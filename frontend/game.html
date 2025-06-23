@@ -2240,6 +2240,57 @@
         .item-info-btn:hover::before {
             left: 100%;
         }
+
+        /* === Responsive Design for Mobile Devices === */
+        @media (max-width: 900px) {
+          .main-content {
+            flex-direction: column;
+            padding-right: 0;
+          }
+          .right-panel {
+            position: static;
+            width: 100%;
+            padding: 0;
+            margin-bottom: 20px;
+          }
+          .game-container {
+            max-width: 100%;
+            min-height: 400px;
+            padding: 10px;
+          }
+          .boxes-grid {
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 10px;
+            padding: 10px;
+          }
+          .box {
+            width: 90px;
+            height: 90px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .player-info {
+            flex-direction: column;
+            min-width: 0;
+            padding: 10px;
+            gap: 10px;
+          }
+          .game-container {
+            padding: 5px;
+            min-height: 300px;
+          }
+          .boxes-grid {
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 6px;
+            padding: 4px;
+          }
+          .box {
+            width: 70px;
+            height: 70px;
+            font-size: 1em;
+          }
+        }
     </style>
 </head>
 <body>
