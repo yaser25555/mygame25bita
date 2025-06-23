@@ -23,6 +23,7 @@ app.use(cors({
         'http://127.0.0.1:8080', 
         'http://127.0.0.1:5500',
         'https://mygame25bita.onrender.com', // رابط Render الخاص بك
+        'https://mygame25bita-1.onrender.com', // رابط الواجهة الأمامية الجديد
         'https://*.onrender.com' // السماح لجميع روابط Render
     ],
     credentials: true 
