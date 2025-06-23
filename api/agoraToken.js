@@ -2,7 +2,7 @@ const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
 
 // Agora Configuration
 const appID = '852ff5f55a7a49b081b799358f2fc329';
-const appCertificate = '007eJxTYHj81KRE7GjOapG24m3XujuW5Tm+dfh/0iag486n1PnauvIKDBamRmlppmmmponmiSaWSQYWhknmlpbGphZpRmnJxkaW3bciMhoCGRneF09mZWRgZWBkYGIA8RkYAPThHz0=';
+const appCertificate = '007eJxTYBC2a1uuN4fbS6ZQvXTxRp73ooteHejicjN+7vNhclh7iJoCg4WpUVqaaZqpaaJ5oollkoGFYZK5paWxqUWaUVqysZHl6XsRGQ2BjAxMjpdZGRlYGYAsBhCfgQEA4XMbfQ==';
 
 // Token expiration time (24 hours)
 const expirationTimeInSeconds = 24 * 3600;

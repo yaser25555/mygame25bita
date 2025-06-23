@@ -2350,6 +2350,15 @@
             <button id="mute-button" title="كتم/إلغاء كتم الصوت">🔊</button>
         </div>
     </div>
+
+    <!-- Voice Chat Controls -->
+    <div class="voice-chat-controls">
+        <button id="voice-mic-btn" class="voice-btn" title="تشغيل/إيقاف الميكروفون">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <div id="voice-status" class="voice-status">🎤 انقر للانضمام للمحادثة الصوتية</div>
+    </div>
+
         <!-- Chat Window -->
         <div class="chat-container" id="chatContainer">
             <div class="chat-header">
@@ -2357,9 +2366,6 @@
                 <div class="chat-controls">
                     <button id="reconnectBtn" class="chat-control-btn" title="إعادة الاتصال" style="background: linear-gradient(135deg, #10b981, #059669);">
                         <i class="fas fa-wifi"></i>
-                    </button>
-                    <button id="voiceChatBtn" class="chat-control-btn" title="بدء المحادثة الصوتية">
-                        <i class="fas fa-microphone-slash"></i>
                     </button>
                     <button id="chatMuteBtn" class="chat-control-btn" title="كتم صوت المحادثة">
                         <i class="fas fa-volume-up"></i>
@@ -2501,14 +2507,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Voice Chat Controls -->
-    <div class="voice-chat-controls">
-        <button id="voice-mic-btn" class="voice-btn" title="تشغيل/إيقاف الميكروفون">
-            <i class="fas fa-microphone"></i>
-        </button>
-        <div id="voice-status" class="voice-status">🎤 انقر للانضمام للمحادثة الصوتية</div>
     </div>
 
     <script>

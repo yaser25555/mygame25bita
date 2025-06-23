@@ -75,8 +75,26 @@ class VoiceChatManager {
                 return false;
             }
             
+            // اختبار الميكروفون أولاً
+            console.log('🎤 Testing microphone access...');
+            try {
+                const testStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('✅ Microphone access granted');
+                testStream.getTracks().forEach(track => track.stop()); // إيقاف الاختبار
+            } catch (micError) {
+                console.error('❌ Microphone access denied:', micError);
+                alert('يجب السماح بالوصول للميكروفون لاستخدام المحادثة الصوتية');
+                return false;
+            }
+            
             // الحصول على token من الخادم
             await this.getToken(username);
+            
+            if (!this.token) {
+                console.error('❌ Failed to get token from server');
+                alert('فشل في الحصول على رمز الوصول للصوت');
+                return false;
+            }
             
             // الانضمام للقناة
             const uid = await this.client.join(this.appId, this.channelName, this.token, username);
@@ -89,9 +107,11 @@ class VoiceChatManager {
             this.isJoined = true;
             this.updateVoiceStatus();
             
+            console.log('🎤 Voice chat joined successfully');
             return true;
         } catch (error) {
             console.error('❌ Error joining voice chat:', error);
+            alert(`خطأ في الانضمام للمحادثة الصوتية: ${error.message}`);
             return false;
         }
     }
@@ -131,6 +151,7 @@ class VoiceChatManager {
     
     async getToken(username) {
         try {
+            console.log('🎤 Requesting token from server...');
             // الحصول على token من الخادم
             const response = await fetch(`${BACKEND_URL}/api/voice/token`, {
                 method: 'POST',
@@ -144,16 +165,21 @@ class VoiceChatManager {
                 })
             });
             
+            console.log('🎤 Token response status:', response.status);
+            
             if (response.ok) {
                 const data = await response.json();
                 this.token = data.token;
+                console.log('✅ Token received successfully');
+                return true;
             } else {
-                throw new Error('Failed to get token');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('❌ Token request failed:', response.status, errorData);
+                throw new Error(`Server error: ${response.status} - ${errorData.message || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('❌ Error getting token:', error);
-            // استخدام token مؤقت للتطوير
-            this.token = null;
+            throw error;
         }
     }
     
