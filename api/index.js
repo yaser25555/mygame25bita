@@ -161,6 +161,3 @@ wss.on('connection', ws => {
         }
     });
 });
-
-// --- 6. تشغيل الخادم ---
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
