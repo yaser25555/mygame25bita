@@ -1,23 +1,23 @@
 # Large media files - ALLOWED FOR RENDER DEPLOYMENT
-# *.gif
-# *.mp3
-# *.mp4
-# *.wav
-# *.avi
-# *.mov
-# *.mkv
+*.gif
+*.mp3
+*.mp4
+*.wav
+*.avi
+*.mov
+*.mkv
 
 # Specific large files - ALLOWED FOR RENDER DEPLOYMENT
-# WIN.GIF
-# sadcat.gif
-# HERO1.gif
-# WIN1.MP3
-# LOOS.MP3
-# Money.mp4
-# MMMMoney.mp4
-# hammerShot.mp3
-# ضربة ثلاثية .mp3
-# ضربة فردية.mp3
+WIN.GIF
+sadcat.gif
+HERO1.gif
+WIN1.MP3
+LOOS.MP3
+Money.mp4
+MMMMoney.mp4
+hammerShot.mp3
+ضربة ثلاثية .mp3
+ضربة فردية.mp3
 
 # Node modules
 node_modules/
