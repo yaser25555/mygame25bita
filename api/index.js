@@ -48,6 +48,9 @@ app.get('/health', (req, res) => {
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+// خريطة للاحتفاظ بمرجع WebSocket لكل مستخدم
+const userSockets = new Map();
+
 // دالة لإرسال رسالة إلى جميع العملاء المتصلين
 function broadcast(data) {
     wss.clients.forEach(client => {
@@ -70,9 +73,6 @@ async function broadcastPlayerList() {
 wss.on('connection', ws => {
     console.log('Client connected');
 
-    // عند اتصال عميل جديد، أرسل له قائمة اللاعبين الحالية
-    broadcastPlayerList();
-
     ws.on('message', async message => {
         try {
             const data = JSON.parse(message);
@@ -80,16 +80,63 @@ wss.on('connection', ws => {
             if (data.type === 'join') {
                 console.log(`Player ${data.username} joined`);
                 ws.username = data.username;
+                userSockets.set(data.username, ws); // حفظ السوكيت باسم المستخدم
                 broadcast({ type: 'player_joined', username: data.username });
                 await broadcastPlayerList();
             } else if (data.type === 'chat_message') {
-                // When a chat message is received, broadcast it to all clients
+                // رسالة عامة
                 console.log(`Message from ${data.sender}: ${data.text}`);
                 broadcast({
                     type: 'chat_message',
                     sender: data.sender,
                     text: data.text
                 });
+            } else if (data.type === 'voice_message') {
+                // رسالة صوتية عامة
+                console.log(`Voice message from ${data.sender}`);
+                broadcast({
+                    type: 'voice_message',
+                    sender: data.sender,
+                    audio: data.audio
+                });
+            } else if (data.type === 'private_message') {
+                // رسالة نصية خاصة
+                const targetSocket = userSockets.get(data.target);
+                if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+                    targetSocket.send(JSON.stringify({
+                        type: 'private_message',
+                        sender: data.sender,
+                        text: data.text
+                    }));
+                }
+                // أرسل نسخة للمرسل أيضًا (اختياري)
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        type: 'private_message',
+                        sender: data.sender,
+                        text: data.text,
+                        self: true
+                    }));
+                }
+            } else if (data.type === 'private_voice_message') {
+                // رسالة صوتية خاصة
+                const targetSocket = userSockets.get(data.target);
+                if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+                    targetSocket.send(JSON.stringify({
+                        type: 'private_voice_message',
+                        sender: data.sender,
+                        audio: data.audio
+                    }));
+                }
+                // أرسل نسخة للمرسل أيضًا (اختياري)
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        type: 'private_voice_message',
+                        sender: data.sender,
+                        audio: data.audio,
+                        self: true
+                    }));
+                }
             }
         } catch (e) {
             console.error('Failed to parse message or process', e);
@@ -99,9 +146,8 @@ wss.on('connection', ws => {
     ws.on('close', () => {
         console.log(`Client ${ws.username || ''} disconnected`);
         if(ws.username) {
+            userSockets.delete(ws.username); // إزالة السوكيت عند الخروج
             broadcast({ type: 'player_left', username: ws.username });
-            // We could rebroadcast the player list here as well
-            // broadcastPlayerList();
         }
     });
 });
