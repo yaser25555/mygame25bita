@@ -72,3 +72,6 @@ jspm_packages/
 .Trashes
 ehthumbs.db
 Thumbs.db 
+   !frontend/sounds/single_shot.mp3
+   !frontend/sounds/triple_shot.mp3
+   !frontend/sounds/hammer_shot.mp3
