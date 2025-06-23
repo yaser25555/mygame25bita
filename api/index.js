@@ -22,20 +22,32 @@ app.use(cors({
         'http://localhost:8080', 
         'http://127.0.0.1:8080', 
         'http://127.0.0.1:5500',
-        'https://voiceboom-frontend.onrender.com', // رابط الواجهة الأمامية على Render
-        'https://your-frontend-name.onrender.com'  // استبدل باسم مشروعك الفعلي
+        'https://mygame25bita.onrender.com', // رابط Render الخاص بك
+        'https://*.onrender.com' // السماح لجميع روابط Render
     ],
     credentials: true 
 }));
 app.use(express.json());
+
+// إضافة route للتحقق من صحة الخدمة
+app.get('/', (req, res) => {
+    res.json({ message: 'VoiceBoom API is running!' });
+});
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 
 // --- 3. الاتصال بقاعدة البيانات ---
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(() => console.log('MongoDB connected successfully'))
+.catch(err => {
+    console.error('MongoDB connection error:', err);
+    // لا توقف التطبيق إذا فشل الاتصال بقاعدة البيانات
+});
 
 // --- 4. استخدام المسارات ---
 app.use('/api/auth', authRoutes);
@@ -45,10 +57,20 @@ app.use('/api/users', userRoutes);
 
 // --- 5. إعداد خادم HTTP و WebSocket ---
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+
+// محاولة إنشاء WebSocket server مع معالجة الأخطاء
+let wss;
+try {
+    wss = new WebSocket.Server({ server });
+    console.log('WebSocket server initialized successfully');
+} catch (error) {
+    console.error('Failed to initialize WebSocket server:', error);
+    wss = null;
+}
 
 // دالة لإرسال رسالة إلى جميع العملاء المتصلين
 function broadcast(data) {
+    if (!wss) return;
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(data));
@@ -58,6 +80,7 @@ function broadcast(data) {
 
 // دالة لجلب قائمة اللاعبين وتحديثها للجميع
 async function broadcastPlayerList() {
+    if (!wss) return;
     try {
         const players = await User.find({}, 'username highScore').sort({ highScore: -1 }).limit(20);
         broadcast({ type: 'player_list_update', players });
@@ -66,45 +89,50 @@ async function broadcastPlayerList() {
     }
 }
 
-wss.on('connection', ws => {
-    console.log('Client connected');
+// إعداد WebSocket events فقط إذا تم إنشاء الخادم بنجاح
+if (wss) {
+    wss.on('connection', ws => {
+        console.log('Client connected');
 
-    // عند اتصال عميل جديد، أرسل له قائمة اللاعبين الحالية
-    broadcastPlayerList();
+        // عند اتصال عميل جديد، أرسل له قائمة اللاعبين الحالية
+        broadcastPlayerList();
 
-    ws.on('message', async message => {
-        try {
-            const data = JSON.parse(message);
-            
-            if (data.type === 'join') {
-                console.log(`Player ${data.username} joined`);
-                ws.username = data.username;
-                broadcast({ type: 'player_joined', username: data.username });
-                await broadcastPlayerList();
-            } else if (data.type === 'chat_message') {
-                // When a chat message is received, broadcast it to all clients
-                console.log(`Message from ${data.sender}: ${data.text}`);
-                broadcast({
-                    type: 'chat_message',
-                    sender: data.sender,
-                    text: data.text
-                });
+        ws.on('message', async message => {
+            try {
+                const data = JSON.parse(message);
+                
+                if (data.type === 'join') {
+                    console.log(`Player ${data.username} joined`);
+                    ws.username = data.username;
+                    broadcast({ type: 'player_joined', username: data.username });
+                    await broadcastPlayerList();
+                } else if (data.type === 'chat_message') {
+                    // When a chat message is received, broadcast it to all clients
+                    console.log(`Message from ${data.sender}: ${data.text}`);
+                    broadcast({
+                        type: 'chat_message',
+                        sender: data.sender,
+                        text: data.text
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to parse message or process', e);
             }
-        } catch (e) {
-            console.error('Failed to parse message or process', e);
-        }
-    });
+        });
 
-    ws.on('close', () => {
-        console.log(`Client ${ws.username || ''} disconnected`);
-        if(ws.username) {
-            broadcast({ type: 'player_left', username: ws.username });
-            // We could rebroadcast the player list here as well
-            // broadcastPlayerList();
-        }
+        ws.on('close', () => {
+            console.log(`Client ${ws.username || ''} disconnected`);
+            if(ws.username) {
+                broadcast({ type: 'player_left', username: ws.username });
+            }
+        });
     });
-});
+}
 
 // --- 6. تشغيل الخادم ---
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'Not set'}`);
+});
