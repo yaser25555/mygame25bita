@@ -2457,7 +2457,7 @@
     </div>
 
     <script>
-        const BACKEND_URL = 'http://localhost:3000';
+        const BACKEND_URL = 'https://mygame25bita.onrender.com';
 
         // Game State
         let score = 0;
@@ -3190,7 +3190,7 @@
         function connectWebSocket() {
             try {
                 // Use ws:// for local, and wss:// for secure production environment
-                const wsUrl = `ws://${window.location.hostname}:3000`;
+                const wsUrl = `wss://mygame25bita.onrender.com`;
                 console.log('Attempting to connect to WebSocket:', wsUrl);
                 
                 ws = new WebSocket(wsUrl);
