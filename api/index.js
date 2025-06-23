@@ -10,6 +10,7 @@ const User = require('../models/User'); // استيراد موديل المست�
 const authRoutes = require('./authRoutes');
 const authApiRoutes = require('./auth');
 const userRoutes = require('./user');
+const voiceRoutes = require('./voiceRoutes');
 // const gameRoutes = require('./game'); // استيراد مسار اللعبة الجديد
 
 dotenv.config();
@@ -34,6 +35,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', authApiRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/voice', voiceRoutes);
 // app.use('/api/game', gameRoutes); // استخدام مسار اللعبة الجديد
 
 // --- نقطة نهاية لفحص الحالة الصحية (Health Check) ---
