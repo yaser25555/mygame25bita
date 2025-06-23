@@ -9,6 +9,12 @@ async function joinVoiceChannel() {
   const res = await fetch(`${AGORA_SERVER_URL}?channelName=${CHANNEL_NAME}`);
   const data = await res.json();
   client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+  client.on('user-published', async (user, mediaType) => {
+    await client.subscribe(user, mediaType);
+    if (mediaType === 'audio') {
+      user.audioTrack.play();
+    }
+  });
   await client.join(data.appId, CHANNEL_NAME, data.token, data.uid);
   localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
   await client.publish([localAudioTrack]);
