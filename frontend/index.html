@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>INFINITY BOX VOICEBOOM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* أنماط CSS المحدثة بألوان وتأثيرات لتعزيز الفخامة */
+        :root {
+            --primary-bg-color: #1C152F; /* أزرق فحمي بنفسجي داكن جداً للخلفيات الأساسية */
+            --secondary-color: #2C204B; /* أزرق فحمي بنفسجي أعمق قليلاً لأقسام المحتوى */
+            --accent-color-1: #0b361c; /* ذهبي داكن (للأزرار، الأيقونات، الروابط - عام) */
+            --accent-color-2: #a208088e; /* أحمر داكن (للعناوين الرئيسية، رسائل النجاح) */
+            --text-color-light: #E74C3C; /* أحمر للنصوص الرئيسية */
+            --text-color-dark: #2516c6; /* نفس لون الخلفية الأساسية للنصوص على الخلفيات الفاتحة جداً (إذا وجدت) */
+            --border-color: #140c2d; /* بنفسجي-رمادي دقيق للحدود */
+            
+            /* ألوان الأزرار العامة */
+            --button-bg-color: var(--accent-color-1);
+            --button-hover-bg-color: #D6A400; /* درجة أفتح من الذهبي عند التحويم */
+            
+            /* ألوان مخصضصة لتبويبات محددة */
+            --tab-login-active-color: #36286B; /* كحلي بنفسجي غامق جداً لتبويب تسجيل الدخول */
+            --tab-register-active-color: #9B59B6; /* بنفسجي لتبويب التسجيل (تم الإبقاء عليها) */
+            --tab-other-active-color: #00BFFF; /* أزرق سماوي عميق للتبويبات الأخرى (تم الإبقاء عليها) */
+            
+            /* ألوان الصناديق والنقاط (محدثة لتناسق الثيم - يجب تطبيقها في game.html أيضاً) */
+            --box-unrevealed-color: var(--accent-color-2); /* أحمر داكن للصناديق غير المكشوفة */
+            --box-revealed-color: #A0B3C6; /* رمادي فاتح بعد الكشف */
+            --points-1-color: #FFC107; /* أصفر/ذهبي للنقاط الإيجابية الصغيرة */
+            --points-5-color: #2196F3; /* أزرق للنقاط الإيجابية المتوسطة */
+            --points-10-color: var(--accent-color-1); /* ذهبي للنقاط الإيجابية الكبيرة */
+            --points-negative-5-color: #FF8A65; /* برتقالي للنقاط السلبية المتوسطة */
+            --points-negative-10-color: #FF5252; /* أحمر ساطع للنقاط السلبية الكبيرة */
+        }
+
+        body {
+            font-family: 'Noto Naskh Arabic', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg-color) 0%, #0A0714 100%); /* تدرج لوني للخلفية */
+            color: var(--text-color-light);
+            display: flex;
+            flex-direction: column; /* لضمان تمركز المحتوى عمودياً */
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-image: url('images/background_image.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden; /* لمنع التمرير الأفقي غير المرغوب فيه */
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7); /* طبقة تظليل لزيادة التباين */
+            z-index: -1;
+        }
+
+        .container {
+            background: linear-gradient(180deg, var(--secondary-color) 0%, #1A1230 100%); /* تدرج لوني للحاوية */
+            padding: 40px; /* زيادة التباعد الداخلي */
+            border-radius: 20px; /* زوايا أكثر استدارة */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.05); /* ظلال أكثر عمقاً وداخلية */
+            text-align: center;
+            max-width: 650px; /* زيادة عرض الحاوية قليلاً */
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            border: 2px solid var(--border-color);
+            margin: auto;
+            backdrop-filter: blur(5px); /* تأثير ضبابي خفيف للخلفية */
+        }
+
+        .logo {
+            width: 140px; /* تكبير الشعار قليلاً */
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 10px rgba(255, 210, 98, 0.7)); /* ظل متوهج للشعار */
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--secondary-color);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-content h3 {
+            color: var(--accent-color-2);
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            margin-bottom: 30px;
+            color: var(--text-color-light);
+        }
+
+        .modal-content .btn {
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--accent-color-2); /* أحمر داكن للعناوين */
+            font-family: 'Amiri', serif;
+            margin-bottom: 25px;
+            font-size: 2.5em; /* تكبير حجم العنوان */
+            text-shadow: 0 0 10px rgba(255, 210, 98, 0.8), 0 0 20px rgba(255, 210, 98, 0.4); /* ظل متوهج للنص */
+            letter-spacing: 1px; /* تباعد الحروف */
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            justify-content: center;
+        }
+
+        .tab-button {
+            flex-grow: 1;
+            padding: 18px 12px; /* زيادة حجم التبويبات */
+            cursor: pointer;
+            font-size: 1.1em; /* تكبير حجم الخط */
+            font-weight: bold;
+            color: #bdc3c7; /* لون رمادي فاتح للنص غير النشط */
+            background-color: transparent;
+            border: none;
+            border-bottom: 4px solid transparent; /* خط سفلي أكثر سمكاً */
+            transition: color 0.3s ease, border-bottom-color 0.3s ease, transform 0.2s ease;
+            font-family: 'Noto Naskh Arabic', sans-serif;
+            min-width: 110px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        .tab-button:hover:not(.active) {
+            color: var(--accent-color-1); /* تلون النص بالذهبي عند التحويم */
+            transform: translateY(-2px); /* رفع بسيط عند التحويم */
+        }
+
+        /* ألوان التبويبات النشطة بناءً على الـ ID */
+        .tab-button.active { 
+            color: var(--text-color-light);
+            text-shadow: 0 0 8px rgba(var(--text-color-light), 0.6); /* ظل متوهج للنص النشط */
+        }
+        
+        #login-tab.active {
+            border-bottom-color: var(--tab-login-active-color); /* كحلي بنفسجي لتبويب تسجيل الدخول */
+        }
+        #register-tab.active {
+            border-bottom-color: var(--tab-register-active-color); /* بنفسجي لتبويب التسجيل */
+        }
+        #instructions-tab.active,
+        #apps-tab.active,
+        #contact-tab.active {
+            border-bottom-color: var(--tab-other-active-color); /* أزرق سماوي للتبويبات الأخرى */
+        }
+
+
+        .content-section {
+            display: none;
+            padding-top: 25px;
+            text-align: right;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px; /* زيادة المسافة بين حقول النموذج */
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-color-light);
+            font-weight: bold;
+            font-size: 1.05em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group input {
+            width: calc(100% - 24px); /* تعديل العرض لاحتساب البادينغ والحدود */
+            padding: 14px 12px; /* زيادة البادينغ */
+            border-radius: 10px; /* زوايا أكثر استدارة */
+            border: 1px solid var(--border-color);
+            background-color: rgba(32, 32, 56, 0.7); /* خلفية حقول الإدخال شفافة قليلاً */
+            color: var(--text-color-light);
+            font-size: 1.0em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3); /* ظل داخلي */
+        }
+
+        .form-group input:focus {
+            border-color: var(--button-bg-color);
+            background-color: var(--secondary-color); /* خلفية أغمق قليلاً عند التركيز */
+            box-shadow: 0 0 0 4px rgba(var(--button-bg-color), 0.4), inset 0 2px 8px rgba(0, 0, 0, 0.5); /* ظل متوهج ومعقد */
+            outline: none;
+        }
+
+        .btn {
+            background: linear-gradient(90deg, var(--button-bg-color) 0%, var(--button-hover-bg-color) 100%); /* تدرج لوني للأزرار */
+            color: var(--text-color-dark); /* نص داكن على الأزرار الفاتحة */
+            border: none;
+            padding: 15px 30px; /* زيادة حجم الأزرار */
+            border-radius: 10px; /* زوايا أكثر استدارة */
+            font-size: 1.2em; /* تكبير حجم الخط */
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* ظل أكثر بروزاً */
+            font-family: 'Noto Naskh Arabic', sans-serif;
+            font-weight: bold;
+            width: 100%;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1); /* تأثير لامع عند التحويم */
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+        .btn:hover:not(:disabled)::before {
+            left: 0;
+        }
+
+        /* لون خاص لزر تسجيل الدخول */
+        #login-button {
+            background: linear-gradient(90deg, #36286B 0%, #1C0F33 100%); /* تدرج كحلي بنفسجي غامق جداً */
+            color: var(--text-color-light); /* نص فاتح على خلفية داكنة */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        }
+        #login-button:hover:not(:disabled) {
+            background: linear-gradient(90deg, #4A3A80 0%, #2F1A5A 100%); /* درجة أغمق للتحويم */
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7); /* ظل أكثر بروزاً عند التحويم */
+        }
+
+        .btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .message-box {
+            background-color: var(--accent-color-2); /* أحمر داكن لرسائل النجاح */
+            color: var(--text-color-dark); /* نص داكن على خلفية فاتحة */
+            padding: 12px; /* زيادة البادينغ */
+            border-radius: 8px; /* زوايا أكثر استدارة */
+            margin-top: 20px;
+            font-size: 1.0em;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .message-box.error {
+            background-color: #E74C3C; /* أحمر للخطأ */
+            color: #fff; /* نص أبيض */
+        }
+
+        .message-box.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .loading-spinner {
+            display: none;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--text-color-light); /* لون متوهج */
+            border-radius: 50%;
+            width: 22px; /* تكبير حجم السبينر */
+            height: 22px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        .btn.loading .loading-spinner {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 12px;
+        }
+
+        .btn.loading .btn-text {
+            visibility: hidden;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .content-section h3 {
+            color: var(--accent-color-2);
+            font-family: 'Amiri', serif;
+            margin-bottom: 20px;
+            font-size: 1.8em; /* تكبير حجم الخط */
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6), 0 0 10px rgba(255, 210, 98, 0.3); /* ظل متوهج */
+            text-align: center;
+        }
+
+        .content-section p {
+            margin-bottom: 15px;
+            line-height: 1.8; /* تباعد أسطر أكبر */
+            color: var(--text-color-light);
+            font-size: 1.05em;
+            text-align: justify;
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-section ul {
+            text-align: right;
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .content-section ul li {
+            margin-bottom: 12px;
+            color: var(--text-color-light);
+            font-size: 1.0em;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-section ul li i {
+            color: var(--accent-color-1);
+            font-size: 1.2em;
+            text-shadow: 0 0 5px rgba(var(--accent-color-1), 0.5); /* ظل متوهج للأيقونات */
+        }
+
+        .contact-info-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            font-size: 1.05em;
+        }
+        .contact-info-item a {
+            color: var(--accent-color-1);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.2);
+        }
+        .contact-info-item a:hover {
+            color: var(--button-hover-bg-color);
+            text-decoration: underline;
+        }
+
+        /* أنماط خاصة لميزة نصيحة اللعبة */
+        #game-tip-section { 
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--primary-bg-color);
+            border-radius: 15px;
+            border: 2px solid var(--border-color);
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3), 0 5px 15px rgba(0, 0, 0, 0.4);
+            text-align: right;
+        }
+
+        #game-tip-output { 
+            color: var(--text-color-light);
+            font-size: 1.1em;
+            margin-top: 15px;
+            text-align: justify;
+            line-height: 1.6;
+            font-family: 'Amiri', serif;
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+                border-radius: 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .tab-button {
+                padding: 15px 8px;
+                font-size: 0.95em;
+            }
+            .form-group input, .btn {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            .content-section h3 {
+                font-size: 1.6em;
+            }
+            .content-section p, .content-section ul li, .contact-info-item {
+                font-size: 0.95em;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .tabs {
+                flex-direction: column;
+                border-bottom: none;
+            }
+
+            .tab-button {
+                border-bottom: 1px solid var(--border-color);
+                font-size: 1.0em;
+                padding: 10px;
+            }
+
+            .tab-button.active {
+                border-bottom-color: var(--button-bg-color); 
+            }
+
+            .form-group input { 
+                padding: 10px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            .content-section p {
+                text-align: right;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .container {
+                padding: 15px;
+            }
+            .logo {
+                width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="images/logo.png" alt="Voice Boom Logo" class="logo">
+        <h1>INFINITY BOX VOICEBOOM</h1>
+
+        <div id="admin-choice-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>أهلاً بك أيها المشرف</h3>
+                <p>إلى أين تريد الذهاب؟</p>
+                <button id="go-to-game-btn" class="btn">الدخول للعبة</button>
+                <button id="go-to-admin-btn" class="btn">الدخول للوحة التحكم</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" id="login-tab">تسجيل الدخول</button>
+            <button class="tab-button" id="register-tab">تسجيل</button>
+            <button class="tab-button" id="instructions-tab">التعليمات</button>
+            <button class="tab-button" id="apps-tab">التطبيقات</button>
+            <button class="tab-button" id="contact-tab">للاستفسار وشحن العملات</button>
+        </div>
+
+        <div id="message-box" class="message-box"></div>
+
+        <!-- قسم تسجيل الدخول -->
+        <div id="login-section" class="content-section active">
+            <div class="form-group">
+                <label for="login-username">اسم المستخدم / البريد الإلكتروني:</label>
+                <input type="text" id="login-username" placeholder="أدخل اسم المستخدم أو البريد الإلكتروني" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">كلمة المرور:</label>
+                <input type="password" id="login-password" placeholder="أدخل كلمة المرور" required>
+            </div>
+            <button id="login-button" class="btn">
+                <span class="loading-spinner"></span>
+                <span class="btn-text">تسجيل الدخول</span>
+            </button>
+        </div>
+
+        <!-- قسم التسجيل -->
+        <div id="register-section" class="content-section">
+            <div class="form-group">
+                <label for="register-username">اسم المستخدم:</label>
+                <input type="text" id="register-username" placeholder="اختر اسم مستخدم" required>
+            </div>
+            <div class="form-group">
+                <label for="register-email">البريد الإلكتروني:</label>
+                <input type="email" id="register-email" placeholder="أدخل بريدك الإلكتروني" required>
+            </div>
+            <div class="form-group">
+                <label for="register-password">كلمة المرور:</label>
+                <input type="password" id="register-password" placeholder="اختر كلمة مرور" required>
+            </div>
+            <button id="register-button" class="btn">
+                <span class="loading-spinner"></span>
+                <span class="btn-text">تسجيل</span>
+            </button>
+        </div>
+
+        <!-- قسم محتوى التعليمات (يظهر عند النقر على تبويب التعليمات) -->
+        <div id="instructions-section-content" class="content-section">
+            <h3>تعليمات اللعبة</h3>
+            <p>مرحباً بك في INFINITY BOX VOICEBOOM! لعبة تعتمد على الحظ والذكاء. تحدى نفسك واكتشف كنوزاً مخفية في كل صندوق.</p>
+            <ul>
+                <li><i class="fas fa-play-circle"></i> **ابدأ جولة جديدة:** انقر على هذا الزر لبدء جولة جديدة وتهيئة الصناديق.</li>
+                <li><i class="fas fa-box-open"></i> **اكشف الصناديق:** اختر الصناديق للكشف عن النقاط. كن حذراً، بعض الصناديق قد تقلل نقاطك!</li>
+                <li><i class="fas fa-hand-holding-usd"></i> **اجمع النقاط:** في أي وقت خلال الجولة، يمكنك جمع نقاطك الحالية لحفظها.</li>
+                <li><i class="fas fa-forward"></i> **الجولة التالية:** بعد الكشف عن صندوق واحد على الأقل، يمكنك الانتقال إلى الجولة التالية بنقاطك الحالية.</li>
+                <li><i class="fas fa-magic"></i> **قوى خاصة:** استخدم القوى المتاحة بحكمة لزيادة فرصك في الفوز!</li>
+            </ul>
+
+            <!-- ميزة نصيحة سحرية للعبة باستخدام Gemini API -->
+            <div id="game-tip-section">
+                <h3>احصل على نصيحة سحرية للعبة ✨</h3>
+                <button id="get-tip-button" class="btn">
+                    <span class="loading-spinner"></span>
+                    <span class="btn-text">احصل على نصيحة جديدة</span>
+                </button>
+                <p id="game-tip-output">انقر على الزر أعلاه للحصول على نصيحة سحرية من الذكاء الاصطناعي!</p>
+            </div>
+        </div>
+
+        <!-- قسم محتوى التطبيقات (يظهر عند النقر على تبويب التطبيقات) -->
+        <!-- تم إزالة هذا القسم بالكامل -->
+
+        <!-- قسم محتوى التواصل معنا (يظهر عند النقر على تبويب التواصل) -->
+        <div id="contact-section-content" class="content-section">
+            <h3>للاستفسار وشحن العملات</h3>
+            <p>يسعدنا تلقي استفساراتكم ومساعدتكم في شحن العملات. لا تترددوا في الاتصال بنا.</p>
+            <div class="contact-info-item">
+                <i class="fas fa-envelope"></i> البريد الإلكتروني: <a href="mailto:YASER.HAROON79@GMAIL.COM">YASER.HAROON79@GMAIL.COM</a>
+            </div>
+            <div class="contact-info-item">
+                <i class="fab fa-whatsapp"></i> رقم واتساب: <a href="https://wa.me/966554593007">00966554593007</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = "http://localhost:3000"; // Use your actual backend URL
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginTab = document.getElementById('login-tab');
+            const registerTab = document.getElementById('register-tab');
+            const instructionsTab = document.getElementById('instructions-tab');
+            // تم إزالة appsTab من هنا
+            const contactTab = document.getElementById('contact-tab');
+
+            const loginSection = document.getElementById('login-section');
+            const registerSection = document.getElementById('register-section');
+            const instructionsSectionContent = document.getElementById('instructions-section-content');
+            // تم إزالة appsSectionContent من هنا
+            const contactSectionContent = document.getElementById('contact-section-content');
+
+            const loginUsernameInput = document.getElementById('login-username');
+            const loginPasswordInput = document.getElementById('login-password');
+            const loginButton = document.getElementById('login-button');
+
+            const registerUsernameInput = document.getElementById('register-username');
+            const registerEmailInput = document.getElementById('register-email');
+            const registerPasswordInput = document.getElementById('register-password');
+            const registerButton = document.getElementById('register-button');
+
+            const messageBox = document.getElementById('message-box');
+            const getTipButton = document.getElementById('get-tip-button');
+            const gameTipOutput = document.getElementById('game-tip-output');
+
+            const adminChoiceModal = document.getElementById('admin-choice-modal');
+            const goToGameBtn = document.getElementById('go-to-game-btn');
+            const goToAdminBtn = document.getElementById('go-to-admin-btn');
+
+
+            const baseURL = 'http://localhost:3000'; // Add this line
+
+            // Force hide admin modal on page load
+            if (adminChoiceModal) {
+                adminChoiceModal.style.display = 'none';
+            }
+
+            function showMessage(message, isError = false) {
+                messageBox.textContent = message;
+                messageBox.classList.remove('success', 'error');
+                if (isError) {
+                    messageBox.classList.add('error');
+                } else {
+                    messageBox.classList.add('success');
+                }
+                messageBox.classList.add('show');
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, 5000);
+            }
+
+            function setButtonLoading(button, isLoading) {
+                button.disabled = isLoading;
+                if (isLoading) {
+                    button.classList.add('loading');
+                } else {
+                    button.classList.remove('loading');
+                }
+            }
+
+            function switchTab(activeTab) {
+                // Hide all sections and remove active class from all tabs
+                [loginTab, registerTab, instructionsTab, contactTab].forEach(tab => {
+                    if (tab) tab.classList.remove('active');
+                });
+                [loginSection, registerSection, instructionsSectionContent, contactSectionContent].forEach(section => {
+                    if (section) section.classList.remove('active');
+                });
+
+                // Show the correct section based on the active tab
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                    const targetSectionId = activeTab.id.replace('-tab', '-section');
+                    const targetSection = document.getElementById(targetSectionId) || document.getElementById(targetSectionId + '-content');
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    }
+                }
+                messageBox.classList.remove('show');
+            }
+
+            async function handleLogin() {
+                const username = loginUsernameInput.value.trim();
+                const password = loginPasswordInput.value.trim();
+
+                if (!username || !password) {
+                    showMessage('الرجاء إدخال اسم المستخدم/البريد الإلكتروني وكلمة المرور.', true);
+                    return;
+                }
+
+                setButtonLoading(loginButton, true);
+
+                try {
+                    const response = await fetch(`${baseURL}/api/auth/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
+                        localStorage.setItem('username', data.username);
+                        showMessage('تم تسجيل الدخول بنجاح!', false);
+                        
+                        setTimeout(() => {
+                            if (data.isAdmin) {
+                                adminChoiceModal.style.display = 'flex';
+                            } else {
+                                window.location.href = 'game.html';
+                            }
+                        }, 500); // 0.5 second delay
+
+                    } else {
+                        showMessage(`فشل تسجيل الدخول: ${data.message || 'خطأ غير معروف'}`, true);
+                    }
+                } catch (error) {
+                    console.error('خطأ في الاتصال بالخادم:', error);
+                    showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة لاحقًا.', true);
+                } finally {
+                    setButtonLoading(loginButton, false);
+                }
+            }
+
+            async function handleRegister() {
+                const username = registerUsernameInput.value.trim();
+                const email = registerEmailInput.value.trim();
+                const password = registerPasswordInput.value.trim();
+
+                if (!username || !email || !password) {
+                    showMessage('الرجاء تعبئة جميع الحقول للتسجيل.', true);
+                    return;
+                }
+
+                if (!/\S+@\S+\.\S+/.test(email)) {
+                    showMessage('الرجاء إدخال بريد إلكتروني صالح.', true);
+                    return;
+                }
+
+                setButtonLoading(registerButton, true);
+
+                try {
+                    const response = await fetch(`${baseURL}/api/auth/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, email, password }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.', false);
+                        switchTab(loginTab);
+                        loginUsernameInput.value = username;
+                        loginPasswordInput.value = '';
+                    } else {
+                        showMessage(`فشل التسجيل: ${data.message || 'خطأ غير معروف'}`, true);
+                    }
+                } catch (error) {
+                    console.error('خطأ في الاتصال بالخادم:', error);
+                    showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة لاحقًا.', true);
+                } finally {
+                    setButtonLoading(registerButton, false);
+                }
+            }
+
+            // ----------------------------------------------------
+            // ميزة: الحصول على نصيحة للعبة باستخدام Gemini API
+            // ----------------------------------------------------
+            async function getMagicGameTip() {
+                setButtonLoading(getTipButton, true);
+                gameTipOutput.textContent = 'جاري توليد نصيحة سحرية...';
+                
+                try {
+                    const prompt = "Please provide a short, single-sentence, motivational, or strategic tip for playing a game called 'INFINITY BOX VOICEBOOM'. The game involves opening mysterious boxes to get points, but some boxes might reduce points. Players can collect points at any time or proceed to the next round. The game also has special powers. The tip should be in Arabic.";
+                    
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        gameTipOutput.textContent = text;
+                    } else {
+                        gameTipOutput.textContent = 'عذراً، لم أتمكن من توليد نصيحة الآن. يرجى المحاولة لاحقاً.';
+                        console.error('Gemini API returned an unexpected response structure:', result);
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    gameTipOutput.textContent = 'حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. يرجى المحاولة لاحقاً.';
+                } finally {
+                    setButtonLoading(getTipButton, false);
+                }
+            }
+
+
+            // حدث النقر على ألسنة التبويب
+            if (loginTab) loginTab.addEventListener('click', () => switchTab(loginTab));
+            if (registerTab) registerTab.addEventListener('click', () => switchTab(registerTab));
+            if (instructionsTab) instructionsTab.addEventListener('click', () => switchTab(instructionsTab));
+            // تم إزالة حدث النقر لـ appsTab
+            if (contactTab) contactTab.addEventListener('click', () => switchTab(contactTab));
+
+            // أحداث النقر على الأزرار
+            if (loginButton) {
+                loginButton.addEventListener('click', handleLogin);
+            }
+            if (registerButton) {
+                registerButton.addEventListener('click', handleRegister);
+            }
+            if (getTipButton) {
+                getTipButton.addEventListener('click', getMagicGameTip);
+            }
+
+            if(goToGameBtn) {
+                goToGameBtn.addEventListener('click', () => {
+                    window.location.href = 'game.html';
+                });
+            }
+    
+            if(goToAdminBtn) {
+                goToAdminBtn.addEventListener('click', () => {
+                    window.location.href = 'admin.html';
+                });
+            }
+
+            // السماح بالضغط على Enter لإرسال النماذج
+            loginUsernameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loginButton.click();
+            });
+            loginPasswordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loginButton.click();
+            });
+            registerUsernameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') registerButton.click();
+            });
+            registerEmailInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') registerButton.click();
+            });
+            registerPasswordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') registerButton.click();
+            });
+
+            // إخفاء زر تسجيل دخول المسؤول القديم إذا كان موجوداً
+            const oldAdminLoginButton = document.getElementById('adminLoginButton');
+            if (oldAdminLoginButton) {
+                oldAdminLoginButton.style.display = 'none';
+            }
+
+            // افتراضيًا, إظهار قسم تسجيل الدخول عند تحميل الصفحة
+            switchTab(loginTab);
+        });
+    </script>
+</body>
+</html>
