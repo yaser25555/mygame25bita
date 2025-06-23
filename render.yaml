@@ -33,4 +33,13 @@ services:
         value: public, max-age=31536000
       - path: /*.html
         name: Cache-Control
-        value: public, max-age=0, must-revalidate 
+        value: public, max-age=0, must-revalidate
+      - path: /sounds/*
+        name: Cache-Control
+        value: public, max-age=31536000
+      - path: /sounds/*
+        name: Access-Control-Allow-Origin
+        value: '*'
+      - path: /sounds/*
+        name: Access-Control-Allow-Methods
+        value: 'GET,HEAD,OPTIONS'
