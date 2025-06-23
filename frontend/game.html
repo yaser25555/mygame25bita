@@ -6,6 +6,10 @@
     <title>VoiceBoom Game</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Agora SDK for Voice Chat -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.19.3.js"></script>
+    <!-- Voice Chat Manager -->
+    <script src="voice-chat.js"></script>
     <style>
         * {
             margin: 0;
@@ -2240,6 +2244,49 @@
         .item-info-btn:hover::before {
             left: 100%;
         }
+
+        /* Voice Chat Controls */
+        .voice-chat-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .voice-chat-controls .voice-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4);
+        }
+
+        .voice-chat-controls .voice-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(34, 197, 94, 0.6);
+        }
+
+        .voice-chat-controls .voice-btn.muted {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+        }
+
+        .voice-chat-controls .voice-btn.muted:hover {
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.6);
+        }
+
+        .voice-status {
+            color: #fff;
+            font-size: 1em;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -2454,6 +2501,14 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Voice Chat Controls -->
+    <div class="voice-chat-controls">
+        <button id="voice-mic-btn" class="voice-btn" title="تشغيل/إيقاف الميكروفون">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <div id="voice-status" class="voice-status">🎤 انقر للانضمام للمحادثة الصوتية</div>
     </div>
 
     <script>
@@ -3634,6 +3689,50 @@
 
         // Start the game
         initGame();
+
+        // Initialize Voice Chat
+        const voiceMicBtn = document.getElementById('voice-mic-btn');
+        const voiceStatus = document.getElementById('voice-status');
+        
+        // ربط Voice Chat Manager مع واجهة المستخدم
+        if (window.voiceChatManager) {
+            window.voiceChatManager.setUIElements(voiceMicBtn, voiceStatus);
+        }
+        
+        // Voice Chat Button Event
+        voiceMicBtn.addEventListener('click', async () => {
+            if (!username) {
+                showMessage('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            try {
+                if (!window.voiceChatManager.isJoined) {
+                    // الانضمام للمحادثة الصوتية
+                    const success = await window.voiceChatManager.joinVoiceChat(username);
+                    if (success) {
+                        showMessage('تم الانضمام للمحادثة الصوتية بنجاح! 🎤', 'success');
+                    } else {
+                        showMessage('فشل في الانضمام للمحادثة الصوتية', 'error');
+                    }
+                } else {
+                    // مغادرة المحادثة الصوتية
+                    await window.voiceChatManager.leaveVoiceChat();
+                    showMessage('تم مغادرة المحادثة الصوتية', 'info');
+                }
+            } catch (error) {
+                console.error('Voice chat error:', error);
+                showMessage('حدث خطأ في المحادثة الصوتية', 'error');
+            }
+        });
+        
+        // Mute/Unmute Voice Chat (Right click)
+        voiceMicBtn.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (window.voiceChatManager && window.voiceChatManager.isJoined) {
+                window.voiceChatManager.toggleMute();
+            }
+        });
 
         // Function to send fake congratulatory messages
         function sendFakeCongratulations(winAmount) {
