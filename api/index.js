@@ -24,8 +24,9 @@ app.use(cors());
 app.use(express.json());
 
 // --- 2.5. إعداد الملفات الثابتة ---
-app.use(express.static('../frontend'));
-app.use('/sounds', express.static('../frontend/sounds'));
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
+app.use('/sounds', express.static(path.join(frontendPath, 'sounds')));
 
 // --- 3. الاتصال بقاعدة البيانات ---
 mongoose.connect(process.env.MONGODB_URI, {
