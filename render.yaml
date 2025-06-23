@@ -25,6 +25,12 @@ services:
     staticPublishPath: ./frontend
     routes:
       - type: rewrite
+        source: /(.*)
+        destination: /$1
+      - type: rewrite
+        source: /sounds/(.*)
+        destination: /sounds/$1
+      - type: rewrite
         source: /*
         destination: /index.html
     headers:
