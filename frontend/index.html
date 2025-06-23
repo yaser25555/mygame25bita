@@ -5,8 +5,6 @@
     <title>INFINITY BOX VOICEBOOM</title>
     <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Agora SDK for Voice Chat -->
-    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.19.3.js"></script>
     <style>
         /* أنماط CSS المحدثة بألوان وتأثيرات لتعزيز الفخامة */
         :root {
@@ -592,7 +590,7 @@
     </div>
 
     <script>
-        const BACKEND_URL = "https://mygame25bita.onrender.com"; // Use your actual backend URL
+        const BACKEND_URL = "http://localhost:3000"; // Use your actual backend URL
 
         document.addEventListener('DOMContentLoaded', () => {
             const loginTab = document.getElementById('login-tab');
@@ -625,7 +623,7 @@
             const goToAdminBtn = document.getElementById('go-to-admin-btn');
 
 
-            const baseURL = 'https://mygame25bita.onrender.com'; // Add this line
+            const baseURL = 'http://localhost:3000'; // Add this line
 
             // Force hide admin modal on page load
             if (adminChoiceModal) {

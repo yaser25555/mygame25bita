@@ -1,7 +1,6 @@
 services:
-  # Backend API service
   - type: web
-    name: voiceboom-backend
+    name: magic-box-game-backend
     env: node
     plan: free
     buildCommand: npm install
@@ -10,17 +9,27 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
-        sync: false  # You'll need to set this in Render dashboard
-    healthCheckPath: /api/auth
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: PORT
+        value: 3000
+    healthCheckPath: /health
 
-  # Frontend static site
   - type: web
-    name: voiceboom-frontend
+    name: magic-box-game-frontend
     env: static
     plan: free
-    buildCommand: null
+    buildCommand: echo "Static site - no build needed"
     staticPublishPath: ./frontend
     routes:
       - type: rewrite
-        source: /api/*
-        destination: https://voiceboom-backend.onrender.com/api/* 
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=31536000
+      - path: /*.html
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate 
