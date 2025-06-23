@@ -3189,8 +3189,8 @@
 
         function connectWebSocket() {
             try {
-                // Use ws:// for local, and wss:// for secure production environment
-                const wsUrl = `ws://${window.location.hostname}:3000`;
+                // Use wss:// for secure production environment
+                const wsUrl = `wss://mygame25bita.onrender.com`;
                 console.log('Attempting to connect to WebSocket:', wsUrl);
                 
                 ws = new WebSocket(wsUrl);
