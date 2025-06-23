@@ -641,40 +641,28 @@
             border-radius: 4px;
         }
 
-        /* === Chat Message Styles === */
         .chat-message {
-          border-radius: 18px !important;
-          padding: 10px 16px !important;
-          margin: 6px 0 !important;
-          max-width: 85%;
-          word-break: break-word;
-          font-size: 1em;
-          display: inline-block;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        }
-        .chat-message.female {
-          background: #ffe4ef;
-          color: #e75480;
-          border: 1.5px solid #e75480;
-          align-self: flex-end;
-        }
-        .chat-message.male {
-          background: #e6eaf7;
-          color: #1c2957;
-          border: 1.5px solid #1c2957;
-          align-self: flex-end;
-        }
-        .chat-message.admin {
-          background: #222;
-          color: #fff;
-          border: 1.5px solid #000;
-          font-weight: bold;
-          align-self: flex-end;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
         }
 
-        /* محاذاة الرسائل حسب المرسل */
-        .chat-message.own { align-self: flex-end; }
-        .chat-message.other { align-self: flex-start; }
+        .chat-message.own {
+            align-self: flex-end;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.8) 0%, rgba(52, 152, 219, 0.6) 100%);
+            color: #fff;
+        }
+
+        .chat-message.other {
+            align-self: flex-start;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
 
         .system-message {
             align-self: center;
@@ -3503,16 +3491,22 @@
         // Add message to chat
         function addMessageToChat(sender, text, type) {
             const messageDiv = document.createElement('div');
-            const userType = getUserTypeClass(sender);
-            messageDiv.className = `chat-message ${type} ${userType}`;
-            const time = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+            messageDiv.className = `chat-message ${type}`;
+            
+            const time = new Date().toLocaleTimeString('ar-SA', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
             messageDiv.innerHTML = `
                 <div class="message-sender">${sender}</div>
                 <div class="message-text">${text}</div>
                 <div class="message-time">${time}</div>
             `;
+            
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+            
             // Add animation for new messages
             messageDiv.style.opacity = '0';
             messageDiv.style.transform = 'translateY(10px)';
