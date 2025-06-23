@@ -23,7 +23,7 @@ async function leaveVoiceChannel() {
 }
 
 // ربط زر الميكروفون
-const micBtn = document.getElementById('mic-btn');
+const micBtn = document.getElementById('voiceChatBtn');
 if (micBtn) {
   micBtn.addEventListener('click', async () => {
     if (!joined) {
