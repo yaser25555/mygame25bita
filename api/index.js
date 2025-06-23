@@ -23,6 +23,10 @@ app.use(cors());
 
 app.use(express.json());
 
+// --- 2.5. إعداد الملفات الثابتة ---
+app.use(express.static('../frontend'));
+app.use('/sounds', express.static('../frontend/sounds'));
+
 // --- 3. الاتصال بقاعدة البيانات ---
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
