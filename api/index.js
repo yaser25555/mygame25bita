@@ -17,10 +17,9 @@ dotenv.config();
 const app = express();
 
 // --- 2. إعداد الـ Middleware ---
-app.use(cors({ 
-    origin: ['http://localhost:8080', 'http://127.0.0.1:8080', 'http://127.0.0.1:5500'], // أضف المنفذ الذي يستخدمه Live Server إذا لزم الأمر
-    credentials: true 
-}));
+// إعداد CORS للسماح بالطلبات من أي مصدر. هذا ضروري للنشر على Render.
+app.use(cors()); 
+
 app.use(express.json());
 
 // --- 3. الاتصال بقاعدة البيانات ---
@@ -36,6 +35,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/auth', authApiRoutes);
 app.use('/api/users', userRoutes);
 // app.use('/api/game', gameRoutes); // استخدام مسار اللعبة الجديد
+
+// --- نقطة نهاية لفحص الحالة الصحية (Health Check) ---
+// Render يستخدم هذا المسار للتأكد من أن الخدمة تعمل بشكل سليم
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
 
 // --- 5. إعداد خادم HTTP و WebSocket ---
 const server = http.createServer(app);
