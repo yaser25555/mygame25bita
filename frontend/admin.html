@@ -102,11 +102,14 @@
       <h3>تسجيل دخول المسؤول</h3>
       <div class="field">
         <label for="adminUsername">اسم المستخدم:</label>
-        <input type="text" id="adminUsername" placeholder="اسم المستخدم" required>
-      </div>
-      <div class="field">
-        <label for="adminPassword">كلمة المرور:</label>
-        <input type="password" id="adminPassword" placeholder="كلمة المرور" required>
+        <form id="manageUserForm" class="manage-form">
+          <input type="text" id="manageUsername" placeholder="اسم المستخدم" required>
+          <input type="password" id="managePassword" placeholder="كلمة مرور جديدة">
+        </form>
+        <form id="adminLoginForm" class="login-form">
+          <input type="text" id="adminUsername" placeholder="اسم المستخدم" required>
+          <input type="password" id="adminPassword" placeholder="كلمة المرور" required>
+        </form>
       </div>
       <button id="adminLoginBtn">تسجيل الدخول</button>
       <p id="loginMessage" style="color: red;"></p>
@@ -200,30 +203,45 @@
     });
 
     async function checkLoginStatus() {
+      // Check if admin token exists in local storage
       const token = localStorage.getItem('adminToken');
+
+      // If token exists, verify it with the backend
       if (token) {
         try {
-          const response = await fetch(`${BACKEND_URL}/api/users/me`, { // Use a protected route for verification
+          // Send a GET request to the backend to verify the token
+          const response = await fetch(`${BACKEND_URL}/api/users/me`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
           });
 
+          // If the response is OK, the token is valid
           if (response.ok) {
+            // Get the user data from the response
             const user = await response.json();
+
+            // If the user is an admin, show the admin panel
             if (user.isAdmin) {
+              // Hide the login form
               document.getElementById('adminLoginForm').classList.add('hidden');
+
+              // Show the admin panel
               const adminPanel = document.getElementById('adminPanel');
               adminPanel.classList.remove('hidden');
+
               // Default to showing the game management section
               document.getElementById('showGameManagement').click();
             } else {
-              localStorage.removeItem('adminToken'); // Not an admin, remove token
+              // If the user is not an admin, remove the token
+              localStorage.removeItem('adminToken');
             }
           } else {
-            localStorage.removeItem('adminToken'); // Invalid token, remove it
+            // If the response is not OK, the token is invalid
+            localStorage.removeItem('adminToken');
           }
         } catch (error) {
+          // If an error occurs, log it and remove the token
           console.error('Error checking login status:', error);
           localStorage.removeItem('adminToken');
         }
