@@ -14,6 +14,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.4",
     "serverless-http": "^3.2.0",
-    "ws": "^8.18.2"
+    "ws": "^8.18.2",
+    "agora-access-token": "^0.0.11"
   }
 }
