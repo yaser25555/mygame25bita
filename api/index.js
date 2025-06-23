@@ -18,7 +18,13 @@ const app = express();
 
 // --- 2. إعداد الـ Middleware ---
 app.use(cors({ 
-    origin: ['http://localhost:8080', 'http://127.0.0.1:8080', 'http://127.0.0.1:5500'], // أضف المنفذ الذي يستخدمه Live Server إذا لزم الأمر
+    origin: [
+        'http://localhost:8080', 
+        'http://127.0.0.1:8080', 
+        'http://127.0.0.1:5500',
+        'https://voiceboom-frontend.onrender.com', // رابط الواجهة الأمامية على Render
+        'https://your-frontend-name.onrender.com'  // استبدل باسم مشروعك الفعلي
+    ],
     credentials: true 
 }));
 app.use(express.json());

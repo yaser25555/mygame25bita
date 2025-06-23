@@ -1,0 +1,26 @@
+services:
+  # Backend API service
+  - type: web
+    name: voiceboom-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false  # You'll need to set this in Render dashboard
+    healthCheckPath: /api/auth
+
+  # Frontend static site
+  - type: web
+    name: voiceboom-frontend
+    env: static
+    plan: free
+    buildCommand: null
+    staticPublishPath: ./frontend
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://voiceboom-backend.onrender.com/api/* 
