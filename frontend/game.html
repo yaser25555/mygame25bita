@@ -641,28 +641,40 @@
             border-radius: 4px;
         }
 
+        /* === Chat Message Styles === */
         .chat-message {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 12px 18px;
-            border-radius: 18px;
-            max-width: 85%;
-            word-wrap: break-word;
+          border-radius: 18px !important;
+          padding: 10px 16px !important;
+          margin: 6px 0 !important;
+          max-width: 85%;
+          word-break: break-word;
+          font-size: 1em;
+          display: inline-block;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .chat-message.female {
+          background: #ffe4ef;
+          color: #e75480;
+          border: 1.5px solid #e75480;
+          align-self: flex-end;
+        }
+        .chat-message.male {
+          background: #e6eaf7;
+          color: #1c2957;
+          border: 1.5px solid #1c2957;
+          align-self: flex-end;
+        }
+        .chat-message.admin {
+          background: #222;
+          color: #fff;
+          border: 1.5px solid #000;
+          font-weight: bold;
+          align-self: flex-end;
         }
 
-        .chat-message.own {
-            align-self: flex-end;
-            background: linear-gradient(135deg, rgba(52, 152, 219, 0.8) 0%, rgba(52, 152, 219, 0.6) 100%);
-            color: #fff;
-        }
-
-        .chat-message.other {
-            align-self: flex-start;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+        /* محاذاة الرسائل حسب المرسل */
+        .chat-message.own { align-self: flex-end; }
+        .chat-message.other { align-self: flex-start; }
 
         .system-message {
             align-self: center;
@@ -2291,6 +2303,58 @@
             font-size: 1em;
           }
         }
+
+        body, .item-emoji, .item-found-emoji {
+          font-family: 'Noto Naskh Arabic', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Arial', sans-serif;
+        }
+
+        @media (max-width: 600px) {
+          .main-content, .game-container, .right-panel, .player-info {
+            width: 100vw !important;
+            max-width: 100vw !important;
+            min-width: 0 !important;
+            box-sizing: border-box;
+          }
+          .main-content {
+            flex-direction: column;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          .game-container {
+            padding: 2px !important;
+            margin: 0 !important;
+            min-height: 180px !important;
+            border-radius: 0 !important;
+          }
+          .right-panel {
+            position: static !important;
+            margin-bottom: 10px !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+          }
+          .player-info {
+            flex-direction: column;
+            gap: 4px;
+            padding: 4px !important;
+            font-size: 0.95em;
+          }
+          .boxes-grid {
+            grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+            gap: 4px;
+            padding: 2px;
+          }
+          .box {
+            width: 55px;
+            height: 55px;
+            font-size: 1.1em;
+          }
+          .message-area {
+            font-size: 0.95em;
+            padding: 6px 2px;
+            margin-bottom: 8px;
+          }
+        }
     </style>
 </head>
 <body>
@@ -3439,22 +3503,16 @@
         // Add message to chat
         function addMessageToChat(sender, text, type) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${type}`;
-            
-            const time = new Date().toLocaleTimeString('ar-SA', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            
+            const userType = getUserTypeClass(sender);
+            messageDiv.className = `chat-message ${type} ${userType}`;
+            const time = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
             messageDiv.innerHTML = `
                 <div class="message-sender">${sender}</div>
                 <div class="message-text">${text}</div>
                 <div class="message-time">${time}</div>
             `;
-            
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-            
             // Add animation for new messages
             messageDiv.style.opacity = '0';
             messageDiv.style.transform = 'translateY(10px)';
