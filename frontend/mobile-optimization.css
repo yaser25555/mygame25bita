@@ -25,21 +25,34 @@
     transform: scale(1.1) !important;
 }
 
-/* حالة الطي للأعلى - إصلاح المشكلة */
+/* حالة الطي - طريقة بسيطة باستخدام display */
 .collapsed {
-    transform: translateY(-100%) !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: all 0.3s ease !important;
-    /* إزالة display: none لمنع الاختفاء الكامل */
+    display: none !important;
 }
 
-/* إصلاح زر الطي في الحالة المطوية */
-.collapsed .collapse-btn {
-    transform: rotate(180deg) !important;
-    /* إبقاء الزر مرئي وقابل للضغط */
-    pointer-events: auto !important;
-    opacity: 1 !important;
+/* زر إعادة الظهور للعناصر المطوية */
+.collapse-restore-btn {
+    position: fixed !important;
+    top: 10px !important;
+    right: 10px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 30px !important;
+    height: 30px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    z-index: 1001 !important;
+    transition: all 0.3s ease !important;
+}
+
+.collapse-restore-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1) !important;
 }
 
 /* تحسينات عامة للموبايل */
@@ -837,15 +850,14 @@
 .chat-container {
     position: relative !important;
     transition: all 0.3s ease !important;
-    /* إضافة overflow hidden لمنع ظهور المحتوى خارج الحاوية */
     overflow: hidden !important;
 }
 
 /* إضافة زر إعادة الظهور للعناصر المطوية */
 .collapsed::after {
-    content: '';
+    content: '▼';
     position: absolute;
-    top: 0;
+    top: 5px;
     right: 5px;
     width: 25px;
     height: 25px;
@@ -860,10 +872,6 @@
     font-size: 12px;
     color: white;
     transition: all 0.3s ease;
-}
-
-.collapsed::after {
-    content: '▼';
 }
 
 .collapsed:hover::after {

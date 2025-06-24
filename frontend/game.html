@@ -4114,10 +4114,56 @@
             addCollapseButton('.header-container', 'الشعار والعنوان');
             addCollapseButton('.chat-container', 'المحادثة');
             
+            // إضافة زر إعادة الظهور العام
+            addRestoreButton();
+            
             // حفظ حالة الطي في localStorage
             loadCollapseStates();
             
             console.log('✅ تم تهيئة ميزة طي العناصر بنجاح');
+        }
+        
+        function addRestoreButton() {
+            // إزالة الزر القديم إن وجد
+            const oldBtn = document.querySelector('.collapse-restore-btn');
+            if (oldBtn) oldBtn.remove();
+            
+            // إضافة زر إعادة الظهور
+            const restoreBtn = document.createElement('button');
+            restoreBtn.className = 'collapse-restore-btn';
+            restoreBtn.innerHTML = '🔽';
+            restoreBtn.title = 'إعادة ظهور العناصر المطوية';
+            restoreBtn.onclick = function() {
+                restoreAllCollapsed();
+            };
+            
+            document.body.appendChild(restoreBtn);
+            
+            // إخفاء الزر إذا لم تكن هناك عناصر مطوية
+            updateRestoreButtonVisibility();
+        }
+        
+        function updateRestoreButtonVisibility() {
+            const restoreBtn = document.querySelector('.collapse-restore-btn');
+            const collapsedElements = document.querySelectorAll('.collapsed');
+            
+            if (restoreBtn) {
+                if (collapsedElements.length > 0) {
+                    restoreBtn.style.display = 'flex';
+                } else {
+                    restoreBtn.style.display = 'none';
+                }
+            }
+        }
+        
+        function restoreAllCollapsed() {
+            const collapsedElements = document.querySelectorAll('.collapsed');
+            collapsedElements.forEach(element => {
+                const selector = element.dataset.collapseSelector;
+                if (selector) {
+                    toggleCollapse(element, selector);
+                }
+            });
         }
         
         function addCollapseButton(selector, title) {
@@ -4180,9 +4226,6 @@
             element.style.position = 'relative';
             element.style.transition = 'all 0.3s ease';
             
-            // إضافة event listener للعنصر
-            addCollapseEventListener(element, selector);
-            
             console.log(`✅ تم إضافة زر الطي لـ ${selector}`);
         }
         
@@ -4193,34 +4236,27 @@
             if (isCollapsed) {
                 // فتح العنصر
                 element.classList.remove('collapsed');
-                element.style.transform = 'translateY(0)';
-                element.style.opacity = '1';
-                element.style.pointerEvents = 'auto';
-                element.style.overflow = 'visible';
+                element.style.display = '';
                 
                 if (btn) {
                     btn.innerHTML = '▲';
                     btn.title = btn.title.replace('فتح', 'طي');
-                    btn.style.pointerEvents = 'auto';
-                    btn.style.opacity = '1';
                 }
                 console.log(`📱 فتح ${selector}`);
             } else {
                 // طي العنصر
                 element.classList.add('collapsed');
-                element.style.transform = 'translateY(-100%)';
-                element.style.opacity = '0';
-                element.style.pointerEvents = 'none';
-                element.style.overflow = 'hidden';
+                element.style.display = 'none';
                 
                 if (btn) {
                     btn.innerHTML = '▼';
                     btn.title = btn.title.replace('طي', 'فتح');
-                    btn.style.pointerEvents = 'auto';
-                    btn.style.opacity = '1';
                 }
                 console.log(`📱 طي ${selector}`);
             }
+            
+            // تحديث زر إعادة الظهور
+            updateRestoreButtonVisibility();
             
             // حفظ الحالة
             saveCollapseState(selector, !isCollapsed);
@@ -4240,40 +4276,19 @@
                 const element = document.querySelector(selector);
                 if (element && states[selector]) {
                     element.classList.add('collapsed');
-                    element.style.transform = 'translateY(-100%)';
-                    element.style.opacity = '0';
-                    element.style.pointerEvents = 'none';
-                    element.style.overflow = 'hidden';
+                    element.style.display = 'none';
                     
                     const btn = element.querySelector('.collapse-btn');
                     if (btn) {
                         btn.innerHTML = '▼';
                         btn.title = btn.title.replace('طي', 'فتح');
-                        btn.style.pointerEvents = 'auto';
-                        btn.style.opacity = '1';
                     }
                     console.log(`📱 استعادة حالة ${selector}: مطوي`);
                 }
             });
-        }
-        
-        // إضافة event listener للعناصر المطوية لإعادة الظهور
-        function addCollapseEventListener(element, selector) {
-            // إضافة event listener للعنصر نفسه
-            element.addEventListener('click', function(e) {
-                if (this.classList.contains('collapsed') && e.target === this) {
-                    toggleCollapse(this, selector);
-                }
-            });
             
-            // إضافة event listener للزر
-            const btn = element.querySelector('.collapse-btn');
-            if (btn) {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    toggleCollapse(element, selector);
-                });
-            }
+            // تحديث زر إعادة الظهور
+            updateRestoreButtonVisibility();
         }
 
         // تفعيل ميزة الطي عند تحميل الصفحة
