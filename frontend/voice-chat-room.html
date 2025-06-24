@@ -430,6 +430,7 @@
   </style>
 </head>
 <body>
+  <div class="user-name"></div>
   <div class="voice-room-container">
     <h2>غرفة المحادثة الصوتية</h2>
     <div class="users-circle" id="usersCircle">
@@ -638,7 +639,7 @@
     };
 
     let isChatMuted = false;
-    let chatNotification = new Audio('chat-notification.mp3');
+    let chatNotification = new Audio('sounds/click.mp3');
     let isChatCollapsed = false;
     
     function getWebSocket() {
@@ -807,7 +808,8 @@
     // الاتصال بـ WebSocket عند تحميل الصفحة
     window.addEventListener('load', () => {
       username = localStorage.getItem('username') || 'لاعب مجهول';
-      document.querySelector('.user-name').textContent = username;
+      const userNameDiv = document.querySelector('.user-name');
+      if (userNameDiv) userNameDiv.textContent = username;
       
       // إنشاء مفاتيح الأصوات
       const soundKeys = document.querySelector('.sound-keys');
