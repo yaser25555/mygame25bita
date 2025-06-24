@@ -207,7 +207,7 @@ const voiceRooms = new Map(); // roomName => Set of usernames
 
 // دالة لإرسال رسالة إلى جميع العملاء المتصلين
 function broadcast(data) {
-    wss.clients.forEach(client => {
+    voiceServer.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(data));
         }
@@ -238,7 +238,7 @@ async function broadcastPlayerList() {
     }
 }
 
-wss.on('connection', ws => {
+voiceServer.on('connection', ws => {
     console.log('Client connected');
 
     ws.on('message', async message => {
