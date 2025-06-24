@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>غرفة المحادثة الصوتية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      font-family: 'Cairo', sans-serif;
+      color: #fff;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .voice-room-container {
+      margin-top: 40px;
+      background: rgba(30,32,34,0.95);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      padding: 32px 24px 48px 24px;
+      max-width: 400px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h2 {
+      margin-bottom: 16px;
+      color: #7fbcff;
+      letter-spacing: 1px;
+    }
+    .users-circle {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 18px;
+      margin: 24px 0 32px 0;
+      min-height: 80px;
+    }
+    .user-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      border: 3px solid #232526;
+      position: relative;
+      transition: transform 0.2s;
+    }
+    .user-avatar.speaking {
+      box-shadow: 0 0 0 4px #7fbcff, 0 2px 8px rgba(0,0,0,0.18);
+      transform: scale(1.08);
+    }
+    .user-avatar.you {
+      border: 3px solid #facc15;
+    }
+    .mic-btn {
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      border: none;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5em;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(79,70,229,0.18);
+      cursor: pointer;
+      margin: 0 auto 18px auto;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .mic-btn.active {
+      background: linear-gradient(135deg, #f43f5e 0%, #facc15 100%);
+      color: #fff;
+      transform: scale(1.08);
+    }
+    .instructions {
+      color: #b3b3b3;
+      font-size: 1em;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    @media (max-width: 500px) {
+      .voice-room-container {
+        padding: 18px 4px 32px 4px;
+        max-width: 98vw;
+      }
+      .user-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 1em;
+      }
+      .mic-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="voice-room-container">
+    <h2>غرفة المحادثة الصوتية</h2>
+    <div class="instructions">انقر على زر الميكروفون للانضمام أو مغادرة المحادثة الصوتية.<br>يمكنك التحدث مع جميع الموجودين في الغرفة.</div>
+    <button id="voiceChatBtn" class="mic-btn" title="تشغيل/إيقاف الميكروفون">🎤</button>
+    <div class="users-circle" id="voiceUsersCircle">
+      <!-- سيتم عرض المستخدمين هنا -->
+    </div>
+  </div>
+  <!-- حاوية المحادثة الكتابية المنقولة -->
+  <div class="chat-container" id="chatContainer">
+    <div class="chat-header">
+      <h3><i class="fas fa-comments"></i> المحادثة</h3>
+      <div class="chat-controls">
+        <button id="reconnectBtn" class="chat-control-btn" title="إعادة الاتصال" style="background: linear-gradient(135deg, #10b981, #059669);">
+          <i class="fas fa-wifi"></i>
+        </button>
+        <button id="voiceChatBtn2" class="chat-control-btn" title="بدء المحادثة الصوتية">
+          <i class="fas fa-microphone-slash"></i>
+        </button>
+        <button id="chatMuteBtn" class="chat-control-btn" title="كتم صوت المحادثة">
+          <i class="fas fa-volume-up"></i>
+        </button>
+        <button id="toggleChat" class="chat-toggle-btn">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="system-message">
+        <span class="message-time">الآن</span>
+        <span class="message-text">مرحباً! يمكنك التحدث مع اللاعبين الآخرين هنا</span>
+      </div>
+    </div>
+    <div class="voice-chat-status" id="voiceChatStatus" style="display: none;">
+      <div class="voice-indicator">
+        <i class="fas fa-microphone"></i>
+        <span>المحادثة الصوتية نشطة</span>
+      </div>
+      <div class="connected-players" id="connectedPlayers">
+        <span>اللاعبين المتصلين: 0</span>
+      </div>
+    </div>
+    <div class="chat-input-container">
+      <div class="chat-controls-row" style="position: relative;">
+        <button id="emojiBtn" class="emoji-btn" title="إضافة رمز تعبيري">😊</button>
+        <div id="emojiPicker" class="emoji-picker">
+          <div class="emoji-item">😊</div>
+          <div class="emoji-item">😂</div>
+          <div class="emoji-item">🎉</div>
+          <div class="emoji-item">🏆</div>
+          <div class="emoji-item">💰</div>
+          <div class="emoji-item">🎮</div>
+          <div class="emoji-item">🔥</div>
+          <div class="emoji-item">⭐</div>
+          <div class="emoji-item">💪</div>
+          <div class="emoji-item">🎯</div>
+          <div class="emoji-item">🎊</div>
+          <div class="emoji-item">🥳</div>
+          <div class="emoji-item">😍</div>
+          <div class="emoji-item">🤩</div>
+          <div class="emoji-item">👏</div>
+          <div class="emoji-item">🎪</div>
+          <div class="emoji-item">🎨</div>
+          <div class="emoji-item">🌟</div>
+          <div class="emoji-item">✨</div>
+          <div class="emoji-item">💎</div>
+          <div class="emoji-item">🎭</div>
+          <div class="emoji-item">🎪</div>
+          <div class="emoji-item">🎯</div>
+        </div>
+      </div>
+      <div class="chat-controls-row" style="position: relative;">
+        <button id="soundBtn" class="sound-btn" title="مفاتيح الصوت">🔊</button>
+        <div id="soundKeys" class="sound-keys">
+          <div class="sound-key" data-sound="win">🎉 فوز</div>
+          <div class="sound-key" data-sound="lose">😢 خسارة</div>
+          <div class="sound-key" data-sound="click">👆 نقرة</div>
+          <div class="sound-key" data-sound="single">🎯 ضربة فردية</div>
+          <div class="sound-key" data-sound="triple">🎯 ضربة ثلاثية</div>
+          <div class="sound-key" data-sound="hammer">🔨 ضربة المطرقة</div>
+        </div>
+      </div>
+      <input id="chatInput" type="text" placeholder="اكتب رسالة..." autocomplete="off" />
+      <button id="sendBtn" class="send-btn" title="إرسال"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+  <script src="voice-chat.js"></script>
+  <script>
+    // قائمة المستخدمين المتصلين بالصوت
+    let voiceUsers = [];
+    let myUsername = window.currentUsername || localStorage.getItem('username') || '';
+
+    // تحديث قائمة المستخدمين
+    function updateVoiceUsers(users) {
+      voiceUsers = users;
+      renderVoiceUsersCircle();
+    }
+
+    // رسم الدوائر للمستخدمين
+    function renderVoiceUsersCircle() {
+      const container = document.getElementById('voiceUsersCircle');
+      container.innerHTML = '';
+      voiceUsers.forEach(username => {
+        const div = document.createElement('div');
+        div.className = 'user-avatar' + (username === myUsername ? ' you' : '');
+        div.textContent = username[0] ? username[0].toUpperCase() : '?';
+        div.title = username + (username === myUsername ? ' (أنت)' : '');
+        container.appendChild(div);
+      });
+    }
+
+    // استقبال تحديثات المستخدمين من WebSocket
+    function handleVoiceRoomUsers(users) {
+      updateVoiceUsers(users);
+    }
+
+    // ربط مع WebSocket في voice-chat.js
+    const origHandleWSMessage = window.handleWSMessage;
+    window.handleWSMessage = function(event) {
+      const data = JSON.parse(event.data);
+      if (data.type === 'voice_room_users') {
+        handleVoiceRoomUsers(data.users);
+      }
+      if (origHandleWSMessage) origHandleWSMessage.call(this, event);
+    };
+
+    // عند الانضمام أو مغادرة الغرفة، أطلب تحديث القائمة
+    const origJoin = window.joinVoiceChannel;
+    window.joinVoiceChannel = async function() {
+      if (origJoin) await origJoin();
+      getWebSocket().send(JSON.stringify({ type: 'get_voice_room_users', roomName: window.currentRoomName || 'game-room' }));
+    };
+    const origLeave = window.leaveVoiceChannel;
+    window.leaveVoiceChannel = function() {
+      if (origLeave) origLeave();
+      updateVoiceUsers([]);
+    };
+  </script>
+</body>
+</html> 

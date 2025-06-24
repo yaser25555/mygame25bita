@@ -51,6 +51,8 @@ async function handleWSMessage(event) {
     if (audio) audio.remove();
   } else if (data.type === 'webrtc_signal') {
     handleSignal(data.from, data.signal);
+  } else if (data.type === 'muted_by_admin') {
+    muteMyMic();
   }
 }
 
@@ -118,4 +120,11 @@ if (micBtn) {
       micBtn.classList.remove('active');
     }
   });
+}
+
+function muteMyMic() {
+  if (localStream) {
+    localStream.getAudioTracks().forEach(track => track.enabled = false);
+    alert('تم كتم صوتك من قبل المشرف');
+  }
 } 

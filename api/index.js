@@ -194,6 +194,13 @@ wss.on('connection', ws => {
                     // إرسال إشارة لكل أعضاء الغرفة (جماعي)
                     broadcastToVoiceRoom(roomName, { type: 'webrtc_signal', signal, from }, from);
                 }
+            } else if (data.type === 'mute_user') {
+                // كتم مستخدم من قبل المشرف
+                const { targetUsername } = data;
+                const targetSocket = userSockets.get(targetUsername);
+                if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+                    targetSocket.send(JSON.stringify({ type: 'muted_by_admin' }));
+                }
             }
         } catch (e) {
             console.error('Failed to parse message or process', e);

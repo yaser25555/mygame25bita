@@ -204,6 +204,9 @@
       </div>
     </div>
 
+    <!-- مثال: قائمة المستخدمين المتصلين بالصوت -->
+    <ul id="voiceUsersList"></ul>
+
   </div>
 
   <script>
@@ -529,6 +532,29 @@
             console.error('خطأ في حفظ إعدادات اللعبة:', error);
             alert('خطأ في حفظ إعدادات اللعبة: ' + error.message);
         }
+    }
+
+    function renderVoiceUsers(users) {
+      const ul = document.getElementById('voiceUsersList');
+      ul.innerHTML = '';
+      users.forEach(username => {
+        const li = document.createElement('li');
+        li.textContent = username + ' ';
+        const muteBtn = document.createElement('button');
+        muteBtn.textContent = 'كتم';
+        muteBtn.onclick = function() { muteUser(username); };
+        li.appendChild(muteBtn);
+        ul.appendChild(li);
+      });
+    }
+
+    function muteUser(username) {
+      // تأكد من وجود ws أو getWebSocket
+      (window.getWebSocket ? getWebSocket() : ws).send(JSON.stringify({
+        type: 'mute_user',
+        targetUsername: username
+      }));
+      alert('تم إرسال أمر الكتم إلى ' + username);
     }
   </script>
 </body>
