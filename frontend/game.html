@@ -4180,6 +4180,9 @@
             element.style.position = 'relative';
             element.style.transition = 'all 0.3s ease';
             
+            // إضافة event listener للعنصر
+            addCollapseEventListener(element, selector);
+            
             console.log(`✅ تم إضافة زر الطي لـ ${selector}`);
         }
         
@@ -4193,10 +4196,13 @@
                 element.style.transform = 'translateY(0)';
                 element.style.opacity = '1';
                 element.style.pointerEvents = 'auto';
+                element.style.overflow = 'visible';
                 
                 if (btn) {
                     btn.innerHTML = '▲';
                     btn.title = btn.title.replace('فتح', 'طي');
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
                 }
                 console.log(`📱 فتح ${selector}`);
             } else {
@@ -4205,10 +4211,13 @@
                 element.style.transform = 'translateY(-100%)';
                 element.style.opacity = '0';
                 element.style.pointerEvents = 'none';
+                element.style.overflow = 'hidden';
                 
                 if (btn) {
                     btn.innerHTML = '▼';
                     btn.title = btn.title.replace('طي', 'فتح');
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
                 }
                 console.log(`📱 طي ${selector}`);
             }
@@ -4234,17 +4243,39 @@
                     element.style.transform = 'translateY(-100%)';
                     element.style.opacity = '0';
                     element.style.pointerEvents = 'none';
+                    element.style.overflow = 'hidden';
                     
                     const btn = element.querySelector('.collapse-btn');
                     if (btn) {
                         btn.innerHTML = '▼';
                         btn.title = btn.title.replace('طي', 'فتح');
+                        btn.style.pointerEvents = 'auto';
+                        btn.style.opacity = '1';
                     }
                     console.log(`📱 استعادة حالة ${selector}: مطوي`);
                 }
             });
         }
         
+        // إضافة event listener للعناصر المطوية لإعادة الظهور
+        function addCollapseEventListener(element, selector) {
+            // إضافة event listener للعنصر نفسه
+            element.addEventListener('click', function(e) {
+                if (this.classList.contains('collapsed') && e.target === this) {
+                    toggleCollapse(this, selector);
+                }
+            });
+            
+            // إضافة event listener للزر
+            const btn = element.querySelector('.collapse-btn');
+            if (btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleCollapse(element, selector);
+                });
+            }
+        }
+
         // تفعيل ميزة الطي عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 تحميل الصفحة...');
