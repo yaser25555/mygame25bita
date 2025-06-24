@@ -1,6 +1,6 @@
 // إعداد متغيرات WebRTC و WebSocket
 let ws = null; // اتصال WebSocket
-let username = window.currentUsername || localStorage.getItem('username') || prompt('ادخل اسمك');
+let username = window.currentUsername;
 let roomName = window.currentRoomName || 'game-room'; // يمكنك تغييره حسب منطق غرفتك
 let localStream = null;
 let peers = {}; // { username: RTCPeerConnection }

@@ -428,6 +428,14 @@
       }
     }
   </style>
+  <script>
+    // التأكد من وجود اسم مستخدم حقيقي من تسجيل الدخول
+    window.currentUsername = window.currentUsername || localStorage.getItem('username');
+    if (!window.currentUsername) {
+      // إذا لم يوجد اسم مستخدم، أعد التوجيه لصفحة تسجيل الدخول
+      window.location.href = '/index.html';
+    }
+  </script>
 </head>
 <body>
   <div class="user-name"></div>
