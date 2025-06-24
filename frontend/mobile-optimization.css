@@ -1,5 +1,41 @@
 /* === Mobile Optimization CSS === */
 
+/* إضافة أزرار الطي والفتح */
+.collapse-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* حالة الطي للأعلى */
+.collapsed {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.collapsed .collapse-btn {
+    transform: rotate(180deg);
+}
+
 /* تحسينات عامة للموبايل */
 @media (max-width: 900px) {
     body {
@@ -19,6 +55,8 @@
         padding: 0;
         margin-bottom: 15px;
         order: -1; /* يظهر في الأعلى */
+        transition: all 0.3s ease;
+        position: relative;
     }
     
     .game-container {
@@ -59,6 +97,8 @@
     
     .header-container {
         margin-bottom: 15px;
+        transition: all 0.3s ease;
+        position: relative;
     }
     
     .logo {
@@ -85,6 +125,8 @@
         padding: 12px 15px;
         gap: 10px;
         border-radius: 20px;
+        transition: all 0.3s ease;
+        position: relative;
     }
     
     .player-details p {
@@ -638,6 +680,8 @@
 @media (max-width: 768px) {
     .chat-container {
         max-height: 200px;
+        transition: all 0.3s ease;
+        position: relative;
     }
     
     .chat-messages {

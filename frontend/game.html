@@ -4104,6 +4104,92 @@
         }
 
         // Event Listeners
+        
+        // إضافة ميزة طي العناصر للأعلى
+        function initializeCollapseFeatures() {
+            // إضافة أزرار الطي للعناصر
+            addCollapseButton('.right-panel', 'معلومات اللاعب');
+            addCollapseButton('.header-container', 'الشعار والعنوان');
+            addCollapseButton('.chat-container', 'المحادثة');
+            
+            // حفظ حالة الطي في localStorage
+            loadCollapseStates();
+        }
+        
+        function addCollapseButton(selector, title) {
+            const element = document.querySelector(selector);
+            if (!element) return;
+            
+            // إضافة زر الطي
+            const collapseBtn = document.createElement('button');
+            collapseBtn.className = 'collapse-btn';
+            collapseBtn.innerHTML = '▲';
+            collapseBtn.title = `طي ${title}`;
+            collapseBtn.onclick = function(e) {
+                e.stopPropagation();
+                toggleCollapse(element, selector);
+            };
+            
+            element.appendChild(collapseBtn);
+            
+            // إضافة خاصية للعنصر لتتبع حالته
+            element.dataset.collapseSelector = selector;
+        }
+        
+        function toggleCollapse(element, selector) {
+            const isCollapsed = element.classList.contains('collapsed');
+            const btn = element.querySelector('.collapse-btn');
+            
+            if (isCollapsed) {
+                // فتح العنصر
+                element.classList.remove('collapsed');
+                btn.innerHTML = '▲';
+                btn.title = btn.title.replace('فتح', 'طي');
+                console.log(`📱 فتح ${selector}`);
+            } else {
+                // طي العنصر
+                element.classList.add('collapsed');
+                btn.innerHTML = '▼';
+                btn.title = btn.title.replace('طي', 'فتح');
+                console.log(`📱 طي ${selector}`);
+            }
+            
+            // حفظ الحالة
+            saveCollapseState(selector, !isCollapsed);
+        }
+        
+        function saveCollapseState(selector, isCollapsed) {
+            const states = JSON.parse(localStorage.getItem('collapseStates') || '{}');
+            states[selector] = isCollapsed;
+            localStorage.setItem('collapseStates', JSON.stringify(states));
+        }
+        
+        function loadCollapseStates() {
+            const states = JSON.parse(localStorage.getItem('collapseStates') || '{}');
+            
+            Object.keys(states).forEach(selector => {
+                const element = document.querySelector(selector);
+                if (element && states[selector]) {
+                    element.classList.add('collapsed');
+                    const btn = element.querySelector('.collapse-btn');
+                    if (btn) {
+                        btn.innerHTML = '▼';
+                        btn.title = btn.title.replace('طي', 'فتح');
+                    }
+                }
+            });
+        }
+        
+        // تفعيل ميزة الطي عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // The game is already initialized with initGame() call above
+            // Just initialize the additional features
+            initializeItemInfoModal();
+            initializeCollapseFeatures();
+            
+            // Uncomment the line below to test effects on page load
+            // testEffects();
+        });
     </script>
 </body>
 </html>
