@@ -43,17 +43,41 @@ function getWebSocket() {
 // بدء المحادثة الصوتية
 async function joinVoiceChannel() {
   if (joined) return;
-  localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const ws = getWebSocket();
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
-    joined = true;
-  } else {
-    ws.addEventListener('open', function handler() {
+  try {
+    // تحسين إعدادات الميكروفون
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        channelCount: 2,
+        sampleRate: 48000,
+        sampleSize: 16
+      }
+    });
+    
+    // إنشاء مكبر صوت محلي
+    const audioContext = new AudioContext();
+    const source = audioContext.createMediaStreamSource(localStream);
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = 1.0;
+    source.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    const ws = getWebSocket();
+    if (ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
       joined = true;
-      ws.removeEventListener('open', handler);
-    });
+    } else {
+      ws.addEventListener('open', function handler() {
+        ws.send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
+        joined = true;
+        ws.removeEventListener('open', handler);
+      });
+    }
+  } catch (error) {
+    console.error('Error accessing microphone:', error);
+    alert('لم يتمكن من الوصول إلى الميكروفون. يرجى التأكد من إعطاء الإذن للموقع');
   }
 }
 
@@ -88,8 +112,38 @@ async function handleWSMessage(event) {
 
 // إنشاء PeerConnection
 function createPeerConnection(remoteUsername, isInitiator) {
-  const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-  if (localStream) localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  // تحسين إعدادات RTCPeerConnection
+  const pc = new RTCPeerConnection({
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' }
+    ],
+    iceTransportPolicy: 'all',
+    bundlePolicy: 'max-bundle'
+  });
+
+  // تحسين جودة الصوت
+  pc.setConfiguration({
+    encodedInsertableStreams: true,
+    rtcp: {
+      reducedSize: true
+    }
+  });
+
+  if (localStream) {
+    const audioTrack = localStream.getAudioTracks()[0];
+    if (audioTrack) {
+      const audioParams = {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      };
+      audioTrack.applyConstraints(audioParams);
+      pc.addTrack(audioTrack, localStream);
+    }
+  }
+
   pc.onicecandidate = (event) => {
     if (event.candidate) {
       getWebSocket().send(JSON.stringify({
@@ -97,16 +151,31 @@ function createPeerConnection(remoteUsername, isInitiator) {
       }));
     }
   };
-  pc.ontrack = (event) => { playRemoteAudio(remoteUsername, event.streams[0]); };
-  peers[remoteUsername] = pc;
+
+  pc.ontrack = (event) => {
+    // تحسين جودة الصوت للطرف الآخر
+    const remoteAudio = document.createElement('audio');
+    remoteAudio.id = 'audio-' + remoteUsername;
+    remoteAudio.controls = false;
+    remoteAudio.autoplay = true;
+    remoteAudio.volume = 0.8; // تقليل الصوت قليلاً لتجنب التشويش
+    remoteAudio.srcObject = event.streams[0];
+    document.body.appendChild(remoteAudio);
+  };
+
   if (isInitiator) {
-    pc.createOffer().then(offer => {
-      pc.setLocalDescription(offer);
+    pc.createOffer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: false
+    }).then(offer => {
+      return pc.setLocalDescription(offer);
+    }).then(() => {
       getWebSocket().send(JSON.stringify({
-        type: 'webrtc_signal', roomName, from: username, to: remoteUsername, signal: { sdp: offer }
+        type: 'webrtc_signal', roomName, from: username, to: remoteUsername, signal: { sdp: pc.localDescription }
       }));
     });
   }
+  return pc;
 }
 
 // استقبال إشارات WebRTC
@@ -129,14 +198,21 @@ async function handleSignal(from, signal) {
 
 // تشغيل صوت الطرف الآخر
 function playRemoteAudio(username, stream) {
-  let audio = document.getElementById('audio-' + username);
-  if (!audio) {
-    audio = document.createElement('audio');
-    audio.id = 'audio-' + username;
-    audio.autoplay = true;
-    document.body.appendChild(audio);
-  }
+  // تحسين جودة الصوت للطرف الآخر
+  const audio = document.getElementById('audio-' + username) || document.createElement('audio');
+  audio.id = 'audio-' + username;
+  audio.controls = false;
+  audio.autoplay = true;
+  audio.volume = 0.8; // تقليل الصوت قليلاً لتجنب التشويش
+  
+  // إضافة معالج للتحكم في الصوت
+  audio.addEventListener('volumechange', (event) => {
+    if (audio.volume > 1.0) audio.volume = 1.0;
+    if (audio.volume < 0.1) audio.volume = 0.1;
+  });
+  
   audio.srcObject = stream;
+  document.body.appendChild(audio);
 }
 
 // ربط زر الميكروفون
