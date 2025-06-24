@@ -150,6 +150,8 @@ voiceServer.on('connection', (ws, req) => {
       const { roomName, username } = data;
       console.log('User joined voice room:', username, roomName);
       ws.voiceRoom = roomName;
+      ws.username = username; // ضروري لتتبع المستخدم عند الخروج
+      userSockets.set(username, ws); // إضافة ضرورية
       if (!voiceRooms.has(roomName)) voiceRooms.set(roomName, new Set());
       voiceRooms.get(roomName).add(username);
       // أبلغ البقية أن هناك مستخدم جديد
