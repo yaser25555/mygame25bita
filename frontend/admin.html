@@ -263,6 +263,7 @@
           showError('لا يمكن الاتصال بخادم التطبيق. يرجى التأكد من الاتصال بالإنترنت.');
         }
       } else {
+        // If no token, show login form
         showLoginForm();
       }
     }
@@ -302,111 +303,6 @@
       } catch (error) {
         console.error('خطأ في تسجيل الدخول:', error);
         showError('لا يمكن الاتصال بخادم التطبيق. يرجى التأكد من الاتصال بالإنترنت.');
-      }
-    }
-
-      const gameBtn = document.getElementById('showGameManagement');
-      const userBtn = document.getElementById('showUserManagement');
-      const gameSection = document.getElementById('gameManagementSection');
-      const userSection = document.getElementById('userManagementSection');
-
-      gameBtn.addEventListener('click', () => {
-        gameSection.classList.remove('hidden');
-        userSection.classList.add('hidden');
-        gameBtn.classList.add('active');
-        userBtn.classList.remove('active');
-        loadGameSettings();
-      });
-
-      userBtn.addEventListener('click', () => {
-        userSection.classList.remove('hidden');
-        gameSection.classList.add('hidden');
-        userBtn.classList.add('active');
-        gameBtn.classList.remove('active');
-      });
-
-      document.getElementById('saveGameSettingsBtn').addEventListener('click', saveGameSettings);
-      document.getElementById('fetchUserDataBtn').addEventListener('click', fetchUserData);
-      document.getElementById('updateUserBtn').addEventListener('click', updateUserData);
-      document.getElementById('assignAdminRoleBtn').addEventListener('click', assignAdminRole);
-    });
-
-    async function checkLoginStatus() {
-      const token = localStorage.getItem('adminToken');
-      
-      if (token) {
-        try {
-          const response = await fetch(`${BACKEND_URL}/api/users/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (response.ok) {
-            const user = await response.json();
-            if (user.isAdmin) {
-              showAdminPanel();
-            } else {
-              localStorage.removeItem('adminToken');
-            }
-          } else if (response.status === 401) {
-            localStorage.removeItem('adminToken');
-            showError('الجلسة منتهية الصلاحية. يرجى تسجيل الدخول مرة أخرى.');
-          } else {
-            localStorage.removeItem('adminToken');
-            showError('حدث خطأ أثناء التحقق من الدخول.');
-          }
-        } catch (error) {
-          console.error('خطأ في التحقق من الدخول:', error);
-          localStorage.removeItem('adminToken');
-          showError('لا يمكن الاتصال بخادم التطبيق. يرجى التأكد من الاتصال بالإنترنت.');
-        }
-      } else {
-        // If no token, show login form
-        showLoginForm();
-      }
-    }
-    }
-
-    async function handleAdminLogin() {
-      const username = document.getElementById('adminUsername').value;
-      const password = document.getElementById('adminPassword').value;
-      const loginMessage = document.getElementById('loginMessage');
-
-      if (!username || !password) {
-        showError('يرجى تعبئة جميع الحقول.');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username,
-            password,
-            isAdmin: true
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem('adminToken', data.token);
-          document.getElementById('adminLoginForm').classList.add('hidden');
-          const adminPanel = document.getElementById('adminPanel');
-          adminPanel.classList.remove('hidden');
-          document.getElementById('showGameManagement').click();
-        } else if (response.status === 401) {
-          loginMessage.textContent = data.message || 'اسم المستخدم أو كلمة المرور غير صحيحة.';
-        } else {
-          loginMessage.textContent = 'حدث خطأ أثناء تسجيل الدخول.';
-        }
-      } catch (error) {
-        console.error('خطأ في تسجيل الدخول:', error);
-        loginMessage.textContent = 'لا يمكن الاتصال بخادم التطبيق. يرجى التأكد من الاتصال بالإنترنت.';
       }
     }
 
