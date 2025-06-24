@@ -293,6 +293,26 @@
           }
         } catch (e) { console.error('Chat parse error', e); }
       };
+      
+      // معالج الخطأ لإعادة الاتصال
+      ws.onerror = (error) => {
+        console.error('WebSocket connection error:', error);
+        // إعادة الاتصال بعد 5 ثواني
+        setTimeout(() => {
+          console.log('Attempting to reconnect...');
+          connectWebSocket();
+        }, 5000);
+      };
+      
+      // معالج الإغلاق لإعادة الاتصال
+      ws.onclose = (event) => {
+        console.log('WebSocket connection closed:', event);
+        // إعادة الاتصال بعد 5 ثواني
+        setTimeout(() => {
+          console.log('Attempting to reconnect...');
+          connectWebSocket();
+        }, 5000);
+      };
     }
     connectWebSocket();
     function sendMessage() {
