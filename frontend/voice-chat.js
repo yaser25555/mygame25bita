@@ -167,6 +167,7 @@ function createPeerConnection(remoteUsername, isInitiator) {
       }));
     });
   }
+  peers[remoteUsername] = pc;
   return pc;
 }
 
