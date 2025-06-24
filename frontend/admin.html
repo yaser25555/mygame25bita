@@ -390,7 +390,7 @@
       }
 
       try {
-        const response = await fetch(`${BACKEND_URL}/api/admin/assign-role`, {
+        const response = await fetch(`${BACKEND_URL}/api/users/set-admin`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -436,8 +436,8 @@
       if (newCoins !== '') body.newScore = parseInt(newCoins, 10);
 
       try {
-        const response = await fetch(`${BACKEND_URL}/api/users/${currentUsername}`, {
-          method: 'PUT',
+        const response = await fetch(`${BACKEND_URL}/api/users/update-user`, {
+          method: 'POST',
           headers: {
             'Authorization': `Bearer ${adminToken}`,
             'Content-Type': 'application/json'
@@ -502,7 +502,7 @@
 
         try {
             const response = await fetch(`${BACKEND_URL}/api/users/settings`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
