@@ -23,8 +23,17 @@ function getWebSocket() {
 async function joinVoiceChannel() {
   if (joined) return;
   localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  getWebSocket().send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
-  joined = true;
+  const ws = getWebSocket();
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
+    joined = true;
+  } else {
+    ws.addEventListener('open', function handler() {
+      ws.send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
+      joined = true;
+      ws.removeEventListener('open', handler);
+    });
+  }
 }
 
 // مغادرة المحادثة الصوتية
