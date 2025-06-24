@@ -181,22 +181,22 @@
         <form id="editUserForm" class="hidden">
           <input type="hidden" id="currentUsername">
           <div class="field">
-            <label>اسم المستخدم:</label>
+            <label for="editUsername">اسم المستخدم:</label>
             <input type="text" id="editUsername" placeholder="اسم المستخدم" autocomplete="username">
           </div>
           <div class="field">
-            <label>كلمة المرور الجديدة (اتركه فارغًا لعدم التغيير):</label>
+            <label for="editPassword">كلمة المرور الجديدة (اتركه فارغًا لعدم التغيير):</label>
             <input type="password" id="editPassword" placeholder="كلمة مرور جديدة" autocomplete="new-password">
           </div>
           <div class="field">
-            <label>الرصيد الحالي:</label>
+            <label for="manageCoins">الرصيد الحالي:</label>
             <input type="number" id="manageCoins" placeholder="الرصيد">
           </div>
           <button type="submit" id="updateUserBtn">تحديث بيانات المستخدم</button>
         </form>
           <hr style="margin: 20px 0; border-color: #444;">
           <div class="field">
-            <label>تعيين كمسؤول:</label>
+            <label for="adminRoleUsername">تعيين كمسؤول:</label>
             <input type="text" id="adminRoleUsername" readonly>
           </div>
           <button id="assignAdminRoleBtn">تعيين مشرف</button>
