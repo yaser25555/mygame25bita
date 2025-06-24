@@ -210,6 +210,7 @@
   <script src="voice-chat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
   <script>
+    // ملاحظة: يجب عدم تعريف ws أو username هنا، بل استخدامهما من voice-chat.js فقط
     // قائمة المستخدمين المتصلين بالصوت
     let voiceUsers = [];
     let myUsername = window.currentUsername || localStorage.getItem('username') || '';
@@ -260,8 +261,8 @@
       updateVoiceUsers([]);
     };
 
-    // كود الدردشة الكتابية المنقول من صفحة اللعبة:
-    let username = window.currentUsername || localStorage.getItem('username') || prompt('ادخل اسمك');
+    // كود الدردشة الكتابية المنقول من صفحة اللعبة (بدون تعريف username أو ws):
+    // استخدم فقط ws = getWebSocket(); و username مباشرة
     const chatContainer = document.getElementById('chatContainer');
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
