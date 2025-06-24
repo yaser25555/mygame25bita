@@ -292,7 +292,9 @@
     #sadcat-gif-container {
         width: 250px;
         height: 150px;
-        top: 5%;
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
     }
     
     #win-amount-display,
@@ -308,7 +310,9 @@
     #sadcat-gif-container {
         width: 200px;
         height: 120px;
-        top: 3%;
+        top: 3px;
+        left: 50%;
+        transform: translateX(-50%);
     }
     
     #win-amount-display,
@@ -316,6 +320,24 @@
         font-size: 1.2em;
         padding: 6px 12px;
         top: -35px;
+    }
+}
+
+@media (max-width: 360px) {
+    #win-gif-container,
+    #sadcat-gif-container {
+        width: 180px;
+        height: 100px;
+        top: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    #win-amount-display,
+    #lose-amount-display {
+        font-size: 1.1em;
+        padding: 5px 10px;
+        top: -30px;
     }
 }
 
