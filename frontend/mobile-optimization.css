@@ -286,6 +286,280 @@
     }
 }
 
+/* === تحسينات الشاشة العرضية للموبايل === */
+@media (max-width: 900px) and (orientation: landscape) {
+    body {
+        padding: 5px;
+    }
+    
+    .main-content {
+        flex-direction: row;
+        gap: 10px;
+        margin-top: 5px;
+    }
+    
+    .right-panel {
+        position: static;
+        width: auto;
+        min-width: 200px;
+        max-width: 250px;
+        margin-bottom: 0;
+        order: 0;
+    }
+    
+    .game-container {
+        flex: 1;
+        min-height: 250px;
+        padding: 10px;
+    }
+    
+    .header-container {
+        margin-bottom: 8px;
+    }
+    
+    .logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .game-title {
+        font-size: 1.2em;
+    }
+    
+    .message-area {
+        font-size: 0.9em;
+        padding: 6px;
+        margin-bottom: 8px;
+    }
+    
+    .controls {
+        flex-direction: row;
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+    
+    .bet-button {
+        padding: 6px 4px;
+        font-size: 0.8em;
+        min-height: 35px;
+        flex: 1;
+    }
+    
+    .item-collection-display {
+        padding: 6px;
+        margin: 6px 0;
+    }
+    
+    .item-collection-title {
+        font-size: 0.9em;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+        gap: 4px;
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 4px;
+        padding: 6px;
+    }
+    
+    .box {
+        width: 60px;
+        height: 60px;
+        font-size: 0.8em;
+    }
+    
+    .player-info {
+        padding: 8px 10px;
+        gap: 6px;
+        border-radius: 15px;
+    }
+    
+    .player-details p {
+        font-size: 0.8em;
+    }
+    
+    .player-details p:first-child {
+        font-size: 0.9em;
+    }
+    
+    .player-actions button {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9em;
+    }
+}
+
+/* تحسينات الشاشة العرضية للشاشات الصغيرة */
+@media (max-width: 600px) and (orientation: landscape) {
+    .right-panel {
+        min-width: 180px;
+        max-width: 200px;
+    }
+    
+    .game-container {
+        min-height: 200px;
+        padding: 6px;
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 3px;
+        padding: 4px;
+    }
+    
+    .box {
+        width: 50px;
+        height: 50px;
+        font-size: 0.7em;
+    }
+    
+    .controls {
+        gap: 3px;
+        margin-bottom: 6px;
+    }
+    
+    .bet-button {
+        padding: 4px 3px;
+        font-size: 0.7em;
+        min-height: 30px;
+    }
+    
+    .message-area {
+        font-size: 0.8em;
+        padding: 4px;
+        margin-bottom: 6px;
+    }
+    
+    .logo {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .game-title {
+        font-size: 1em;
+    }
+    
+    .player-info {
+        padding: 6px 8px;
+        gap: 4px;
+    }
+    
+    .player-details p {
+        font-size: 0.75em;
+    }
+    
+    .player-details p:first-child {
+        font-size: 0.8em;
+    }
+    
+    .player-actions button {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8em;
+    }
+    
+    .item-collection-display {
+        padding: 4px;
+        margin: 4px 0;
+    }
+    
+    .item-collection-title {
+        font-size: 0.8em;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+        gap: 3px;
+    }
+}
+
+/* تحسينات الشاشة العرضية للشاشات الصغيرة جداً */
+@media (max-width: 480px) and (orientation: landscape) {
+    .right-panel {
+        min-width: 150px;
+        max-width: 170px;
+    }
+    
+    .game-container {
+        min-height: 180px;
+        padding: 4px;
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+        gap: 2px;
+        padding: 3px;
+    }
+    
+    .box {
+        width: 45px;
+        height: 45px;
+        font-size: 0.65em;
+    }
+    
+    .controls {
+        gap: 2px;
+        margin-bottom: 4px;
+    }
+    
+    .bet-button {
+        padding: 3px 2px;
+        font-size: 0.65em;
+        min-height: 25px;
+    }
+    
+    .message-area {
+        font-size: 0.75em;
+        padding: 3px;
+        margin-bottom: 4px;
+    }
+    
+    .logo {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .game-title {
+        font-size: 0.9em;
+    }
+    
+    .player-info {
+        padding: 4px 6px;
+        gap: 3px;
+    }
+    
+    .player-details p {
+        font-size: 0.7em;
+    }
+    
+    .player-details p:first-child {
+        font-size: 0.75em;
+    }
+    
+    .player-actions button {
+        width: 22px;
+        height: 22px;
+        font-size: 0.7em;
+    }
+    
+    .item-collection-display {
+        padding: 3px;
+        margin: 3px 0;
+    }
+    
+    .item-collection-title {
+        font-size: 0.75em;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+        gap: 2px;
+    }
+}
+
 /* تحسين مؤثرات الفوز والخسارة للموبايل */
 @media (max-width: 768px) {
     #win-gif-container,
@@ -341,6 +615,25 @@
     }
 }
 
+/* تحسين مؤثرات الفوز والخسارة للشاشة العرضية */
+@media (max-width: 900px) and (orientation: landscape) {
+    #win-gif-container,
+    #sadcat-gif-container {
+        width: 200px;
+        height: 120px;
+        top: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    #win-amount-display,
+    #lose-amount-display {
+        font-size: 1.2em;
+        padding: 6px 12px;
+        top: -30px;
+    }
+}
+
 /* تحسين المحادثة للموبايل */
 @media (max-width: 768px) {
     .chat-container {
@@ -363,6 +656,31 @@
         width: 30px;
         height: 30px;
         font-size: 0.8em;
+    }
+}
+
+/* تحسين المحادثة للشاشة العرضية */
+@media (max-width: 900px) and (orientation: landscape) {
+    .chat-container {
+        max-height: 150px;
+    }
+    
+    .chat-messages {
+        max-height: 100px;
+    }
+    
+    .chat-header {
+        padding: 6px 8px;
+    }
+    
+    .chat-header h3 {
+        font-size: 0.9em;
+    }
+    
+    .chat-control-btn {
+        width: 25px;
+        height: 25px;
+        font-size: 0.7em;
     }
 }
 
