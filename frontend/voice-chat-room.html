@@ -23,7 +23,7 @@
       border-radius: 24px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.25);
       padding: 32px 24px 48px 24px;
-      max-width: 400px;
+      max-width: 600px;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -38,19 +38,24 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 18px;
-      margin: 24px 0 32px 0;
-      min-height: 80px;
+      gap: 32px;
+      margin: 32px 0 40px 0;
+      min-height: 180px;
+      min-width: 320px;
+      background: rgba(60, 60, 80, 0.15);
+      border-radius: 24px;
+      padding: 32px 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
     }
     .user-avatar {
-      width: 56px;
-      height: 56px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3em;
+      font-size: 1.7em;
       font-weight: bold;
       color: #fff;
       box-shadow: 0 2px 8px rgba(0,0,0,0.18);
@@ -69,16 +74,16 @@
       background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
       border: none;
       border-radius: 50%;
-      width: 80px;
-      height: 80px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.5em;
+      font-size: 1.2em;
       color: #fff;
       box-shadow: 0 4px 16px rgba(79,70,229,0.18);
       cursor: pointer;
-      margin: 0 auto 18px auto;
+      margin: 0 auto 10px auto;
       transition: background 0.2s, transform 0.2s;
     }
     .mic-btn.active {
@@ -89,23 +94,28 @@
     .instructions {
       color: #b3b3b3;
       font-size: 1em;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
       text-align: center;
     }
-    @media (max-width: 500px) {
+    @media (max-width: 700px) {
       .voice-room-container {
-        padding: 18px 4px 32px 4px;
-        max-width: 98vw;
+        padding: 10px 2px 18px 2px;
+        max-width: 99vw;
+      }
+      .users-circle {
+        gap: 16px;
+        min-width: 0;
+        padding: 12px 2px;
       }
       .user-avatar {
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         font-size: 1em;
       }
       .mic-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5em;
+        width: 32px;
+        height: 32px;
+        font-size: 1em;
       }
     }
   </style>
@@ -198,6 +208,7 @@
     </div>
   </div>
   <script src="voice-chat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
   <script>
     // قائمة المستخدمين المتصلين بالصوت
     let voiceUsers = [];
@@ -248,6 +259,93 @@
       if (origLeave) origLeave();
       updateVoiceUsers([]);
     };
+
+    // كود الدردشة الكتابية المنقول من صفحة اللعبة:
+    let ws;
+    let username = window.currentUsername || localStorage.getItem('username') || prompt('ادخل اسمك');
+    const chatContainer = document.getElementById('chatContainer');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const emojiBtn = document.getElementById('emojiBtn');
+    const emojiPicker = document.getElementById('emojiPicker');
+    const soundBtn = document.getElementById('soundBtn');
+    const soundKeys = document.getElementById('soundKeys');
+    const chatMuteBtn = document.getElementById('chatMuteBtn');
+    const toggleChatBtn = document.getElementById('toggleChat');
+    let isChatMuted = false;
+    let isChatCollapsed = false;
+    let chatVolume = 0.5;
+    const chatNotification = new Audio('sounds/click.mp3');
+    chatNotification.volume = chatVolume;
+    function connectWebSocket() {
+      ws = getWebSocket();
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'chat_message') {
+            addMessageToChat(data.sender, data.text, data.sender === username ? 'own' : 'other');
+            if (data.sender !== username && !isChatMuted) chatNotification.play();
+          } else if (data.type === 'player_joined') {
+            addMessageToChat('النظام', `انضم اللاعب ${data.username} إلى المحادثة`, 'system-message');
+          } else if (data.type === 'player_left') {
+            addMessageToChat('النظام', `غادر اللاعب ${data.username} المحادثة`, 'system-message');
+          }
+        } catch (e) { console.error('Chat parse error', e); }
+      };
+    }
+    connectWebSocket();
+    function sendMessage() {
+      const message = chatInput.value.trim();
+      if (!message) return;
+      ws.send(JSON.stringify({ type: 'chat_message', text: message, sender: username }));
+      chatInput.value = '';
+    }
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+    function addMessageToChat(sender, text, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chat-message ${type}`;
+      const time = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+      messageDiv.innerHTML = `<div class="message-sender">${sender}</div><div class="message-text">${text}</div><div class="message-time">${time}</div>`;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    // الرموز التعبيرية
+    emojiBtn.addEventListener('click', () => { emojiPicker.classList.toggle('show'); });
+    emojiPicker.addEventListener('click', e => {
+      if (e.target.classList.contains('emoji-item')) {
+        chatInput.value += e.target.textContent;
+        emojiPicker.classList.remove('show');
+        chatInput.focus();
+      }
+    });
+    // مفاتيح الصوت
+    soundBtn.addEventListener('click', () => { soundKeys.classList.toggle('show'); });
+    soundKeys.addEventListener('click', e => {
+      if (e.target.classList.contains('sound-key')) {
+        chatNotification.currentTime = 0;
+        chatNotification.play();
+        soundKeys.classList.remove('show');
+      }
+    });
+    // كتم صوت المحادثة
+    chatMuteBtn.addEventListener('click', () => {
+      isChatMuted = !isChatMuted;
+      chatMuteBtn.classList.toggle('muted', isChatMuted);
+      chatMuteBtn.innerHTML = isChatMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+    });
+    // طي نافذة الدردشة
+    toggleChatBtn.addEventListener('click', () => {
+      isChatCollapsed = !isChatCollapsed;
+      chatContainer.classList.toggle('collapsed', isChatCollapsed);
+      toggleChatBtn.innerHTML = isChatCollapsed ? '<i class="fas fa-chevron-left"></i>' : '<i class="fas fa-chevron-right"></i>';
+    });
+    // إغلاق القوائم عند الضغط خارجها
+    document.addEventListener('click', (e) => {
+      if (!emojiBtn.contains(e.target) && !emojiPicker.contains(e.target)) emojiPicker.classList.remove('show');
+      if (!soundBtn.contains(e.target) && !soundKeys.contains(e.target)) soundKeys.classList.remove('show');
+    });
   </script>
 </body>
 </html> 
