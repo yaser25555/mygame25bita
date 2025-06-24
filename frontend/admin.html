@@ -455,6 +455,66 @@
         alert('⚠️ ' + error.message);
       }
     }
+
+    async function loadGameSettings() {
+        const token = localStorage.getItem('adminToken');
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/users/settings`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('فشل في تحميل إعدادات اللعبة');
+            }
+            const settings = await response.json();
+            document.getElementById('numBoxesInput').value = settings.gameSettings.numBoxes || 20;
+            document.getElementById('winRatioInput').value = settings.gameSettings.winRatio || 0.5;
+        } catch (error) {
+            console.error('خطأ في تحميل إعدادات اللعبة:', error);
+            alert('خطأ في تحميل إعدادات اللعبة: ' + error.message);
+        }
+    }
+
+    async function saveGameSettings() {
+        const numBoxes = document.getElementById('numBoxesInput').value;
+        const winRatio = document.getElementById('winRatioInput').value;
+
+        if (!numBoxes || !winRatio) {
+            alert('يرجى تعبئة جميع الحقول.');
+            return;
+        }
+
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            alert('لا يوجد توكن مسؤول. يرجى تسجيل الدخول أولاً.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/admin/update-game-settings`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    numBoxes,
+                    winRatio
+                })
+            });
+
+            if (response.ok) {
+                alert('تم حفظ إعدادات اللعبة بنجاح!');
+            } else {
+                throw new Error('فشل في حفظ إعدادات اللعبة');
+            }
+        } catch (error) {
+            console.error('خطأ في حفظ إعدادات اللعبة:', error);
+            alert('خطأ في حفظ إعدادات اللعبة: ' + error.message);
+        }
+    }
   </script>
 </body>
 </html>
