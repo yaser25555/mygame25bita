@@ -217,16 +217,17 @@ function broadcast(data) {
 
 // دالة لإرسال رسالة إلى كل أعضاء غرفة صوتية ما عدا المرسل
 function broadcastToVoiceRoom(roomName, data, excludeUsername = null) {
-    const room = voiceRooms.get(roomName);
-    if (!room) return;
-    room.forEach(username => {
-        if (username !== excludeUsername) {
-            const ws = userSockets.get(username);
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(data));
-            }
-        }
-    });
+  if (!voiceRooms.has(roomName)) return;
+  console.log('broadcastToVoiceRoom', roomName, data, 'exclude:', excludeUsername);
+  voiceRooms.get(roomName).forEach(username => {
+    if (username !== excludeUsername) {
+      const ws = userSockets.get(username);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        console.log('Sending to', username, data);
+        ws.send(JSON.stringify(data));
+      }
+    }
+  });
 }
 
 // دالة لجلب قائمة اللاعبين وتحديثها للجميع
