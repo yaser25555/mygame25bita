@@ -7,8 +7,8 @@
   <style>
     body {
       font-family: 'Cairo', sans-serif;
-      background-color: #121212; /* Darker background */
-      color: #e0e0e0;
+      background-color: #1a1a1a; /* Darker background */
+      color: #ffffff;
       padding: 40px;
       text-align: center;
       line-height: 1.6;
@@ -16,37 +16,76 @@
     .container {
       max-width: 800px;
       margin: auto;
-      background-color: #1e1e1e; /* Slightly lighter container */
+      background-color: #2d2d2d; /* Slightly lighter container */
       padding: 40px;
       border-radius: 15px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-      border: 1px solid #333;
+      border: 1px solid #444;
     }
     h2, h3 {
-        color: #4CAF50; /* Green accent for headers */
+        color: #6366f1; /* Indigo accent for headers */
     }
     input, button, select {
       padding: 12px 15px;
       margin: 10px 0;
       width: calc(100% - 30px);
-      border: 1px solid #444;
+      border: 1px solid #666;
       border-radius: 8px;
       font-size: 1em;
     }
     input, select {
-      background-color: #2a2a2a;
-      color: #e0e0e0;
+      background-color: #3a3a3a;
+      color: #ffffff;
     }
     button {
-      background-color: #4CAF50;
+      background-color: #6366f1;
       color: white;
       cursor: pointer;
       transition: background-color 0.3s, transform 0.2s;
       font-weight: bold;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #4f46e5;
       transform: translateY(-2px);
+    }
+    .login-form {
+      background-color: #333333;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .admin-panel-sections {
+      margin: 20px 0;
+    }
+    .admin-panel-sections button {
+      margin: 5px;
+      padding: 10px 20px;
+    }
+    .admin-panel-sections button.active {
+      background-color: #4f46e5;
+    }
+    .section-content {
+      background-color: #333333;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .field {
+      margin: 15px 0;
+    }
+    label {
+      color: #ffffff;
+      display: block;
+      margin-bottom: 5px;
+    }
+    #loginMessage {
+      color: #f43f5e;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .hidden {
+      display: none;
     }
     .field {
       text-align: right;
@@ -274,7 +313,7 @@
       const loginMessage = document.getElementById('loginMessage');
 
       if (!username || !password) {
-        showError('يرجى تعبئة جميع الحقول.');
+        loginMessage.textContent = 'يرجى تعبئة جميع الحقول.';
         return;
       }
 
@@ -294,15 +333,18 @@
         if (response.ok) {
           const data = await response.json();
           localStorage.setItem('adminToken', data.token);
-          showAdminPanel();
+          document.getElementById('adminLoginForm').classList.add('hidden');
+          const adminPanel = document.getElementById('adminPanel');
+          adminPanel.classList.remove('hidden');
+          document.getElementById('showGameManagement').click();
         } else if (response.status === 401) {
-          showError('اسم المستخدم أو كلمة المرور غير صحيحة.');
+          loginMessage.textContent = data.message || 'اسم المستخدم أو كلمة المرور غير صحيحة.';
         } else {
-          showError('حدث خطأ أثناء تسجيل الدخول.');
+          loginMessage.textContent = 'حدث خطأ أثناء تسجيل الدخول.';
         }
       } catch (error) {
         console.error('خطأ في تسجيل الدخول:', error);
-        showError('لا يمكن الاتصال بخادم التطبيق. يرجى التأكد من الاتصال بالإنترنت.');
+        loginMessage.textContent = 'لا يمكن الاتصال بخادم التطبيق. يرجى التأكد من الاتصال بالإنترنت.';
       }
     }
 
@@ -312,7 +354,7 @@
 
       const token = localStorage.getItem('adminToken');
       if (!token) {
-        alert('No admin token found. Please log in first.');
+        alert('لا يوجد توكن مسؤول. يرجى تسجيل الدخول أولاً.');
         return;
       }
 
@@ -324,153 +366,95 @@
         });
         const data = await res.json();
 
-        if (!res.ok) throw new Error(data.message || 'Failed to fetch data');
+        if (!res.ok) throw new Error(data.message || 'فشل في جلب البيانات');
 
         document.getElementById('editUserForm').classList.remove('hidden');
         document.getElementById('currentUsername').value = data.username || '';
-        document.getElementById('manageUsername').value = data.username || '';
+        document.getElementById('editUsername').value = data.username || '';
         document.getElementById('manageCoins').value = data.score !== undefined ? data.score : 0;
         document.getElementById('adminRoleUsername').value = data.username || '';
-        document.getElementById('managePassword').value = '';
-
+        document.getElementById('editPassword').value = '';
       } catch (err) {
         alert('⚠️ ' + err.message);
       }
     }
 
-    // Function to update user data (coins, username, password)
-    async function updateUserData() {
-        const currentUsername = document.getElementById('searchUsername').value.trim();
-        const newUsername = document.getElementById('manageUsername').value.trim();
-        const newPassword = document.getElementById('managePassword').value.trim();
-        const newCoins = document.getElementById('manageCoins').value.trim();
-
-        if (!currentUsername) {
-            alert('Please search for a user first.');
-            return;
-        }
-
-        const adminToken = localStorage.getItem('adminToken');
-        if (!adminToken) {
-            alert('Admin token not found. Please log in again.');
-            return;
-        }
-
-        const body = {
-            currentUsername,
-        };
-
-        if (newUsername) body.newUsername = newUsername;
-        if (newPassword) body.newPassword = newPassword;
-        if (newCoins !== '') body.newScore = parseInt(newCoins, 10);
-
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/users/update-user`, {
-                method: 'POST', // Corrected to POST
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${adminToken}`
-                },
-                body: JSON.stringify(body)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                alert('User data updated successfully!');
-                // Optionally, refresh the user data display
-                fetchUserData();
-            } else {
-                alert(`Error: ${result.message}`);
-            }
-        } catch (error) {
-            console.error('Error updating user data:', error);
-            alert('An error occurred while updating user data.');
-        }
-    }
-
-    // Function to assign admin role
     async function assignAdminRole() {
       const username = document.getElementById('adminRoleUsername').value;
-      const token = localStorage.getItem('adminToken');
+      if (!username) return alert('يرجى اختيار مستخدم أولاً');
 
-      if (!username) {
-        alert('يرجى البحث عن مستخدم أولاً.');
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('لا يوجد توكن مسؤول. يرجى تسجيل الدخول أولاً.');
         return;
       }
 
       try {
-        const res = await fetch(`${BACKEND_URL}/api/users/assign-admin`,
-        {
+        const response = await fetch(`${BACKEND_URL}/api/admin/assign-role`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ username })
         });
-        const data = await res.json();
 
-        if (!res.ok) throw new Error(data.message || 'فشل في تعيين دور المسؤول');
-
-        alert('✅ تم تعيين المستخدم كمسؤول بنجاح');
-
-      } catch (err) {
-        alert('❌ حدث خطأ: ' + err.message);
+        const data = await response.json();
+        if (response.ok) {
+          alert('تم تعيين المستخدم كمسؤول بنجاح!');
+        } else {
+          throw new Error(data.message || 'فشل في تعيين المستخدم كمسؤول');
+        }
+      } catch (error) {
+        alert('⚠️ ' + error.message);
       }
     }
 
-    async function loadGameSettings() {
-        const token = localStorage.getItem('adminToken');
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/users/settings`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (!response.ok) {
-                throw new Error('فشل في تحميل إعدادات اللعبة');
-            }
-            const settings = await response.json();
-            document.getElementById('numBoxesInput').value = settings.gameSettings.numBoxes || 20;
-            document.getElementById('winRatioInput').value = settings.gameSettings.winRatio || 0.5;
-        } catch (error) {
-            console.error('خطأ في تحميل إعدادات اللعبة:', error);
-            alert('خطأ في تحميل إعدادات اللعبة: ' + error.message);
+    async function updateUserData() {
+      const currentUsername = document.getElementById('searchUsername').value.trim();
+      const newUsername = document.getElementById('editUsername').value.trim();
+      const newPassword = document.getElementById('editPassword').value.trim();
+      const newCoins = document.getElementById('manageCoins').value.trim();
+
+      if (!currentUsername) {
+        alert('يرجى البحث عن المستخدم أولاً');
+        return;
+      }
+
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        alert('لا يوجد توكن مسؤول. يرجى تسجيل الدخول أولاً.');
+        return;
+      }
+
+      const body = {
+        currentUsername,
+      };
+
+      if (newUsername) body.newUsername = newUsername;
+      if (newPassword) body.newPassword = newPassword;
+      if (newCoins !== '') body.newScore = parseInt(newCoins, 10);
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/admin/update-user`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          alert('تم تحديث بيانات المستخدم بنجاح!');
+        } else {
+          throw new Error(data.message || 'فشل في تحديث بيانات المستخدم');
         }
+      } catch (error) {
+        alert('⚠️ ' + error.message);
+      }
     }
-
-    async function saveGameSettings() {
-        const token = localStorage.getItem('adminToken');
-        const settings = {
-            numBoxes: parseInt(document.getElementById('numBoxesInput').value, 10),
-            winRatio: parseFloat(document.getElementById('winRatioInput').value)
-        };
-
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/users/settings`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(settings)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'فشل حفظ إعدادات اللعبة');
-            }
-
-            alert('✅ تم حفظ إعدادات اللعبة بنجاح!');
-        } catch (error) {
-            console.error('خطأ في حفظ إعدادات اللعبة:', error);
-            alert('خطأ في حفظ إعدادات اللعبة: ' + error.message);
-        }
-    }
-
   </script>
 </body>
 </html>
