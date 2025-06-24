@@ -16,13 +16,83 @@ const voiceRoutes = require('./voiceRoutes');
 
 dotenv.config();
 
-const app = express();
-
 // --- 2. إعداد الـ Middleware ---
 // إعداد CORS للسماح بالطلبات من أي مصدر. هذا ضروري للنشر على Render.
 app.use(cors()); 
 
 app.use(express.json());
+
+// --- 2.5 إعداد WebSocket ---
+const voiceServer = new WebSocket.Server({ noServer: true });
+
+app.use((req, res, next) => {
+  voiceServer.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
+    voiceServer.emit('connection', ws, req);
+  });
+  next();
+});
+
+voiceServer.on('connection', (ws, req) => {
+  console.log('New WebSocket connection');
+  
+  ws.on('message', (message) => {
+    console.log('Received:', message);
+    const data = JSON.parse(message);
+    
+    // معالجة أنواع مختلفة من الرسائل
+    if (data.type === 'join_voice_room') {
+      // إضافة المستخدم إلى قائمة المستخدمين
+      ws.username = data.username;
+      ws.roomName = data.roomName;
+      
+      // إرسال رسالة للجميع بأن مستخدم جديد انضم
+      voiceServer.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: 'voice_user_joined',
+            username: data.username
+          }));
+        }
+      });
+    }
+    
+    if (data.type === 'leave_voice_room') {
+      // إرسال رسالة للجميع بأن المستخدم غادر
+      voiceServer.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: 'voice_user_left',
+            username: data.username
+          }));
+        }
+      });
+    }
+    
+    // معالجة إشارات WebRTC
+    if (data.type === 'webrtc_signal') {
+      const targetClient = Array.from(voiceServer.clients).find(
+        c => c.readyState === WebSocket.OPEN && c.username === data.to
+      );
+      
+      if (targetClient) {
+        targetClient.send(JSON.stringify(data));
+      }
+    }
+  });
+  
+  ws.on('close', () => {
+    console.log('WebSocket connection closed');
+    // إرسال رسالة للجميع بأن المستخدم غادر
+    voiceServer.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          type: 'voice_user_left',
+          username: ws.username
+        }));
+      }
+    });
+  });
+});
 
 // --- 2.5. إعداد الملفات الثابتة ---
 const frontendPath = path.join(__dirname, '../frontend');

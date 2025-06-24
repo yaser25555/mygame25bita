@@ -14,7 +14,7 @@ function getWebSocket() {
   if (ws && ws.readyState === WebSocket.OPEN) return ws;
   
   // استخدام URL محدد للـ WebSocket
-  const wsUrl = window.WS_URL || (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+  const wsUrl = window.WS_URL || 'wss://mygame25bita.onrender.com';
   console.log('Attempting to connect to WebSocket:', wsUrl);
   
   ws = new WebSocket(wsUrl);
