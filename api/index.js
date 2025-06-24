@@ -61,11 +61,28 @@ const wss = new WebSocket.Server({ server });
 // خريطة للاحتفاظ بمرجع WebSocket لكل مستخدم
 const userSockets = new Map();
 
+// خريطة لإدارة غرف الصوت
+const voiceRooms = new Map(); // roomName => Set of usernames
+
 // دالة لإرسال رسالة إلى جميع العملاء المتصلين
 function broadcast(data) {
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(data));
+        }
+    });
+}
+
+// دالة لإرسال رسالة إلى كل أعضاء غرفة صوتية ما عدا المرسل
+function broadcastToVoiceRoom(roomName, data, excludeUsername = null) {
+    const room = voiceRooms.get(roomName);
+    if (!room) return;
+    room.forEach(username => {
+        if (username !== excludeUsername) {
+            const ws = userSockets.get(username);
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(data));
+            }
         }
     });
 }
@@ -147,6 +164,36 @@ wss.on('connection', ws => {
                         self: true
                     }));
                 }
+            } else if (data.type === 'join_voice_room') {
+                // انضمام المستخدم لغرفة صوتية
+                const { roomName, username } = data;
+                ws.voiceRoom = roomName;
+                if (!voiceRooms.has(roomName)) voiceRooms.set(roomName, new Set());
+                voiceRooms.get(roomName).add(username);
+                // أبلغ البقية أن هناك مستخدم جديد
+                broadcastToVoiceRoom(roomName, { type: 'voice_user_joined', username }, username);
+            } else if (data.type === 'leave_voice_room') {
+                // خروج المستخدم من غرفة صوتية
+                const { roomName, username } = data;
+                if (voiceRooms.has(roomName)) {
+                    voiceRooms.get(roomName).delete(username);
+                    if (voiceRooms.get(roomName).size === 0) voiceRooms.delete(roomName);
+                }
+                ws.voiceRoom = null;
+                broadcastToVoiceRoom(roomName, { type: 'voice_user_left', username }, username);
+            } else if (data.type === 'webrtc_signal') {
+                // تمرير إشارات WebRTC (offer/answer/candidate) لباقي أعضاء الغرفة
+                const { roomName, signal, from, to } = data;
+                if (to) {
+                    // إرسال إشارة مباشرة لمستخدم محدد (ثنائي)
+                    const targetSocket = userSockets.get(to);
+                    if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+                        targetSocket.send(JSON.stringify({ type: 'webrtc_signal', signal, from }));
+                    }
+                } else if (roomName) {
+                    // إرسال إشارة لكل أعضاء الغرفة (جماعي)
+                    broadcastToVoiceRoom(roomName, { type: 'webrtc_signal', signal, from }, from);
+                }
             }
         } catch (e) {
             console.error('Failed to parse message or process', e);
@@ -158,6 +205,11 @@ wss.on('connection', ws => {
         if(ws.username) {
             userSockets.delete(ws.username); // إزالة السوكيت عند الخروج
             broadcast({ type: 'player_left', username: ws.username });
+        }
+        // إزالة المستخدم من أي غرفة صوتية
+        if (ws.voiceRoom && voiceRooms.has(ws.voiceRoom)) {
+            voiceRooms.get(ws.voiceRoom).delete(ws.username);
+            if (voiceRooms.get(ws.voiceRoom).size === 0) voiceRooms.delete(ws.voiceRoom);
         }
     });
 });

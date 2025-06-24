@@ -1,42 +1,120 @@
-// إعداد Agora Voice Chat
-const AGORA_SERVER_URL = 'https://mygame25bita-1.onrender.com/api/voice/token'; // عدل هذا للرابط الصحيح
-const CHANNEL_NAME = 'game-room';
+// إعداد متغيرات WebRTC و WebSocket
+let ws = null; // اتصال WebSocket
+let username = window.currentUsername || localStorage.getItem('username') || prompt('ادخل اسمك');
+let roomName = window.currentRoomName || 'game-room'; // يمكنك تغييره حسب منطق غرفتك
+let localStream = null;
+let peers = {}; // { username: RTCPeerConnection }
+let joined = false;
 
-let client, localAudioTrack, joined = false;
+// زر الميكروفون
+const micBtn = document.getElementById('voiceChatBtn');
 
+// إنشاء أو إعادة استخدام WebSocket
+function getWebSocket() {
+  if (ws && ws.readyState === WebSocket.OPEN) return ws;
+  ws = new WebSocket(window.WS_URL || (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
+  ws.onopen = () => console.log('WebSocket connected');
+  ws.onmessage = handleWSMessage;
+  ws.onclose = () => { console.log('WebSocket closed'); joined = false; };
+  return ws;
+}
+
+// بدء المحادثة الصوتية
 async function joinVoiceChannel() {
   if (joined) return;
-  const res = await fetch(`${AGORA_SERVER_URL}?channelName=${CHANNEL_NAME}`);
-  const data = await res.json();
-  client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-  client.on('user-published', async (user, mediaType) => {
-    await client.subscribe(user, mediaType);
-    if (mediaType === 'audio') {
-      user.audioTrack.play();
-    }
-  });
-  await client.join(data.appId, CHANNEL_NAME, data.token, data.uid);
-  localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-  await client.publish([localAudioTrack]);
+  localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  getWebSocket().send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
   joined = true;
 }
 
-async function leaveVoiceChannel() {
+// مغادرة المحادثة الصوتية
+function leaveVoiceChannel() {
   if (!joined) return;
-  await localAudioTrack.close();
-  await client.leave();
+  getWebSocket().send(JSON.stringify({ type: 'leave_voice_room', roomName, username }));
+  Object.values(peers).forEach(pc => pc.close());
+  peers = {};
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
+  }
   joined = false;
 }
 
+// التعامل مع رسائل WebSocket
+async function handleWSMessage(event) {
+  const data = JSON.parse(event.data);
+  if (data.type === 'voice_user_joined') {
+    if (data.username !== username) createPeerConnection(data.username, true);
+  } else if (data.type === 'voice_user_left') {
+    if (peers[data.username]) { peers[data.username].close(); delete peers[data.username]; }
+    const audio = document.getElementById('audio-' + data.username);
+    if (audio) audio.remove();
+  } else if (data.type === 'webrtc_signal') {
+    handleSignal(data.from, data.signal);
+  }
+}
+
+// إنشاء PeerConnection
+function createPeerConnection(remoteUsername, isInitiator) {
+  const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+  if (localStream) localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  pc.onicecandidate = (event) => {
+    if (event.candidate) {
+      getWebSocket().send(JSON.stringify({
+        type: 'webrtc_signal', roomName, from: username, to: remoteUsername, signal: { candidate: event.candidate }
+      }));
+    }
+  };
+  pc.ontrack = (event) => { playRemoteAudio(remoteUsername, event.streams[0]); };
+  peers[remoteUsername] = pc;
+  if (isInitiator) {
+    pc.createOffer().then(offer => {
+      pc.setLocalDescription(offer);
+      getWebSocket().send(JSON.stringify({
+        type: 'webrtc_signal', roomName, from: username, to: remoteUsername, signal: { sdp: offer }
+      }));
+    });
+  }
+}
+
+// استقبال إشارات WebRTC
+async function handleSignal(from, signal) {
+  let pc = peers[from];
+  if (!pc) { createPeerConnection(from, false); pc = peers[from]; }
+  if (signal.sdp) {
+    await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+    if (signal.sdp.type === 'offer') {
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      getWebSocket().send(JSON.stringify({
+        type: 'webrtc_signal', roomName, from: username, to: from, signal: { sdp: answer }
+      }));
+    }
+  } else if (signal.candidate) {
+    await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+  }
+}
+
+// تشغيل صوت الطرف الآخر
+function playRemoteAudio(username, stream) {
+  let audio = document.getElementById('audio-' + username);
+  if (!audio) {
+    audio = document.createElement('audio');
+    audio.id = 'audio-' + username;
+    audio.autoplay = true;
+    document.body.appendChild(audio);
+  }
+  audio.srcObject = stream;
+}
+
 // ربط زر الميكروفون
-const micBtn = document.getElementById('voiceChatBtn');
 if (micBtn) {
   micBtn.addEventListener('click', async () => {
     if (!joined) {
       await joinVoiceChannel();
       micBtn.classList.add('active');
     } else {
-      await leaveVoiceChannel();
+      leaveVoiceChannel();
       micBtn.classList.remove('active');
     }
   });
