@@ -139,7 +139,7 @@
         <input type="text" id="searchUsername" placeholder="أدخل اسم المستخدم للبحث">
         <button id="fetchUserDataBtn">🔍 عرض بيانات المستخدم</button>
 
-        <div id="editUserForm" class="hidden">
+        <form id="editUserForm" class="hidden">
           <input type="hidden" id="currentUsername">
           <div class="field">
             <label>اسم المستخدم:</label>
@@ -153,7 +153,8 @@
             <label>الرصيد الحالي:</label>
             <input type="number" id="manageCoins" placeholder="الرصيد">
           </div>
-          <button id="updateUserBtn">تحديث بيانات المستخدم</button>
+          <button type="submit" id="updateUserBtn">تحديث بيانات المستخدم</button>
+        </form>
           <hr style="margin: 20px 0; border-color: #444;">
           <div class="field">
             <label>تعيين كمسؤول:</label>
@@ -264,7 +265,8 @@
     async function handleAdminLogin() {
       const username = document.getElementById('adminUsername').value;
       const password = document.getElementById('adminPassword').value;
-      
+      const loginMessage = document.getElementById('loginMessage');
+
       if (!username || !password) {
         showError('يرجى تعبئة جميع الحقول.');
         return;
