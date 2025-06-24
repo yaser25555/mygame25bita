@@ -9,6 +9,8 @@ let joined = false;
 // زر الميكروفون
 const micBtn = document.getElementById('voiceChatBtn');
 
+console.log('username:', username, 'roomName:', roomName);
+
 // إنشاء أو إعادة استخدام WebSocket
 function getWebSocket() {
   if (window.ws && window.ws.readyState === WebSocket.OPEN) return window.ws;
@@ -55,13 +57,14 @@ async function joinVoiceChannel() {
         sampleSize: 16
       }
     });
-    
     const ws = getWebSocket();
     if (ws.readyState === WebSocket.OPEN) {
+      console.log('Sending join_voice_room', { roomName, username });
       ws.send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
       joined = true;
     } else {
       ws.addEventListener('open', function handler() {
+        console.log('Sending join_voice_room', { roomName, username });
         ws.send(JSON.stringify({ type: 'join_voice_room', roomName, username }));
         joined = true;
         ws.removeEventListener('open', handler);
@@ -104,6 +107,7 @@ async function handleWSMessage(event) {
 
 // إنشاء PeerConnection
 function createPeerConnection(remoteUsername, isInitiator) {
+  console.log('createPeerConnection', remoteUsername, isInitiator);
   // تحسين إعدادات RTCPeerConnection
   const pc = new RTCPeerConnection({
     iceServers: [
@@ -138,6 +142,7 @@ function createPeerConnection(remoteUsername, isInitiator) {
 
   pc.onicecandidate = (event) => {
     if (event.candidate) {
+      console.log('Sending ICE candidate to', remoteUsername, event.candidate);
       getWebSocket().send(JSON.stringify({
         type: 'webrtc_signal', roomName, from: username, to: remoteUsername, signal: { candidate: event.candidate }
       }));
@@ -145,6 +150,7 @@ function createPeerConnection(remoteUsername, isInitiator) {
   };
 
   pc.ontrack = (event) => {
+    console.log('Received remote track from', remoteUsername, event);
     // تحسين جودة الصوت للطرف الآخر
     const remoteAudio = document.createElement('audio');
     remoteAudio.id = 'audio-' + remoteUsername;
@@ -160,8 +166,10 @@ function createPeerConnection(remoteUsername, isInitiator) {
       offerToReceiveAudio: true,
       offerToReceiveVideo: false
     }).then(offer => {
+      console.log('Created offer for', remoteUsername, offer);
       return pc.setLocalDescription(offer);
     }).then(() => {
+      console.log('Sending SDP offer to', remoteUsername, pc.localDescription);
       getWebSocket().send(JSON.stringify({
         type: 'webrtc_signal', roomName, from: username, to: remoteUsername, signal: { sdp: pc.localDescription }
       }));
@@ -173,6 +181,7 @@ function createPeerConnection(remoteUsername, isInitiator) {
 
 // استقبال إشارات WebRTC
 async function handleSignal(from, signal) {
+  console.log('handleSignal from', from, signal);
   let pc = peers[from];
   if (!pc) { createPeerConnection(from, false); pc = peers[from]; }
   if (signal.sdp) {
@@ -180,12 +189,14 @@ async function handleSignal(from, signal) {
     if (signal.sdp.type === 'offer') {
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
+      console.log('Sending SDP answer to', from, answer);
       getWebSocket().send(JSON.stringify({
         type: 'webrtc_signal', roomName, from: username, to: from, signal: { sdp: answer }
       }));
     }
   } else if (signal.candidate) {
     await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+    console.log('Added ICE candidate from', from, signal.candidate);
   }
 }
 

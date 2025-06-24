@@ -148,6 +148,7 @@ voiceServer.on('connection', (ws, req) => {
     } else if (data.type === 'join_voice_room') {
       // انضمام المستخدم لغرفة صوتية
       const { roomName, username } = data;
+      console.log('User joined voice room:', username, roomName);
       ws.voiceRoom = roomName;
       if (!voiceRooms.has(roomName)) voiceRooms.set(roomName, new Set());
       voiceRooms.get(roomName).add(username);
