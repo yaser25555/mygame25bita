@@ -16,6 +16,9 @@ const voiceRoutes = require('./voiceRoutes');
 
 dotenv.config();
 
+// إنشاء تطبيق Express
+const app = express();
+
 // --- 2. إعداد الـ Middleware ---
 // إعداد CORS للسماح بالطلبات من أي مصدر. هذا ضروري للنشر على Render.
 app.use(cors()); 
@@ -25,79 +28,15 @@ app.use(express.json());
 // --- 2.5 إعداد WebSocket ---
 const voiceServer = new WebSocket.Server({ noServer: true });
 
-app.use((req, res, next) => {
-  voiceServer.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
-    voiceServer.emit('connection', ws, req);
-  });
-  next();
-});
+// إعداد خادم HTTP
+const httpServer = http.createServer(app);
 
-voiceServer.on('connection', (ws, req) => {
-  console.log('New WebSocket connection');
-  
-  ws.on('message', (message) => {
-    console.log('Received:', message);
-    const data = JSON.parse(message);
-    
-    // معالجة أنواع مختلفة من الرسائل
-    if (data.type === 'join_voice_room') {
-      // إضافة المستخدم إلى قائمة المستخدمين
-      ws.username = data.username;
-      ws.roomName = data.roomName;
-      
-      // إرسال رسالة للجميع بأن مستخدم جديد انضم
-      voiceServer.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({
-            type: 'voice_user_joined',
-            username: data.username
-          }));
-        }
-      });
-    }
-    
-    if (data.type === 'leave_voice_room') {
-      // إرسال رسالة للجميع بأن المستخدم غادر
-      voiceServer.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({
-            type: 'voice_user_left',
-            username: data.username
-          }));
-        }
-      });
-    }
-    
-    // معالجة إشارات WebRTC
-    if (data.type === 'webrtc_signal') {
-      const targetClient = Array.from(voiceServer.clients).find(
-        c => c.readyState === WebSocket.OPEN && c.username === data.to
-      );
-      
-      if (targetClient) {
-        targetClient.send(JSON.stringify(data));
-      }
-    }
-  });
-  
-  ws.on('close', () => {
-    console.log('WebSocket connection closed');
-    // إرسال رسالة للجميع بأن المستخدم غادر
-    voiceServer.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          type: 'voice_user_left',
-          username: ws.username
-        }));
-      }
-    });
+// معالجة طلبات WebSocket
+httpServer.on('upgrade', (request, socket, head) => {
+  voiceServer.handleUpgrade(request, socket, head, (ws) => {
+    voiceServer.emit('connection', ws, request);
   });
 });
-
-// --- 2.5. إعداد الملفات الثابتة ---
-const frontendPath = path.join(__dirname, '../frontend');
-app.use(express.static(frontendPath));
-app.use('/sounds', express.static(path.join(frontendPath, 'sounds')));
 
 // --- 3. الاتصال بقاعدة البيانات ---
 mongoose.connect(process.env.MONGODB_URI, {
@@ -107,26 +46,158 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// --- 4. استخدام المسارات ---
+// --- 4. ربط المسارات ---
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', authApiRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/voice', voiceRoutes);
-// app.use('/api/game', gameRoutes); // استخدام مسار اللعبة الجديد
+// app.use('/api/game', gameRoutes); // مسار اللعبة
 
-// --- نقطة نهاية لفحص الحالة الصحية (Health Check) ---
+// --- 5. إعداد الملفات الثابتة ---
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
+app.use('/sounds', express.static(path.join(frontendPath, 'sounds')));
+
+// --- 6. إعداد مسارات الثابتة ---
+app.use(express.static(path.join(__dirname, '../frontend')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// --- 7. نقطة نهاية لفحص الحالة الصحية (Health Check) ---
 // Render يستخدم هذا المسار للتأكد من أن الخدمة تعمل بشكل سليم
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// --- 5. إعداد خادم HTTP و WebSocket ---
+// --- 8. تشغيل الخادم ---
 const PORT = process.env.PORT || 3000;
-const server = http.createServer(app);
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+httpServer.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-const wss = new WebSocket.Server({ server });
+
+// --- 9. معالجة WebSocket ---
+voiceServer.on('connection', (ws, req) => {
+  console.log('New WebSocket connection');
+  
+  ws.on('message', (message) => {
+    console.log('Received:', message);
+    const data = JSON.parse(message);
+    
+    // معالجة أنواع مختلفة من الرسائل
+    if (data.type === 'join') {
+      console.log(`Player ${data.username} joined`);
+      ws.username = data.username;
+      userSockets.set(data.username, ws); // حفظ السوكيت باسم المستخدم
+      broadcast({ type: 'player_joined', username: data.username });
+      broadcastPlayerList();
+    } else if (data.type === 'chat_message') {
+      // رسالة عامة
+      console.log(`Message from ${data.sender}: ${data.text}`);
+      broadcast({
+        type: 'chat_message',
+        sender: data.sender,
+        text: data.text
+      });
+    } else if (data.type === 'voice_message') {
+      // رسالة صوتية عامة
+      console.log(`Voice message from ${data.sender}`);
+      broadcast({
+        type: 'voice_message',
+        sender: data.sender,
+        audio: data.audio
+      });
+    } else if (data.type === 'private_message') {
+      // رسالة نصية خاصة
+      const targetSocket = userSockets.get(data.target);
+      if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+        targetSocket.send(JSON.stringify({
+          type: 'private_message',
+          sender: data.sender,
+          text: data.text
+        }));
+      }
+      // أرسل نسخة للمرسل أيضًا (اختياري)
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'private_message',
+          sender: data.sender,
+          text: data.text,
+          self: true
+        }));
+      }
+    } else if (data.type === 'private_voice_message') {
+      // رسالة صوتية خاصة
+      const targetSocket = userSockets.get(data.target);
+      if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+        targetSocket.send(JSON.stringify({
+          type: 'private_voice_message',
+          sender: data.sender,
+          audio: data.audio
+        }));
+      }
+      // أرسل نسخة للمرسل أيضًا (اختياري)
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'private_voice_message',
+          sender: data.sender,
+          audio: data.audio,
+          self: true
+        }));
+      }
+    } else if (data.type === 'join_voice_room') {
+      // انضمام المستخدم لغرفة صوتية
+      const { roomName, username } = data;
+      ws.voiceRoom = roomName;
+      if (!voiceRooms.has(roomName)) voiceRooms.set(roomName, new Set());
+      voiceRooms.get(roomName).add(username);
+      // أبلغ البقية أن هناك مستخدم جديد
+      broadcastToVoiceRoom(roomName, { type: 'voice_user_joined', username }, username);
+    } else if (data.type === 'leave_voice_room') {
+      // خروج المستخدم من غرفة صوتية
+      const { roomName, username } = data;
+      if (voiceRooms.has(roomName)) {
+        voiceRooms.get(roomName).delete(username);
+        if (voiceRooms.get(roomName).size === 0) voiceRooms.delete(roomName);
+      }
+      ws.voiceRoom = null;
+      broadcastToVoiceRoom(roomName, { type: 'voice_user_left', username }, username);
+    } else if (data.type === 'webrtc_signal') {
+      // تمرير إشارات WebRTC (offer/answer/candidate) لباقي أعضاء الغرفة
+      const { roomName, signal, from, to } = data;
+      if (to) {
+        // إرسال إشارة مباشرة لمستخدم محدد (ثنائي)
+        const targetSocket = userSockets.get(to);
+        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+          targetSocket.send(JSON.stringify({ type: 'webrtc_signal', signal, from }));
+        }
+      } else if (roomName) {
+        // إرسال إشارة لكل أعضاء الغرفة (جماعي)
+        broadcastToVoiceRoom(roomName, { type: 'webrtc_signal', signal, from }, from);
+      }
+    } else if (data.type === 'mute_user') {
+      // كتم مستخدم من قبل المشرف
+      const { targetUsername } = data;
+      const targetSocket = userSockets.get(targetUsername);
+      if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+        targetSocket.send(JSON.stringify({ type: 'muted_by_admin' }));
+      }
+    }
+  });
+  
+  ws.on('close', () => {
+    console.log(`Client ${ws.username || ''} disconnected`);
+    if(ws.username) {
+      userSockets.delete(ws.username); // إزالة السوكيت عند الخروج
+      broadcast({ type: 'player_left', username: ws.username });
+    }
+    // إزالة المستخدم من أي غرفة صوتية
+    if (ws.voiceRoom && voiceRooms.has(ws.voiceRoom)) {
+      voiceRooms.get(ws.voiceRoom).delete(ws.username);
+      if (voiceRooms.get(ws.voiceRoom).size === 0) voiceRooms.delete(ws.voiceRoom);
+    }
+  });
+});
 
 // خريطة للاحتفاظ بمرجع WebSocket لكل مستخدم
 const userSockets = new Map();
