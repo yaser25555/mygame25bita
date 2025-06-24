@@ -98,22 +98,19 @@
     <h2>لوحة تحكم المسؤول</h2>
 
     <!-- Admin Login Form -->
-    <div id="adminLoginForm">
+    <form id="adminLoginForm" class="login-form">
       <h3>تسجيل دخول المسؤول</h3>
       <div class="field">
         <label for="adminUsername">اسم المستخدم:</label>
-        <form id="manageUserForm" class="manage-form">
-          <input type="text" id="manageUsername" placeholder="اسم المستخدم" required>
-          <input type="password" id="managePassword" placeholder="كلمة مرور جديدة">
-        </form>
-        <form id="adminLoginForm" class="login-form">
-          <input type="text" id="adminUsername" placeholder="اسم المستخدم" required>
-          <input type="password" id="adminPassword" placeholder="كلمة المرور" required>
-        </form>
+        <input type="text" id="adminUsername" placeholder="اسم المستخدم" required autocomplete="username">
       </div>
-      <button id="adminLoginBtn">تسجيل الدخول</button>
+      <div class="field">
+        <label for="adminPassword">كلمة المرور:</label>
+        <input type="password" id="adminPassword" placeholder="كلمة المرور" required autocomplete="current-password">
+      </div>
+      <button type="submit" id="adminLoginBtn">تسجيل الدخول</button>
       <p id="loginMessage" style="color: red;"></p>
-    </div>
+    </form>
 
     <!-- Admin Panel Content (initially hidden) -->
     <div id="adminPanel" class="hidden">
@@ -146,11 +143,11 @@
           <input type="hidden" id="currentUsername">
           <div class="field">
             <label>اسم المستخدم:</label>
-            <input type="text" id="manageUsername" placeholder="اسم المستخدم">
+            <input type="text" id="editUsername" placeholder="اسم المستخدم" autocomplete="username">
           </div>
           <div class="field">
             <label>كلمة المرور الجديدة (اتركه فارغًا لعدم التغيير):</label>
-            <input type="password" id="managePassword" placeholder="كلمة مرور جديدة">
+            <input type="password" id="editPassword" placeholder="كلمة مرور جديدة" autocomplete="new-password">
           </div>
           <div class="field">
             <label>الرصيد الحالي:</label>
@@ -172,9 +169,33 @@
   <script>
     const BACKEND_URL = 'https://mygame25bita.onrender.com';
 
+    // دوال مساعدة
+    function showLoginForm() {
+      document.getElementById('adminLoginForm').classList.remove('hidden');
+      document.getElementById('adminPanel').classList.add('hidden');
+    }
+
+    function showAdminPanel() {
+      document.getElementById('adminLoginForm').classList.add('hidden');
+      document.getElementById('adminPanel').classList.remove('hidden');
+      document.getElementById('showGameManagement').click();
+    }
+
+    function showError(message) {
+      const loginMessage = document.getElementById('loginMessage');
+      loginMessage.textContent = message;
+      loginMessage.style.display = 'block';
+      setTimeout(() => {
+        loginMessage.style.display = 'none';
+      }, 5000);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       checkLoginStatus();
-      document.getElementById('adminLoginBtn').addEventListener('click', handleAdminLogin);
+      document.getElementById('adminLoginBtn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await handleAdminLogin();
+      });
 
       const gameBtn = document.getElementById('showGameManagement');
       const userBtn = document.getElementById('showUserManagement');
@@ -203,52 +224,79 @@
     });
 
     async function checkLoginStatus() {
-      // Check if admin token exists in local storage
       const token = localStorage.getItem('adminToken');
-
-      // If token exists, verify it with the backend
+      
       if (token) {
         try {
-          // Send a GET request to the backend to verify the token
           const response = await fetch(`${BACKEND_URL}/api/users/me`, {
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
             }
           });
 
-          // If the response is OK, the token is valid
           if (response.ok) {
-            // Get the user data from the response
             const user = await response.json();
-
-            // If the user is an admin, show the admin panel
             if (user.isAdmin) {
-              // Hide the login form
-              document.getElementById('adminLoginForm').classList.add('hidden');
-
-              // Show the admin panel
-              const adminPanel = document.getElementById('adminPanel');
-              adminPanel.classList.remove('hidden');
-
-              // Default to showing the game management section
-              document.getElementById('showGameManagement').click();
+              showAdminPanel();
             } else {
-              // If the user is not an admin, remove the token
               localStorage.removeItem('adminToken');
             }
-          } else {
-            // If the response is not OK, the token is invalid
+          } else if (response.status === 401) {
             localStorage.removeItem('adminToken');
+            showError('الجلسة منتهية الصلاحية. يرجى تسجيل الدخول مرة أخرى.');
+          } else {
+            localStorage.removeItem('adminToken');
+            showError('حدث خطأ أثناء التحقق من الدخول.');
           }
         } catch (error) {
-          // If an error occurs, log it and remove the token
-          console.error('Error checking login status:', error);
+          console.error('خطأ في التحقق من الدخول:', error);
           localStorage.removeItem('adminToken');
+          showError('لا يمكن الاتصال بخادم التطبيق. يرجى التأكد من الاتصال بالإنترنت.');
         }
+      } else {
+        // If no token, show login form
+        showLoginForm();
       }
+    }
     }
 
     async function handleAdminLogin() {
+      const username = document.getElementById('adminUsername').value;
+      const password = document.getElementById('adminPassword').value;
+      
+      if (!username || !password) {
+        showError('يرجى تعبئة جميع الحقول.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            password,
+            isAdmin: true
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('adminToken', data.token);
+          showAdminPanel();
+        } else if (response.status === 401) {
+          showError('اسم المستخدم أو كلمة المرور غير صحيحة.');
+        } else {
+          showError('حدث خطأ أثناء تسجيل الدخول.');
+        }
+      } catch (error) {
+        console.error('خطأ في تسجيل الدخول:', error);
+        showError('لا يمكن الاتصال بخادم التطبيق. يرجى التأكد من الاتصال بالإنترنت.');
+      }
+    }
       const username = document.getElementById('adminUsername').value;
       const password = document.getElementById('adminPassword').value;
       const loginMessage = document.getElementById('loginMessage');
