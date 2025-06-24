@@ -468,7 +468,7 @@
       </div>
     </div>
     <div class="mic-container">
-      <button class="mic-btn" onclick="toggleMic()">
+      <button class="mic-btn" id="voiceChatBtn" onclick="toggleMic()">
         <i class="fas fa-microphone"></i>
       </button>
       <div class="instructions">
@@ -511,11 +511,16 @@
     // ربط مع WebSocket في voice-chat.js
     const origHandleWSMessage = window.handleWSMessage;
     window.handleWSMessage = function(event) {
-      const data = JSON.parse(event.data);
-      if (data.type === 'voice_room_users') {
-        handleVoiceRoomUsers(data.users);
-      }
-      if (origHandleWSMessage) origHandleWSMessage.call(this, event);
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'voice_room_users') {
+          handleVoiceRoomUsers(data.users);
+        } else if (data.type === 'player_joined') {
+          addMessageToChat('النظام', `انضم اللاعب ${data.username} إلى المحادثة`, 'system-message');
+        } else if (data.type === 'player_left') {
+          addMessageToChat('النظام', `غادر اللاعب ${data.username} المحادثة`, 'system-message');
+        }
+      } catch (e) { console.error('Chat parse error', e); }
     };
 
     // عند الانضمام أو مغادرة الغرفة، أطلب تحديث القائمة
@@ -572,20 +577,6 @@
       };
       
       return ws;
-    }
-    
-    function handleWSMessage(event) {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'chat_message') {
-          addMessageToChat(data.sender, data.text, data.sender === username ? 'own' : 'other');
-          if (data.sender !== username && !isChatMuted) chatNotification.play();
-        } else if (data.type === 'player_joined') {
-          addMessageToChat('النظام', `انضم اللاعب ${data.username} إلى المحادثة`, 'system-message');
-        } else if (data.type === 'player_left') {
-          addMessageToChat('النظام', `غادر اللاعب ${data.username} المحادثة`, 'system-message');
-        }
-      } catch (e) { console.error('Chat parse error', e); }
     }
     
     function addMessageToChat(sender, text, type) {
