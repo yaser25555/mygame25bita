@@ -436,14 +436,19 @@
       if (newCoins !== '') body.newScore = parseInt(newCoins, 10);
 
       try {
-        const response = await fetch(`${BACKEND_URL}/api/admin/update-user`, {
-          method: 'POST',
+        const response = await fetch(`${BACKEND_URL}/api/users/${currentUsername}`, {
+          method: 'PUT',
           headers: {
             'Authorization': `Bearer ${adminToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(body)
         });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`خطأ في الخادم: ${errorText}`);
+        }
 
         const data = await response.json();
         if (response.ok) {
@@ -465,9 +470,12 @@
                     'Authorization': `Bearer ${token}`
                 }
             });
+
             if (!response.ok) {
-                throw new Error('فشل في تحميل إعدادات اللعبة');
+              const errorText = await response.text();
+              throw new Error(`خطأ في الخادم: ${errorText}`);
             }
+
             const settings = await response.json();
             document.getElementById('numBoxesInput').value = settings.gameSettings.numBoxes || 20;
             document.getElementById('winRatioInput').value = settings.gameSettings.winRatio || 0.5;
@@ -494,7 +502,7 @@
 
         try {
             const response = await fetch(`${BACKEND_URL}/api/users/settings`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -506,6 +514,11 @@
                     }
                 })
             });
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`خطأ في الخادم: ${errorText}`);
+            }
 
             if (response.ok) {
                 alert('تم حفظ إعدادات اللعبة بنجاح!');
