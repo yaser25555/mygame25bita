@@ -526,7 +526,11 @@
         } else if (data.type === 'player_joined') {
           addMessageToChat('النظام', `انضم اللاعب ${data.username} إلى المحادثة`, 'system-message');
         } else if (data.type === 'player_left') {
-          addMessageToChat('النظام', `غادر اللاعب ${data.username} المحادثة`, 'system-message');
+          addMessageToChat('النظام', `غادر اللاعب ${data.username} إلى المحادثة`, 'system-message');
+        } else if (data.type === 'chat_message') {
+          // عرض رسائل الدردشة الكتابية
+          const messageType = data.sender === username ? 'own' : 'other';
+          addMessageToChat(data.sender, data.text, messageType);
         }
       } catch (e) { console.error('Chat parse error', e); }
     };
@@ -604,14 +608,19 @@
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
       if (!text) return;
-      
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
+
+      console.log('Trying to send chat message:', text);
+
+      if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        window.ws.send(JSON.stringify({
           type: 'chat_message',
           text: text,
-          sender: username
+          sender: window.username
         }));
         input.value = '';
+        console.log('Chat message sent:', text);
+      } else {
+        console.warn('WebSocket not open, cannot send message');
       }
     }
     
@@ -651,48 +660,35 @@
       const emojiBtn = document.getElementById('emoji-btn');
       const muteBtn = document.getElementById('mute-btn');
       const collapseBtn = document.getElementById('collapse-btn');
-      
-      sendBtn.addEventListener('click', sendMessage);
-      chatInput.addEventListener('keypress', (e) => {
+      const emojiPicker = document.querySelector('.emoji-picker');
+
+      // تأكد من إزالة أي مستمعات سابقة لتفادي التكرار
+      sendBtn.onclick = sendMessage;
+      chatInput.onkeypress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           sendMessage();
         }
+      };
+      muteBtn.onclick = toggleChatMute;
+      collapseBtn.onclick = toggleChatCollapse;
+
+      // معالج الرموز التعبيرية
+      emojiBtn.onclick = (e) => {
+        e.stopPropagation();
+        emojiPicker.classList.toggle('show');
+      };
+      // إغلاق القائمة عند النقر خارجها
+      document.addEventListener('click', (e) => {
+        if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
+          emojiPicker.classList.remove('show');
+        }
       });
-      muteBtn.addEventListener('click', toggleChatMute);
-      collapseBtn.addEventListener('click', toggleChatCollapse);
-      
-      // إضافة معالج للرموز التعبيرية
-      emojiBtn.addEventListener('click', () => {
-        const picker = document.querySelector('.emoji-picker');
-        picker.classList.toggle('show');
-        
-        // إغلاق القائمة عند النقر خارجها
-        document.addEventListener('click', (e) => {
-          if (!picker.contains(e.target) && e.target !== emojiBtn) {
-            picker.classList.remove('show');
-          }
-        });
-      });
-      
       // إضافة معالج لاختيار الرموز التعبيرية
-      document.querySelectorAll('.emoji-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const emoji = item.textContent;
-          chatInput.value += emoji;
+      emojiPicker.querySelectorAll('.emoji-item').forEach(item => {
+        item.onclick = () => {
+          chatInput.value += item.textContent;
           chatInput.focus();
-        });
-      });
-      
-      // إضافة معالج للأصوات
-      const soundKeys = document.querySelector('.sound-keys');
-      document.querySelectorAll('.sound-key').forEach(key => {
-        key.addEventListener('click', () => {
-          const sound = key.getAttribute('data-sound');
-          if (sound) {
-            const audio = new Audio(sound);
-            audio.play();
-          }
-        });
+        };
       });
     }
     

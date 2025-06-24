@@ -1,5 +1,5 @@
 // إعداد متغيرات WebRTC و WebSocket
-let ws = null; // اتصال WebSocket
+window.ws = null; // اتصال WebSocket عام
 let username = window.currentUsername;
 let roomName = window.currentRoomName || 'game-room'; // يمكنك تغييره حسب منطق غرفتك
 let localStream = null;
@@ -11,21 +11,21 @@ const micBtn = document.getElementById('voiceChatBtn');
 
 // إنشاء أو إعادة استخدام WebSocket
 function getWebSocket() {
-  if (ws && ws.readyState === WebSocket.OPEN) return ws;
+  if (window.ws && window.ws.readyState === WebSocket.OPEN) return window.ws;
   
   // استخدام URL محدد للـ WebSocket
   const wsUrl = 'wss://mygame25bita.onrender.com';
   console.log('Attempting to connect to WebSocket:', wsUrl);
   
-  ws = new WebSocket(wsUrl);
-  ws.onopen = () => {
+  window.ws = new WebSocket(wsUrl);
+  window.ws.onopen = () => {
     console.log('WebSocket connected successfully');
-    console.log('WebSocket state:', ws.readyState);
+    console.log('WebSocket state:', window.ws.readyState);
   };
   
-  ws.onmessage = handleWSMessage;
+  window.ws.onmessage = handleWSMessage;
   
-  ws.onclose = (event) => {
+  window.ws.onclose = (event) => {
     console.log('WebSocket closed');
     console.log('Close event:', event);
     console.log('Close code:', event.code);
@@ -33,11 +33,11 @@ function getWebSocket() {
     joined = false;
   };
   
-  ws.onerror = (error) => {
+  window.ws.onerror = (error) => {
     console.error('WebSocket error:', error);
   };
   
-  return ws;
+  return window.ws;
 }
 
 // بدء المحادثة الصوتية
@@ -55,14 +55,6 @@ async function joinVoiceChannel() {
         sampleSize: 16
       }
     });
-    
-    // إنشاء مكبر صوت محلي
-    const audioContext = new AudioContext();
-    const source = audioContext.createMediaStreamSource(localStream);
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = 1.0;
-    source.connect(gainNode);
-    gainNode.connect(audioContext.destination);
     
     const ws = getWebSocket();
     if (ws.readyState === WebSocket.OPEN) {
