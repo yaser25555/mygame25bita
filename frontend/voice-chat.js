@@ -12,10 +12,31 @@ const micBtn = document.getElementById('voiceChatBtn');
 // إنشاء أو إعادة استخدام WebSocket
 function getWebSocket() {
   if (ws && ws.readyState === WebSocket.OPEN) return ws;
-  ws = new WebSocket(window.WS_URL || (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
-  ws.onopen = () => console.log('WebSocket connected');
+  
+  // استخدام URL محدد للـ WebSocket
+  const wsUrl = window.WS_URL || (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+  console.log('Attempting to connect to WebSocket:', wsUrl);
+  
+  ws = new WebSocket(wsUrl);
+  ws.onopen = () => {
+    console.log('WebSocket connected successfully');
+    console.log('WebSocket state:', ws.readyState);
+  };
+  
   ws.onmessage = handleWSMessage;
-  ws.onclose = () => { console.log('WebSocket closed'); joined = false; };
+  
+  ws.onclose = (event) => {
+    console.log('WebSocket closed');
+    console.log('Close event:', event);
+    console.log('Close code:', event.code);
+    console.log('Close reason:', event.reason);
+    joined = false;
+  };
+  
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  };
+  
   return ws;
 }
 
