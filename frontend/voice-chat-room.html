@@ -475,114 +475,6 @@
         اضغط على زر المايكروفون للتحدث
       </div>
     </div>
-      <div class="chat-header">
-        <h3>الدردشة الكتابية</h3>
-        <div class="chat-controls">
-          <button class="chat-control-btn" id="mute-btn">
-            <i class="fas fa-volume-up"></i>
-          </button>
-          <button class="chat-control-btn" id="collapse-btn">
-            <i class="fas fa-chevron-down"></i>
-          </button>
-        </div>
-      </div>
-      <div class="chat-messages" id="chatMessages">
-        <!-- سيتم إضافة الرسائل هنا -->
-      </div>
-      <div class="chat-input-container">
-        <button class="emoji-btn" id="emoji-btn">
-          <i class="fas fa-smile"></i>
-        </button>
-        <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا..." class="chat-input">
-        <button class="send-btn" id="send-btn">
-          <i class="fas fa-paper-plane"></i>
-        </button>
-      </div>
-      <div class="emoji-picker">
-        <!-- سيتم إضافة الرموز التعبيرية هنا -->
-      </div>
-      <div class="sound-keys">
-        <!-- سيتم إضافة مفاتيح الصوت هنا -->
-      </div>
-    </div>
-  </div>
-  <!-- حاوية المحادثة الكتابية المنقولة -->
-  <div class="chat-container" id="chatContainer">
-    <div class="chat-header">
-      <h3><i class="fas fa-comments"></i> المحادثة</h3>
-      <div class="chat-controls">
-        <button id="reconnectBtn" class="chat-control-btn" title="إعادة الاتصال" style="background: linear-gradient(135deg, #10b981, #059669);">
-          <i class="fas fa-wifi"></i>
-        </button>
-        <button id="voiceChatBtn2" class="chat-control-btn" title="بدء المحادثة الصوتية">
-          <i class="fas fa-microphone-slash"></i>
-        </button>
-        <button id="chatMuteBtn" class="chat-control-btn" title="كتم صوت المحادثة">
-          <i class="fas fa-volume-up"></i>
-        </button>
-        <button id="toggleChat" class="chat-toggle-btn">
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="system-message">
-        <span class="message-time">الآن</span>
-        <span class="message-text">مرحباً! يمكنك التحدث مع اللاعبين الآخرين هنا</span>
-      </div>
-    </div>
-    <div class="voice-chat-status" id="voiceChatStatus" style="display: none;">
-      <div class="voice-indicator">
-        <i class="fas fa-microphone"></i>
-        <span>المحادثة الصوتية نشطة</span>
-      </div>
-      <div class="connected-players" id="connectedPlayers">
-        <span>اللاعبين المتصلين: 0</span>
-      </div>
-    </div>
-    <div class="chat-input-container">
-      <div class="chat-controls-row" style="position: relative;">
-        <button id="emojiBtn" class="emoji-btn" title="إضافة رمز تعبيري">😊</button>
-        <div id="emojiPicker" class="emoji-picker">
-          <div class="emoji-item">😊</div>
-          <div class="emoji-item">😂</div>
-          <div class="emoji-item">🎉</div>
-          <div class="emoji-item">🏆</div>
-          <div class="emoji-item">💰</div>
-          <div class="emoji-item">🎮</div>
-          <div class="emoji-item">🔥</div>
-          <div class="emoji-item">⭐</div>
-          <div class="emoji-item">💪</div>
-          <div class="emoji-item">🎯</div>
-          <div class="emoji-item">🎊</div>
-          <div class="emoji-item">🥳</div>
-          <div class="emoji-item">😍</div>
-          <div class="emoji-item">🤩</div>
-          <div class="emoji-item">👏</div>
-          <div class="emoji-item">🎪</div>
-          <div class="emoji-item">🎨</div>
-          <div class="emoji-item">🌟</div>
-          <div class="emoji-item">✨</div>
-          <div class="emoji-item">💎</div>
-          <div class="emoji-item">🎭</div>
-          <div class="emoji-item">🎪</div>
-          <div class="emoji-item">🎯</div>
-        </div>
-      </div>
-      <div class="chat-controls-row" style="position: relative;">
-        <button id="soundBtn" class="sound-btn" title="مفاتيح الصوت">🔊</button>
-        <div id="soundKeys" class="sound-keys">
-          <div class="sound-key" data-sound="win">🎉 فوز</div>
-          <div class="sound-key" data-sound="lose">😢 خسارة</div>
-          <div class="sound-key" data-sound="click">👆 نقرة</div>
-          <div class="sound-key" data-sound="single">🎯 ضربة فردية</div>
-          <div class="sound-key" data-sound="triple">🎯 ضربة ثلاثية</div>
-          <div class="sound-key" data-sound="hammer">🔨 ضربة المطرقة</div>
-        </div>
-      </div>
-      <input id="chatInput" type="text" placeholder="اكتب رسالة..." autocomplete="off" />
-      <button id="sendBtn" class="send-btn" title="إرسال"><i class="fas fa-paper-plane"></i></button>
-    </div>
   </div>
   <script src="voice-chat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
@@ -600,7 +492,7 @@
 
     // رسم الدوائر للمستخدمين
     function renderVoiceUsersCircle() {
-      const container = document.getElementById('voiceUsersCircle');
+      const container = document.getElementById('usersCircle');
       container.innerHTML = '';
       voiceUsers.forEach(username => {
         const div = document.createElement('div');
