@@ -1418,8 +1418,9 @@
 
         #win-gif-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 300px;
             height: 200px;
             display: none; /* Hidden by default */
@@ -1475,11 +1476,11 @@
 
         @keyframes winContainerSlide {
             0% {
-                transform: translateX(100%);
+                transform: translate(-50%, -50%) scale(0.5);
                 opacity: 0;
             }
             100% {
-                transform: translateX(0);
+                transform: translate(-50%, -50%) scale(1);
                 opacity: 1;
             }
         }
@@ -1562,8 +1563,9 @@
         /* Sad Cat GIF Container */
         #sadcat-gif-container {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 300px;
             height: 200px;
             display: none; /* Hidden by default */
@@ -1619,11 +1621,11 @@
 
         @keyframes sadcatContainerSlide {
             0% {
-                transform: translateX(-100%);
+                transform: translate(-50%, -50%) scale(0.5);
                 opacity: 0;
             }
             100% {
-                transform: translateX(0);
+                transform: translate(-50%, -50%) scale(1);
                 opacity: 1;
             }
         }
