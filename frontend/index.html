@@ -12,6 +12,15 @@
         <img src="images/logo.png" alt="Voice Boom Logo" class="logo">
         <h1>INFINITY BOX VOICEBOOM</h1>
 
+        <!-- نموذج رفع صورة الملف الشخصي -->
+        <div id="avatar-section" style="display:none; text-align:center; margin-bottom:20px;">
+            <form id="avatarForm">
+                <input type="file" id="avatarInput" name="avatar" accept="image/*" style="margin-bottom:10px;" />
+                <button type="submit">رفع الصورة</button>
+            </form>
+            <img id="profileAvatar" src="images/logo.png" alt="Avatar" style="width:100px;height:100px;border-radius:50%;display:block;margin:10px auto;" />
+        </div>
+
         <div id="admin-choice-modal" class="modal-overlay hidden">
             <div class="modal-content">
                 <h3>أهلاً بك أيها المشرف</h3>
@@ -114,6 +123,10 @@
             const goToGameBtn = document.getElementById('go-to-game-btn');
             const goToAdminBtn = document.getElementById('go-to-admin-btn');
 
+            const avatarSection = document.getElementById('avatar-section');
+            const avatarForm = document.getElementById('avatarForm');
+            const avatarInput = document.getElementById('avatarInput');
+            const profileAvatar = document.getElementById('profileAvatar');
 
             const baseURL = 'https://mygame25bita.onrender.com'; // PRODUCTION: Point to the Render backend URL
 
@@ -297,6 +310,39 @@
                 }
             }
 
+            // إظهار قسم الصورة الرمزية فقط إذا كان المستخدم مسجلاً الدخول
+            if (localStorage.getItem('token')) {
+                avatarSection.style.display = 'block';
+                // جلب الصورة الحالية من السيرفر
+                fetch(`${baseURL}/api/users/me`, {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.avatar) {
+                        profileAvatar.src = data.avatar;
+                    }
+                });
+            }
+
+            avatarForm.onsubmit = async function(e) {
+                e.preventDefault();
+                if (!avatarInput.files[0]) return;
+                const formData = new FormData();
+                formData.append('avatar', avatarInput.files[0]);
+                const res = await fetch(`${baseURL}/api/users/upload-avatar`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.avatar) {
+                    profileAvatar.src = data.avatar;
+                    showMessage('تم رفع الصورة بنجاح!');
+                } else {
+                    showMessage('حدث خطأ أثناء رفع الصورة', true);
+                }
+            };
 
             // حدث النقر على ألسنة التبويب
             if (loginTab) loginTab.addEventListener('click', () => switchTab(loginTab));

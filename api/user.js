@@ -2,6 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User'); // تصحيح المسار
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123'; // تصحيح ||
 
@@ -39,6 +41,17 @@ function verifyAdmin(req, res, next) {
   next();
 }
 
+// إعداد التخزين للصور الرمزية
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../uploads/avatars'));
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, req.user.userId + ext);
+  }
+});
+const upload = multer({ storage: storage });
 
 // مسار جديد: جلب إعدادات اللعبة (للجميع) - *** يجب وضعه هنا قبل المسارات الأخرى ***
 router.get('/settings', async (req, res) => {
@@ -310,8 +323,6 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
-module.exports = router;
-
 // مسار جديد: إضافة عملات للمستخدم (فقط للمشرف)
 router.post('/add-coins', verifyToken, verifyAdmin, async (req, res) => {
   const { username, amount } = req.body;
@@ -335,6 +346,19 @@ router.post('/add-coins', verifyToken, verifyAdmin, async (req, res) => {
   } catch (error) {
     console.error("خطأ في إضافة العملات:", error);
     res.status(500).json({ message: 'خطأ في الخادم أثناء إضافة العملات' });
+  }
+});
+
+// نقطة نهاية رفع الصورة الرمزية
+router.post('/upload-avatar', verifyToken, upload.single('avatar'), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: 'المستخدم غير موجود' });
+    user.avatar = '/uploads/avatars/' + req.file.filename;
+    await user.save();
+    res.json({ avatar: user.avatar });
+  } catch (err) {
+    res.status(500).json({ error: 'حدث خطأ أثناء رفع الصورة' });
   }
 });
 

@@ -506,7 +506,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
             display: flex;
             justify-content: center;
@@ -2972,63 +2972,252 @@
             navigator.sendBeacon(`${BACKEND_URL}/api/users/save-game-data?token=${token}`, blob);
         });
 
-        async function animateHeroAndOpenBox(betType) {
-            const boxes = Array.from(document.querySelectorAll('.box:not(.opened)'));
-            if (boxes.length === 0) {
-                showMessage('كل الصناديق مفتوحة!', 'error');
-                return null;
+        let isMuted = false;
+        let isChatMuted = false; // New variable for chat sounds
+        let chatVolume = 0.5; // Chat volume level
+
+        const BETS = {
+            single: { cost: 100, multiplier: 2.5 },   // Increased from 2.0
+            triple: { cost: 300, multiplier: 3.0 },   // Increased from 2.5
+            hammer: { cost: 500, multiplier: 4.0 }    // Increased from 3.0
+        };
+
+        // Utility Functions
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function showMessage(message, type = 'info') {
+            messageArea.textContent = message;
+            messageArea.className = 'message-area ' + type;
+        }
+
+        // Item Management Functions
+        function initializeItemDisplay() {
+            const itemsGrid = document.getElementById('itemsGrid');
+            itemsGrid.innerHTML = '';
+            
+            // Create display for each item type
+            const itemTypes = ['gem', 'key', 'coin', 'bomb', 'star', 'bat'];
+            
+            itemTypes.forEach(itemType => {
+                const itemData = ITEM_REWARDS[itemType];
+                const itemDisplay = document.createElement('div');
+                itemDisplay.className = 'item-display';
+                
+                // Add negative class for items with negative points
+                if (itemData.points < 0) {
+                    itemDisplay.classList.add('negative');
+                }
+                
+                itemDisplay.dataset.itemType = itemType;
+                
+                // Get current count
+                const currentCount = itemsCollected[itemType] || 0;
+                
+                // Calculate progress for collection goals
+                let progress = 0;
+                let targetText = '';
+                if (COLLECTION_GOALS[itemType]) {
+                    const goal = COLLECTION_GOALS[itemType];
+                    progress = Math.min((currentCount / goal.target) * 100, 100);
+                    targetText = `${currentCount}/${goal.target}`;
+                } else {
+                    targetText = currentCount.toString();
+                }
+                
+                itemDisplay.innerHTML = `
+                    <div class="item-emoji">${itemData.emoji}</div>
+                    <div class="item-count">${targetText}</div>
+                    <div class="item-progress">
+                        <div class="item-progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                `;
+                
+                itemsGrid.appendChild(itemDisplay);
+            });
+        }
+
+        function updateItemDisplay() {
+            Object.entries(itemsCollected).forEach(([itemType, count]) => {
+                const itemDisplay = document.querySelector(`[data-item-type="${itemType}"]`);
+                if (itemDisplay) {
+                    const countElement = itemDisplay.querySelector('.item-count');
+                    const progressBar = itemDisplay.querySelector('.item-progress-bar');
+                    
+                    // Update count text
+                    if (COLLECTION_GOALS[itemType]) {
+                        const goal = COLLECTION_GOALS[itemType];
+                        countElement.textContent = `${count}/${goal.target}`;
+                    } else {
+                        countElement.textContent = count.toString();
+                    }
+                    
+                    // Update progress bar for collection goals
+                    if (COLLECTION_GOALS[itemType]) {
+                        const goal = COLLECTION_GOALS[itemType];
+                        const progress = Math.min((count / goal.target) * 100, 100);
+                        progressBar.style.width = `${progress}%`;
+                    }
+                }
+            });
+        }
+
+        function addItem(itemType) {
+            if (itemsCollected[itemType] !== undefined) {
+                itemsCollected[itemType]++;
+                updateItemDisplay();
+                
+                // Check for collection rewards
+                checkCollectionRewards(itemType);
+                
+                // Show item found animation
+                showItemFound(itemType);
+                
+                // Update score
+                const itemData = ITEM_REWARDS[itemType];
+                if (itemData) {
+                    score += itemData.points;
+                    updateDisplay();
+                    
+                    // Play sound for negative items
+                    if (itemData.points < 0) {
+                        sounds.lose.play().catch(e => console.log('Negative item sound error:', e));
+                    }
+                    
+                    // Show in chat area
+                    const pointsText = itemData.points > 0 ? `+${itemData.points}` : `${itemData.points}`;
+                    addMessageToChat('النظام', `${itemData.emoji} لقد حصلت على <b>${itemData.name}</b> (${pointsText} نقطة)`, itemData.points > 0 ? 'system-message' : 'system-message error');
+                }
+                
+                // Save data to server
+                saveUserData();
             }
+        }
 
-            let boxesToOpenCount = 1;
-            if (betType === 'triple') boxesToOpenCount = 3;
-            if (betType === 'hammer') boxesToOpenCount = 5;
+        function showItemFound(itemType) {
+            const itemData = ITEM_REWARDS[itemType];
+            if (!itemData) return;
+            
+            const itemFound = document.createElement('div');
+            itemFound.className = `item-found ${itemData.points >= 0 ? 'positive' : 'negative'}`;
+            
+            itemFound.innerHTML = `
+                <div class="item-found-emoji">${itemData.emoji}</div>
+                <div class="item-found-text">${itemData.name}</div>
+                <div class="item-found-points">${itemData.points >= 0 ? '+' : ''}${itemData.points} نقطة</div>
+            `;
+            
+            document.body.appendChild(itemFound);
+            
+            // Remove after animation
+            setTimeout(() => {
+                itemFound.remove();
+            }, 2000);
+        }
 
-            if (boxes.length < boxesToOpenCount) {
-                showMessage('لا توجد صناديق كافية لهذه الضربة!', 'error');
-                return null;
+        function checkCollectionRewards(itemType) {
+            const goal = COLLECTION_GOALS[itemType];
+            if (!goal) return;
+            
+            if (itemsCollected[itemType] >= goal.target) {
+                // Award collection bonus
+                score += goal.reward;
+                updateDisplay();
+                
+                // Show collection reward
+                const rewardElement = document.getElementById('collectionReward');
+                rewardElement.textContent = `🎉 مكافأة ${goal.name}: +${goal.reward} نقطة!`;
+                rewardElement.style.display = 'block';
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    rewardElement.style.display = 'none';
+                }, 3000);
+                
+                // Reset collection count
+                itemsCollected[itemType] = 0;
+                updateItemDisplay();
+                
+                // Save data
+                saveUserData();
             }
+        }
 
-            seekerImage.style.display = 'block';
-            seekerImage.style.left = '50%';
-            seekerImage.style.top = '110%';
-            await sleep(200);
-
-            const shuffledBoxes = boxes.sort(() => 0.5 - Math.random());
-            const targets = shuffledBoxes.slice(0, boxesToOpenCount);
-
-            for (let i = 0; i < shuffledBoxes.length; i++) {
-                const box = shuffledBoxes[i];
-                const boxRect = box.getBoundingClientRect();
-                const gridRect = boxesContainer.getBoundingClientRect();
-                const targetX = boxRect.left - gridRect.left + boxRect.width / 2;
-                const targetY = boxRect.top - gridRect.top + boxRect.height / 2;
-
-                seekerImage.style.left = `${targetX}px`;
-                seekerImage.style.top = `${targetY}px`;
-
-                box.classList.add('sequential-glow');
-                await sleep(250);
-                box.classList.remove('sequential-glow');
-
-                if (targets.includes(box) && boxesToOpenCount > 1) {
-                    box.classList.add('single-shot-final-glow');
+        function generateRandomItem() {
+            const itemTypes = Object.keys(ITEM_REWARDS);
+            const weights = {
+                gem: 20,      // 20% chance (increased from 15%)
+                key: 15,      // 15% chance (increased from 10%)
+                coin: 30,     // 30% chance (increased from 25%)
+                bomb: 12,     // 12% chance (reduced from 20%)
+                star: 12,     // 12% chance (increased from 8%)
+                bat: 11       // 11% chance (reduced from 22%)
+            };
+            
+            const totalWeight = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (const [itemType, weight] of Object.entries(weights)) {
+                random -= weight;
+                if (random <= 0) {
+                    return itemType;
                 }
             }
+            
+            return 'coin'; // Default fallback
+        }
 
-            const finalTarget = targets[targets.length - 1];
-            finalTarget.classList.add('single-shot-final-glow');
-            seekerImage.style.animation = 'finalSeekerPulse 1s infinite alternate';
+        function updateDisplay() {
+            balanceDisplay.textContent = Math.round(score);
+            usernameDisplay.textContent = username;
 
-            await sleep(2000);
+            // Disable buttons only if a shot is currently being processed
+            const buttonsDisabled = isProcessingShot;
+            singleShotButton.disabled = buttonsDisabled;
+            tripleShotButton.disabled = buttonsDisabled;
+            hammerShotButton.disabled = buttonsDisabled;
+        }
 
-            seekerImage.style.animation = 'none';
+        function createHero() {
+            const hero = document.createElement('div');
+            hero.id = 'hero';
+            hero.textContent = 'C'; // Use text content 'C'
+            hero.style.fontSize = '24px'; // Adjust size as needed
+            hero.style.color = 'white'; // Set color
+            hero.style.display = 'flex';
+            hero.style.alignItems = 'center';
+            hero.style.justifyContent = 'center';
+            hero.style.fontWeight = 'bold';
+            return hero;
+        }
 
-            targets.forEach(box => {
-                box.classList.remove('single-shot-final-glow');
-                box.classList.add('opened');
-            });
+        function createBoxes(count = 10) {
+            boxesContainer.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const box = document.createElement('div');
+                box.classList.add('box');
+                box.dataset.id = i;
 
-            return targets;
+                const boxContent = document.createElement('div');
+                boxContent.classList.add('box-content');
+
+                const boxText = document.createElement('div');
+                boxText.classList.add('box-text');
+
+                const itemIcon = document.createElement('div');
+                itemIcon.classList.add('item-icon');
+                itemIcon.style.display = 'none'; // Hidden by default
+
+                const coinIcon = document.createElement('div');
+                coinIcon.classList.add('coin-icon');
+
+                boxContent.appendChild(boxText);
+                boxContent.appendChild(itemIcon);
+                boxContent.appendChild(coinIcon);
+                box.appendChild(boxContent);
+                boxesContainer.appendChild(box);
+            }
         }
 
         async function placeBet(betType) {
@@ -3762,7 +3951,7 @@
                 'لا تحزن، حظ أوفر في المرة القادمة! 😊',
                 'هذا يحدث للجميع، جرب مرة أخرى! 💪',
                 'لا تستسلم، المرة القادمة ستكون أفضل! 🌟',
-                'حظ أوفر في الجولة القادمة! 🍀',
+                'حظ أوفر، جرب ضربة مختلفة! 🎯',
                 'لا تقلق، ستنجح في المرة القادمة! ✨',
                 'هذا جزء من اللعبة، استمر! 🎮',
                 'حظ أوفر، جرب ضربة مختلفة! 🎯',
@@ -4270,5 +4459,3 @@
     </script>
 </body>
 </html>
-
-
