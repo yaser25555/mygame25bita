@@ -1,6 +1,6 @@
 // ملف game.js: يرجى نقل جميع أكواد الجافاسكريبت من <script> في game.html إلى هنا. 
 
-const BACKEND_URL = 'https://mygame25bita.onrender.com';
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
 // Game State
 let score = 0;

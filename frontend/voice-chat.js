@@ -11,12 +11,14 @@ const micBtn = document.getElementById('voiceChatBtn');
 
 console.log('username:', username, 'roomName:', roomName);
 
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+
 // إنشاء أو إعادة استخدام WebSocket
 function getWebSocket() {
   if (window.ws && window.ws.readyState === WebSocket.OPEN) return window.ws;
   
   // استخدام URL محدد للـ WebSocket
-  const wsUrl = 'wss://mygame25bita.onrender.com';
+  const wsUrl = BACKEND_URL;
   console.log('Attempting to connect to WebSocket:', wsUrl);
   
   window.ws = new WebSocket(wsUrl);

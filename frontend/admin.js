@@ -1,6 +1,6 @@
 // ملف admin.js لإدارة لوحة تحكم المسؤول
 
-const BACKEND_URL = 'https://mygame25bita.onrender.com';
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
 // عناصر DOM
 const adminLoginForm = document.getElementById('adminLoginForm');

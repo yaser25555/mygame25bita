@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://mygame25bita.onrender.com"; // Use your actual backend URL
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com"; // Use your actual backend URL
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginTab = document.getElementById('login-tab');
