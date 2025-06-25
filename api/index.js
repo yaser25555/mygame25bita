@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
 const express = require('express'); // أضف هذا السطر
+const mongoose = require('mongoose'); // Add this line
 const User = require('../models/User'); // استيراد موديل المستخدم
 
 // --- 1. استيراد المسارات ---
