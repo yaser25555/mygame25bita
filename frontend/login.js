@@ -314,17 +314,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // استماع على إرسال نموذج تسجيل الدخول
     if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
+        loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            console.log('Login values:', loginUsernameInput.value, loginPasswordInput.value);
             handleLogin();
         });
     }
     // استماع على إرسال نموذج التسجيل
     if (registerForm) {
-        registerForm.addEventListener('submit', function(e) {
+        registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            console.log('Register values:', registerUsernameInput.value, registerEmailInput.value, registerPasswordInput.value);
             handleRegister();
         });
     }

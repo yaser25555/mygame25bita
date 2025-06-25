@@ -8,7 +8,6 @@ const mongoose = require('mongoose'); // Add this line
 const User = require('../models/User'); // استيراد موديل المستخدم
 
 // --- 1. استيراد المسارات ---
-const authRoutes = require('./authRoutes');
 const authApiRoutes = require('./auth');
 const userRoutes = require('./user');
 const voiceRoutes = require('./voiceRoutes');
@@ -59,7 +58,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => console.error('MongoDB connection error:', err));
 
 // --- 4. ربط المسارات ---
-app.use('/api/auth', authRoutes);
 app.use('/api/auth', authApiRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/voice', voiceRoutes);
