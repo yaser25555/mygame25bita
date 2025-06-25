@@ -294,6 +294,33 @@ function loadCollapseStates() {
     updateRestoreButtonVisibility();
 }
 
+function setupGameButtons() {
+    if (singleShotButton) {
+        singleShotButton.addEventListener('click', function() {
+            if (singleShotButton.disabled) return;
+            console.log('✅ Single shot button clicked');
+            showMessage('تم تنفيذ ضربة واحدة!');
+            // ضع منطق الضربة الواحدة هنا
+        });
+    }
+    if (tripleShotButton) {
+        tripleShotButton.addEventListener('click', function() {
+            if (tripleShotButton.disabled) return;
+            console.log('✅ Triple shot button clicked');
+            showMessage('تم تنفيذ ضربة ثلاثية!');
+            // ضع منطق الضربة الثلاثية هنا
+        });
+    }
+    if (hammerShotButton) {
+        hammerShotButton.addEventListener('click', function() {
+            if (hammerShotButton.disabled) return;
+            console.log('✅ Hammer shot button clicked');
+            showMessage('تم تنفيذ ضربة المطرقة!');
+            // ضع منطق ضربة المطرقة هنا
+        });
+    }
+}
+
 async function initGame() {
     username = localStorage.getItem('username');
     if (!username) {
@@ -306,6 +333,7 @@ async function initGame() {
     updateDisplay();
     checkAudioFiles();
     connectWebSocket();
+    setupGameButtons();
 }
 
 async function loadGameData() {
