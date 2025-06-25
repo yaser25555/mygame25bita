@@ -398,6 +398,12 @@ function createBoxes(count = 10) {
         boxContent.appendChild(itemIcon);
         boxContent.appendChild(coinIcon);
         box.appendChild(boxContent);
+        // أضف event listener للصندوق
+        box.addEventListener('click', function() {
+            console.log('✅ تم الضغط على الصندوق رقم', i);
+            showMessage('تم فتح الصندوق رقم ' + (i + 1));
+            // ضع منطق فتح الصندوق هنا
+        });
         boxesContainer.appendChild(box);
     }
 }
