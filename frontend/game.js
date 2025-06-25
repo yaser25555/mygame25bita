@@ -15,6 +15,7 @@ let itemsCollected = {
     gem: 0,
     key: 0,
     coin: 0,
+    pearl: 0,
     bomb: 0,
     star: 0,
     bat: 0
@@ -23,6 +24,7 @@ const ITEM_REWARDS = {
     gem: { points: 75, name: 'جوهرة', emoji: '💎', color: '#ff69b4' },
     key: { points: 150, name: 'مفتاح', emoji: '🔑', color: '#ffd700' },
     coin: { points: 40, name: 'عملة', emoji: '🪙', color: '#ffd700' },
+    pearl: { points: 10000, name: 'لؤلؤة', emoji: '🦪', color: '#bfe6ff' },
     bomb: { points: -50, name: 'قنبلة', emoji: '💣', color: '#ff4500' },
     star: { points: 300, name: 'نجمة', emoji: '⭐', color: '#ffd700' },
     bat: { points: -75, name: 'خفاش', emoji: '🦇', color: '#8b4513' }
@@ -30,15 +32,18 @@ const ITEM_REWARDS = {
 const COLLECTION_GOALS = {
     gem: { target: 5, reward: 1500, name: 'الجواهر' },
     key: { target: 3, reward: 800, name: 'المفاتيح' },
-    star: { target: 2, reward: 1200, name: 'النجوم' }
+    star: { target: 2, reward: 1200, name: 'النجوم' },
+    pearl: { target: 1, reward: 50000, name: 'اللآلئ' }
 };
 const usernameDisplay = document.getElementById('username-display');
 const balanceDisplay = document.getElementById('balance-display');
+const pearlBalanceDisplay = document.getElementById('pearl-balance');
 const boxesContainer = document.getElementById('boxes-container');
 const messageArea = document.getElementById('message-area');
 const singleShotButton = document.getElementById('single-shot-button');
 const tripleShotButton = document.getElementById('triple-shot-button');
 const hammerShotButton = document.getElementById('hammer-shot-button');
+const lampButton = document.getElementById('lamp-button');
 const logoutButton = document.getElementById('logout-button');
 const seekerImage = document.getElementById('seeker-hero');
 const loadingIndicator = document.getElementById('loading-indicator');
@@ -143,6 +148,7 @@ function getItemDescription(itemType) {
         gem: 'جوهرة ثمينة تمنحك نقاط إضافية. اجمع 5 جواهر للحصول على مكافأة كبيرة!',
         key: 'مفتاح سحري يفتح أبواب الثروة. اجمع 3 مفاتيح للحصول على مكافأة!',
         coin: 'عملة ذهبية تزيد من رصيدك. جمع المزيد يعني المزيد من النقاط!',
+        pearl: 'لؤلؤة ثمينة تمنحك نقاط إضافية. اجمع لؤلؤة واحدة للحصول على مكافأة كبيرة!',
         bomb: 'قنبلة خطيرة! تجنبها أو ستخسر نقاط. كن حذراً!',
         star: 'نجمة ساطعة تمنحك نقاط عالية. اجمع نجمتين للحصول على مكافأة!',
         bat: 'خفاش شرير يخصم من نقاطك. احذر منه!'
@@ -337,6 +343,82 @@ function setupGameButtons() {
             openRandomBoxes(5); // فتح 5 صناديق
         });
     }
+    if (lampButton) {
+        lampButton.addEventListener('click', function() {
+            if (lampButton.disabled) return;
+            console.log('✅ Lamp button clicked');
+            openLamp(); // فتح المصباح
+        });
+    }
+}
+
+// دالة فتح المصباح
+async function openLamp() {
+    if (itemsCollected.pearl < 1) {
+        showMessage('❌ تحتاج إلى لؤلؤة واحدة على الأقل لفتح المصباح!', 'error');
+        return;
+    }
+
+    try {
+        // خصم لؤلؤة واحدة
+        itemsCollected.pearl--;
+        
+        // إنشاء قسيمة نقدية عشوائية (من 10 سنت إلى 10 دولار)
+        const voucherAmounts = [0.10, 0.25, 0.50, 1.00, 2.00, 5.00, 10.00];
+        const randomVoucher = voucherAmounts[Math.floor(Math.random() * voucherAmounts.length)];
+        
+        // إضافة القسيمة للرصيد (تحويل الدولار إلى نقاط - 1 دولار = 1000 نقطة)
+        const pointsToAdd = Math.round(randomVoucher * 1000);
+        score += pointsToAdd;
+        
+        // تحديث العرض
+        updateDisplay();
+        updateItemDisplay();
+        
+        // عرض رسالة النجاح
+        showMessage(`🎉 تم فتح المصباح! حصلت على قسيمة بقيمة $${randomVoucher.toFixed(2)} (${pointsToAdd} نقطة)`, 'success');
+        
+        // حفظ البيانات على الخادم
+        await saveGameData();
+        
+    } catch (error) {
+        console.error('Error opening lamp:', error);
+        showMessage('❌ خطأ في فتح المصباح', 'error');
+        // إعادة اللؤلؤة في حالة الخطأ
+        itemsCollected.pearl++;
+        updateDisplay();
+        updateItemDisplay();
+    }
+}
+
+// دالة حفظ بيانات اللعبة
+async function saveGameData() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/users/update-game-data`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                score: score,
+                itemsCollected: itemsCollected,
+                collectedGems: collectedGems,
+                totalGemsCollected: totalGemsCollected,
+                batsHit: batsHit,
+                pearls: itemsCollected.pearl || 0
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save game data');
+        }
+        
+        console.log('✅ Game data saved successfully');
+    } catch (error) {
+        console.error('Error saving game data:', error);
+        showMessage('❌ خطأ في حفظ بيانات اللعبة', 'error');
+    }
 }
 
 async function initGame() {
@@ -385,6 +467,9 @@ async function loadGameData() {
         if (data.batsHit !== undefined) {
             batsHit = data.batsHit;
         }
+        if (data.pearls !== undefined) {
+            itemsCollected.pearl = data.pearls;
+        }
         updateDisplay();
         updateItemDisplay();
     } catch (error) {
@@ -423,7 +508,7 @@ function createBoxes(count = 10) {
 function initializeItemDisplay() {
     const itemsGrid = document.getElementById('itemsGrid');
     itemsGrid.innerHTML = '';
-    const itemTypes = ['gem', 'key', 'coin', 'bomb', 'star', 'bat'];
+    const itemTypes = ['gem', 'key', 'coin', 'pearl', 'bomb', 'star', 'bat'];
     itemTypes.forEach(itemType => {
         const itemData = ITEM_REWARDS[itemType];
         const itemDisplay = document.createElement('div');
@@ -455,6 +540,7 @@ function initializeItemDisplay() {
 
 function updateDisplay() {
     balanceDisplay.textContent = Math.round(score);
+    pearlBalanceDisplay.textContent = itemsCollected.pearl || 0;
     usernameDisplay.textContent = username;
     const buttonsDisabled = isProcessingShot;
     singleShotButton.disabled = buttonsDisabled;

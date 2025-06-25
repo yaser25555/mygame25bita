@@ -23,6 +23,10 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  pearls: {
+    type: Number,
+    default: 0,
+  },
   boxesOpened: {
     type: Number,
     default: 0,
@@ -73,6 +77,7 @@ const UserSchema = new mongoose.Schema({
       gems: 0,
       keys: 0,
       coins: 0,
+      pearls: 0,
       bombs: 0,
       stars: 0,
       bat: 0

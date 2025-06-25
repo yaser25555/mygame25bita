@@ -1,0 +1,222 @@
+/* ملف admin-styles.css للوحة تحكم المسؤول */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Cairo', 'Noto Naskh Arabic', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    direction: rtl;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+/* نموذج تسجيل دخول المسؤول */
+.login-form {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: bold;
+}
+
+.field input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* لوحة الإدارة */
+#adminPanel {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.admin-panel-sections {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.admin-panel-sections button {
+    flex: 1;
+    background: transparent;
+    color: #333;
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.admin-panel-sections button:hover {
+    background: #e9ecef;
+}
+
+.admin-panel-sections button.active {
+    background: #667eea;
+    color: white;
+}
+
+/* محتوى الأقسام */
+.section-content {
+    padding: 30px;
+}
+
+.section-content.hidden {
+    display: none;
+}
+
+/* إدارة المستخدمين */
+#searchUsername {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 15px;
+}
+
+#fetchUserDataBtn {
+    margin-bottom: 20px;
+}
+
+#editUserForm {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+#editUserForm.hidden {
+    display: none;
+}
+
+hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 2px solid #e9ecef;
+}
+
+/* إعدادات اللعبة */
+#numBoxesInput,
+#winRatioInput {
+    width: 100%;
+    max-width: 200px;
+}
+
+/* رسائل */
+#loginMessage {
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* تحسينات للأجهزة المحمولة */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .admin-panel-sections {
+        flex-direction: column;
+    }
+    
+    .section-content {
+        padding: 20px;
+    }
+    
+    .login-form {
+        margin: 10px;
+    }
+}
+
+/* تأثيرات إضافية */
+.hidden {
+    display: none !important;
+}
+
+/* أزرار خاصة */
+#updateUserBtn,
+#assignAdminRoleBtn,
+#saveGameSettingsBtn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    margin-top: 10px;
+}
+
+#fetchUserDataBtn {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+/* تحسين مظهر الحقول */
+.field input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.field input[type="number"]::-webkit-outer-spin-button,
+.field input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+} 

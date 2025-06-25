@@ -349,6 +349,63 @@ router.post('/add-coins', verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
+// مسار جديد: إضافة لؤلؤ للمستخدم (فقط للمشرف)
+router.post('/add-pearls', verifyToken, verifyAdmin, async (req, res) => {
+  const { username, amount } = req.body;
+
+  if (typeof amount !== 'number' || amount <= 0) {
+    return res.status(400).json({ message: 'المبلغ غير صالح. يجب أن يكون رقمًا موجبًا.' });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    // تحديث حقل pearls و itemsCollected.pearl
+    user.pearls = (user.pearls || 0) + amount;
+    if (!user.itemsCollected) {
+      user.itemsCollected = {};
+    }
+    user.itemsCollected.pearl = (user.itemsCollected.pearl || 0) + amount;
+    
+    await user.save();
+
+    res.json({ message: `تم إضافة ${amount} لؤلؤة للمستخدم ${username} بنجاح!`, user });
+  } catch (error) {
+    console.error("خطأ في إضافة اللؤلؤ:", error);
+    res.status(500).json({ message: 'خطأ في الخادم أثناء إضافة اللؤلؤ' });
+  }
+});
+
+// مسار جديد: تحديث بيانات اللعبة للمستخدم
+router.post('/update-game-data', verifyToken, async (req, res) => {
+  const { score, itemsCollected, collectedGems, totalGemsCollected, batsHit, pearls } = req.body;
+
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    // تحديث البيانات
+    if (score !== undefined) user.score = score;
+    if (itemsCollected) user.itemsCollected = { ...user.itemsCollected, ...itemsCollected };
+    if (collectedGems !== undefined) user.collectedGems = collectedGems;
+    if (totalGemsCollected !== undefined) user.totalGemsCollected = totalGemsCollected;
+    if (batsHit !== undefined) user.batsHit = batsHit;
+    if (pearls !== undefined) user.pearls = pearls;
+
+    await user.save();
+
+    res.json({ message: 'تم تحديث بيانات اللعبة بنجاح!', user });
+  } catch (error) {
+    console.error("خطأ في تحديث بيانات اللعبة:", error);
+    res.status(500).json({ message: 'خطأ في الخادم أثناء تحديث بيانات اللعبة' });
+  }
+});
+
 // نقطة نهاية رفع الصورة الرمزية
 router.post('/upload-avatar', verifyToken, upload.single('avatar'), async (req, res) => {
   try {
@@ -359,6 +416,24 @@ router.post('/upload-avatar', verifyToken, upload.single('avatar'), async (req, 
     res.json({ avatar: user.avatar });
   } catch (err) {
     res.status(500).json({ error: 'حدث خطأ أثناء رفع الصورة' });
+  }
+});
+
+// مسار جديد: جلب بيانات المستخدم بواسطة اسم المستخدم (فقط للمشرف)
+router.get('/by-username/:username', verifyToken, verifyAdmin, async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await User.findOne({ username }).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("خطأ في جلب بيانات المستخدم:", error);
+    res.status(500).json({ message: 'خطأ في الخادم أثناء جلب بيانات المستخدم' });
   }
 });
 
