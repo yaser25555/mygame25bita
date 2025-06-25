@@ -474,6 +474,12 @@
         <!-- سيتم إضافة مفاتيح الصوت هنا -->
       </div>
     </div>
+    <script>
+      // Set username and room name before loading voice-chat.js
+      window.currentUsername = localStorage.getItem('username') || '';
+      window.currentRoomName = 'game-room';
+    </script>
+    <script src="voice-chat.js"></script>
     <div class="mic-container">
       <button class="mic-btn" id="voiceChatBtn" onclick="toggleMic()">
         <i class="fas fa-microphone"></i>
@@ -483,7 +489,6 @@
       </div>
     </div>
   </div>
-  <script src="voice-chat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
   <script>
     // ملاحظة: يجب عدم تعريف ws أو username هنا، بل استخدامهما من voice-chat.js فقط
