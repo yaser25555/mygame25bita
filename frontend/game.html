@@ -2609,7 +2609,6 @@
         }
 
         let isMuted = false;
-        let chatVolume = 0.5; // Chat volume level
 
         const BETS = {
             single: { cost: 100, multiplier: 2.5 },   // Increased from 2.0
@@ -2975,14 +2974,6 @@
             // Use sendBeacon for reliable data sending on unload
             navigator.sendBeacon(`${BACKEND_URL}/api/users/save-game-data?token=${token}`, blob);
         });
-
-        let chatVolume = 0.5; // Chat volume level
-
-        const BETS = {
-            single: { cost: 100, multiplier: 2.5 },   // Increased from 2.0
-            triple: { cost: 300, multiplier: 3.0 },   // Increased from 2.5
-            hammer: { cost: 500, multiplier: 4.0 }    // Increased from 3.0
-        };
 
         // Utility Functions
         function sleep(ms) {
