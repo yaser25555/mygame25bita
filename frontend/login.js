@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://localhost:3000"; // Use your actual backend URL
+const BACKEND_URL = "https://mygame25bita.onrender.com"; // Use your actual backend URL
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginTab = document.getElementById('login-tab');
@@ -34,8 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const avatarForm = document.getElementById('avatarForm');
     const avatarInput = document.getElementById('avatarInput');
     const profileAvatar = document.getElementById('profileAvatar');
-
-    const baseURL = 'https://mygame25bita.onrender.com'; // PRODUCTION: Point to the Render backend URL
 
     // Force hide admin modal on page load
     if (adminChoiceModal) {
@@ -92,26 +90,38 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleLogin() {
         const username = loginUsernameInput.value.trim();
         const password = loginPasswordInput.value.trim();
+        
+        console.log('🔐 محاولة تسجيل دخول:', { username, password: password ? '***' : 'فارغة' });
+        
         if (!username || !password) {
             showMessage('الرجاء إدخال اسم المستخدم/البريد الإلكتروني وكلمة المرور.', true);
             console.error('Login error: missing username or password');
             return;
         }
+        
         setButtonLoading(loginButton, true);
+        console.log('🌐 إرسال طلب إلى:', `${BACKEND_URL}/api/auth/login`);
+        
         try {
-            const response = await fetch(`${baseURL}/api/auth/login`, {
+            const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ username, password }),
             });
+            
+            console.log('📡 استجابة الخادم:', response.status, response.statusText);
+            
             const data = await response.json();
+            console.log('📄 بيانات الاستجابة:', data);
+            
             if (response.ok) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
                 localStorage.setItem('username', data.username);
                 showMessage('تم تسجيل الدخول بنجاح!', false);
+                console.log('✅ تسجيل الدخول ناجح، إعادة توجيه...');
                 setTimeout(() => {
                     if (data.isAdmin) {
                         adminChoiceModal.style.display = 'flex';
@@ -124,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Login failed:', data);
             }
         } catch (error) {
-            console.error('خطأ في الاتصال بالخادم:', error);
+            console.error('❌ خطأ في الاتصال بالخادم:', error);
             showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة لاحقًا.', true);
         } finally {
             setButtonLoading(loginButton, false);
@@ -147,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         setButtonLoading(registerButton, true);
         try {
-            const response = await fetch(`${baseURL}/api/auth/register`, {
+            const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password }),
@@ -216,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('token')) {
         avatarSection.style.display = 'block';
         // جلب الصورة الحالية من السيرفر
-        fetch(`${baseURL}/api/users/me`, {
+        fetch(`${BACKEND_URL}/api/users/me`, {
             headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
         })
         .then(res => res.json())
@@ -232,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!avatarInput.files[0]) return;
         const formData = new FormData();
         formData.append('avatar', avatarInput.files[0]);
-        const res = await fetch(`${baseURL}/api/users/upload-avatar`, {
+        const res = await fetch(`${BACKEND_URL}/api/users/upload-avatar`, {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
             body: formData
