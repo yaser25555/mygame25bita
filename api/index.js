@@ -68,6 +68,12 @@ app.use('/api/voice', voiceRoutes);
 // --- 5. إعداد الملفات الثابتة ---
 app.use('/sounds', express.static(path.join(__dirname, '../frontend/sounds')));
 app.use('/images', express.static(path.join(__dirname, '../frontend/images')));
+app.use(express.static(path.join(__dirname, '../frontend'))); // خدمة كل ملفات الواجهة
+
+// إعادة توجيه / إلى index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
 
 // --- 7. نقطة نهاية لفحص الحالة الصحية (Health Check) ---
 // Render يستخدم هذا المسار للتأكد من أن الخدمة تعمل بشكل سليم
