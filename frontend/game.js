@@ -294,4 +294,154 @@ function loadCollapseStates() {
     updateRestoreButtonVisibility();
 }
 
+async function initGame() {
+    username = localStorage.getItem('username');
+    if (!username) {
+        window.location.href = 'index.html';
+        return;
+    }
+    await loadGameData();
+    createBoxes();
+    initializeItemDisplay();
+    updateDisplay();
+    checkAudioFiles();
+    connectWebSocket();
+}
+
+async function loadGameData() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/users/me`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = 'index.html';
+            }
+            throw new Error('Failed to load game data');
+        }
+        const data = await response.json();
+        score = data.score || 1000;
+        highScore = data.highScore || score;
+        roundNumber = data.roundNumber || 1;
+        if (data.itemsCollected) {
+            itemsCollected = { ...itemsCollected, ...data.itemsCollected };
+        }
+        if (data.collectedGems !== undefined) {
+            collectedGems = data.collectedGems;
+        }
+        if (data.totalGemsCollected !== undefined) {
+            totalGemsCollected = data.totalGemsCollected;
+        }
+        if (data.batsHit !== undefined) {
+            batsHit = data.batsHit;
+        }
+        updateDisplay();
+        updateItemDisplay();
+    } catch (error) {
+        console.error('Error loading game data:', error);
+        showMessage('❌ خطأ في تحميل بيانات اللعبة', 'error');
+        score = 1000;
+        highScore = 1000;
+        roundNumber = 1;
+        updateDisplay();
+    }
+}
+
+function createBoxes(count = 10) {
+    boxesContainer.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const box = document.createElement('div');
+        box.classList.add('box');
+        box.dataset.id = i;
+        const boxContent = document.createElement('div');
+        boxContent.classList.add('box-content');
+        const boxText = document.createElement('div');
+        boxText.classList.add('box-text');
+        const itemIcon = document.createElement('div');
+        itemIcon.classList.add('item-icon');
+        itemIcon.style.display = 'none';
+        const coinIcon = document.createElement('div');
+        coinIcon.classList.add('coin-icon');
+        boxContent.appendChild(boxText);
+        boxContent.appendChild(itemIcon);
+        boxContent.appendChild(coinIcon);
+        box.appendChild(boxContent);
+        boxesContainer.appendChild(box);
+    }
+}
+
+function initializeItemDisplay() {
+    const itemsGrid = document.getElementById('itemsGrid');
+    itemsGrid.innerHTML = '';
+    const itemTypes = ['gem', 'key', 'coin', 'bomb', 'star', 'bat'];
+    itemTypes.forEach(itemType => {
+        const itemData = ITEM_REWARDS[itemType];
+        const itemDisplay = document.createElement('div');
+        itemDisplay.className = 'item-display';
+        if (itemData.points < 0) {
+            itemDisplay.classList.add('negative');
+        }
+        itemDisplay.dataset.itemType = itemType;
+        const currentCount = itemsCollected[itemType] || 0;
+        let progress = 0;
+        let targetText = '';
+        if (COLLECTION_GOALS[itemType]) {
+            const goal = COLLECTION_GOALS[itemType];
+            progress = Math.min((currentCount / goal.target) * 100, 100);
+            targetText = `${currentCount}/${goal.target}`;
+        } else {
+            targetText = currentCount.toString();
+        }
+        itemDisplay.innerHTML = `
+            <div class="item-emoji">${itemData.emoji}</div>
+            <div class="item-count">${targetText}</div>
+            <div class="item-progress">
+                <div class="item-progress-bar" style="width: ${progress}%"></div>
+            </div>
+        `;
+        itemsGrid.appendChild(itemDisplay);
+    });
+}
+
+function updateDisplay() {
+    balanceDisplay.textContent = Math.round(score);
+    usernameDisplay.textContent = username;
+    const buttonsDisabled = isProcessingShot;
+    singleShotButton.disabled = buttonsDisabled;
+    tripleShotButton.disabled = buttonsDisabled;
+    hammerShotButton.disabled = buttonsDisabled;
+}
+
+function checkAudioFiles() {
+    Object.entries(sounds).forEach(([name, audio]) => {
+        audio.addEventListener('error', (e) => {
+            console.error(`Audio file error for ${name}:`, e);
+        });
+        audio.addEventListener('loadstart', () => {
+            console.log(`Audio file ${name} loading started`);
+        });
+        audio.addEventListener('canplay', () => {
+            console.log(`Audio file ${name} ready to play`);
+        });
+    });
+}
+
+function connectWebSocket() {
+    // يمكنك نقل الكود الأصلي الخاص بالويب سوكيت هنا إذا كان موجوداً في game5.html
+}
+
+// استدعاء التهيئة في نهاية الملف
+
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        initGame();
+        initializeItemInfoModal();
+        initializeCollapseFeatures();
+    }, 500);
+});
+
 // ... existing code ... 
