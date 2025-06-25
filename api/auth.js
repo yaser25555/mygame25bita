@@ -45,17 +45,25 @@ router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    console.log('🔐 محاولة تسجيل دخول:', { username, password: password ? '***' : 'فارغة' });
+
     // البحث عن المستخدم باستخدام اسم المستخدم أو البريد الإلكتروني
     const user = await User.findOne({ $or: [{ username }, { email: username }] }); // يمكن الدخول باسم المستخدم أو البريد الإلكتروني
 
     if (!user) {
+      console.log('❌ المستخدم غير موجود:', username);
       return res.status(400).json({ message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
     }
 
+    console.log('✅ تم العثور على المستخدم:', user.username);
+
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
+      console.log('❌ كلمة المرور غير صحيحة للمستخدم:', username);
       return res.status(400).json({ message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
     }
+
+    console.log('✅ كلمة المرور صحيحة للمستخدم:', username);
 
     // إنشاء التوكن
     const token = jwt.sign(
@@ -63,6 +71,8 @@ router.post('/login', async (req, res) => {
       SECRET_KEY,
       { expiresIn: '6h' }
     );
+
+    console.log('✅ تم إنشاء التوكن للمستخدم:', username);
 
     res.json({
       message: 'تم تسجيل الدخول بنجاح!',
@@ -75,6 +85,41 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error("خطأ أثناء تسجيل الدخول:", error); // طباعة الخطأ كاملاً
     res.status(500).json({ message: 'خطأ داخلي أثناء تسجيل الدخول', error: error.message });
+  }
+});
+
+// مسار لإنشاء مستخدم تجريبي (للتطوير فقط)
+router.post('/create-test-user', async (req, res) => {
+  try {
+    const { username, password, email } = req.body;
+
+    // التحقق من وجود المستخدم
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res.status(409).json({ message: 'اسم المستخدم أو البريد الإلكتروني موجود بالفعل.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      isAdmin: false,
+      score: 1000,
+      pearls: 5
+    });
+
+    await newUser.save();
+    res.status(201).json({ 
+      message: 'تم إنشاء المستخدم التجريبي بنجاح!',
+      username,
+      email,
+      password: 'كلمة المرور المدخلة'
+    });
+
+  } catch (err) {
+    console.error("خطأ أثناء إنشاء المستخدم التجريبي:", err);
+    res.status(500).json({ message: 'خطأ داخلي أثناء إنشاء المستخدم', error: err.message });
   }
 });
 
