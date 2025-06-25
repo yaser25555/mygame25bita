@@ -294,29 +294,47 @@ function loadCollapseStates() {
     updateRestoreButtonVisibility();
 }
 
+// دالة فتح عدد معين من الصناديق عشوائياً
+function openRandomBoxes(count) {
+    const boxes = Array.from(document.querySelectorAll('.box:not(.opened)'));
+    if (boxes.length === 0) {
+        showMessage('كل الصناديق مفتوحة!');
+        return;
+    }
+    // اختيار صناديق عشوائية بدون تكرار
+    const toOpen = [];
+    for (let i = 0; i < Math.min(count, boxes.length); i++) {
+        const idx = Math.floor(Math.random() * boxes.length);
+        toOpen.push(boxes[idx]);
+        boxes.splice(idx, 1);
+    }
+    toOpen.forEach(box => {
+        box.classList.add('opened');
+        box.style.background = '#cfc'; // لون مؤقت للصندوق المفتوح
+        showMessage('تم فتح الصندوق رقم ' + (parseInt(box.dataset.id) + 1));
+    });
+}
+
 function setupGameButtons() {
     if (singleShotButton) {
         singleShotButton.addEventListener('click', function() {
             if (singleShotButton.disabled) return;
             console.log('✅ Single shot button clicked');
-            showMessage('تم تنفيذ ضربة واحدة!');
-            // ضع منطق الضربة الواحدة هنا
+            openRandomBoxes(1); // فتح صندوق واحد
         });
     }
     if (tripleShotButton) {
         tripleShotButton.addEventListener('click', function() {
             if (tripleShotButton.disabled) return;
             console.log('✅ Triple shot button clicked');
-            showMessage('تم تنفيذ ضربة ثلاثية!');
-            // ضع منطق الضربة الثلاثية هنا
+            openRandomBoxes(3); // فتح 3 صناديق
         });
     }
     if (hammerShotButton) {
         hammerShotButton.addEventListener('click', function() {
             if (hammerShotButton.disabled) return;
             console.log('✅ Hammer shot button clicked');
-            showMessage('تم تنفيذ ضربة المطرقة!');
-            // ضع منطق ضربة المطرقة هنا
+            openRandomBoxes(5); // فتح 5 صناديق
         });
     }
 }
@@ -398,12 +416,6 @@ function createBoxes(count = 10) {
         boxContent.appendChild(itemIcon);
         boxContent.appendChild(coinIcon);
         box.appendChild(boxContent);
-        // أضف event listener للصندوق
-        box.addEventListener('click', function() {
-            console.log('✅ تم الضغط على الصندوق رقم', i);
-            showMessage('تم فتح الصندوق رقم ' + (i + 1));
-            // ضع منطق فتح الصندوق هنا
-        });
         boxesContainer.appendChild(box);
     }
 }
