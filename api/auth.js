@@ -123,6 +123,54 @@ router.post('/create-test-user', async (req, res) => {
   }
 });
 
+// مسار لفحص المستخدمين الموجودين (للتطوير فقط)
+router.get('/check-users', async (req, res) => {
+  try {
+    const users = await User.find({}, { password: 0 }); // لا نرجع كلمات المرور
+    res.json({
+      message: `تم العثور على ${users.length} مستخدم`,
+      users: users.map(user => ({
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        score: user.score,
+        pearls: user.pearls || 0,
+        createdAt: user.createdAt
+      }))
+    });
+  } catch (err) {
+    console.error("خطأ أثناء فحص المستخدمين:", err);
+    res.status(500).json({ message: 'خطأ داخلي أثناء فحص المستخدمين', error: err.message });
+  }
+});
+
+// مسار لإعادة تعيين كلمة مرور المستخدم (للتطوير فقط)
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { username, newPassword } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({
+      message: 'تم إعادة تعيين كلمة المرور بنجاح!',
+      username: user.username,
+      newPassword: newPassword
+    });
+
+  } catch (err) {
+    console.error("خطأ أثناء إعادة تعيين كلمة المرور:", err);
+    res.status(500).json({ message: 'خطأ داخلي أثناء إعادة تعيين كلمة المرور', error: err.message });
+  }
+});
+
 // تم إزالة دالة verifyToken ومسار /me من هنا
 // لأنها موجودة في user.js وهي مناسبة أكثر هناك
 // تأكد من أن أي مكان يستدعي verifyToken يستخدمها من user.js أو أن تكون دالة عامة
