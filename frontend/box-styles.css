@@ -22,10 +22,6 @@
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    background-image: url('box_closed.png');
-    background-size: 80% 80%;
-    background-repeat: no-repeat;
-    background-position: center;
     box-shadow: 
         0 8px 25px rgba(0, 0, 0, 0.3),
         inset 0 2px 4px rgba(255, 255, 255, 0.3);
@@ -77,7 +73,6 @@
 }
 
 .box.opened {
-    background-image: none !important;
     transform: scale(0.95);
     animation: none !important;
     cursor: default;
@@ -234,7 +229,6 @@
     .box {
         width: 80px;
         height: 80px;
-        background-size: 70% 70%;
     }
     
     .box-reward {
@@ -256,7 +250,6 @@
     .box {
         width: 65px;
         height: 65px;
-        background-size: 65% 65%;
     }
     
     .box-reward {
