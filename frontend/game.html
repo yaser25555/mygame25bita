@@ -3688,6 +3688,7 @@
                 window.location.href = 'index.html';
                 return;
             }
+            window.currentUsername = username; // Set window.currentUsername here
 
             await loadGameData();
             createBoxes();
