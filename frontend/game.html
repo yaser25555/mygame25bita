@@ -1636,13 +1636,18 @@
                     0 0 20px rgba(139, 0, 0, 0.6),
                     0 0 40px rgba(75, 0, 130, 0.4),
                     0 0 60px rgba(139, 0, 0, 0.3);
-                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(75, 0, 130, 0.7),
+                    0 0 60px rgba(47, 79, 79, 0.5),
+                    0 0 90px rgba(139, 0, 0, 0.6);
             }
             100% {
                 box-shadow: 
-                    0 0 50px rgba(255, 0, 0, 1),
-                    0 0 100px rgba(220, 53, 69, 0.8);
-                transform: translateX(-50%) scale(1.05);
+                    0 0 40px rgba(47, 79, 79, 0.8),
+                    0 0 80px rgba(139, 0, 0, 0.6),
+                    0 0 120px rgba(75, 0, 130, 0.4);
             }
         }
 
@@ -2604,7 +2609,6 @@
         }
 
         let isMuted = false;
-        let isChatMuted = false; // New variable for chat sounds
         let chatVolume = 0.5; // Chat volume level
 
         const BETS = {
@@ -2621,7 +2625,7 @@
         function showMessage(message, type = 'info') {
             messageArea.textContent = message;
             messageArea.className = 'message-area ' + type;
-        }
+        }        
 
         // Item Management Functions
         function initializeItemDisplay() {
@@ -2972,7 +2976,6 @@
             navigator.sendBeacon(`${BACKEND_URL}/api/users/save-game-data?token=${token}`, blob);
         });
 
-        let isChatMuted = false; // New variable for chat sounds
         let chatVolume = 0.5; // Chat volume level
 
         const BETS = {
@@ -3562,7 +3565,7 @@
 
         // Function to play chat sounds
         function playChatSound(audioElement) {
-            if (!isChatMuted && audioElement) {
+            if (!isMuted && audioElement) {
                 audioElement.currentTime = 0;
                 audioElement.play().catch(e => {
                     console.log('Chat sound play error:', e);
@@ -3572,10 +3575,11 @@
 
         // Toggle chat mute
         chatMuteBtn.addEventListener('click', () => {
-            isChatMuted = !isChatMuted;
-            chatMuteBtn.classList.toggle('muted', isChatMuted);
+            isMuted = !isMuted;
+            Object.values(sounds).forEach(sound => sound.muted = isMuted);
+            chatMuteBtn.classList.toggle('muted', isMuted);
             
-            if (isChatMuted) {
+            if (isMuted) {
                 chatMuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
                 chatMuteBtn.title = 'إلغاء كتم صوت المحادثة';
             } else {
