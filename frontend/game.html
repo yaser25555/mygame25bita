@@ -2972,7 +2972,6 @@
             navigator.sendBeacon(`${BACKEND_URL}/api/users/save-game-data?token=${token}`, blob);
         });
 
-        let isMuted = false;
         let isChatMuted = false; // New variable for chat sounds
         let chatVolume = 0.5; // Chat volume level
 
@@ -2990,7 +2989,7 @@
         function showMessage(message, type = 'info') {
             messageArea.textContent = message;
             messageArea.className = 'message-area ' + type;
-        }
+        }        
 
         // Item Management Functions
         function initializeItemDisplay() {
