@@ -23,10 +23,10 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 // --- 2. إعداد الـ Middleware ---
-// إعداد CORS للسماح بالطلبات من أي مصدر. هذا ضروري للنشر على Render.
+// إعداد CORS للسماح بالطلبات من واجهة الويب فقط
 app.use(cors({
-    origin: true, // Reflect the request origin
-    credentials: true // Allow sending credentials (like cookies, authorization headers)
+    origin: 'https://mygame25bita-1-4ue6.onrender.com', // دومين الواجهة
+    credentials: true
 }));
 
 app.use(express.json());
@@ -66,7 +66,8 @@ app.use('/api/voice', voiceRoutes);
 // app.use('/api/game', gameRoutes); // مسار اللعبة
 
 // --- 5. إعداد الملفات الثابتة ---
-
+app.use('/sounds', express.static(path.join(__dirname, '../frontend/sounds')));
+app.use('/images', express.static(path.join(__dirname, '../frontend/images')));
 
 // --- 7. نقطة نهاية لفحص الحالة الصحية (Health Check) ---
 // Render يستخدم هذا المسار للتأكد من أن الخدمة تعمل بشكل سليم
