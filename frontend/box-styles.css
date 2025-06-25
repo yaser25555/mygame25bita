@@ -81,12 +81,115 @@
     transform: scale(0.95);
     animation: none !important;
     cursor: default;
+    transition: all 0.3s ease;
+}
+
+/* تأثيرات فتح الصندوق */
+.box-reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    animation: rewardGlow 2s ease-in-out;
+}
+
+.box-reward-text {
+    margin-top: 5px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+/* تأثيرات خاصة حسب نوع المحتوى */
+.reward-coins {
+    animation: coinsRewardGlow 2s ease-in-out !important;
+}
+
+.reward-rare {
+    animation: rareRewardGlow 2s ease-in-out !important;
+}
+
+.reward-bomb {
+    animation: bombRewardGlow 2s ease-in-out !important;
+}
+
+.reward-empty {
+    animation: emptyRewardGlow 2s ease-in-out !important;
+}
+
+@keyframes rewardGlow {
+    0% { 
+        transform: scale(0.5); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: scale(1.2); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+}
+
+@keyframes coinsRewardGlow {
+    0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+    25% { transform: scale(1.2) rotate(5deg); opacity: 0.8; }
+    50% { transform: scale(1.1) rotate(-5deg); opacity: 1; }
+    75% { transform: scale(1.15) rotate(3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes rareRewardGlow {
+    0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+    25% { transform: scale(1.3) rotate(90deg); opacity: 0.8; }
+    50% { transform: scale(1.1) rotate(180deg); opacity: 1; }
+    75% { transform: scale(1.2) rotate(270deg); opacity: 1; }
+    100% { transform: scale(1) rotate(360deg); opacity: 1; }
+}
+
+@keyframes bombRewardGlow {
+    0% { transform: scale(0.5); opacity: 0; }
+    25% { transform: scale(1.4); opacity: 1; }
+    50% { transform: scale(0.8); opacity: 0.8; }
+    75% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes emptyRewardGlow {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes boxShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes boxPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes boxClose {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.8); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .box-content {
     text-align: center;
     z-index: 2;
     position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .box-image {
@@ -129,6 +232,14 @@
         height: 80px;
         background-size: 70% 70%;
     }
+    
+    .box-reward {
+        font-size: 1.8em !important;
+    }
+    
+    .box-reward-text {
+        font-size: 0.7em !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -142,5 +253,13 @@
         width: 65px;
         height: 65px;
         background-size: 65% 65%;
+    }
+    
+    .box-reward {
+        font-size: 1.5em !important;
+    }
+    
+    .box-reward-text {
+        font-size: 0.6em !important;
     }
 } 
