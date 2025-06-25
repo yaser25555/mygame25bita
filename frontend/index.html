@@ -40,38 +40,42 @@
 
         <!-- قسم تسجيل الدخول -->
         <div id="login-section" class="content-section active">
-            <div class="form-group">
-                <label for="login-username">اسم المستخدم / البريد الإلكتروني:</label>
-                <input type="text" id="login-username" placeholder="أدخل اسم المستخدم أو البريد الإلكتروني" required>
-            </div>
-            <div class="form-group">
-                <label for="login-password">كلمة المرور:</label>
-                <input type="password" id="login-password" placeholder="أدخل كلمة المرور" required>
-            </div>
-            <button id="login-button" class="btn">
-                <span class="loading-spinner"></span>
-                <span class="btn-text">تسجيل الدخول</span>
-            </button>
+            <form id="login-form" autocomplete="on">
+                <div class="form-group">
+                    <label for="login-username">اسم المستخدم / البريد الإلكتروني:</label>
+                    <input type="text" id="login-username" placeholder="أدخل اسم المستخدم أو البريد الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">كلمة المرور:</label>
+                    <input type="password" id="login-password" placeholder="أدخل كلمة المرور" required>
+                </div>
+                <button id="login-button" class="btn" type="submit">
+                    <span class="loading-spinner"></span>
+                    <span class="btn-text">تسجيل الدخول</span>
+                </button>
+            </form>
         </div>
 
         <!-- قسم التسجيل -->
         <div id="register-section" class="content-section">
-            <div class="form-group">
-                <label for="register-username">اسم المستخدم:</label>
-                <input type="text" id="register-username" placeholder="اختر اسم مستخدم" required>
-            </div>
-            <div class="form-group">
-                <label for="register-email">البريد الإلكتروني:</label>
-                <input type="email" id="register-email" placeholder="أدخل بريدك الإلكتروني" required>
-            </div>
-            <div class="form-group">
-                <label for="register-password">كلمة المرور:</label>
-                <input type="password" id="register-password" placeholder="اختر كلمة مرور" required>
-            </div>
-            <button id="register-button" class="btn">
-                <span class="loading-spinner"></span>
-                <span class="btn-text">تسجيل</span>
-            </button>
+            <form id="register-form" autocomplete="on">
+                <div class="form-group">
+                    <label for="register-username">اسم المستخدم:</label>
+                    <input type="text" id="register-username" placeholder="اختر اسم مستخدم" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">البريد الإلكتروني:</label>
+                    <input type="email" id="register-email" placeholder="أدخل بريدك الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">كلمة المرور:</label>
+                    <input type="password" id="register-password" placeholder="اختر كلمة مرور" required>
+                </div>
+                <button id="register-button" class="btn" type="submit">
+                    <span class="loading-spinner"></span>
+                    <span class="btn-text">تسجيل</span>
+                </button>
+            </form>
         </div>
 
         <!-- قسم محتوى التطبيقات (يظهر عند النقر على تبويب التطبيقات) -->

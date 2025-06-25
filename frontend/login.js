@@ -86,17 +86,18 @@ document.addEventListener('DOMContentLoaded', () => {
         messageBox.classList.remove('show');
     }
 
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+
     async function handleLogin() {
         const username = loginUsernameInput.value.trim();
         const password = loginPasswordInput.value.trim();
-
         if (!username || !password) {
             showMessage('الرجاء إدخال اسم المستخدم/البريد الإلكتروني وكلمة المرور.', true);
+            console.error('Login error: missing username or password');
             return;
         }
-
         setButtonLoading(loginButton, true);
-
         try {
             const response = await fetch(`${baseURL}/api/auth/login`, {
                 method: 'POST',
@@ -105,25 +106,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({ username, password }),
             });
-
             const data = await response.json();
-
             if (response.ok) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
                 localStorage.setItem('username', data.username);
                 showMessage('تم تسجيل الدخول بنجاح!', false);
-                
                 setTimeout(() => {
                     if (data.isAdmin) {
                         adminChoiceModal.style.display = 'flex';
                     } else {
                         window.location.href = 'game.html';
                     }
-                }, 500); // 0.5 second delay
-
+                }, 500);
             } else {
                 showMessage(`فشل تسجيل الدخول: ${data.message || 'خطأ غير معروف'}`, true);
+                console.error('Login failed:', data);
             }
         } catch (error) {
             console.error('خطأ في الاتصال بالخادم:', error);
@@ -137,28 +135,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = registerUsernameInput.value.trim();
         const email = registerEmailInput.value.trim();
         const password = registerPasswordInput.value.trim();
-
         if (!username || !email || !password) {
             showMessage('الرجاء تعبئة جميع الحقول للتسجيل.', true);
+            console.error('Register error: missing fields');
             return;
         }
-
         if (!/\S+@\S+\.\S+/.test(email)) {
             showMessage('الرجاء إدخال بريد إلكتروني صالح.', true);
+            console.error('Register error: invalid email');
             return;
         }
-
         setButtonLoading(registerButton, true);
-
         try {
             const response = await fetch(`${baseURL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password }),
             });
-
             const data = await response.json();
-
             if (response.ok) {
                 showMessage('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.', false);
                 switchTab(loginTab);
@@ -166,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginPasswordInput.value = '';
             } else {
                 showMessage(`فشل التسجيل: ${data.message || 'خطأ غير معروف'}`, true);
+                console.error('Register failed:', data);
             }
         } catch (error) {
             console.error('خطأ في الاتصال بالخادم:', error);
@@ -306,4 +301,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // افتراضيًا, إظهار قسم تسجيل الدخول عند تحميل الصفحة
     switchTab(loginTab);
+
+    // استماع على إرسال نموذج تسجيل الدخول
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Login values:', loginUsernameInput.value, loginPasswordInput.value);
+            handleLogin();
+        });
+    }
+    // استماع على إرسال نموذج التسجيل
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Register values:', registerUsernameInput.value, registerEmailInput.value, registerPasswordInput.value);
+            handleRegister();
+        });
+    }
 }); 
