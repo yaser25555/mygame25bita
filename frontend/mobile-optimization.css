@@ -60,6 +60,7 @@
     body {
         padding: 10px;
         font-size: 14px;
+        background: linear-gradient(135deg, #001a00 0%, #002600 100%);
     }
     
     .main-content {
@@ -73,7 +74,7 @@
         width: 100%;
         padding: 0;
         margin-bottom: 15px;
-        order: -1; /* يظهر في الأعلى */
+        order: -1;
         transition: all 0.3s ease;
         position: relative;
     }
@@ -83,6 +84,8 @@
         min-height: 400px;
         padding: 15px;
         border-radius: 20px;
+        background: rgba(0, 34, 0, 0.95);
+        border: 2px solid rgba(0, 255, 0, 0.1);
     }
     
     .boxes-grid {
@@ -95,6 +98,8 @@
         width: 80px;
         height: 80px;
         font-size: 0.9em;
+        background: rgba(0, 34, 0, 0.9);
+        border: 1px solid rgba(0, 255, 0, 0.1);
     }
     
     .controls {
@@ -106,6 +111,8 @@
         padding: 12px 8px;
         font-size: 0.9em;
         min-height: 45px;
+        background: linear-gradient(135deg, #00FF00 0%, #00CC00 100%);
+        color: #FFFFFF;
     }
     
     .message-area {
@@ -123,10 +130,12 @@
     .logo {
         width: 60px;
         height: 60px;
+        filter: drop-shadow(0 0 20px rgba(0, 255, 0, 0.5));
     }
     
     .game-title {
         font-size: 1.5em;
+        text-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4);
     }
 }
 
@@ -166,6 +175,8 @@
         padding: 10px;
         min-height: 350px;
         border-radius: 15px;
+        background: rgba(0, 34, 0, 0.95);
+        border: 2px solid rgba(0, 255, 0, 0.1);
     }
     
     .boxes-grid {
@@ -188,6 +199,15 @@
         padding: 10px 6px;
         font-size: 0.8em;
         min-height: 40px;
+        background: linear-gradient(135deg, #00FF00 0%, #00CC00 100%);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        color: #FFFFFF;
+    }
+    
+    .bet-button:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
     }
     
     .message-area {
@@ -199,10 +219,12 @@
     .logo {
         width: 50px;
         height: 50px;
+        filter: drop-shadow(0 0 20px rgba(0, 255, 0, 0.5));
     }
     
     .game-title {
         font-size: 1.3em;
+        text-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4);
     }
     
     .item-collection-display {
