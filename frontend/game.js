@@ -434,6 +434,34 @@ function connectWebSocket() {
     // يمكنك نقل الكود الأصلي الخاص بالويب سوكيت هنا إذا كان موجوداً في game5.html
 }
 
+function updateItemDisplay() {
+    Object.entries(itemsCollected).forEach(([itemType, count]) => {
+        const itemDisplay = document.querySelector(`[data-item-type="${itemType}"]`);
+        if (itemDisplay) {
+            const countElement = itemDisplay.querySelector('.item-count');
+            const progressBar = itemDisplay.querySelector('.item-progress-bar');
+            // Update count text
+            if (COLLECTION_GOALS[itemType]) {
+                const goal = COLLECTION_GOALS[itemType];
+                countElement.textContent = `${count}/${goal.target}`;
+            } else {
+                countElement.textContent = count.toString();
+            }
+            // Update progress bar for collection goals
+            if (COLLECTION_GOALS[itemType]) {
+                const goal = COLLECTION_GOALS[itemType];
+                const progress = Math.min((count / goal.target) * 100, 100);
+                progressBar.style.width = `${progress}%`;
+            }
+        }
+    });
+}
+
+function showMessage(message, type = 'info') {
+    messageArea.textContent = message;
+    messageArea.className = 'message-area ' + type;
+}
+
 // استدعاء التهيئة في نهاية الملف
 
 document.addEventListener('DOMContentLoaded', function() {
