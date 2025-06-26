@@ -490,56 +490,73 @@ h1 {
         box-shadow: none;
         border: none;
         padding-top: 40px;
+        gap: 15px; /* مسافة بين العناصر */
     }
     
     .logo {
         width: 80px;
         height: auto;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
         align-self: center;
         display: block;
+        flex-shrink: 0; /* منع التصغير */
     }
     
     h1 {
         font-size: 1.6em;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
         text-align: center;
         width: 100%;
+        flex-shrink: 0; /* منع التصغير */
     }
     
     .tabs {
         flex-direction: column;
-        gap: 3px;
-        margin-bottom: 20px;
+        gap: 8px; /* زيادة المسافة بين التبويبات */
+        margin-bottom: 15px;
         width: 100%;
+        flex-shrink: 0; /* منع التصغير */
     }
     
     .tab-button {
-        padding: 12px 10px;
-        font-size: 0.9em;
-        border-radius: 10px;
+        padding: 15px 12px; /* زيادة الـ padding */
+        font-size: 0.95em;
+        border-radius: 12px;
         min-width: auto;
+        width: 100%; /* عرض كامل */
+        margin: 0; /* إزالة الهوامش */
+        min-height: 50px; /* ارتفاع أدنى */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px; /* مسافة بين النص والأيقونة */
     }
     
     .form-group {
         margin-bottom: 15px;
+        width: 100%;
     }
     
     .form-group input,
     .form-group select {
-        padding: 12px 15px;
+        padding: 15px 18px; /* زيادة الـ padding */
         font-size: 16px; /* منع التكبير على iOS */
+        min-height: 50px; /* ارتفاع أدنى */
     }
     
     .btn {
-        padding: 12px 20px;
+        padding: 15px 20px; /* زيادة الـ padding */
         font-size: 1em;
-        min-height: 45px;
+        min-height: 50px; /* ارتفاع أدنى */
+        width: 100%;
+        margin-top: 10px;
     }
     
     .modal-content {
         padding: 25px 20px;
         max-width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
     .admin-login-header {
@@ -559,6 +576,8 @@ h1 {
         display: flex;
         flex-direction: column;
         align-items: center;
+        padding: 0 10px;
+        gap: 15px; /* مسافة بين العناصر */
     }
     
     /* تعديل أحجام الأيقونات للجوال */
@@ -576,12 +595,33 @@ h1 {
         font-size: 1em;
         margin-left: 3px;
     }
+    
+    /* تحسين الأزرار الإضافية */
+    .logout-btn,
+    .game-btn {
+        min-height: 50px;
+        padding: 15px 20px;
+        font-size: 1em;
+        margin: 5px 0;
+    }
+    
+    .admin-actions {
+        gap: 10px;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .admin-actions .btn {
+        width: 100%;
+        min-height: 50px;
+    }
 }
 
 @media (max-width: 480px) {
     .container {
         padding: 15px 10px;
         padding-top: 30px;
+        gap: 12px; /* تقليل المسافة قليلاً */
     }
     
     .logo {
@@ -594,20 +634,22 @@ h1 {
     }
     
     .tab-button {
-        padding: 10px 8px;
-        font-size: 0.85em;
+        padding: 12px 10px;
+        font-size: 0.9em;
+        min-height: 45px;
     }
     
     .form-group input,
     .form-group select {
-        padding: 10px 12px;
+        padding: 12px 15px;
         font-size: 16px;
+        min-height: 45px;
     }
     
     .btn {
-        padding: 10px 15px;
+        padding: 12px 15px;
         font-size: 0.95em;
-        min-height: 40px;
+        min-height: 45px;
     }
     
     .modal-content {
@@ -629,12 +671,19 @@ h1 {
         font-size: 0.9em;
         margin-left: 2px;
     }
+    
+    .logout-btn,
+    .game-btn {
+        min-height: 45px;
+        padding: 12px 15px;
+    }
 }
 
 @media (max-width: 360px) {
     .container {
         padding: 10px 8px;
         padding-top: 25px;
+        gap: 10px;
     }
     
     .logo {
@@ -644,6 +693,25 @@ h1 {
     
     h1 {
         font-size: 1.2em;
+    }
+    
+    .tab-button {
+        padding: 10px 8px;
+        font-size: 0.85em;
+        min-height: 40px;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 10px 12px;
+        font-size: 16px;
+        min-height: 40px;
+    }
+    
+    .btn {
+        padding: 10px 12px;
+        font-size: 0.9em;
+        min-height: 40px;
     }
     
     /* تعديل أحجام الأيقونات للشاشات الصغيرة جداً */
@@ -660,6 +728,12 @@ h1 {
     .tab-button i {
         font-size: 0.8em;
         margin-left: 2px;
+    }
+    
+    .logout-btn,
+    .game-btn {
+        min-height: 40px;
+        padding: 10px 12px;
     }
 }
 
