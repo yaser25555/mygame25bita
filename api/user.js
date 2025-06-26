@@ -100,12 +100,40 @@ router.get('/me', verifyToken, async (req, res) => {
         itemsCollected: user.itemsCollected,
         collectedGems: user.collectedGems,
         totalGemsCollected: user.totalGemsCollected,
-        batsHit: user.batsHit
+        batsHit: user.batsHit,
+        profile: user.profile,
+        stats: user.stats,
+        weapons: user.weapons,
+        achievements: user.achievements,
+        badges: user.badges,
+        relationships: user.relationships
     });
 
   } catch (error) {
     console.error("خطأ في جلب بيانات المستخدم:", error);
     res.status(500).json({ message: 'خطأ في الخادم أثناء جلب بيانات المستخدم' });
+  }
+});
+
+// مسار جلب إحصائيات المستخدم
+router.get('/stats', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    res.json({
+      stats: user.stats,
+      weapons: user.weapons,
+      itemsCollected: user.itemsCollected,
+      achievements: user.achievements,
+      badges: user.badges
+    });
+  } catch (error) {
+    console.error('خطأ في جلب الإحصائيات:', error);
+    res.status(500).json({ message: 'خطأ في الخادم أثناء جلب الإحصائيات' });
   }
 });
 

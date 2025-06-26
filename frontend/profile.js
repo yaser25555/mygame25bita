@@ -74,6 +74,63 @@ function setupEventListeners() {
     
     // إعدادات اللعبة
     setupGameSettings();
+    
+    // إضافة مستمعي الأحداث للـ data attributes
+    setupDataActionListeners();
+}
+
+// إعداد مستمعي الأحداث للـ data attributes
+function setupDataActionListeners() {
+    // مستمع عام للأزرار مع data-action
+    document.addEventListener('click', (e) => {
+        const action = e.target.dataset.action;
+        if (!action) return;
+        
+        switch (action) {
+            case 'goBack':
+                goBack();
+                break;
+            case 'openSettings':
+                openSettings();
+                break;
+            case 'editProfile':
+                editProfile();
+                break;
+            case 'viewStats':
+                viewStats();
+                break;
+            case 'viewFriends':
+                viewFriends();
+                break;
+            case 'searchUsers':
+                searchUsers();
+                break;
+            case 'editProfileImage':
+                editProfileImage();
+                break;
+            case 'editCoverImage':
+                editCoverImage();
+                break;
+            case 'resetImageUpload':
+                resetImageUpload();
+                break;
+            case 'uploadImage':
+                uploadImage();
+                break;
+            case 'closeModal':
+                const modalId = e.target.dataset.modal;
+                if (modalId) {
+                    closeModal(modalId);
+                }
+                break;
+        }
+    });
+    
+    // مستمع للبحث المباشر
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', searchUsersRealTime);
+    }
 }
 
 // تبديل التبويبات
@@ -1104,5 +1161,4 @@ function viewStats() {
 // عرض الأصدقاء
 function viewFriends() {
     switchTab('friends');
-} 
 } 

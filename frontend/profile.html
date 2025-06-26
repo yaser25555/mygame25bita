@@ -20,25 +20,25 @@
         <!-- شريط التنقل -->
         <nav class="navbar">
             <div class="nav-left">
-                <button class="nav-btn" onclick="goBack()">← رجوع</button>
+                <button class="nav-btn" data-action="goBack">← رجوع</button>
             </div>
             <div class="nav-center">
                 <h1>البروفايل</h1>
             </div>
             <div class="nav-right">
-                <button class="nav-btn" onclick="openSettings()">⚙️</button>
+                <button class="nav-btn" data-action="openSettings">⚙️</button>
             </div>
         </nav>
 
         <!-- معلومات البروفايل الأساسية -->
         <div class="profile-header">
             <div class="profile-cover">
-                <img id="cover-image" src="images/default-cover.jpg" alt="صورة الغلاف">
-                <button class="edit-cover-btn" onclick="editCoverImage()">📷</button>
+                <img id="cover-image" src="images/background_image.jpg" alt="صورة الغلاف">
+                <button class="edit-cover-btn" data-action="editCoverImage">📷</button>
             </div>
             <div class="profile-avatar">
-                <img id="user-avatar" src="images/default-avatar.png" alt="الصورة الشخصية">
-                <button class="edit-avatar-btn" onclick="editProfileImage()">📷</button>
+                <img id="user-avatar" src="images/hero.png" alt="الصورة الشخصية">
+                <button class="edit-avatar-btn" data-action="editProfileImage">📷</button>
                 <div class="online-status" id="online-status"></div>
             </div>
             <div class="profile-info">
@@ -68,9 +68,9 @@
 
         <!-- أزرار الإجراءات -->
         <div class="action-buttons" id="action-buttons">
-            <button class="btn primary" onclick="editProfile()">تعديل البروفايل</button>
-            <button class="btn secondary" onclick="viewStats()">الإحصائيات</button>
-            <button class="btn secondary" onclick="viewFriends()">الأصدقاء</button>
+            <button class="btn primary" data-action="editProfile">تعديل البروفايل</button>
+            <button class="btn secondary" data-action="viewStats">الإحصائيات</button>
+            <button class="btn secondary" data-action="viewFriends">الأصدقاء</button>
         </div>
 
         <!-- التبويبات -->
@@ -241,7 +241,7 @@
                 <div class="friends-container">
                     <div class="friends-header">
                         <h3>👥 الأصدقاء</h3>
-                        <button class="btn small" onclick="searchUsers()">البحث عن أصدقاء</button>
+                        <button class="btn small" data-action="searchUsers">البحث عن أصدقاء</button>
                     </div>
                     
                     <div class="friends-tabs">
@@ -373,7 +373,7 @@
     <!-- النوافذ المنبثقة -->
     <div id="edit-profile-modal" class="modal-overlay hidden">
         <div class="modal-content large">
-            <button class="modal-close" onclick="closeModal('edit-profile-modal')">×</button>
+            <button class="modal-close" data-action="closeModal" data-modal="edit-profile-modal">×</button>
             <h3>تعديل البروفايل</h3>
             <form id="edit-profile-form">
                 <div class="form-section">
@@ -477,7 +477,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn secondary" onclick="closeModal('edit-profile-modal')">إلغاء</button>
+                    <button type="button" class="btn secondary" data-action="closeModal" data-modal="edit-profile-modal">إلغاء</button>
                     <button type="submit" class="btn primary">حفظ التغييرات</button>
                 </div>
             </form>
@@ -487,7 +487,7 @@
     <!-- نافذة رفع الصور -->
     <div id="upload-image-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('upload-image-modal')">×</button>
+            <button class="modal-close" data-action="closeModal" data-modal="upload-image-modal">×</button>
             <h3 id="upload-image-title">رفع صورة</h3>
             <div class="upload-container">
                 <div class="upload-area" id="upload-area">
@@ -501,8 +501,8 @@
                 <div class="image-preview" id="image-preview" style="display: none;">
                     <img id="preview-image" src="" alt="معاينة الصورة">
                     <div class="preview-actions">
-                        <button type="button" class="btn secondary" onclick="resetImageUpload()">إعادة اختيار</button>
-                        <button type="button" class="btn primary" onclick="uploadImage()">رفع الصورة</button>
+                        <button type="button" class="btn secondary" data-action="resetImageUpload">إعادة اختيار</button>
+                        <button type="button" class="btn primary" data-action="uploadImage">رفع الصورة</button>
                     </div>
                 </div>
             </div>
@@ -511,10 +511,10 @@
 
     <div id="search-users-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('search-users-modal')">×</button>
+            <button class="modal-close" data-action="closeModal" data-modal="search-users-modal">×</button>
             <h3>البحث عن مستخدمين</h3>
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="ابحث عن مستخدم..." oninput="searchUsersRealTime()">
+                <input type="text" id="search-input" placeholder="ابحث عن مستخدم..." data-action="searchUsersRealTime">
                 <div class="search-results" id="search-results">
                     <!-- نتائج البحث -->
                 </div>
