@@ -484,27 +484,34 @@ h1 {
         height: 100vh;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
+        align-items: center;
         margin: 0;
         box-shadow: none;
         border: none;
+        padding-top: 40px;
     }
     
     .logo {
         width: 80px;
         height: auto;
         margin-bottom: 15px;
+        align-self: center;
+        display: block;
     }
     
     h1 {
         font-size: 1.6em;
         margin-bottom: 15px;
+        text-align: center;
+        width: 100%;
     }
     
     .tabs {
         flex-direction: column;
         gap: 3px;
         margin-bottom: 20px;
+        width: 100%;
     }
     
     .tab-button {
@@ -548,6 +555,10 @@ h1 {
         flex: 1;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
     /* تعديل أحجام الأيقونات للجوال */
@@ -570,6 +581,7 @@ h1 {
 @media (max-width: 480px) {
     .container {
         padding: 15px 10px;
+        padding-top: 30px;
     }
     
     .logo {
@@ -620,6 +632,11 @@ h1 {
 }
 
 @media (max-width: 360px) {
+    .container {
+        padding: 10px 8px;
+        padding-top: 25px;
+    }
+    
     .logo {
         width: 60px;
         height: auto;
