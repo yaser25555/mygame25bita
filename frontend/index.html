@@ -12,7 +12,7 @@
 
         <div id="admin-choice-modal" class="modal-overlay hidden">
             <div class="modal-content">
-                <button class="modal-close" onclick="closeAdminModal()">×</button>
+                <button class="modal-close" id="close-admin-modal">×</button>
                 <h3>أهلاً بك أيها المشرف</h3>
                 <p>إلى أين تريد الذهاب؟</p>
                 <div class="admin-buttons">
@@ -25,6 +25,7 @@
         <div class="tabs">
             <button class="tab-button active" id="login-tab">تسجيل الدخول</button>
             <button class="tab-button" id="register-tab">تسجيل</button>
+            <button class="tab-button" id="admin-login-tab">🔐 تسجيل دخول المشرف</button>
             <button class="tab-button" id="contact-tab">للاستفسار وشحن العملات</button>
             <button class="tab-button admin-only" id="admin-tab" style="display: none;">لوحة التحكم</button>
             <button class="tab-button game-btn" id="game-tab" style="display: none;">🎮 الدخول للعبة</button>
@@ -73,6 +74,28 @@
             </form>
         </div>
 
+        <!-- قسم تسجيل دخول المشرف -->
+        <div id="admin-login-section" class="content-section">
+            <div class="admin-login-header">
+                <h3>🔐 تسجيل دخول المشرف</h3>
+                <p>أدخل بيانات المشرف للوصول إلى لوحة التحكم</p>
+            </div>
+            <form id="admin-login-form" method="POST" action="javascript:void(0)" autocomplete="on">
+                <div class="form-group">
+                    <label for="admin-login-username">اسم المستخدم:</label>
+                    <input type="text" id="admin-login-username" placeholder="أدخل اسم مستخدم المشرف" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-login-password">كلمة المرور:</label>
+                    <input type="password" id="admin-login-password" placeholder="أدخل كلمة مرور المشرف" required>
+                </div>
+                <button id="admin-login-button" class="btn admin-btn" type="submit">
+                    <span class="loading-spinner"></span>
+                    <span class="btn-text">🔐 تسجيل دخول المشرف</span>
+                </button>
+            </form>
+        </div>
+
         <!-- قسم التواصل -->
         <div id="contact-section-content" class="content-section">
             <h3>للاستفسار وشحن العملات</h3>
@@ -97,14 +120,5 @@
     </div>
 
     <script src="login.js"></script>
-    <script>
-        // دالة إغلاق مودال المشرف
-        function closeAdminModal() {
-            const modal = document.getElementById('admin-choice-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-    </script>
 </body>
 </html>
