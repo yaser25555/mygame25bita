@@ -1,5 +1,18 @@
 const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
+// تسجيل Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+            })
+            .catch((error) => {
+                console.log('❌ فشل في تسجيل Service Worker:', error);
+            });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 تحميل صفحة تسجيل الدخول...');
     
