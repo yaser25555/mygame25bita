@@ -407,6 +407,471 @@ router.get('/stats', auth, async (req, res) => {
   }
 });
 
+// إرسال هدية
+router.post('/send-gift', auth, async (req, res) => {
+  try {
+    const { toUsername, giftName, giftCount = 1, message = '' } = req.body;
+    const fromUserId = req.user.userId;
+
+    if (!toUsername || !giftName) {
+      return res.status(400).json({ error: 'اسم المستخدم ونوع الهدية مطلوبان' });
+    }
+
+    // البحث عن المستخدم المستلم
+    const toUser = await User.findOne({ username: toUsername });
+    if (!toUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    if (toUser._id.toString() === fromUserId) {
+      return res.status(400).json({ error: 'لا يمكنك إرسال هدية لنفسك' });
+    }
+
+    // التحقق من إعدادات المستلم
+    if (!toUser.gifts.giftSettings.allowGifts) {
+      return res.status(403).json({ error: 'هذا المستخدم لا يقبل الهدايا' });
+    }
+
+    // تحديد نوع الهدية وتصنيفها
+    const giftInfo = getGiftInfo(giftName);
+    if (!giftInfo) {
+      return res.status(400).json({ error: 'نوع هدية غير صحيح' });
+    }
+
+    // التحقق من إعدادات الهدايا السلبية
+    if (giftInfo.type === 'negative' && !toUser.gifts.giftSettings.allowNegativeGifts) {
+      return res.status(403).json({ error: 'هذا المستخدم لا يقبل الهدايا السلبية' });
+    }
+
+    // التحقق من إعدادات القنابل والخفافيش
+    if ((giftInfo.category === 'bomb' || giftInfo.category === 'bat') && 
+        !toUser.gifts.giftSettings.allowBombsAndBats) {
+      return res.status(403).json({ error: 'هذا المستخدم لا يقبل القنابل والخفافيش' });
+    }
+
+    // التحقق من الحد اليومي
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayGifts = await User.findById(fromUserId).then(user => 
+      user.gifts.sentGifts.filter(gift => 
+        gift.sentAt >= today && gift.toUserId.toString() === toUser._id.toString()
+      ).length
+    );
+
+    if (todayGifts >= 5) { // حد أقصى 5 هدايا يومياً لنفس المستخدم
+      return res.status(429).json({ error: 'لقد وصلت للحد الأقصى من الهدايا لهذا المستخدم اليوم' });
+    }
+
+    // إنشاء معرف فريد للهدية
+    const giftId = `gift_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // تحديد ما إذا كانت الهدية تتطلب موافقة
+    const requiresAcceptance = shouldRequireAcceptance(giftInfo);
+    const autoExecute = !requiresAcceptance;
+
+    // إنشاء الهدية
+    const gift = {
+      giftId,
+      toUserId: toUser._id,
+      toUsername: toUser.username,
+      giftType: giftInfo.type,
+      giftCategory: giftInfo.category,
+      giftName: giftInfo.name,
+      giftValue: giftInfo.value * giftCount,
+      giftCount,
+      message,
+      status: autoExecute ? 'auto_executed' : 'pending',
+      requiresAcceptance,
+      autoExecute,
+      sentAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 أيام
+      executedAt: autoExecute ? new Date() : null
+    };
+
+    // إضافة الهدية للمرسل
+    const fromUser = await User.findById(fromUserId);
+    fromUser.gifts.sentGifts.push(gift);
+    fromUser.gifts.giftStats.totalGiftsSent++;
+    if (giftInfo.type === 'positive') {
+      fromUser.gifts.giftStats.positiveGiftsSent++;
+    } else if (giftInfo.type === 'negative') {
+      fromUser.gifts.giftStats.negativeGiftsSent++;
+    }
+    fromUser.gifts.giftStats.lastGiftAt = new Date();
+
+    // إضافة الهدية للمستلم
+    const receivedGift = {
+      ...gift,
+      fromUserId: fromUser._id,
+      fromUsername: fromUser.username,
+      receivedAt: new Date()
+    };
+    toUser.gifts.receivedGifts.push(receivedGift);
+    toUser.gifts.giftStats.totalGiftsReceived++;
+    if (giftInfo.type === 'positive') {
+      toUser.gifts.giftStats.positiveGiftsReceived++;
+    } else if (giftInfo.type === 'negative') {
+      toUser.gifts.giftStats.negativeGiftsReceived++;
+    }
+
+    // تنفيذ الهدية تلقائياً إذا كانت لا تتطلب موافقة
+    if (autoExecute) {
+      await executeGift(toUser, giftInfo, giftCount);
+      
+      // إضافة للسجل
+      const historyEntry = {
+        giftId,
+        partnerId: toUser._id,
+        partnerUsername: toUser.username,
+        type: 'sent',
+        giftType: giftInfo.type,
+        giftCategory: giftInfo.category,
+        giftName: giftInfo.name,
+        giftValue: giftInfo.value * giftCount,
+        giftCount,
+        message,
+        status: 'auto_executed',
+        executedAt: new Date()
+      };
+      fromUser.gifts.giftHistory.push(historyEntry);
+      
+      const receivedHistoryEntry = {
+        ...historyEntry,
+        type: 'received',
+        partnerId: fromUser._id,
+        partnerUsername: fromUser.username
+      };
+      toUser.gifts.giftHistory.push(receivedHistoryEntry);
+    }
+
+    await fromUser.save();
+    await toUser.save();
+
+    res.json({
+      success: true,
+      message: autoExecute ? 
+        `تم إرسال ${giftInfo.name} وتنفيذها تلقائياً على ${toUser.username}` :
+        `تم إرسال ${giftInfo.name} إلى ${toUser.username} بانتظار الموافقة`,
+      giftId,
+      autoExecuted: autoExecute
+    });
+
+  } catch (error) {
+    console.error('خطأ في إرسال الهدية:', error);
+    res.status(500).json({ error: 'خطأ في إرسال الهدية' });
+  }
+});
+
+// قبول هدية
+router.post('/accept-gift', auth, async (req, res) => {
+  try {
+    const { giftId } = req.body;
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // البحث عن الهدية
+    const gift = user.gifts.receivedGifts.find(g => g.giftId === giftId);
+    if (!gift) {
+      return res.status(404).json({ error: 'الهدية غير موجودة' });
+    }
+
+    if (gift.status !== 'pending') {
+      return res.status(400).json({ error: 'لا يمكن قبول هذه الهدية' });
+    }
+
+    // البحث عن معلومات الهدية
+    const giftInfo = getGiftInfo(gift.giftName);
+    if (!giftInfo) {
+      return res.status(400).json({ error: 'معلومات الهدية غير صحيحة' });
+    }
+
+    // تنفيذ الهدية
+    await executeGift(user, giftInfo, gift.giftCount);
+
+    // تحديث حالة الهدية
+    gift.status = 'accepted';
+    gift.executedAt = new Date();
+
+    // البحث عن المرسل وتحديث هديته
+    const fromUser = await User.findById(gift.fromUserId);
+    if (fromUser) {
+      const sentGift = fromUser.gifts.sentGifts.find(g => g.giftId === giftId);
+      if (sentGift) {
+        sentGift.status = 'accepted';
+        sentGift.executedAt = new Date();
+      }
+      await fromUser.save();
+    }
+
+    // إضافة للسجل
+    const historyEntry = {
+      giftId,
+      partnerId: fromUser._id,
+      partnerUsername: fromUser.username,
+      type: 'received',
+      giftType: giftInfo.type,
+      giftCategory: giftInfo.category,
+      giftName: giftInfo.name,
+      giftValue: giftInfo.value * gift.giftCount,
+      giftCount: gift.giftCount,
+      message: gift.message,
+      status: 'accepted',
+      executedAt: new Date()
+    };
+    user.gifts.giftHistory.push(historyEntry);
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `تم قبول ${giftInfo.name} بنجاح`,
+      giftValue: giftInfo.value * gift.giftCount
+    });
+
+  } catch (error) {
+    console.error('خطأ في قبول الهدية:', error);
+    res.status(500).json({ error: 'خطأ في قبول الهدية' });
+  }
+});
+
+// رفض هدية
+router.post('/reject-gift', auth, async (req, res) => {
+  try {
+    const { giftId } = req.body;
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // البحث عن الهدية
+    const gift = user.gifts.receivedGifts.find(g => g.giftId === giftId);
+    if (!gift) {
+      return res.status(404).json({ error: 'الهدية غير موجودة' });
+    }
+
+    if (gift.status !== 'pending') {
+      return res.status(400).json({ error: 'لا يمكن رفض هذه الهدية' });
+    }
+
+    // تحديث حالة الهدية
+    gift.status = 'rejected';
+
+    // البحث عن المرسل وتحديث هديته
+    const fromUser = await User.findById(gift.fromUserId);
+    if (fromUser) {
+      const sentGift = fromUser.gifts.sentGifts.find(g => g.giftId === giftId);
+      if (sentGift) {
+        sentGift.status = 'rejected';
+      }
+      await fromUser.save();
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'تم رفض الهدية بنجاح'
+    });
+
+  } catch (error) {
+    console.error('خطأ في رفض الهدية:', error);
+    res.status(500).json({ error: 'خطأ في رفض الهدية' });
+  }
+});
+
+// الحصول على الهدايا المستلمة
+router.get('/received-gifts', auth, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تصفية الهدايا حسب الحالة
+    const pendingGifts = user.gifts.receivedGifts.filter(g => g.status === 'pending');
+    const acceptedGifts = user.gifts.receivedGifts.filter(g => g.status === 'accepted');
+    const rejectedGifts = user.gifts.receivedGifts.filter(g => g.status === 'rejected');
+
+    res.json({
+      pending: pendingGifts,
+      accepted: acceptedGifts,
+      rejected: rejectedGifts,
+      stats: user.gifts.giftStats
+    });
+
+  } catch (error) {
+    console.error('خطأ في جلب الهدايا:', error);
+    res.status(500).json({ error: 'خطأ في جلب الهدايا' });
+  }
+});
+
+// الحصول على الهدايا المرسلة
+router.get('/sent-gifts', auth, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    res.json({
+      sentGifts: user.gifts.sentGifts,
+      stats: user.gifts.giftStats
+    });
+
+  } catch (error) {
+    console.error('خطأ في جلب الهدايا المرسلة:', error);
+    res.status(500).json({ error: 'خطأ في جلب الهدايا المرسلة' });
+  }
+});
+
+// تحديث إعدادات الهدايا
+router.put('/gift-settings', auth, async (req, res) => {
+  try {
+    const { 
+      allowGifts, 
+      allowNegativeGifts, 
+      allowBombsAndBats, 
+      autoAcceptPositiveGifts,
+      maxGiftValue,
+      dailyGiftLimit 
+    } = req.body;
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تحديث الإعدادات
+    if (typeof allowGifts === 'boolean') {
+      user.gifts.giftSettings.allowGifts = allowGifts;
+    }
+    if (typeof allowNegativeGifts === 'boolean') {
+      user.gifts.giftSettings.allowNegativeGifts = allowNegativeGifts;
+    }
+    if (typeof allowBombsAndBats === 'boolean') {
+      user.gifts.giftSettings.allowBombsAndBats = allowBombsAndBats;
+    }
+    if (typeof autoAcceptPositiveGifts === 'boolean') {
+      user.gifts.giftSettings.autoAcceptPositiveGifts = autoAcceptPositiveGifts;
+    }
+    if (typeof maxGiftValue === 'number') {
+      user.gifts.giftSettings.maxGiftValue = maxGiftValue;
+    }
+    if (typeof dailyGiftLimit === 'number') {
+      user.gifts.giftSettings.dailyGiftLimit = dailyGiftLimit;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'تم تحديث إعدادات الهدايا بنجاح',
+      settings: user.gifts.giftSettings
+    });
+
+  } catch (error) {
+    console.error('خطأ في تحديث إعدادات الهدايا:', error);
+    res.status(500).json({ error: 'خطأ في تحديث إعدادات الهدايا' });
+  }
+});
+
+// دالة مساعدة لتحديد معلومات الهدية
+function getGiftInfo(giftName) {
+  const giftTypes = {
+    // هدايا إيجابية (تتطلب موافقة)
+    'pearls': { name: 'لآلئ', type: 'positive', category: 'currency', value: 100 },
+    'gems': { name: 'جواهر', type: 'positive', category: 'currency', value: 50 },
+    'coins': { name: 'عملات', type: 'positive', category: 'currency', value: 10 },
+    'keys': { name: 'مفاتيح', type: 'positive', category: 'item', value: 25 },
+    'stars': { name: 'نجوم', type: 'positive', category: 'item', value: 30 },
+    
+    // هدايا سلبية (تنفذ تلقائياً)
+    'bomb': { name: 'قنبلة', type: 'negative', category: 'bomb', value: -50 },
+    'bat': { name: 'خفاش', type: 'negative', category: 'bat', value: -30 },
+    'curse': { name: 'لعنة', type: 'negative', category: 'effect', value: -20 },
+    
+    // هدايا محايدة
+    'mystery_box': { name: 'صندوق غامض', type: 'neutral', category: 'item', value: 0 }
+  };
+
+  return giftTypes[giftName];
+}
+
+// دالة مساعدة لتحديد ما إذا كانت الهدية تتطلب موافقة
+function shouldRequireAcceptance(giftInfo) {
+  // الهدايا السلبية (قنابل، خفافيش، لعنات) تنفذ تلقائياً
+  if (giftInfo.type === 'negative') {
+    return false;
+  }
+  
+  // الهدايا الإيجابية (عملات، عناصر) تتطلب موافقة
+  if (giftInfo.type === 'positive') {
+    return true;
+  }
+  
+  // الهدايا المحايدة تتطلب موافقة
+  return true;
+}
+
+// دالة مساعدة لتنفيذ الهدية
+async function executeGift(user, giftInfo, count) {
+  switch (giftInfo.category) {
+    case 'currency':
+      switch (giftInfo.name) {
+        case 'لآلئ':
+          user.stats.pearls += (giftInfo.value * count);
+          break;
+        case 'جواهر':
+          user.itemsCollected.gems += count;
+          break;
+        case 'عملات':
+          user.itemsCollected.coins += count;
+          break;
+      }
+      break;
+      
+    case 'item':
+      switch (giftInfo.name) {
+        case 'مفاتيح':
+          user.itemsCollected.keys += count;
+          break;
+        case 'نجوم':
+          user.itemsCollected.stars += count;
+          break;
+      }
+      break;
+      
+    case 'bomb':
+      // القنبلة تخصم نقاط
+      user.stats.score = Math.max(0, user.stats.score + (giftInfo.value * count));
+      break;
+      
+    case 'bat':
+      // الخفاش يخصم نقاط
+      user.stats.score = Math.max(0, user.stats.score + (giftInfo.value * count));
+      break;
+      
+    case 'effect':
+      // اللعنة تخصم نقاط
+      user.stats.score = Math.max(0, user.stats.score + (giftInfo.value * count));
+      break;
+  }
+  
+  // تحديث إحصائيات الهدايا
+  user.gifts.giftStats.totalGiftValue += (giftInfo.value * count);
+}
+
 // دوال مساعدة
 
 // التحقق من امتلاك العناصر

@@ -451,9 +451,10 @@ const UserSchema = new mongoose.Schema({
         gems: { type: Number, default: 0 },
         keys: { type: Number, default: 0 },
         coins: { type: Number, default: 0 },
-        bombs: { type: Number, default: 0 },
-        stars: { type: Number, default: 0 },
-        bats: { type: Number, default: 0 }
+        items: [{
+          type: String,
+          count: Number
+        }]
       },
       requestedItems: {
         score: { type: Number, default: 0 },
@@ -461,11 +462,11 @@ const UserSchema = new mongoose.Schema({
         gems: { type: Number, default: 0 },
         keys: { type: Number, default: 0 },
         coins: { type: Number, default: 0 },
-        bombs: { type: Number, default: 0 },
-        stars: { type: Number, default: 0 },
-        bats: { type: Number, default: 0 }
+        items: [{
+          type: String,
+          count: Number
+        }]
       },
-      message: String,
       status: {
         type: String,
         enum: ['pending', 'accepted', 'rejected', 'cancelled'],
@@ -500,9 +501,10 @@ const UserSchema = new mongoose.Schema({
         gems: { type: Number, default: 0 },
         keys: { type: Number, default: 0 },
         coins: { type: Number, default: 0 },
-        bombs: { type: Number, default: 0 },
-        stars: { type: Number, default: 0 },
-        bats: { type: Number, default: 0 }
+        items: [{
+          type: String,
+          count: Number
+        }]
       },
       requestedItems: {
         score: { type: Number, default: 0 },
@@ -510,11 +512,11 @@ const UserSchema = new mongoose.Schema({
         gems: { type: Number, default: 0 },
         keys: { type: Number, default: 0 },
         coins: { type: Number, default: 0 },
-        bombs: { type: Number, default: 0 },
-        stars: { type: Number, default: 0 },
-        bats: { type: Number, default: 0 }
+        items: [{
+          type: String,
+          count: Number
+        }]
       },
-      message: String,
       status: {
         type: String,
         enum: ['pending', 'accepted', 'rejected', 'cancelled'],
@@ -532,7 +534,7 @@ const UserSchema = new mongoose.Schema({
       }
     }],
     
-    // سجل التداولات المكتملة
+    // سجل التداول
     tradeHistory: [{
       tradeId: String,
       partnerId: {
@@ -540,27 +542,37 @@ const UserSchema = new mongoose.Schema({
         ref: 'User'
       },
       partnerUsername: String,
-      tradedItems: {
-        given: {
-          score: { type: Number, default: 0 },
-          pearls: { type: Number, default: 0 },
-          gems: { type: Number, default: 0 },
-          keys: { type: Number, default: 0 },
-          coins: { type: Number, default: 0 },
-          bombs: { type: Number, default: 0 },
-          stars: { type: Number, default: 0 },
-          bats: { type: Number, default: 0 }
-        },
-        received: {
-          score: { type: Number, default: 0 },
-          pearls: { type: Number, default: 0 },
-          gems: { type: Number, default: 0 },
-          keys: { type: Number, default: 0 },
-          coins: { type: Number, default: 0 },
-          bombs: { type: Number, default: 0 },
-          stars: { type: Number, default: 0 },
-          bats: { type: Number, default: 0 }
-        }
+      type: {
+        type: String,
+        enum: ['sent', 'received'],
+        required: true
+      },
+      offeredItems: {
+        score: { type: Number, default: 0 },
+        pearls: { type: Number, default: 0 },
+        gems: { type: Number, default: 0 },
+        keys: { type: Number, default: 0 },
+        coins: { type: Number, default: 0 },
+        items: [{
+          type: String,
+          count: Number
+        }]
+      },
+      receivedItems: {
+        score: { type: Number, default: 0 },
+        pearls: { type: Number, default: 0 },
+        gems: { type: Number, default: 0 },
+        keys: { type: Number, default: 0 },
+        coins: { type: Number, default: 0 },
+        items: [{
+          type: String,
+          count: Number
+        }]
+      },
+      status: {
+        type: String,
+        enum: ['completed', 'cancelled', 'expired'],
+        required: true
       },
       completedAt: {
         type: Date,
@@ -574,29 +586,21 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: true
       },
-      allowScoreTrading: {
+      allowGifts: {
         type: Boolean,
         default: true
       },
-      allowPearlTrading: {
+      allowNegativeItems: {
         type: Boolean,
         default: true
       },
-      allowItemTrading: {
-        type: Boolean,
-        default: true
-      },
-      minTradeAmount: {
-        type: Number,
-        default: 10
-      },
-      maxTradeAmount: {
-        type: Number,
-        default: 10000
-      },
-      autoRejectTrades: {
+      autoAcceptGifts: {
         type: Boolean,
         default: false
+      },
+      maxTradeValue: {
+        type: Number,
+        default: 10000
       }
     },
     
@@ -610,25 +614,240 @@ const UserSchema = new mongoose.Schema({
         type: Number,
         default: 0
       },
-      cancelledTrades: {
+      totalValueTraded: {
         type: Number,
         default: 0
       },
-      totalTradedScore: {
+      giftsSent: {
         type: Number,
         default: 0
       },
-      totalTradedPearls: {
+      giftsReceived: {
         type: Number,
         default: 0
       },
-      totalTradedGems: {
+      lastTradeAt: {
+        type: Date,
+        default: null
+      }
+    }
+  },
+  
+  // نظام الهدايا الجديد
+  gifts: {
+    // الهدايا المرسلة
+    sentGifts: [{
+      giftId: {
+        type: String,
+        unique: true
+      },
+      toUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      toUsername: String,
+      giftType: {
+        type: String,
+        enum: ['positive', 'negative', 'neutral'],
+        required: true
+      },
+      giftCategory: {
+        type: String,
+        enum: ['currency', 'item', 'effect', 'bomb', 'bat'],
+        required: true
+      },
+      giftName: String,
+      giftValue: Number,
+      giftCount: {
+        type: Number,
+        default: 1
+      },
+      message: String,
+      status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected', 'auto_executed', 'expired'],
+        default: 'pending'
+      },
+      requiresAcceptance: {
+        type: Boolean,
+        default: true
+      },
+      autoExecute: {
+        type: Boolean,
+        default: false
+      },
+      sentAt: {
+        type: Date,
+        default: Date.now
+      },
+      expiresAt: {
+        type: Date,
+        default: function() {
+          return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 أيام
+        }
+      },
+      executedAt: {
+        type: Date,
+        default: null
+      }
+    }],
+    
+    // الهدايا المستلمة
+    receivedGifts: [{
+      giftId: {
+        type: String,
+        unique: true
+      },
+      fromUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      fromUsername: String,
+      giftType: {
+        type: String,
+        enum: ['positive', 'negative', 'neutral'],
+        required: true
+      },
+      giftCategory: {
+        type: String,
+        enum: ['currency', 'item', 'effect', 'bomb', 'bat'],
+        required: true
+      },
+      giftName: String,
+      giftValue: Number,
+      giftCount: {
+        type: Number,
+        default: 1
+      },
+      message: String,
+      status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected', 'auto_executed', 'expired'],
+        default: 'pending'
+      },
+      requiresAcceptance: {
+        type: Boolean,
+        default: true
+      },
+      autoExecute: {
+        type: Boolean,
+        default: false
+      },
+      receivedAt: {
+        type: Date,
+        default: Date.now
+      },
+      expiresAt: {
+        type: Date,
+        default: function() {
+          return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 أيام
+        }
+      },
+      executedAt: {
+        type: Date,
+        default: null
+      }
+    }],
+    
+    // سجل الهدايا
+    giftHistory: [{
+      giftId: String,
+      partnerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      partnerUsername: String,
+      type: {
+        type: String,
+        enum: ['sent', 'received'],
+        required: true
+      },
+      giftType: {
+        type: String,
+        enum: ['positive', 'negative', 'neutral'],
+        required: true
+      },
+      giftCategory: {
+        type: String,
+        enum: ['currency', 'item', 'effect', 'bomb', 'bat'],
+        required: true
+      },
+      giftName: String,
+      giftValue: Number,
+      giftCount: Number,
+      message: String,
+      status: {
+        type: String,
+        enum: ['accepted', 'rejected', 'auto_executed', 'expired'],
+        required: true
+      },
+      executedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    
+    // إعدادات الهدايا
+    giftSettings: {
+      allowGifts: {
+        type: Boolean,
+        default: true
+      },
+      allowNegativeGifts: {
+        type: Boolean,
+        default: true
+      },
+      allowBombsAndBats: {
+        type: Boolean,
+        default: true
+      },
+      autoAcceptPositiveGifts: {
+        type: Boolean,
+        default: false
+      },
+      maxGiftValue: {
+        type: Number,
+        default: 5000
+      },
+      dailyGiftLimit: {
+        type: Number,
+        default: 10
+      }
+    },
+    
+    // إحصائيات الهدايا
+    giftStats: {
+      totalGiftsSent: {
         type: Number,
         default: 0
       },
-      reputation: {
+      totalGiftsReceived: {
         type: Number,
-        default: 100
+        default: 0
+      },
+      positiveGiftsSent: {
+        type: Number,
+        default: 0
+      },
+      negativeGiftsSent: {
+        type: Number,
+        default: 0
+      },
+      positiveGiftsReceived: {
+        type: Number,
+        default: 0
+      },
+      negativeGiftsReceived: {
+        type: Number,
+        default: 0
+      },
+      totalGiftValue: {
+        type: Number,
+        default: 0
+      },
+      lastGiftAt: {
+        type: Date,
+        default: null
       }
     }
   }
