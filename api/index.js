@@ -71,7 +71,7 @@ app.use(express.static(path.join(__dirname, '../frontend'))); // خدمة كل �
 // إعادة توجيه / إلى index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
-});
+  });
 
 // --- 7. نقطة نهاية لفحص الحالة الصحية (Health Check) ---
 // Render يستخدم هذا المسار للتأكد من أن الخدمة تعمل بشكل سليم
