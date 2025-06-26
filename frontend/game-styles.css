@@ -47,7 +47,7 @@
             z-index: -1;
         }
 
-        /* توزيع الأعمدة الرئيسية */
+        /* توزيع الأعمدة الرئيسية فقط */
         .main-content {
           display: flex;
           flex-direction: row;
@@ -97,62 +97,6 @@
           align-items: center;
           justify-content: flex-start;
           gap: 18px;
-          background: #fff;
-          border-radius: 18px;
-          box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-          padding: 24px 0;
-        }
-        .small-logo {
-          width: 70px;
-          height: 70px;
-          margin: 10px auto 0 auto;
-          display: block;
-        }
-
-        .circular-controls {
-          display: flex;
-          gap: 18px;
-          justify-content: center;
-          margin: 18px 0 10px 0;
-        }
-        .circular-btn {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #e0e7ef 0%, #7fbcff 100%);
-          border: none;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2em;
-          color: #333;
-          transition: background 0.2s, transform 0.2s;
-          cursor: pointer;
-        }
-        .circular-btn:hover {
-          background: linear-gradient(135deg, #facc15 0%, #f43f5e 100%);
-          color: #fff;
-          transform: scale(1.08);
-        }
-
-        .large-items {
-          transform: scale(1.18);
-          margin-top: 0 !important;
-          background: #f9fafb;
-          border-radius: 12px;
-          padding: 12px;
-        }
-
-        .prominent-boxes {
-          margin-top: 18px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.10);
-          border-radius: 18px;
-          background: #fff;
-          padding: 18px 0 18px 0;
-          min-height: 200px;
-          width: 90%;
-          margin-bottom: 24px;
         }
 
         /* عمود معلومات المستخدم والمحادثة */
