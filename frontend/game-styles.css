@@ -94,10 +94,12 @@ body::before {
     justify-content: center;
     align-items: flex-start;
     gap: 32px;
-    width: 100vw;
+    width: 100%;
+    max-width: 1400px;
     min-height: 100vh;
     box-sizing: border-box;
     padding: 32px 0;
+    margin: 0 auto;
 }
 
 /* عمود الرسائل */
@@ -124,6 +126,14 @@ body::before {
     text-align: right;
     overflow-y: auto;
     font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+    width: 100%;
+    height: 100%;
+}
+
+.message-area h3 {
+    margin-bottom: 20px;
+    color: #7fbcff;
+    text-align: center;
 }
 
 /* عمود اللعبة */
@@ -135,6 +145,185 @@ body::before {
     align-items: center;
     justify-content: flex-start;
     gap: 18px;
+    max-width: 600px;
+}
+
+/* العنوان */
+.header-container {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.centered-header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo.small-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.game-title {
+    font-size: 2em;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(127, 188, 255, 0.8);
+    margin: 0;
+}
+
+/* أزرار التحكم */
+.controls {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.bet-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 15px;
+    padding: 15px 20px;
+    color: white;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.bet-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bet-button i {
+    font-size: 1.5em;
+}
+
+.bet-button span {
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+/* عرض العناصر المجمعة */
+.item-collection-display {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    width: 100%;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.item-collection-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #7fbcff;
+}
+
+.item-info-btn {
+    background: none;
+    border: none;
+    color: #7fbcff;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.item-info-btn:hover {
+    background: rgba(127, 188, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 15px;
+}
+
+.item-display {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.item-display:hover {
+    transform: translateY(-2px);
+    border-color: #7fbcff;
+}
+
+.item-emoji {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.item-count {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #fff;
+}
+
+.item-name {
+    font-size: 0.8em;
+    color: #ccc;
+    margin-top: 5px;
+}
+
+/* شبكة الصناديق */
+.boxes-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    max-width: 500px;
+    margin: 20px 0;
+}
+
+.box {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+    font-size: 2em;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.box.opened {
+    background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+    border-color: #00b894;
 }
 
 /* عمود معلومات المستخدم والمحادثة */
@@ -157,11 +346,15 @@ body::before {
     padding: 20px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
 }
 
 .player-details p {
     margin: 10px 0;
     font-size: 1.1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .player-actions {
@@ -169,77 +362,24 @@ body::before {
     gap: 10px;
     flex-wrap: wrap;
     margin-top: 15px;
+    justify-content: center;
 }
 
 .player-actions button {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 12px 16px;
     color: white;
     cursor: pointer;
     font-size: 1.2em;
     transition: all 0.3s ease;
+    min-width: 50px;
 }
 
 .player-actions button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* الصناديق */
-.boxes-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 15px;
-    max-width: 600px;
-    margin: 20px 0;
-}
-
-.box {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-    border-radius: 15px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 3px solid transparent;
-    position: relative;
-    overflow: hidden;
-}
-
-.box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-.box.opened {
-    background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
-    border-color: #00b894;
-}
-
-/* أزرار التحكم */
-.controls {
-    display: flex;
-    gap: 15px;
-    margin: 20px 0;
-}
-
-.bet-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 50%;
-    width: 80px;
-    height: 80px;
-    color: white;
-    font-size: 1.5em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.bet-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* المحادثة */
@@ -253,7 +393,9 @@ body::before {
     border-radius: 18px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.25);
     padding: 18px;
-    min-height: 200px;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
 }
 
 .chat-header {
@@ -264,6 +406,7 @@ body::before {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     background: linear-gradient(135deg, rgba(52, 152, 219, 0.3) 0%, rgba(52, 152, 219, 0.1) 100%);
     border-radius: 18px 18px 0 0;
+    margin: -18px -18px 0 -18px;
 }
 
 .chat-header h3 {
@@ -275,6 +418,35 @@ body::before {
     gap: 10px;
 }
 
+.chat-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.chat-control-btn,
+.chat-toggle-btn {
+    border: none;
+    color: #fff;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.chat-control-btn:hover,
+.chat-toggle-btn:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
 .chat-messages {
     height: 200px;
     overflow-y: auto;
@@ -282,12 +454,40 @@ body::before {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     margin: 10px 0;
+    flex: 1;
+}
+
+.chat-message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.system-message {
+    background: rgba(127, 188, 255, 0.2);
+    color: #7fbcff;
+    text-align: center;
+    font-style: italic;
+}
+
+.message-sender {
+    font-weight: bold;
+    color: #7fbcff;
+    margin-right: 8px;
+}
+
+.message-time {
+    font-size: 0.8em;
+    color: #999;
+    margin-left: 8px;
 }
 
 .chat-input-container {
     display: flex;
     gap: 10px;
     align-items: center;
+    margin-top: 10px;
 }
 
 #chatInput {
@@ -322,21 +522,124 @@ body::before {
     transform: scale(1.1);
 }
 
+/* المودالات */
+.item-info-modal,
+.voice-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.item-info-modal.show,
+.voice-modal.show {
+    display: flex;
+}
+
+.item-info-content,
+.voice-modal-content {
+    background: #232946;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.item-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.item-info-title {
+    color: #7fbcff;
+    margin: 0;
+}
+
+.item-info-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.item-info-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* تأثيرات الفوز والخسارة */
+#win-gif-container,
+#sadcat-gif-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10001;
+    display: none;
+    text-align: center;
+}
+
+#win-gif-container.show,
+#sadcat-gif-container.show {
+    display: block;
+}
+
+#win-gif-container img,
+#sadcat-gif-container img {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.close-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #f43f5e;
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 1.2em;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
 /* الوضع الليلي */
 body.dark-mode {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 }
 
 body.dark-mode .player-info,
-body.dark-mode .chat-container {
+body.dark-mode .chat-container,
+body.dark-mode .item-collection-display {
     background: rgba(0, 0, 0, 0.3);
 }
 
 /* الاستجابة للشاشات الصغيرة */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .main-content {
         flex-direction: column;
         gap: 20px;
+        padding: 20px;
     }
     
     .messages-column,
@@ -344,6 +647,16 @@ body.dark-mode .chat-container {
         flex: none;
         width: 100%;
         max-width: none;
+    }
+    
+    .game-center-column {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 10px;
     }
     
     .boxes-grid {
@@ -357,8 +670,44 @@ body.dark-mode .chat-container {
     }
     
     .bet-button {
+        min-width: 100px;
+        padding: 12px 15px;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 10px;
+    }
+    
+    .voice-chat-btn {
+        bottom: 20px;
+        left: 20px;
+        font-size: 1em;
+        padding: 15px 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .boxes-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .bet-button {
+        min-width: 80px;
+        padding: 10px;
+        font-size: 0.9em;
+    }
+    
+    .bet-button span {
+        font-size: 0.8em;
+    }
+    
+    .game-title {
+        font-size: 1.5em;
+    }
+    
+    .logo.small-logo {
         width: 60px;
         height: 60px;
-        font-size: 1.2em;
     }
 } 

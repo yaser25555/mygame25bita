@@ -17,7 +17,10 @@ async function checkExistingToken() {
     const token = localStorage.getItem('token');
     console.log('🔍 فحص token:', token ? 'موجود' : 'غير موجود');
     
-    if (!token) return;
+    if (!token) {
+        console.log('❌ لا يوجد token، عرض صفحة تسجيل الدخول');
+        return;
+    }
     
     try {
         const response = await fetch(`${BACKEND_URL}/api/users/me`, {
@@ -28,11 +31,13 @@ async function checkExistingToken() {
             const data = await response.json();
             console.log('✅ token صالح، المستخدم:', data.username);
             
-            if (data.isAdmin) {
-                showAdminChoiceModal();
-            } else {
+            // توجيه المستخدم العادي مباشرة إلى اللعبة
+            if (!data.isAdmin) {
                 console.log('🔄 توجيه المستخدم العادي إلى اللعبة');
                 window.location.href = 'game.html';
+            } else {
+                console.log('👑 المستخدم مشرف، عرض خيارات المشرف');
+                showAdminChoiceModal();
             }
         } else {
             console.log('❌ token غير صالح، حذفه');
