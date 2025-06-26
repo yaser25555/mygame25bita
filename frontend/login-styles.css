@@ -1,4 +1,4 @@
-/* أنماط CSS لصفحة تسجيل الدخول */
+/* أنماط CSS لصفحة تسجيل الدخول - تصميم تطبيق الجوال */
 :root {
     --primary-bg-color: #002A1B; /* أخضر غامق للخلفية */
     --secondary-color: #003D25; /* أخضر أعمق للحاويات */
@@ -20,6 +20,16 @@
 
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* منع التمرير */
+    position: fixed; /* تثبيت الصفحة */
+    -webkit-overflow-scrolling: touch; /* تمرير سلس على iOS */
 }
 
 body {
@@ -31,10 +41,18 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    margin: 0;
-    padding: 15px;
+    height: 100vh; /* ارتفاع كامل الشاشة */
+    width: 100vw; /* عرض كامل الشاشة */
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
+    /* إعدادات تطبيق الجوال */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: 100%;
 }
 
 body::before {
@@ -53,31 +71,39 @@ body::before {
 
 .container {
     background: linear-gradient(180deg, var(--secondary-color) 0%, #002A1B 100%);
-    padding: 30px 25px;
-    border-radius: 25px;
+    padding: 20px 15px;
+    border-radius: 0; /* إزالة الزوايا المستديرة */
     box-shadow: 
-        0 20px 40px rgba(0, 42, 27, 0.8),
+        0 0 0 rgba(0, 42, 27, 0.8),
         inset 0 0 20px rgba(0, 255, 0, 0.1),
         0 0 30px rgba(0, 255, 0, 0.2);
     text-align: center;
-    max-width: 500px;
     width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     position: relative;
     z-index: 1;
-    border: 2px solid var(--border-color);
+    border: none;
     backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     animation: containerGlow 3s ease-in-out infinite alternate;
+    /* إعدادات تطبيق الجوال */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes containerGlow {
-    0% { box-shadow: 0 20px 40px rgba(0, 42, 27, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.1), 0 0 30px rgba(0, 255, 0, 0.2); }
-    100% { box-shadow: 0 20px 40px rgba(0, 42, 27, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.15), 0 0 40px rgba(0, 255, 0, 0.3); }
+    0% { box-shadow: 0 0 0 rgba(0, 42, 27, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.1), 0 0 30px rgba(0, 255, 0, 0.2); }
+    100% { box-shadow: 0 0 0 rgba(0, 42, 27, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.15), 0 0 40px rgba(0, 255, 0, 0.3); }
 }
 
 .logo {
-    width: 120px;
+    width: 100px;
     height: auto;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     filter: drop-shadow(0 0 15px rgba(0, 255, 0, 0.6));
     animation: logoFloat 4s ease-in-out infinite;
 }
@@ -97,23 +123,23 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px);
 }
 
 .modal-content {
     background: linear-gradient(135deg, var(--secondary-color) 0%, #002A1B 100%);
-    padding: 30px 25px;
+    padding: 25px 20px;
     border-radius: 20px;
     text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
     border: 2px solid var(--border-color);
     position: relative;
-    max-width: 350px;
+    max-width: 90%;
     width: 90%;
     animation: modalSlideIn 0.3s ease-out;
 }
@@ -138,8 +164,8 @@ body::before {
 .modal-content .btn {
     margin: 8px 0;
     width: 100%;
-    padding: 12px 20px;
-    font-size: 1em;
+    padding: 15px 20px;
+    font-size: 1.1em;
 }
 
 .modal-content .admin-buttons {
@@ -150,9 +176,9 @@ body::before {
 }
 
 .modal-content .admin-buttons .btn {
-    padding: 12px 18px;
-    font-size: 1em;
-    border-radius: 12px;
+    padding: 15px 18px;
+    font-size: 1.1em;
+    border-radius: 15px;
     transition: all 0.3s ease;
 }
 
@@ -164,8 +190,8 @@ body::before {
 h1 {
     color: var(--accent-color-2);
     font-family: 'Amiri', 'Noto Naskh Arabic', serif;
-    margin-bottom: 20px;
-    font-size: 2.2em;
+    margin-bottom: 15px;
+    font-size: 2em;
     text-shadow: 0 0 15px rgba(0, 255, 0, 0.8), 0 0 25px rgba(0, 255, 0, 0.4);
     letter-spacing: 1px;
     font-weight: bold;
@@ -174,18 +200,19 @@ h1 {
 .tabs {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     border-bottom: 2px solid var(--border-color);
     justify-content: center;
-    gap: 5px;
+    gap: 2px;
+    width: 100%;
 }
 
 .tab-button {
     flex: 1;
-    min-width: 100px;
-    padding: 15px 12px;
+    min-width: 80px;
+    padding: 12px 8px;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 0.9em;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.7);
     background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 0, 0.05) 100%);
@@ -198,6 +225,9 @@ h1 {
     border-radius: 12px 12px 0 0;
     position: relative;
     overflow: hidden;
+    /* تحسين التفاعل على الجوال */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .tab-button::before {
@@ -211,7 +241,8 @@ h1 {
     transition: left 0.5s;
 }
 
-.tab-button:hover::before {
+.tab-button:hover::before,
+.tab-button:active::before {
     left: 100%;
 }
 
@@ -246,9 +277,12 @@ h1 {
 
 .content-section {
     display: none;
-    padding: 20px 0;
+    padding: 15px 0;
     text-align: right;
     animation: fadeIn 0.3s ease-in;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes fadeIn {
@@ -261,7 +295,7 @@ h1 {
 }
 
 .content-section .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .content-section .btn {
@@ -269,7 +303,7 @@ h1 {
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: right;
     position: relative;
 }
@@ -296,6 +330,11 @@ h1 {
     transition: all 0.3s ease;
     backdrop-filter: blur(5px);
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    /* تحسين الإدخال على الجوال */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: 16px; /* منع التكبير على iOS */
 }
 
 .form-group input:focus,
@@ -316,8 +355,8 @@ h1 {
 /* أنماط خاصة لقسم تسجيل دخول المشرف */
 .admin-login-header {
     text-align: center;
-    margin-bottom: 25px;
-    padding: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
     background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
     border-radius: 15px;
     border: 1px solid rgba(255, 107, 53, 0.3);
@@ -326,14 +365,14 @@ h1 {
 .admin-login-header h3 {
     color: #FF6B35;
     margin-bottom: 10px;
-    font-size: 1.5em;
+    font-size: 1.4em;
     text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
 }
 
 .admin-login-header p {
     color: var(--text-color-light);
     margin: 0;
-    font-size: 0.95em;
+    font-size: 0.9em;
     opacity: 0.9;
 }
 
@@ -355,7 +394,7 @@ h1 {
     background: linear-gradient(135deg, var(--button-bg-color) 0%, var(--button-hover-bg-color) 100%);
     color: var(--text-color-dark);
     border: none;
-    padding: 15px 25px;
+    padding: 18px 25px;
     border-radius: 15px;
     cursor: pointer;
     font-size: 1.1em;
@@ -368,6 +407,10 @@ h1 {
     overflow: hidden;
     width: 100%;
     margin-top: 10px;
+    /* تحسين التفاعل على الجوال */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: 50px; /* ارتفاع أدنى للأزرار */
 }
 
 .btn::before {
@@ -381,7 +424,8 @@ h1 {
     transition: left 0.5s;
 }
 
-.btn:hover::before {
+.btn:hover::before,
+.btn:active::before {
     left: 100%;
 }
 
@@ -421,7 +465,7 @@ h1 {
 }
 
 .message-box {
-    margin: 15px 0;
+    margin: 10px 0;
     padding: 12px 18px;
     border-radius: 12px;
     font-weight: 600;
@@ -453,102 +497,142 @@ h1 {
     color: #74b9ff;
 }
 
-/* أنماط للجوال */
+/* أنماط للجوال - تحسينات إضافية */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 0;
     }
     
     .container {
-        padding: 25px 20px;
-        border-radius: 20px;
+        padding: 15px 10px;
+        border-radius: 0;
         max-width: 100%;
+        height: 100vh;
     }
     
     .logo {
-        width: 100px;
-        margin-bottom: 15px;
+        width: 80px;
+        margin-bottom: 10px;
     }
     
     h1 {
-        font-size: 1.8em;
-        margin-bottom: 15px;
+        font-size: 1.6em;
+        margin-bottom: 10px;
     }
     
     .tabs {
-        flex-direction: column;
-        gap: 3px;
+        flex-direction: row;
+        gap: 1px;
+        margin-bottom: 15px;
     }
     
     .tab-button {
-        padding: 12px 10px;
-        font-size: 0.9em;
+        padding: 10px 6px;
+        font-size: 0.8em;
         border-radius: 10px;
-        min-width: auto;
+        min-width: 60px;
     }
     
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
     
     .form-group input,
     .form-group select {
         padding: 12px 15px;
-        font-size: 0.95em;
+        font-size: 16px; /* منع التكبير على iOS */
     }
     
     .btn {
-        padding: 12px 20px;
+        padding: 15px 20px;
         font-size: 1em;
+        min-height: 45px;
     }
     
     .modal-content {
-        padding: 25px 20px;
-        max-width: 90%;
+        padding: 20px 15px;
+        max-width: 95%;
+        width: 95%;
     }
     
     .admin-login-header {
-        padding: 15px;
-        margin-bottom: 20px;
+        padding: 12px;
+        margin-bottom: 15px;
     }
     
     .admin-login-header h3 {
-        font-size: 1.3em;
+        font-size: 1.2em;
+    }
+    
+    .content-section {
+        padding: 10px 0;
     }
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 20px 15px;
-        border-radius: 15px;
+        padding: 10px 8px;
     }
     
     .logo {
-        width: 80px;
+        width: 70px;
     }
     
     h1 {
-        font-size: 1.5em;
+        font-size: 1.4em;
     }
     
     .tab-button {
-        padding: 10px 8px;
-        font-size: 0.85em;
+        padding: 8px 4px;
+        font-size: 0.75em;
+        min-width: 50px;
     }
     
     .form-group input,
     .form-group select {
         padding: 10px 12px;
-        font-size: 0.9em;
+        font-size: 16px;
     }
     
     .btn {
-        padding: 10px 15px;
+        padding: 12px 15px;
         font-size: 0.95em;
+        min-height: 40px;
     }
     
     .modal-content {
-        padding: 20px 15px;
+        padding: 15px 10px;
+    }
+    
+    .content-section {
+        padding: 8px 0;
+    }
+}
+
+/* أنماط خاصة للشاشات الصغيرة جداً */
+@media (max-width: 360px) {
+    .container {
+        padding: 8px 5px;
+    }
+    
+    .logo {
+        width: 60px;
+    }
+    
+    h1 {
+        font-size: 1.2em;
+    }
+    
+    .tab-button {
+        padding: 6px 3px;
+        font-size: 0.7em;
+        min-width: 45px;
+    }
+    
+    .btn {
+        padding: 10px 12px;
+        font-size: 0.9em;
+        min-height: 35px;
     }
 }
 
@@ -615,6 +699,7 @@ h1 {
     justify-content: center;
     transition: all 0.3s ease;
     background: rgba(255, 255, 255, 0.1);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .modal-close:hover {
@@ -649,4 +734,30 @@ h1 {
 .contact-info-item a:hover {
     color: var(--accent-color-2);
     text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+/* منع التحديد والنسخ */
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* السماح بالتحديد في حقول الإدخال */
+input, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* إخفاء شريط التمرير */
+::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
