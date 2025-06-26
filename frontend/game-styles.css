@@ -1000,36 +1000,34 @@
 
         /* Header Styles from game1.html */
         .header-container {
+            width: 60px;
+            height: 60px;
+            padding: 0;
+            margin: 0 auto 0 auto;
+            background: none;
+            box-shadow: none;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-            padding: 10px 15px;
-            border-radius: 20px;
-            position: relative;
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            z-index: 10;
+            border-radius: 12px;
         }
 
         .centered-header-content {
+            width: 60px;
+            height: 60px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 15px;
-            z-index: 1;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
         }
 
-        .logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 3px solid #3498db;
-            object-fit: cover;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-            transition: all 0.3s ease;
+        .logo, .small-logo {
+            width: 48px;
+            height: 48px;
+            margin: 0;
+            display: block;
         }
 
         .logo:hover {

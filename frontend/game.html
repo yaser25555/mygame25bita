@@ -76,96 +76,96 @@
         </div>
         <!-- عمود معلومات المستخدم والمحادثة (يسار) -->
         <div class="left-panel">
-            <div class="player-info">
-                <div class="player-details">
-                    <p><span id="username-display"></span></p>
-                    <p><span id="balance-display"></span>💰</p>
+    <div class="player-info">
+        <div class="player-details">
+            <p><span id="username-display"></span></p>
+            <p><span id="balance-display"></span>💰</p>
                     <p><span id="pearl-balance"></span>🦪</p>
-                </div>
-                <div class="player-actions">
-                    <button id="recharge-button" title="تعبئة رصيد">💰</button>
+        </div>
+        <div class="player-actions">
+            <button id="recharge-button" title="تعبئة رصيد">💰</button>
                     <button id="lamp-button" title="فتح المصباح">💡</button>
-                    <button id="logout-button" title="تسجيل الخروج">⏻</button>
-                    <button id="mute-button" title="كتم/إلغاء كتم الصوت">🔊</button>
+            <button id="logout-button" title="تسجيل الخروج">⏻</button>
+            <button id="mute-button" title="كتم/إلغاء كتم الصوت">🔊</button>
+        </div>
+    </div>
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <h3><i class="fas fa-comments"></i> المحادثة</h3>
+                <div class="chat-controls">
+                    <button id="reconnectBtn" class="chat-control-btn" title="إعادة الاتصال" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-wifi"></i>
+                    </button>
+                    <button id="voiceChatBtn" class="chat-control-btn" title="بدء المحادثة الصوتية">
+                        <i class="fas fa-microphone-slash"></i>
+                    </button>
+                    <button id="chatMuteBtn" class="chat-control-btn" title="كتم صوت المحادثة">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button id="toggleChat" class="chat-toggle-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+            </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="system-message">
+                    <span class="message-time">الآن</span>
+                    <span class="message-text">مرحباً! يمكنك التحدث مع اللاعبين الآخرين هنا</span>
                 </div>
             </div>
-            <div class="chat-container" id="chatContainer">
-                <div class="chat-header">
-                    <h3><i class="fas fa-comments"></i> المحادثة</h3>
-                    <div class="chat-controls">
-                        <button id="reconnectBtn" class="chat-control-btn" title="إعادة الاتصال" style="background: linear-gradient(135deg, #10b981, #059669);">
-                            <i class="fas fa-wifi"></i>
-                        </button>
-                        <button id="voiceChatBtn" class="chat-control-btn" title="بدء المحادثة الصوتية">
-                            <i class="fas fa-microphone-slash"></i>
-                        </button>
-                        <button id="chatMuteBtn" class="chat-control-btn" title="كتم صوت المحادثة">
-                            <i class="fas fa-volume-up"></i>
-                        </button>
-                        <button id="toggleChat" class="chat-toggle-btn">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
+            <div class="voice-chat-status" id="voiceChatStatus" style="display: none;">
+                <div class="voice-indicator">
+                    <i class="fas fa-microphone"></i>
+                    <span>المحادثة الصوتية نشطة</span>
                 </div>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="system-message">
-                        <span class="message-time">الآن</span>
-                        <span class="message-text">مرحباً! يمكنك التحدث مع اللاعبين الآخرين هنا</span>
-                    </div>
+                <div class="connected-players" id="connectedPlayers">
+                    <span>اللاعبين المتصلين: 0</span>
                 </div>
-                <div class="voice-chat-status" id="voiceChatStatus" style="display: none;">
-                    <div class="voice-indicator">
-                        <i class="fas fa-microphone"></i>
-                        <span>المحادثة الصوتية نشطة</span>
-                    </div>
-                    <div class="connected-players" id="connectedPlayers">
-                        <span>اللاعبين المتصلين: 0</span>
-                    </div>
-                </div>
-                <div class="chat-input-container">
-                    <div class="chat-controls-row" style="position: relative;">
+            </div>
+            <div class="chat-input-container">
+                <div class="chat-controls-row" style="position: relative;">
                         <button id="emojiBtn" class="emoji-btn" title="إضافة رمز تعبيري">😊</button>
-                        <div id="emojiPicker" class="emoji-picker">
-                            <div class="emoji-item">😊</div>
-                            <div class="emoji-item">😂</div>
-                            <div class="emoji-item">🎉</div>
-                            <div class="emoji-item">🏆</div>
-                            <div class="emoji-item">💰</div>
-                            <div class="emoji-item">🎮</div>
-                            <div class="emoji-item">🔥</div>
-                            <div class="emoji-item">⭐</div>
-                            <div class="emoji-item">💪</div>
-                            <div class="emoji-item">🎯</div>
-                            <div class="emoji-item">🎊</div>
-                            <div class="emoji-item">🥳</div>
-                            <div class="emoji-item">😍</div>
-                            <div class="emoji-item">🤩</div>
-                            <div class="emoji-item">👏</div>
-                            <div class="emoji-item">🎪</div>
-                            <div class="emoji-item">🎨</div>
-                            <div class="emoji-item">🌟</div>
-                            <div class="emoji-item">✨</div>
-                            <div class="emoji-item">💎</div>
-                            <div class="emoji-item">🎭</div>
-                            <div class="emoji-item">🎪</div>
-                            <div class="emoji-item">🎯</div>
-                        </div>
-                    </div>
-                    <div class="chat-controls-row" style="position: relative;">
+                    <div id="emojiPicker" class="emoji-picker">
+                        <div class="emoji-item">😊</div>
+                        <div class="emoji-item">😂</div>
+                        <div class="emoji-item">🎉</div>
+                        <div class="emoji-item">🏆</div>
+                        <div class="emoji-item">💰</div>
+                        <div class="emoji-item">🎮</div>
+                        <div class="emoji-item">🔥</div>
+                        <div class="emoji-item">⭐</div>
+                        <div class="emoji-item">💪</div>
+                        <div class="emoji-item">🎯</div>
+                        <div class="emoji-item">🎊</div>
+                        <div class="emoji-item">🥳</div>
+                        <div class="emoji-item">😍</div>
+                        <div class="emoji-item">🤩</div>
+                        <div class="emoji-item">👏</div>
+                        <div class="emoji-item">🎪</div>
+                        <div class="emoji-item">🎨</div>
+                        <div class="emoji-item">🌟</div>
+                        <div class="emoji-item">✨</div>
+                        <div class="emoji-item">💎</div>
+                        <div class="emoji-item">🎭</div>
+                        <div class="emoji-item">🎪</div>
+                        <div class="emoji-item">🎯</div>
+        </div>
+    </div>
+                <div class="chat-controls-row" style="position: relative;">
                         <button id="soundBtn" class="sound-btn" title="مفاتيح الصوت">🔊</button>
-                        <div id="soundKeys" class="sound-keys">
-                            <div class="sound-key" data-sound="win">🎉 فوز</div>
-                            <div class="sound-key" data-sound="lose">😢 خسارة</div>
-                            <div class="sound-key" data-sound="click">👆 نقرة</div>
-                            <div class="sound-key" data-sound="single">🎯 ضربة فردية</div>
-                            <div class="sound-key" data-sound="triple">🎯 ضربة ثلاثية</div>
-                            <div class="sound-key" data-sound="hammer">🔨 ضربة المطرقة</div>
-                        </div>
-                    </div>
-                    <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا..." maxlength="100">
-                    <button id="sendMessage" class="send-btn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+                    <div id="soundKeys" class="sound-keys">
+                        <div class="sound-key" data-sound="win">🎉 فوز</div>
+                        <div class="sound-key" data-sound="lose">😢 خسارة</div>
+                        <div class="sound-key" data-sound="click">👆 نقرة</div>
+                        <div class="sound-key" data-sound="single">🎯 ضربة فردية</div>
+                        <div class="sound-key" data-sound="triple">🎯 ضربة ثلاثية</div>
+                        <div class="sound-key" data-sound="hammer">🔨 ضربة المطرقة</div>
+            </div>
+            </div>
+                <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا..." maxlength="100">
+                <button id="sendMessage" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
                 </div>
             </div>
         </div>
