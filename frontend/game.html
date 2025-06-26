@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="game-styles.css">
 </head>
 <body>
+    <!-- زر الوضع الليلي -->
+    <button id="darkModeToggle" title="تبديل الوضع الليلي/الفاتح">🌙</button>
     <!-- زر غرفة المحادثة الصوتية -->
     <button onclick="window.open('voice-chat-room.html', '_blank')" 
         style="
@@ -84,11 +86,12 @@
         </div>
         <div class="player-actions">
             <button id="recharge-button" title="تعبئة رصيد">💰</button>
-            <button id="lamp-button" title="فتح المصباح">💡</button>
-            <button id="stats-button" title="الإحصائيات">📊</button>
-            <button id="challenges-button" title="التحديات اليومية">🎯</button>
+                    <button id="lamp-button" title="فتح المصباح">💡</button>
             <button id="logout-button" title="تسجيل الخروج">⏻</button>
             <button id="mute-button" title="كتم/إلغاء كتم الصوت">🔊</button>
+            <button id="friendsBtn" title="إدارة الأصدقاء">👥</button>
+            <button id="dailyQuestsBtn" title="المهام اليومية">📋</button>
+            <button id="inviteBtn" title="نظام الدعوات">🎁</button>
         </div>
     </div>
         <div class="chat-container" id="chatContainer">
@@ -238,12 +241,557 @@
         </div>
     </div>
 
+    <div class="player-stats-panel" style="margin: 30px 0;">
+      <h3 style="text-align:center;">📊 إحصائياتي</h3>
+      <canvas id="playerStatsChart" width="400" height="220" style="max-width:100%;background:#fff;border-radius:12px;"></canvas>
+    </div>
+
+    <!-- نافذة منبثقة لإدارة الأصدقاء -->
+    <div id="friendsModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:10001;justify-content:center;align-items:center;">
+      <div style="background:#fff;padding:30px 20px;border-radius:18px;max-width:400px;width:95vw;position:relative;direction:rtl;">
+        <button id="closeFriendsModal" style="position:absolute;top:10px;left:10px;background:none;border:none;font-size:1.5em;cursor:pointer;">×</button>
+        <h2 style="text-align:center;">👥 قائمة الأصدقاء</h2>
+        <div id="friendsList" style="margin:15px 0 20px 0;min-height:40px;"></div>
+        <form id="addFriendForm" style="display:flex;gap:8px;">
+          <input type="text" id="addFriendInput" placeholder="اسم المستخدم لإضافته" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;">
+          <button type="submit" style="padding:8px 16px;border-radius:6px;background:#4f46e5;color:#fff;border:none;">إضافة</button>
+        </form>
+        <div id="friendActionMsg" style="margin-top:10px;color:#10b981;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- نافذة منبثقة للمهام اليومية -->
+    <div id="dailyQuestsModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:10001;justify-content:center;align-items:center;">
+      <div style="background:#fff;padding:30px 20px;border-radius:18px;max-width:500px;width:95vw;position:relative;direction:rtl;max-height:80vh;overflow-y:auto;">
+        <button id="closeDailyQuestsModal" style="position:absolute;top:10px;left:10px;background:none;border:none;font-size:1.5em;cursor:pointer;">×</button>
+        <h2 style="text-align:center;">📋 المهام اليومية</h2>
+        <div id="dailyQuestsList" style="margin:15px 0 20px 0;min-height:40px;"></div>
+        <div id="dailyQuestsMsg" style="margin-top:10px;color:#10b981;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- نافذة منبثقة لنظام الدعوات -->
+    <div id="inviteModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:10001;justify-content:center;align-items:center;">
+      <div style="background:#fff;padding:30px 20px;border-radius:18px;max-width:500px;width:95vw;position:relative;direction:rtl;max-height:80vh;overflow-y:auto;">
+        <button id="closeInviteModal" style="position:absolute;top:10px;left:10px;background:none;border:none;font-size:1.5em;cursor:pointer;">×</button>
+        <h2 style="text-align:center;">🎁 نظام الدعوات</h2>
+        
+        <!-- كود الدعوة الخاص -->
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px;border-radius:12px;margin:15px 0;text-align:center;">
+          <h3 style="margin:0 0 10px 0;">كود دعوتك الخاص</h3>
+          <div id="inviteCode" style="font-size:24px;font-weight:bold;letter-spacing:2px;background:rgba(255,255,255,0.2);padding:10px;border-radius:8px;margin:10px 0;">
+            ...جاري التحميل
+          </div>
+          <button id="copyInviteCode" style="background:rgba(255,255,255,0.2);border:2px solid white;color:white;padding:8px 16px;border-radius:6px;cursor:pointer;margin-top:10px;">
+            📋 نسخ الكود
+          </button>
+        </div>
+        
+        <!-- إحصائيات الدعوات -->
+        <div style="background:#f3f4f6;padding:15px;border-radius:10px;margin:15px 0;">
+          <h4 style="margin:0 0 10px 0;">📊 إحصائيات دعواتك</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="text-align:center;">
+              <div id="totalInvited" style="font-size:20px;font-weight:bold;color:#4f46e5;">0</div>
+              <div style="font-size:12px;color:#666;">مستخدمين دعوتهم</div>
+            </div>
+            <div style="text-align:center;">
+              <div id="totalRewards" style="font-size:20px;font-weight:bold;color:#10b981;">0</div>
+              <div style="font-size:12px;color:#666;">نقطة مكافأة</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- استخدام كود دعوة -->
+        <div style="background:#f0f9ff;padding:15px;border-radius:10px;margin:15px 0;">
+          <h4 style="margin:0 0 10px 0;">🔑 استخدام كود دعوة</h4>
+          <form id="useInviteForm" style="display:flex;gap:8px;">
+            <input type="text" id="useInviteInput" placeholder="أدخل كود الدعوة" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;text-transform:uppercase;">
+            <button type="submit" style="padding:8px 16px;border-radius:6px;background:#10b981;color:#fff;border:none;">استخدام</button>
+          </form>
+        </div>
+        
+        <!-- قائمة المستخدمين المدعوين -->
+        <div id="invitedUsersList" style="margin:15px 0;">
+          <h4 style="margin:0 0 10px 0;">👥 المستخدمين الذين دعوتهم</h4>
+          <div id="invitedUsers" style="max-height:200px;overflow-y:auto;">
+            <!-- سيتم ملؤها بالجافاسكريبت -->
+          </div>
+        </div>
+        
+        <div id="inviteMsg" style="margin-top:10px;color:#10b981;text-align:center;"></div>
+      </div>
+    </div>
+
     <!-- قبل وسم </body> مباشرة أضف: -->
-    <script src="js/soundManager.js"></script>
-    <script src="js/secureStorage.js"></script>
-    <script src="notification-system.js"></script>
-    <script src="statistics-system.js"></script>
-    <script src="daily-challenge.js"></script>
     <script src="game.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="daily-quests.js"></script>
+    <script>
+    // تفعيل الوضع الليلي تلقائياً حسب تفضيل النظام
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add('dark-mode');
+    }
+    // زر التبديل
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    darkModeToggle.onclick = function() {
+      document.body.classList.toggle('dark-mode');
+      // حفظ التفضيل في localStorage
+      if(document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('darkMode', '1');
+      } else {
+        localStorage.removeItem('darkMode');
+      }
+    };
+    // استعادة التفضيل عند الدخول
+    if(localStorage.getItem('darkMode')) {
+      document.body.classList.add('dark-mode');
+    }
+
+    // رسم الإحصائيات بعد تحميل بيانات اللاعب
+    function renderPlayerStatsChart(stats) {
+      const ctx = document.getElementById('playerStatsChart').getContext('2d');
+      if(window.playerStatsChartInstance) window.playerStatsChartInstance.destroy();
+      window.playerStatsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['النقاط', 'الصناديق المفتوحة', 'الجواهر', 'المفاتيح', 'اللآلئ', 'النجوم'],
+          datasets: [{
+            label: 'إحصائياتي',
+            data: [
+              stats.score || 0,
+              stats.boxesOpened || 0,
+              stats.itemsCollected?.gem || 0,
+              stats.itemsCollected?.key || 0,
+              stats.itemsCollected?.pearl || 0,
+              stats.itemsCollected?.star || 0
+            ],
+            backgroundColor: [
+              '#6366f1','#f59e42','#10b981','#fbbf24','#38bdf8','#f43f5e'
+            ],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+    // استدعاء الرسم عند تحديث العرض
+    const origUpdateDisplay = window.updateDisplay;
+    window.updateDisplay = function() {
+      if(origUpdateDisplay) origUpdateDisplay();
+      // جلب بيانات اللاعب من المتغيرات العالمية
+      renderPlayerStatsChart({
+        score: window.score,
+        boxesOpened: window.itemsCollected?.boxesOpened || 0,
+        itemsCollected: window.itemsCollected
+      });
+    };
+    // رسم أولي عند التحميل
+    window.addEventListener('DOMContentLoaded',()=>{
+      renderPlayerStatsChart({
+        score: window.score,
+        boxesOpened: window.itemsCollected?.boxesOpened || 0,
+        itemsCollected: window.itemsCollected
+      });
+    });
+
+    const friendsBtn = document.getElementById('friendsBtn');
+    const friendsModal = document.getElementById('friendsModal');
+    const closeFriendsModal = document.getElementById('closeFriendsModal');
+    const friendsListDiv = document.getElementById('friendsList');
+    const addFriendForm = document.getElementById('addFriendForm');
+    const addFriendInput = document.getElementById('addFriendInput');
+    const friendActionMsg = document.getElementById('friendActionMsg');
+
+    friendsBtn.onclick = () => {
+      friendsModal.style.display = 'flex';
+      loadFriendsList();
+    };
+    closeFriendsModal.onclick = () => {
+      friendsModal.style.display = 'none';
+      friendActionMsg.textContent = '';
+    };
+    window.onclick = function(e) {
+      if(e.target === friendsModal) friendsModal.style.display = 'none';
+    };
+
+    async function loadFriendsList() {
+      friendsListDiv.innerHTML = '...جاري التحميل';
+      const token = localStorage.getItem('token');
+      if(!token) return friendsListDiv.innerHTML = 'يجب تسجيل الدخول';
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/users/friends`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if(data.friends && data.friends.length) {
+          friendsListDiv.innerHTML = data.friends.map(friend => `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="flex:1;">${friend}</span>
+              <button onclick="removeFriend('${friend}')" style="background:#ef4444;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;">حذف</button>
+              <button onclick="inviteFriend('${friend}')" style="background:#10b981;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;">دعوة</button>
+            </div>
+          `).join('');
+        } else {
+          friendsListDiv.innerHTML = '<span style="color:#888">لا يوجد أصدقاء بعد</span>';
+        }
+      } catch(e) {
+        friendsListDiv.innerHTML = 'حدث خطأ في جلب الأصدقاء';
+      }
+    }
+
+    addFriendForm.onsubmit = async function(e) {
+      e.preventDefault();
+      const username = addFriendInput.value.trim();
+      if(!username) return;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/users/friends/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ friendUsername: username })
+        });
+        const data = await res.json();
+        if(res.ok) {
+          friendActionMsg.textContent = 'تمت إضافة الصديق بنجاح';
+          addFriendInput.value = '';
+          loadFriendsList();
+        } else {
+          friendActionMsg.textContent = data.message || 'تعذر إضافة الصديق';
+        }
+      } catch(e) {
+        friendActionMsg.textContent = 'خطأ في الاتصال بالخادم';
+      }
+    };
+
+    window.removeFriend = async function(friendUsername) {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/users/friends/remove`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ friendUsername })
+        });
+        const data = await res.json();
+        if(res.ok) {
+          friendActionMsg.textContent = 'تم حذف الصديق';
+          loadFriendsList();
+        } else {
+          friendActionMsg.textContent = data.message || 'تعذر حذف الصديق';
+        }
+      } catch(e) {
+        friendActionMsg.textContent = 'خطأ في الاتصال بالخادم';
+      }
+    };
+
+    window.inviteFriend = function(friendUsername) {
+      // هنا يمكنك ربط الدعوة بنظام الغرف أو إرسال رسالة عبر WebSocket
+      alert('تم إرسال دعوة إلى ' + friendUsername + ' (تجريبي)');
+    };
+
+    // تفعيل نظام المهام اليومية
+    let dailyQuestSystem;
+    let notificationSystem;
+
+    // تهيئة الأنظمة عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', () => {
+        // تهيئة نظام الإشعارات
+        notificationSystem = new NotificationSystem();
+        
+        // تهيئة نظام المهام اليومية
+        dailyQuestSystem = new DailyQuestSystem();
+        
+        // إعداد أزرار المهام اليومية
+        setupDailyQuestsButtons();
+    });
+
+    function setupDailyQuestsButtons() {
+        const dailyQuestsBtn = document.getElementById('dailyQuestsBtn');
+        const dailyQuestsModal = document.getElementById('dailyQuestsModal');
+        const closeDailyQuestsModal = document.getElementById('closeDailyQuestsModal');
+        const dailyQuestsList = document.getElementById('dailyQuestsList');
+        const dailyQuestsMsg = document.getElementById('dailyQuestsMsg');
+
+        dailyQuestsBtn.onclick = () => {
+            dailyQuestsModal.style.display = 'flex';
+            loadDailyQuests();
+        };
+
+        closeDailyQuestsModal.onclick = () => {
+            dailyQuestsModal.style.display = 'none';
+            dailyQuestsMsg.textContent = '';
+        };
+
+        window.onclick = function(e) {
+            if(e.target === dailyQuestsModal) dailyQuestsModal.style.display = 'none';
+            if(e.target === friendsModal) friendsModal.style.display = 'none';
+        };
+
+        async function loadDailyQuests() {
+            dailyQuestsList.innerHTML = '...جاري التحميل';
+            try {
+                const activeQuests = dailyQuestSystem.getActiveQuests();
+                const completedCount = dailyQuestSystem.getCompletedQuestsCount();
+                const totalCount = dailyQuestSystem.getTotalQuestsCount();
+
+                dailyQuestsList.innerHTML = `
+                    <div style="
+                        background: rgba(79, 70, 229, 0.1);
+                        padding: 15px;
+                        border-radius: 10px;
+                        margin-bottom: 20px;
+                        text-align: center;
+                    ">
+                        <div style="font-size: 18px; margin-bottom: 10px;">
+                            التقدم: ${completedCount}/${totalCount} مهام مكتملة
+                        </div>
+                        <div style="
+                            background: rgba(255,255,255,0.2);
+                            height: 10px;
+                            border-radius: 5px;
+                            overflow: hidden;
+                        ">
+                            <div style="
+                                background: linear-gradient(90deg, #10b981, #059669);
+                                height: 100%;
+                                width: ${(completedCount / totalCount) * 100}%;
+                                transition: width 0.3s ease;
+                            "></div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; gap: 15px;">
+                        ${activeQuests.map(quest => `
+                            <div style="
+                                background: ${quest.completed ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.1)'};
+                                padding: 15px;
+                                border-radius: 10px;
+                                border: 2px solid ${quest.completed ? '#10b981' : 'transparent'};
+                            ">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-size: 24px;">${quest.icon}</span>
+                                        <div>
+                                            <h3 style="margin: 0; font-size: 16px;">${quest.title}</h3>
+                                            <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.8;">
+                                                ${quest.description.replace('{target}', quest.target)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 18px; font-weight: bold;">${quest.reward}</div>
+                                        <div style="font-size: 12px;">نقطة</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 10px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="font-size: 12px;">التقدم</span>
+                                        <span style="font-size: 12px;">${quest.progress}/${quest.target}</span>
+                                    </div>
+                                    <div style="
+                                        background: rgba(255,255,255,0.2);
+                                        height: 8px;
+                                        border-radius: 4px;
+                                        overflow: hidden;
+                                    ">
+                                        <div style="
+                                            background: ${quest.completed ? '#10b981' : 'linear-gradient(90deg, #3b82f6, #2563eb)'};
+                                            height: 100%;
+                                            width: ${quest.progressPercentage}%;
+                                            transition: width 0.3s ease;
+                                        "></div>
+                                    </div>
+                                </div>
+                                
+                                ${quest.completed ? `
+                                    <div style="
+                                        text-align: center;
+                                        margin-top: 10px;
+                                        color: #10b981;
+                                        font-weight: bold;
+                                    ">
+                                        ✅ مكتملة
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch(e) {
+                dailyQuestsList.innerHTML = 'حدث خطأ في تحميل المهام اليومية';
+            }
+        }
+    }
+
+    // تحديث المهام عند أحداث اللعبة
+    function updateDailyQuests(eventType, data) {
+        if (dailyQuestSystem) {
+            dailyQuestSystem.updateQuestsFromGameEvents(eventType, data);
+        }
+    }
+
+    // تفعيل نظام الدعوات
+    let inviteStats = null;
+
+    // إعداد أزرار نظام الدعوات
+    function setupInviteSystem() {
+        const inviteBtn = document.getElementById('inviteBtn');
+        const inviteModal = document.getElementById('inviteModal');
+        const closeInviteModal = document.getElementById('closeInviteModal');
+        const copyInviteCode = document.getElementById('copyInviteCode');
+        const useInviteForm = document.getElementById('useInviteForm');
+        const useInviteInput = document.getElementById('useInviteInput');
+        const inviteMsg = document.getElementById('inviteMsg');
+
+        inviteBtn.onclick = () => {
+            inviteModal.style.display = 'flex';
+            loadInviteStats();
+        };
+
+        closeInviteModal.onclick = () => {
+            inviteModal.style.display = 'none';
+            inviteMsg.textContent = '';
+        };
+
+        copyInviteCode.onclick = async () => {
+            const inviteCode = document.getElementById('inviteCode').textContent;
+            if (inviteCode && inviteCode !== '...جاري التحميل') {
+                try {
+                    await navigator.clipboard.writeText(inviteCode);
+                    inviteMsg.textContent = 'تم نسخ كود الدعوة!';
+                    setTimeout(() => inviteMsg.textContent = '', 3000);
+                } catch (err) {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = inviteCode;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    inviteMsg.textContent = 'تم نسخ كود الدعوة!';
+                    setTimeout(() => inviteMsg.textContent = '', 3000);
+                }
+            }
+        };
+
+        useInviteForm.onsubmit = async function(e) {
+            e.preventDefault();
+            const code = useInviteInput.value.trim().toUpperCase();
+            if (!code) return;
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/users/use-invite-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ inviteCode: code })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    inviteMsg.textContent = data.message;
+                    useInviteInput.value = '';
+                    // تحديث النقاط في اللعبة
+                    if (window.score !== undefined) {
+                        window.score += data.reward;
+                        if (window.updateDisplay) {
+                            window.updateDisplay();
+                        }
+                    }
+                    // إعادة تحميل الإحصائيات
+                    loadInviteStats();
+                } else {
+                    inviteMsg.textContent = data.message;
+                }
+            } catch (e) {
+                inviteMsg.textContent = 'خطأ في الاتصال بالخادم';
+            }
+        };
+    }
+
+    async function loadInviteStats() {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/users/invite-stats`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                inviteStats = data;
+                displayInviteStats(data);
+            }
+        } catch (e) {
+            console.error('Error loading invite stats:', e);
+        }
+    }
+
+    function displayInviteStats(data) {
+        // عرض كود الدعوة
+        document.getElementById('inviteCode').textContent = data.inviteCode;
+        
+        // عرض الإحصائيات
+        document.getElementById('totalInvited').textContent = data.totalInvited;
+        document.getElementById('totalRewards').textContent = data.inviteRewards.toLocaleString();
+        
+        // عرض قائمة المستخدمين المدعوين
+        const invitedUsersDiv = document.getElementById('invitedUsers');
+        if (data.invitedUsersDetails && data.invitedUsersDetails.length > 0) {
+            invitedUsersDiv.innerHTML = data.invitedUsersDetails.map(user => `
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 8px;
+                    background: white;
+                    border-radius: 6px;
+                    margin-bottom: 5px;
+                    border: 1px solid #e5e7eb;
+                ">
+                    <div>
+                        <div style="font-weight: bold;">${user.username}</div>
+                        <div style="font-size: 12px; color: #666;">
+                            انضم: ${new Date(user.createdAt).toLocaleDateString('ar-SA')}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: bold; color: #4f46e5;">${user.score.toLocaleString()}</div>
+                        <div style="font-size: 12px; color: #666;">نقطة</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            invitedUsersDiv.innerHTML = '<p style="text-align: center; color: #666;">لم تدع أي مستخدم بعد</p>';
+        }
+    }
+
+    // إضافة setupInviteSystem إلى DOMContentLoaded
+    window.addEventListener('DOMContentLoaded', () => {
+        // تهيئة نظام الإشعارات
+        notificationSystem = new NotificationSystem();
+        
+        // تهيئة نظام المهام اليومية
+        dailyQuestSystem = new DailyQuestSystem();
+        
+        // إعداد أزرار المهام اليومية
+        setupDailyQuestsButtons();
+        
+        // إعداد نظام الدعوات
+        setupInviteSystem();
+    });
+    </script>
 </body>
 </html>

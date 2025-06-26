@@ -5,6 +5,50 @@
     --background-color: #1a1a2e;
     --text-color: #ecf0f1;
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --main-bg: #f3f4f6;
+    --main-text: #222;
+    --panel-bg: #fff;
+    --panel-border: #e5e7eb;
+    --accent: #4f46e5;
+    --button-bg: #4f46e5;
+    --button-text: #fff;
+}
+
+body {
+    background: var(--main-bg);
+    color: var(--main-text);
+    transition: background 0.3s, color 0.3s;
+}
+
+.panel, .main-content, .left-panel, .messages-column, .game-center-column {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+}
+
+button, .bet-button, .circular-btn {
+    background: var(--button-bg);
+    color: var(--button-text);
+}
+
+/* الوضع الليلي */
+body.dark-mode {
+    --main-bg: #18181b;
+    --main-text: #f3f4f6;
+    --panel-bg: #23232b;
+    --panel-border: #333;
+    --accent: #818cf8;
+    --button-bg: #818cf8;
+    --button-text: #18181b;
+}
+
+body.dark-mode .panel, body.dark-mode .main-content, body.dark-mode .left-panel, body.dark-mode .messages-column, body.dark-mode .game-center-column {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+}
+
+body.dark-mode button, body.dark-mode .bet-button, body.dark-mode .circular-btn {
+    background: var(--button-bg);
+    color: var(--button-text);
 }
 
 /* إعادة تعيين العناصر */
@@ -268,4 +312,22 @@
         width: 100%;
         justify-content: center;
     }
+}
+
+/* زر الوضع الليلي */
+#darkModeToggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 1.5em;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s, color 0.2s;
 }

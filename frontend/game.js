@@ -61,11 +61,6 @@ let chatVolume = 0.5;
 let ws = null;
 let isConnected = false;
 
-// الأنظمة الجديدة
-let notificationSystem = null;
-let statisticsSystem = null;
-let dailyChallengeSystem = null;
-
 // رسائل وهمية في الدردشة
 const fakeUsernames = ['علي', 'احمد', 'دانيال', 'سعار', 'ليلى', 'نيرمين'];
 const fakeMessages = [
@@ -91,51 +86,8 @@ const fakeMessages = [
   'نيرمين، ابتسامتك حلوة!'
 ];
 
-// تحسينات الأداء - إضافة في بداية الملف
-const PERFORMANCE_OPTIMIZATIONS = {
-    // Lazy loading للصور
-    lazyLoadImages: () => {
-        const images = document.querySelectorAll('img[data-src]');
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                    observer.unobserve(img);
-                }
-            });
-        });
-        images.forEach(img => imageObserver.observe(img));
-    },
-
-    // تحسين إدارة الذاكرة
-    memoryOptimization: () => {
-        // تنظيف الذاكرة كل 5 دقائق
-        setInterval(() => {
-            if (window.gc) window.gc();
-        }, 300000);
-    },
-
-    // تحسين تحميل الأصوات
-    preloadSounds: () => {
-        const soundFiles = ['win.mp3', 'lose.mp3', 'click.mp3', 'hammerShot.mp3'];
-        soundFiles.forEach(sound => {
-            const audio = new Audio(`sounds/${sound}`);
-            audio.preload = 'metadata';
-        });
-    }
-};
-
 // عند تحميل الصفحة
 window.addEventListener('DOMContentLoaded', () => {
-    PERFORMANCE_OPTIMIZATIONS.lazyLoadImages();
-    PERFORMANCE_OPTIMIZATIONS.memoryOptimization();
-    PERFORMANCE_OPTIMIZATIONS.preloadSounds();
-    
-    // تهيئة الأنظمة الجديدة
-    initializeNewSystems();
-    
     loadGameData();
     setupGameButtons();
     setupChatSystem();
@@ -252,13 +204,6 @@ function setupGameButtons() {
     if (logoutButton) logoutButton.onclick = logout;
     if (rechargeButton) rechargeButton.onclick = recharge;
     if (muteButton) muteButton.onclick = toggleMute;
-    
-    // أزرار الأنظمة الجديدة
-    const statsButton = document.getElementById('stats-button');
-    const challengesButton = document.getElementById('challenges-button');
-    
-    if (statsButton) statsButton.onclick = showStats;
-    if (challengesButton) challengesButton.onclick = showChallenges;
 }
 
 // معالجة الضربات
@@ -284,9 +229,9 @@ function processShot(type) {
     // تشغيل الصوت المناسب
     playSound(type === 'single' ? 'singleShot' : type === 'triple' ? 'tripleShot' : 'hammerShot');
     
-    // ربط مع نظام التحديات
-    if (dailyChallengeSystem) {
-        dailyChallengeSystem.recordWeaponUse(type);
+    // تحديث المهام اليومية
+    if (window.updateDailyQuests) {
+        window.updateDailyQuests('shotUsed', { shotType: type });
     }
     
     // محاكاة الضربة
@@ -359,24 +304,18 @@ function simulateBoxOpeningWithEffects(numBoxes) {
     // إضافة النقاط الإجمالية
     score += totalReward;
     
-    // ربط مع الأنظمة الجديدة
-    if (statisticsSystem) {
-        statisticsSystem.recordGameResult(totalReward > 0, totalReward, cost, boxesToOpen);
-    }
-    
-    if (dailyChallengeSystem) {
-        dailyChallengeSystem.recordBoxOpen();
+    // تحديث المهام اليومية
+    if (window.updateDailyQuests) {
+        window.updateDailyQuests('boxOpened', { count: boxesToOpen });
         if (totalReward > 0) {
-            dailyChallengeSystem.recordCoinsEarned(totalReward);
+            window.updateDailyQuests('pointsEarned', { amount: totalReward });
         }
-    }
-    
-    if (notificationSystem) {
-        if (totalReward > 0) {
-            notificationSystem.showWin(totalReward);
-        } else if (totalReward < 0) {
-            notificationSystem.showLose();
-        }
+        // تحديث العناصر المجمعة
+        itemsFound.forEach(item => {
+            if (item.type !== 'bomb' && item.type !== 'empty') {
+                window.updateDailyQuests('itemCollected', { itemType: item.type });
+            }
+        });
     }
     
     // إظهار رسالة النتيجة
@@ -464,6 +403,11 @@ function setupChatSystem() {
         if (typeof sendChatMessageToServer === 'function') {
             sendChatMessageToServer(msg);
         }
+        
+        // تحديث المهام اليومية
+        if (window.updateDailyQuests) {
+            window.updateDailyQuests('messageSent', { message: msg });
+        }
     }
 }
 if (document.readyState === 'loading') {
@@ -477,11 +421,20 @@ function sendMessage() {
     const message = chatInput.value.trim();
     if (!message) return;
     if (ws && isConnected) {
-        ws.send(JSON.stringify({ type: 'message', username, message }));
+        ws.send(JSON.stringify({
+            type: 'chat_message',
+            sender: username,
+            text: message
+        }));
     }
+    
+    // تحديث المهام اليومية
+    if (window.updateDailyQuests) {
+        window.updateDailyQuests('messageSent', { message: message });
+    }
+    
     addMessageToChat(username, message);
     chatInput.value = '';
-    playSound('buttonClick');
 }
 
 // إضافة رسالة للدردشة
@@ -953,7 +906,7 @@ function createItemInfo() {
         { key: 'gem', name: 'جوهرة', emoji: '💎', description: 'جوهرة نادرة تزيد من قوة اللاعب', value: 100 },
         { key: 'key', name: 'مفتاح', emoji: '🔑', description: 'يفتح الصناديق الخاصة', value: 50 },
         { key: 'coin', name: 'عملة', emoji: '🪙', description: 'عملة ذهبية قيمة', value: 25 },
-        { key: 'pearl', name: 'لؤلؤة', emoji: '🦪', description: 'لؤلؤة بحرية نادرة', value: 75 },
+        { key: 'pearl', name: 'لؤلؤة', emoji: '��', description: 'لؤلؤة بحرية نادرة', value: 75 },
         { key: 'bomb', name: 'قنبلة', emoji: '💣', description: 'تسبب ضرراً للخصوم', value: 150 },
         { key: 'star', name: 'نجمة', emoji: '⭐', description: 'نجمة سحرية تمنح قوى خاصة', value: 200 },
         { key: 'bat', name: 'خفاش', emoji: '🦇', description: 'خفاش يطير في الظلام', value: 30 }
@@ -1038,39 +991,3 @@ function addFakeChatMessage() {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 setInterval(addFakeChatMessage, Math.floor(Math.random() * 10000) + 10000); // كل 10-20 ثانية
-
-// تهيئة الأنظمة الجديدة
-function initializeNewSystems() {
-    // تهيئة نظام الإشعارات
-    if (window.NotificationSystem) {
-        notificationSystem = new window.NotificationSystem();
-    }
-    
-    // تهيئة نظام الإحصائيات
-    if (window.StatisticsSystem) {
-        statisticsSystem = new window.StatisticsSystem();
-    }
-    
-    // تهيئة نظام التحديات اليومية
-    if (window.DailyChallengeSystem) {
-        dailyChallengeSystem = new window.DailyChallengeSystem();
-    }
-}
-
-// عرض الإحصائيات
-function showStats() {
-    if (statisticsSystem) {
-        statisticsSystem.showStatsReport();
-    } else {
-        showMessage('نظام الإحصائيات غير متاح', 'error');
-    }
-}
-
-// عرض التحديات اليومية
-function showChallenges() {
-    if (dailyChallengeSystem) {
-        dailyChallengeSystem.showChallengeUI();
-    } else {
-        showMessage('نظام التحديات غير متاح', 'error');
-    }
-}

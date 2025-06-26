@@ -30,6 +30,7 @@
       <div class="admin-panel-sections">
         <button id="showGameManagement">إدارة اللعبة</button>
         <button id="showUserManagement">إدارة المستخدمين</button>
+        <button id="showSuspiciousActivity">مراقبة النشاطات المشبوهة</button>
       </div>
 
       <!-- Game Management Section -->
@@ -78,6 +79,27 @@
             <input type="text" id="adminRoleUsername" readonly>
           </div>
           <button id="assignAdminRoleBtn">تعيين مشرف</button>
+        </div>
+      </div>
+
+      <!-- Suspicious Activity Monitoring Section -->
+      <div id="suspiciousActivitySection" class="section-content hidden">
+        <h3>🔍 مراقبة النشاطات المشبوهة</h3>
+        <div class="stats-summary">
+          <div class="stat-card">
+            <span class="stat-number" id="totalSuspiciousUsers">0</span>
+            <span class="stat-label">مستخدمين مشبوهين</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="highRiskUsers">0</span>
+            <span class="stat-label">مخاطر عالية</span>
+          </div>
+        </div>
+        
+        <button id="refreshSuspiciousActivityBtn" style="background: #10b981; margin: 10px 0;">🔄 تحديث البيانات</button>
+        
+        <div id="suspiciousUsersList" style="margin-top: 20px;">
+          <!-- سيتم ملؤها بالجافاسكريبت -->
         </div>
       </div>
     </div>

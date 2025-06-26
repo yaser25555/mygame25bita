@@ -1,56 +1,55 @@
-// نظام الإشعارات المتقدم
+// نظام الإشعارات المتقدم للعبة
 class NotificationSystem {
     constructor() {
         this.notifications = [];
-        this.container = null;
+        this.isEnabled = this.checkNotificationPermission();
         this.init();
     }
 
-    init() {
-        this.createContainer();
-        this.requestPermission();
+    async init() {
+        if ('Notification' in window) {
+            const permission = await Notification.requestPermission();
+            this.isEnabled = permission === 'granted';
+        }
+        this.createNotificationContainer();
     }
 
-    createContainer() {
-        this.container = document.createElement('div');
-        this.container.id = 'notification-container';
-        this.container.style.cssText = `
+    checkNotificationPermission() {
+        return 'Notification' in window && Notification.permission === 'granted';
+    }
+
+    createNotificationContainer() {
+        const container = document.createElement('div');
+        container.id = 'notification-container';
+        container.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 10000;
             max-width: 350px;
         `;
-        document.body.appendChild(this.container);
-    }
-
-    async requestPermission() {
-        if ('Notification' in window) {
-            const permission = await Notification.requestPermission();
-            console.log('Notification permission:', permission);
-        }
+        document.body.appendChild(container);
     }
 
     show(message, type = 'info', duration = 5000) {
-        const notification = this.createNotification(message, type);
-        this.container.appendChild(notification);
-
-        // إضافة تأثير ظهور
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-            notification.style.opacity = '1';
-        }, 100);
+        const notification = this.createNotificationElement(message, type);
+        this.addToContainer(notification);
+        
+        // إشعار المتصفح
+        if (this.isEnabled && type === 'important') {
+            new Notification('لعبة الصندوق السحري', {
+                body: message,
+                icon: '/images/logo.png'
+            });
+        }
 
         // إزالة تلقائية
         setTimeout(() => {
-            this.remove(notification);
+            this.removeNotification(notification);
         }, duration);
-
-        // إشعار سطح المكتب
-        this.showDesktopNotification(message, type);
     }
 
-    createNotification(message, type) {
+    createNotificationElement(message, type) {
         const notification = document.createElement('div');
         notification.className = `game-notification ${type}`;
         notification.style.cssText = `
@@ -58,59 +57,39 @@ class NotificationSystem {
             color: white;
             padding: 15px 20px;
             margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateX(100%);
-            opacity: 0;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            font-family: 'Cairo', 'Noto Naskh Arabic', sans-serif;
             font-size: 14px;
             position: relative;
             overflow: hidden;
         `;
 
-        // إضافة أيقونة
-        const icon = document.createElement('span');
-        icon.innerHTML = this.getIcon(type);
-        icon.style.marginLeft = '10px';
-        notification.appendChild(icon);
-
-        // إضافة النص
-        const text = document.createElement('span');
-        text.textContent = message;
-        notification.appendChild(text);
-
-        // زر الإغلاق
-        const closeBtn = document.createElement('button');
-        closeBtn.innerHTML = '×';
-        closeBtn.style.cssText = `
-            position: absolute;
-            top: 5px;
-            left: 10px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            opacity: 0.7;
+        // إضافة أيقونة حسب النوع
+        const icon = this.getIcon(type);
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">${icon}</span>
+                <span>${message}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" style="
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                font-size: 16px;
+            ">×</button>
         `;
-        closeBtn.onclick = () => this.remove(notification);
-        notification.appendChild(closeBtn);
 
-        // تأثير التقدم
-        const progress = document.createElement('div');
-        progress.style.cssText = `
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: rgba(255,255,255,0.3);
-            width: 100%;
-            transform-origin: left;
-            animation: progress 5s linear;
-        `;
-        notification.appendChild(progress);
+        // تأثير الدخول
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
 
         return notification;
     }
@@ -121,8 +100,7 @@ class NotificationSystem {
             error: 'linear-gradient(135deg, #ef4444, #dc2626)',
             warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
             info: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-            win: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-            lose: 'linear-gradient(135deg, #f87171, #ef4444)'
+            important: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
         };
         return colors[type] || colors.info;
     }
@@ -133,73 +111,48 @@ class NotificationSystem {
             error: '❌',
             warning: '⚠️',
             info: 'ℹ️',
-            win: '🎉',
-            lose: '😢'
+            important: '🎉'
         };
         return icons[type] || icons.info;
     }
 
-    remove(notification) {
-        notification.style.transform = 'translateX(100%)';
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
+    addToContainer(notification) {
+        const container = document.getElementById('notification-container');
+        if (container) {
+            container.appendChild(notification);
+        }
     }
 
-    showDesktopNotification(message, type) {
-        if ('Notification' in window && Notification.permission === 'granted') {
-            const notification = new Notification('VoiceBoom Game', {
-                body: message,
-                icon: '/images/logo.png',
-                badge: '/images/logo.png',
-                tag: 'game-notification'
-            });
-
-            notification.onclick = () => {
-                window.focus();
-                notification.close();
-            };
+    removeNotification(notification) {
+        if (notification && notification.parentElement) {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
         }
     }
 
     // إشعارات خاصة باللعبة
-    showWin(amount) {
-        this.show(`🎉 مبروك! ربحت ${amount} عملة!`, 'win', 7000);
+    showWinNotification(amount) {
+        this.show(`🎉 مبروك! فزت بـ ${amount} نقطة!`, 'success');
     }
 
-    showLose() {
-        this.show('😢 حظ أوفر في المرة القادمة!', 'lose', 5000);
+    showLossNotification() {
+        this.show('😢 للأسف خسرت هذه المرة، جرب مرة أخرى!', 'warning');
     }
 
-    showLevelUp() {
-        this.show('⭐ ترقيت! مستوى جديد!', 'success', 6000);
+    showItemCollectedNotification(itemName) {
+        this.show(`🎯 تم جمع ${itemName}!`, 'info');
     }
 
-    showNewItem(itemName) {
-        this.show(`🎁 حصلت على ${itemName}!`, 'info', 5000);
+    showLevelUpNotification() {
+        this.show('⭐ ترقيت إلى مستوى جديد!', 'important');
     }
 
-    showConnectionLost() {
-        this.show('📡 انقطع الاتصال. جاري إعادة الاتصال...', 'warning', 8000);
+    showChatNotification(sender, message) {
+        this.show(`💬 ${sender}: ${message}`, 'info', 3000);
     }
 }
 
-// إضافة CSS للتحريكات
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes progress {
-        from { transform: scaleX(1); }
-        to { transform: scaleX(0); }
-    }
-    
-    .game-notification:hover {
-        transform: translateX(0) scale(1.02) !important;
-    }
-`;
-document.head.appendChild(style);
-
-// تصدير النظام
+// تصدير النظام للاستخدام العام
 window.NotificationSystem = NotificationSystem; 

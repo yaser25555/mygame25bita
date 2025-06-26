@@ -98,6 +98,60 @@ const UserSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: ''
+  },
+  friends: [{
+    type: String, // username of the friend
+    default: []
+  }],
+  suspiciousActivity: [{
+    timestamp: {
+      type: Date,
+      default: Date.now
+    },
+    activities: [String],
+    oldScore: Number,
+    newScore: Number,
+    ip: String
+  }],
+  totalSpent: {
+    type: Number,
+    default: 0
+  },
+  isBanned: {
+    type: Boolean,
+    default: false
+  },
+  banReason: {
+    type: String,
+    default: ''
+  },
+  bannedAt: {
+    type: Date,
+    default: null
+  },
+  inviteCode: {
+    type: String,
+    unique: true,
+    default: function() {
+      // توليد كود دعوة فريد من 8 أحرف
+      return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+  },
+  invitedBy: {
+    type: String, // username of who invited this user
+    default: null
+  },
+  invitedUsers: [{
+    type: String, // usernames of users invited by this user
+    default: []
+  }],
+  inviteRewards: {
+    type: Number,
+    default: 0 // إجمالي المكافآت من الدعوات
+  },
+  lastInviteReward: {
+    type: Date,
+    default: null
   }
 });
 

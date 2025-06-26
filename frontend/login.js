@@ -1,139 +1,16 @@
 const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com"; // Use your actual backend URL
 
-// نظام الإشعارات المتقدم لصفحة تسجيل الدخول
-class LoginNotificationSystem {
-    constructor() {
-        this.container = null;
-        this.init();
-    }
-
-    init() {
-        this.createContainer();
-    }
-
-    createContainer() {
-        this.container = document.createElement('div');
-        this.container.id = 'login-notification-container';
-        this.container.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            max-width: 350px;
-        `;
-        document.body.appendChild(this.container);
-    }
-
-    show(message, type = 'info', duration = 5000) {
-        const notification = this.createNotification(message, type);
-        this.container.appendChild(notification);
-
-        // تأثير ظهور
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-            notification.style.opacity = '1';
-        }, 100);
-
-        // إزالة تلقائية
-        setTimeout(() => {
-            this.remove(notification);
-        }, duration);
-    }
-
-    createNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.className = `login-notification ${type}`;
-        notification.style.cssText = `
-            background: ${this.getBackgroundColor(type)};
-            color: white;
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateX(100%);
-            opacity: 0;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-family: 'Noto Naskh Arabic', sans-serif;
-            font-size: 14px;
-            position: relative;
-            overflow: hidden;
-        `;
-
-        // إضافة أيقونة
-        const icon = document.createElement('span');
-        icon.innerHTML = this.getIcon(type);
-        icon.style.marginLeft = '10px';
-        notification.appendChild(icon);
-
-        // إضافة النص
-        const text = document.createElement('span');
-        text.textContent = message;
-        notification.appendChild(text);
-
-        // زر الإغلاق
-        const closeBtn = document.createElement('button');
-        closeBtn.innerHTML = '×';
-        closeBtn.style.cssText = `
-            position: absolute;
-            top: 5px;
-            left: 10px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            opacity: 0.7;
-        `;
-        closeBtn.onclick = () => this.remove(notification);
-        notification.appendChild(closeBtn);
-
-        return notification;
-    }
-
-    getBackgroundColor(type) {
-        const colors = {
-            success: 'linear-gradient(135deg, #10b981, #059669)',
-            error: 'linear-gradient(135deg, #ef4444, #dc2626)',
-            warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            info: 'linear-gradient(135deg, #3b82f6, #2563eb)'
-        };
-        return colors[type] || colors.info;
-    }
-
-    getIcon(type) {
-        const icons = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-        return icons[type] || icons.info;
-    }
-
-    remove(notification) {
-        notification.style.transform = 'translateX(100%)';
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }
-}
-
-// تهيئة نظام الإشعارات
-const loginNotifications = new LoginNotificationSystem();
-
 document.addEventListener('DOMContentLoaded', () => {
     const loginTab = document.getElementById('login-tab');
     const registerTab = document.getElementById('register-tab');
     const instructionsTab = document.getElementById('instructions-tab');
+    // تم إزالة appsTab من هنا
     const contactTab = document.getElementById('contact-tab');
 
     const loginSection = document.getElementById('login-section');
     const registerSection = document.getElementById('register-section');
     const instructionsSectionContent = document.getElementById('instructions-section-content');
+    // تم إزالة appsSectionContent من هنا
     const contactSectionContent = document.getElementById('contact-section-content');
 
     const loginUsernameInput = document.getElementById('login-username');
@@ -163,9 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         adminChoiceModal.style.display = 'none';
     }
 
-    // تحسين دالة إظهار الرسائل
     function showMessage(message, isError = false) {
-        // إظهار رسالة في الصندوق التقليدي
         messageBox.textContent = message;
         messageBox.classList.remove('success', 'error');
         if (isError) {
@@ -177,29 +52,17 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             messageBox.classList.remove('show');
         }, 5000);
-
-        // إظهار إشعار متقدم
-        loginNotifications.show(message, isError ? 'error' : 'success');
     }
 
-    // تحسين دالة تحميل الأزرار
     function setButtonLoading(button, isLoading) {
         button.disabled = isLoading;
         if (isLoading) {
             button.classList.add('loading');
-            button.querySelector('.btn-text').textContent = 'جاري التحميل...';
         } else {
             button.classList.remove('loading');
-            // إعادة النص الأصلي حسب نوع الزر
-            if (button.id === 'login-button') {
-                button.querySelector('.btn-text').textContent = 'تسجيل الدخول';
-            } else if (button.id === 'register-button') {
-                button.querySelector('.btn-text').textContent = 'تسجيل';
-            }
         }
     }
 
-    // تحسين دالة تبديل التبويبات
     function switchTab(activeTab) {
         // Hide all sections and remove active class from all tabs
         [loginTab, registerTab, instructionsTab, contactTab].forEach(tab => {
@@ -224,23 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
 
-    // تحسين دالة تسجيل الدخول مع ميزات أمان إضافية
     async function handleLogin() {
         const username = loginUsernameInput.value.trim();
         const password = loginPasswordInput.value.trim();
-        const rememberMe = rememberMeCheckbox ? rememberMeCheckbox.checked : false;
         
-        console.log('🔐 محاولة تسجيل دخول:', { username, password: password ? '***' : 'فارغة', rememberMe });
+        console.log('🔐 محاولة تسجيل دخول:', { username, password: password ? '***' : 'فارغة' });
         
         if (!username || !password) {
             showMessage('الرجاء إدخال اسم المستخدم/البريد الإلكتروني وكلمة المرور.', true);
             console.error('Login error: missing username or password');
-            return;
-        }
-
-        // التحقق من قوة كلمة المرور
-        if (password.length < 6) {
-            showMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل.', true);
             return;
         }
         
@@ -262,26 +117,18 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('📄 بيانات الاستجابة:', data);
             
             if (response.ok) {
-                // حفظ البيانات بشكل آمن
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
                 localStorage.setItem('username', data.username);
-                localStorage.setItem('loginTime', new Date().toISOString());
-                
-                // حفظ بيانات تذكرني
-                saveLoginData(username, rememberMe);
-                
                 showMessage('تم تسجيل الدخول بنجاح!', false);
                 console.log('✅ تسجيل الدخول ناجح، إعادة توجيه...');
-                
-                // تأخير قصير لإظهار رسالة النجاح
                 setTimeout(() => {
                     if (data.isAdmin) {
                         adminChoiceModal.style.display = 'flex';
                     } else {
                         window.location.href = 'game.html';
                     }
-                }, 1000);
+                }, 500);
             } else {
                 showMessage(`فشل تسجيل الدخول: ${data.message || 'خطأ غير معروف'}`, true);
                 console.error('Login failed:', data);
@@ -294,51 +141,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // تحسين دالة التسجيل مع تحقق إضافي
     async function handleRegister() {
         const username = registerUsernameInput.value.trim();
         const email = registerEmailInput.value.trim();
         const password = registerPasswordInput.value.trim();
-        const agreeTerms = agreeTermsCheckbox ? agreeTermsCheckbox.checked : false;
-        
         if (!username || !email || !password) {
             showMessage('الرجاء تعبئة جميع الحقول للتسجيل.', true);
             console.error('Register error: missing fields');
             return;
         }
-
-        // التحقق من صحة البريد الإلكتروني
         if (!/\S+@\S+\.\S+/.test(email)) {
             showMessage('الرجاء إدخال بريد إلكتروني صالح.', true);
             console.error('Register error: invalid email');
             return;
         }
-
-        // التحقق من قوة كلمة المرور
-        if (password.length < 6) {
-            showMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل.', true);
-            return;
-        }
-
-        // التحقق من طول اسم المستخدم
-        if (username.length < 3) {
-            showMessage('اسم المستخدم يجب أن يكون 3 أحرف على الأقل.', true);
-            return;
-        }
-
-        // التحقق من الموافقة على الشروط
-        if (!agreeTerms) {
-            showMessage('يجب الموافقة على الشروط والأحكام للمتابعة.', true);
-            return;
-        }
-
-        // فحص قوة كلمة المرور
-        const passwordCheck = checkPasswordStrength(password);
-        if (passwordCheck.score < 3) {
-            showMessage('كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أقوى.', true);
-            return;
-        }
-
         setButtonLoading(registerButton, true);
         try {
             const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
@@ -352,10 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 switchTab(loginTab);
                 loginUsernameInput.value = username;
                 loginPasswordInput.value = '';
-                // تفعيل تذكرني تلقائياً بعد التسجيل الناجح
-                if (rememberMeCheckbox) {
-                    rememberMeCheckbox.checked = true;
-                }
             } else {
                 showMessage(`فشل التسجيل: ${data.message || 'خطأ غير معروف'}`, true);
                 console.error('Register failed:', data);
@@ -368,485 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // دالة للتحقق من حالة الاتصال
-    async function checkConnection() {
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/health`, {
-                method: 'GET',
-                timeout: 5000
-            });
-            return response.ok;
-        } catch (error) {
-            console.warn('Connection check failed:', error);
-            return false;
-        }
-    }
-
-    // دالة لتنظيف البيانات المحفوظة
-    function clearStoredData() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('isAdmin');
-        localStorage.removeItem('username');
-        localStorage.removeItem('loginTime');
-    }
-
-    // التحقق من الجلسة المحفوظة
-    function checkStoredSession() {
-        const token = localStorage.getItem('token');
-        const loginTime = localStorage.getItem('loginTime');
-        
-        if (token && loginTime) {
-            const loginDate = new Date(loginTime);
-            const now = new Date();
-            const hoursDiff = (now - loginDate) / (1000 * 60 * 60);
-            
-            // إذا مر أكثر من 24 ساعة، احذف الجلسة
-            if (hoursDiff > 24) {
-                clearStoredData();
-                showMessage('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.', true);
-            }
-        }
-    }
-
-    // تشغيل فحص الجلسة عند تحميل الصفحة
-    checkStoredSession();
-
-    // دالة إظهار/إخفاء كلمة المرور
-    function togglePasswordVisibility(inputId, toggleId) {
-        const input = document.getElementById(inputId);
-        const toggle = document.getElementById(toggleId);
-        const icon = toggle.querySelector('i');
-        
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
-
-    // دالة فحص قوة كلمة المرور
-    function checkPasswordStrength(password) {
-        const strengthBar = document.getElementById('strength-fill');
-        const strengthText = document.getElementById('strength-text');
-        const strengthContainer = document.getElementById('password-strength');
-        
-        if (!password) {
-            strengthContainer.classList.remove('show');
-            return;
-        }
-        
-        strengthContainer.classList.add('show');
-        
-        let score = 0;
-        let feedback = [];
-        
-        // طول كلمة المرور
-        if (password.length >= 8) score += 2;
-        else if (password.length >= 6) score += 1;
-        else feedback.push('كلمة المرور قصيرة جداً');
-        
-        // وجود أحرف كبيرة
-        if (/[A-Z]/.test(password)) score += 1;
-        else feedback.push('أضف حروف كبيرة');
-        
-        // وجود أحرف صغيرة
-        if (/[a-z]/.test(password)) score += 1;
-        else feedback.push('أضف حروف صغيرة');
-        
-        // وجود أرقام
-        if (/\d/.test(password)) score += 1;
-        else feedback.push('أضف أرقام');
-        
-        // وجود رموز خاصة
-        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
-        else feedback.push('أضف رموز خاصة');
-        
-        // تحديد القوة
-        let strength = 'weak';
-        let strengthMessage = 'ضعيفة جداً';
-        
-        if (score >= 5) {
-            strength = 'very-strong';
-            strengthMessage = 'قوية جداً';
-        } else if (score >= 4) {
-            strength = 'strong';
-            strengthMessage = 'قوية';
-        } else if (score >= 3) {
-            strength = 'medium';
-            strengthMessage = 'متوسطة';
-        } else {
-            strength = 'weak';
-            strengthMessage = 'ضعيفة';
-        }
-        
-        // تحديث المؤشر البصري
-        strengthBar.className = `strength-fill ${strength}`;
-        strengthText.textContent = `قوة كلمة المرور: ${strengthMessage}`;
-        
-        return { score, strength, feedback };
-    }
-
-    // دالة حفظ بيانات تسجيل الدخول
-    function saveLoginData(username, rememberMe) {
-        if (rememberMe) {
-            localStorage.setItem('rememberedUsername', username);
-            localStorage.setItem('rememberMe', 'true');
-        } else {
-            localStorage.removeItem('rememberedUsername');
-            localStorage.removeItem('rememberMe');
-        }
-    }
-
-    // دالة استرجاع بيانات تسجيل الدخول
-    function loadLoginData() {
-        const rememberedUsername = localStorage.getItem('rememberedUsername');
-        const rememberMe = localStorage.getItem('rememberMe');
-        
-        if (rememberedUsername && rememberMe === 'true') {
-            loginUsernameInput.value = rememberedUsername;
-            document.getElementById('remember-me').checked = true;
-        }
-    }
-
-    // تحميل البيانات المحفوظة عند تحميل الصفحة
-    loadLoginData();
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // مستمعي أحداث إظهار/إخفاء كلمة المرور
-    if (togglePasswordBtn) {
-        togglePasswordBtn.addEventListener('click', () => {
-            togglePasswordVisibility('login-password', 'toggle-password');
-        });
-    }
-
-    if (toggleRegisterPasswordBtn) {
-        toggleRegisterPasswordBtn.addEventListener('click', () => {
-            togglePasswordVisibility('register-password', 'toggle-register-password');
-        });
-    }
-
-    // مستمع حدث فحص قوة كلمة المرور
-    if (registerPasswordInput) {
-        registerPasswordInput.addEventListener('input', (e) => {
-            checkPasswordStrength(e.target.value);
-        });
-    }
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    const agreeTermsCheckbox = document.getElementById('agree-terms');
-
-    // إضافة مستمعي الأحداث للتحسينات الجديدة
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
-    const registerPasswordInput = document.getElementById('register-password');
     // ----------------------------------------------------
     // ميزة: الحصول على نصيحة للعبة باستخدام Gemini API
     // ----------------------------------------------------
@@ -927,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginTab) loginTab.addEventListener('click', () => switchTab(loginTab));
     if (registerTab) registerTab.addEventListener('click', () => switchTab(registerTab));
     if (instructionsTab) instructionsTab.addEventListener('click', () => switchTab(instructionsTab));
+    // تم إزالة حدث النقر لـ appsTab
     if (contactTab) contactTab.addEventListener('click', () => switchTab(contactTab));
 
     // أحداث النقر على الأزرار

@@ -24,6 +24,14 @@ const saveGameSettingsBtn = document.getElementById('saveGameSettingsBtn');
 const numBoxesInput = document.getElementById('numBoxesInput');
 const winRatioInput = document.getElementById('winRatioInput');
 
+// عناصر DOM للنشاطات المشبوهة
+const showSuspiciousActivity = document.getElementById('showSuspiciousActivity');
+const suspiciousActivitySection = document.getElementById('suspiciousActivitySection');
+const refreshSuspiciousActivityBtn = document.getElementById('refreshSuspiciousActivityBtn');
+const suspiciousUsersList = document.getElementById('suspiciousUsersList');
+const totalSuspiciousUsers = document.getElementById('totalSuspiciousUsers');
+const highRiskUsers = document.getElementById('highRiskUsers');
+
 // التحقق من وجود token عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('adminToken');
@@ -241,4 +249,177 @@ saveGameSettingsBtn.addEventListener('click', async function() {
         console.error('Error saving game settings:', error);
         alert('خطأ في الاتصال بالخادم');
     }
-}); 
+});
+
+// إضافة حدث للقسم الجديد
+showSuspiciousActivity.addEventListener('click', function() {
+    suspiciousActivitySection.classList.remove('hidden');
+    userManagementSection.classList.add('hidden');
+    gameManagementSection.classList.add('hidden');
+    loadSuspiciousActivity();
+});
+
+// جلب النشاطات المشبوهة
+async function loadSuspiciousActivity() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/users/admin/suspicious-activity`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            displaySuspiciousUsers(data);
+        } else {
+            console.error('Error loading suspicious activity');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// عرض المستخدمين المشبوهين
+function displaySuspiciousUsers(data) {
+    totalSuspiciousUsers.textContent = data.totalSuspiciousUsers;
+    
+    const highRiskCount = data.users.filter(user => user.riskLevel === 'عالي').length;
+    highRiskUsers.textContent = highRiskCount;
+    
+    if (data.users.length === 0) {
+        suspiciousUsersList.innerHTML = '<p style="text-align: center; color: #666;">لا توجد نشاطات مشبوهة</p>';
+        return;
+    }
+    
+    suspiciousUsersList.innerHTML = data.users.map(user => `
+        <div class="user-card" style="
+            background: ${user.riskLevel === 'عالي' ? '#fee2e2' : user.riskLevel === 'متوسط' ? '#fef3c7' : '#f0f9ff'};
+            border: 1px solid ${user.riskLevel === 'عالي' ? '#fecaca' : user.riskLevel === 'متوسط' ? '#fed7aa' : '#bfdbfe'};
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0;">${user.username}</h4>
+                <span style="
+                    background: ${user.riskLevel === 'عالي' ? '#ef4444' : user.riskLevel === 'متوسط' ? '#f59e0b' : '#3b82f6'};
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                ">${user.riskLevel}</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <strong>النقاط:</strong> ${user.score.toLocaleString()}
+                </div>
+                <div>
+                    <strong>النشاطات المشبوهة:</strong> ${user.suspiciousActivityCount}
+                </div>
+            </div>
+            
+            ${user.lastSuspiciousActivity ? `
+                <div style="background: #f3f4f6; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+                    <strong>آخر نشاط مشبوه:</strong><br>
+                    ${user.lastSuspiciousActivity.activities.join(', ')}<br>
+                    <small>${new Date(user.lastSuspiciousActivity.timestamp).toLocaleString('ar-SA')}</small>
+                </div>
+            ` : ''}
+            
+            <div style="display: flex; gap: 8px;">
+                <button onclick="banUser('${user.username}')" style="
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                ">حظر</button>
+                
+                <button onclick="resetUserScore('${user.username}')" style="
+                    background: #10b981;
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                ">إعادة تعيين النقاط</button>
+                
+                <button onclick="viewUserDetails('${user.username}')" style="
+                    background: #3b82f6;
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                ">تفاصيل</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// حظر مستخدم
+window.banUser = async function(username) {
+    const reason = prompt('سبب الحظر:');
+    if (!reason) return;
+    
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/users/admin/ban-user`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify({ username, reason })
+        });
+        
+        if (response.ok) {
+            alert(`تم حظر المستخدم ${username} بنجاح`);
+            loadSuspiciousActivity();
+        } else {
+            alert('خطأ في حظر المستخدم');
+        }
+    } catch (error) {
+        console.error('Error banning user:', error);
+        alert('خطأ في الاتصال بالخادم');
+    }
+};
+
+// إعادة تعيين نقاط مستخدم
+window.resetUserScore = async function(username) {
+    const newScore = prompt('النقاط الجديدة (اترك فارغاً للعودة إلى 1000):');
+    const score = newScore ? parseInt(newScore) : 1000;
+    
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/users/admin/reset-user-score`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify({ username, newScore: score })
+        });
+        
+        if (response.ok) {
+            alert(`تم إعادة تعيين نقاط ${username} إلى ${score}`);
+            loadSuspiciousActivity();
+        } else {
+            alert('خطأ في إعادة تعيين النقاط');
+        }
+    } catch (error) {
+        console.error('Error resetting user score:', error);
+        alert('خطأ في الاتصال بالخادم');
+    }
+};
+
+// عرض تفاصيل المستخدم
+window.viewUserDetails = function(username) {
+    alert(`تفاصيل المستخدم: ${username}\n\nسيتم إضافة المزيد من التفاصيل هنا...`);
+};
+
+// تحديث البيانات
+refreshSuspiciousActivityBtn.addEventListener('click', loadSuspiciousActivity); 
