@@ -1,0 +1,54 @@
+{
+  "name": "VoiceBoom",
+  "short_name": "VoiceBoom",
+  "description": "لعبة VoiceBoom - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "screenshots/screenshot2.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "بدء لعبة جديدة",
+      "short_name": "جديد",
+      "description": "بدء لعبة جديدة مع الأصدقاء",
+      "url": "/game"
+    },
+    {
+      "name": "الملف الشخصي",
+      "short_name": "ملفي",
+      "description": "عرض الملف الشخصي والإنجازات",
+      "url": "/profile"
+    }
+  ]
+}

@@ -84,7 +84,9 @@
         </div>
         <div class="player-actions">
             <button id="recharge-button" title="تعبئة رصيد">💰</button>
-                    <button id="lamp-button" title="فتح المصباح">💡</button>
+            <button id="lamp-button" title="فتح المصباح">💡</button>
+            <button id="stats-button" title="الإحصائيات">📊</button>
+            <button id="challenges-button" title="التحديات اليومية">🎯</button>
             <button id="logout-button" title="تسجيل الخروج">⏻</button>
             <button id="mute-button" title="كتم/إلغاء كتم الصوت">🔊</button>
         </div>
@@ -237,6 +239,11 @@
     </div>
 
     <!-- قبل وسم </body> مباشرة أضف: -->
+    <script src="js/soundManager.js"></script>
+    <script src="js/secureStorage.js"></script>
+    <script src="notification-system.js"></script>
+    <script src="statistics-system.js"></script>
+    <script src="daily-challenge.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
