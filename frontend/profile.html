@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Voice Boom">
+    <meta name="theme-color" content="#002A1B">
+    <meta name="msapplication-TileColor" content="#002A1B">
+    <meta name="msapplication-navbutton-color" content="#002A1B">
+    <title>البروفايل - INFINITY BOX VOICEBOOM</title>
+    <link rel="stylesheet" href="profile-styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo.png">
+</head>
+<body>
+    <div class="container">
+        <!-- شريط التنقل -->
+        <nav class="navbar">
+            <div class="nav-left">
+                <button class="nav-btn" onclick="goBack()">← رجوع</button>
+            </div>
+            <div class="nav-center">
+                <h1>البروفايل</h1>
+            </div>
+            <div class="nav-right">
+                <button class="nav-btn" onclick="openSettings()">⚙️</button>
+            </div>
+        </nav>
+
+        <!-- معلومات البروفايل الأساسية -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <img id="user-avatar" src="images/default-avatar.png" alt="الصورة الشخصية">
+                <div class="online-status" id="online-status"></div>
+            </div>
+            <div class="profile-info">
+                <h2 id="display-name">اسم المستخدم</h2>
+                <p id="user-bio">مرحباً! أنا لاعب في VoiceBoom 🎮</p>
+                <div class="profile-stats">
+                    <span class="stat">
+                        <strong id="user-level">1</strong>
+                        <small>المستوى</small>
+                    </span>
+                    <span class="stat">
+                        <strong id="friends-count">0</strong>
+                        <small>الأصدقاء</small>
+                    </span>
+                    <span class="stat">
+                        <strong id="games-played">0</strong>
+                        <small>اللعبات</small>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- أزرار الإجراءات -->
+        <div class="action-buttons" id="action-buttons">
+            <button class="btn primary" onclick="editProfile()">تعديل البروفايل</button>
+            <button class="btn secondary" onclick="viewStats()">الإحصائيات</button>
+            <button class="btn secondary" onclick="viewFriends()">الأصدقاء</button>
+        </div>
+
+        <!-- التبويبات -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="overview">نظرة عامة</button>
+            <button class="tab-button" data-tab="stats">الإحصائيات</button>
+            <button class="tab-button" data-tab="friends">الأصدقاء</button>
+            <button class="tab-button" data-tab="achievements">الإنجازات</button>
+            <button class="tab-button" data-tab="settings">الإعدادات</button>
+        </div>
+
+        <!-- محتوى التبويبات -->
+        <div class="tab-content">
+            <!-- تبويب النظرة العامة -->
+            <div id="overview" class="tab-panel active">
+                <div class="overview-grid">
+                    <div class="card">
+                        <h3>🎮 إحصائيات اللعب</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-value" id="total-score">0</span>
+                                <span class="stat-label">مجموع النقاط</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="high-score">0</span>
+                                <span class="stat-label">أعلى نتيجة</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="win-rate">0%</span>
+                                <span class="stat-label">معدل الفوز</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="avg-score">0</span>
+                                <span class="stat-label">متوسط النقاط</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎯 إحصائيات الأسلحة</h3>
+                        <div class="weapons-stats">
+                            <div class="weapon-stat">
+                                <span class="weapon-name">طلقة واحدة</span>
+                                <span class="weapon-count" id="single-shots">0</span>
+                            </div>
+                            <div class="weapon-stat">
+                                <span class="weapon-name">طلقة ثلاثية</span>
+                                <span class="weapon-count" id="triple-shots">0</span>
+                            </div>
+                            <div class="weapon-stat">
+                                <span class="weapon-name">مطرقة</span>
+                                <span class="weapon-count" id="hammer-shots">0</span>
+                            </div>
+                            <div class="weapon-stat">
+                                <span class="weapon-name">الدقة</span>
+                                <span class="weapon-count" id="accuracy">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>💎 العناصر المجمعة</h3>
+                        <div class="items-grid">
+                            <div class="item">
+                                <span class="item-icon">💎</span>
+                                <span class="item-count" id="gems-count">0</span>
+                                <span class="item-name">الجواهر</span>
+                            </div>
+                            <div class="item">
+                                <span class="item-icon">🔑</span>
+                                <span class="item-count" id="keys-count">0</span>
+                                <span class="item-name">المفاتيح</span>
+                            </div>
+                            <div class="item">
+                                <span class="item-icon">🪙</span>
+                                <span class="item-count" id="coins-count">0</span>
+                                <span class="item-name">العملات</span>
+                            </div>
+                            <div class="item">
+                                <span class="item-icon">🦇</span>
+                                <span class="item-count" id="bats-hit">0</span>
+                                <span class="item-name">الخفافيش</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تبويب الإحصائيات -->
+            <div id="stats" class="tab-panel">
+                <div class="stats-container">
+                    <div class="card">
+                        <h3>📊 إحصائيات مفصلة</h3>
+                        <div class="detailed-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">إجمالي النقاط</span>
+                                <span class="stat-value" id="detailed-score">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">اللآلئ</span>
+                                <span class="stat-value" id="detailed-pearls">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">الصناديق المفتوحة</span>
+                                <span class="stat-value" id="detailed-boxes">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">اللعبات المكتملة</span>
+                                <span class="stat-value" id="detailed-games">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">الانتصارات</span>
+                                <span class="stat-value" id="detailed-wins">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">وقت اللعب الإجمالي</span>
+                                <span class="stat-value" id="detailed-playtime">0 دقيقة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تبويب الأصدقاء -->
+            <div id="friends" class="tab-panel">
+                <div class="friends-container">
+                    <div class="friends-header">
+                        <h3>👥 الأصدقاء</h3>
+                        <button class="btn small" onclick="searchUsers()">البحث عن أصدقاء</button>
+                    </div>
+                    
+                    <div class="friends-tabs">
+                        <button class="friend-tab active" data-friend-tab="friends">الأصدقاء</button>
+                        <button class="friend-tab" data-friend-tab="requests">طلبات الصداقة</button>
+                        <button class="friend-tab" data-friend-tab="blocked">المحظورون</button>
+                    </div>
+
+                    <div class="friends-content">
+                        <!-- قائمة الأصدقاء -->
+                        <div id="friends-list" class="friend-panel active">
+                            <div class="friends-grid" id="friends-grid">
+                                <!-- سيتم ملؤها بالجافا سكريبت -->
+                            </div>
+                        </div>
+
+                        <!-- طلبات الصداقة -->
+                        <div id="friend-requests" class="friend-panel">
+                            <div class="requests-list" id="requests-list">
+                                <!-- سيتم ملؤها بالجافا سكريبت -->
+                            </div>
+                        </div>
+
+                        <!-- المستخدمين المحظورين -->
+                        <div id="blocked-users" class="friend-panel">
+                            <div class="blocked-list" id="blocked-list">
+                                <!-- سيتم ملؤها بالجافا سكريبت -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تبويب الإنجازات -->
+            <div id="achievements" class="tab-panel">
+                <div class="achievements-container">
+                    <div class="achievements-header">
+                        <h3>🏆 الإنجازات</h3>
+                        <div class="achievement-progress">
+                            <span id="achievements-unlocked">0</span> / <span id="achievements-total">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="achievements-grid" id="achievements-grid">
+                        <!-- سيتم ملؤها بالجافا سكريبت -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- تبويب الإعدادات -->
+            <div id="settings" class="tab-panel">
+                <div class="settings-container">
+                    <div class="card">
+                        <h3>🔒 إعدادات الخصوصية</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="show-profile" checked>
+                                إظهار البروفايل للآخرين
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="show-stats" checked>
+                                إظهار الإحصائيات للآخرين
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="allow-friend-requests" checked>
+                                السماح بطلبات الصداقة
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="allow-messages" checked>
+                                السماح بالرسائل
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔔 إعدادات الإشعارات</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notify-friend-requests" checked>
+                                إشعارات طلبات الصداقة
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notify-messages" checked>
+                                إشعارات الرسائل
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notify-game-invites" checked>
+                                إشعارات دعوات اللعب
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notify-achievements" checked>
+                                إشعارات الإنجازات
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎮 إعدادات اللعبة</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="sound-enabled" checked>
+                                تفعيل الأصوات
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="music-enabled" checked>
+                                تفعيل الموسيقى
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- النوافذ المنبثقة -->
+    <div id="edit-profile-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('edit-profile-modal')">×</button>
+            <h3>تعديل البروفايل</h3>
+            <form id="edit-profile-form">
+                <div class="form-group">
+                    <label for="edit-display-name">اسم العرض</label>
+                    <input type="text" id="edit-display-name" placeholder="اسم العرض">
+                </div>
+                <div class="form-group">
+                    <label for="edit-bio">نبذة شخصية</label>
+                    <textarea id="edit-bio" placeholder="اكتب نبذة عن نفسك" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-country">البلد</label>
+                    <input type="text" id="edit-country" placeholder="بلدك">
+                </div>
+                <div class="form-group">
+                    <label for="edit-timezone">المنطقة الزمنية</label>
+                    <input type="text" id="edit-timezone" placeholder="المنطقة الزمنية">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary" onclick="closeModal('edit-profile-modal')">إلغاء</button>
+                    <button type="submit" class="btn primary">حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="search-users-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('search-users-modal')">×</button>
+            <h3>البحث عن مستخدمين</h3>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="ابحث عن مستخدم..." oninput="searchUsersRealTime()">
+                <div class="search-results" id="search-results">
+                    <!-- نتائج البحث -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html> 

@@ -4,6 +4,7 @@ const User = require('../models/User'); // تصحيح المسار
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const auth = require('./auth');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123'; // تصحيح ||
 
@@ -731,6 +732,453 @@ router.get('/invite-stats', verifyToken, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: 'خطأ في الخادم عند جلب إحصائيات الدعوات' });
+  }
+});
+
+// الحصول على بروفايل المستخدم
+router.get('/profile/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username }).select('-password -suspiciousActivity');
+    
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    // التحقق من إعدادات الخصوصية
+    if (!user.settings.privacy.showProfile) {
+      return res.status(403).json({ error: 'هذا البروفايل خاص' });
+    }
+    
+    res.json({
+      profile: user.profile,
+      stats: user.settings.privacy.showStats ? user.stats : null,
+      achievements: user.achievements,
+      badges: user.badges,
+      relationships: {
+        friendsCount: user.relationships.friends.filter(f => f.status === 'accepted').length,
+        followersCount: user.relationships.followers.length,
+        followingCount: user.relationships.following.length
+      }
+    });
+  } catch (error) {
+    console.error('خطأ في الحصول على البروفايل:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// تحديث بروفايل المستخدم
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { displayName, bio, avatar, country, timezone } = req.body;
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    // تحديث البيانات المسموح بها
+    if (displayName) user.profile.displayName = displayName;
+    if (bio) user.profile.bio = bio;
+    if (avatar) user.profile.avatar = avatar;
+    if (country) user.profile.country = country;
+    if (timezone) user.profile.timezone = timezone;
+    
+    await user.save();
+    
+    res.json({ 
+      message: 'تم تحديث البروفايل بنجاح',
+      profile: user.profile 
+    });
+  } catch (error) {
+    console.error('خطأ في تحديث البروفايل:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// البحث عن مستخدمين
+router.get('/search', auth, async (req, res) => {
+  try {
+    const { q, limit = 10 } = req.query;
+    const userId = req.user.id;
+    
+    if (!q || q.length < 2) {
+      return res.status(400).json({ error: 'يجب إدخال نص للبحث (حرفين على الأقل)' });
+    }
+    
+    const users = await User.find({
+      username: { $regex: q, $options: 'i' },
+      _id: { $ne: userId },
+      'settings.privacy.showProfile': true
+    })
+    .select('username profile.displayName profile.avatar profile.status profile.level')
+    .limit(parseInt(limit));
+    
+    res.json(users);
+  } catch (error) {
+    console.error('خطأ في البحث عن المستخدمين:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// إرسال طلب صداقة
+router.post('/friend-request', auth, async (req, res) => {
+  try {
+    const { username, message = '' } = req.body;
+    const userId = req.user.id;
+    
+    if (!username) {
+      return res.status(400).json({ error: 'اسم المستخدم مطلوب' });
+    }
+    
+    const targetUser = await User.findOne({ username });
+    if (!targetUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    if (targetUser._id.toString() === userId) {
+      return res.status(400).json({ error: 'لا يمكنك إرسال طلب صداقة لنفسك' });
+    }
+    
+    // التحقق من إعدادات الخصوصية
+    if (!targetUser.settings.privacy.allowFriendRequests) {
+      return res.status(403).json({ error: 'هذا المستخدم لا يقبل طلبات الصداقة' });
+    }
+    
+    // التحقق من وجود طلب سابق
+    const existingRequest = targetUser.relationships.friendRequests.find(
+      req => req.from.toString() === userId
+    );
+    
+    if (existingRequest) {
+      return res.status(400).json({ error: 'تم إرسال طلب صداقة مسبقاً' });
+    }
+    
+    // التحقق من كونهم أصدقاء بالفعل
+    const existingFriend = targetUser.relationships.friends.find(
+      friend => friend.userId.toString() === userId
+    );
+    
+    if (existingFriend && existingFriend.status === 'accepted') {
+      return res.status(400).json({ error: 'أنتما أصدقاء بالفعل' });
+    }
+    
+    const currentUser = await User.findById(userId);
+    
+    // إضافة طلب الصداقة
+    targetUser.relationships.friendRequests.push({
+      from: userId,
+      fromUsername: currentUser.username,
+      message
+    });
+    
+    await targetUser.save();
+    
+    res.json({ message: 'تم إرسال طلب الصداقة بنجاح' });
+  } catch (error) {
+    console.error('خطأ في إرسال طلب الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// قبول طلب صداقة
+router.post('/friend-request/accept', auth, async (req, res) => {
+  try {
+    const { fromUserId } = req.body;
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId);
+    const fromUser = await User.findById(fromUserId);
+    
+    if (!user || !fromUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    // البحث عن طلب الصداقة
+    const friendRequest = user.relationships.friendRequests.find(
+      req => req.from.toString() === fromUserId
+    );
+    
+    if (!friendRequest) {
+      return res.status(404).json({ error: 'طلب الصداقة غير موجود' });
+    }
+    
+    // إزالة طلب الصداقة
+    user.relationships.friendRequests = user.relationships.friendRequests.filter(
+      req => req.from.toString() !== fromUserId
+    );
+    
+    // إضافة كأصدقاء لكلا المستخدمين
+    user.relationships.friends.push({
+      userId: fromUserId,
+      username: fromUser.username,
+      status: 'accepted'
+    });
+    
+    fromUser.relationships.friends.push({
+      userId: userId,
+      username: user.username,
+      status: 'accepted'
+    });
+    
+    await user.save();
+    await fromUser.save();
+    
+    res.json({ message: 'تم قبول طلب الصداقة بنجاح' });
+  } catch (error) {
+    console.error('خطأ في قبول طلب الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// رفض طلب صداقة
+router.post('/friend-request/reject', auth, async (req, res) => {
+  try {
+    const { fromUserId } = req.body;
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    // إزالة طلب الصداقة
+    user.relationships.friendRequests = user.relationships.friendRequests.filter(
+      req => req.from.toString() !== fromUserId
+    );
+    
+    await user.save();
+    
+    res.json({ message: 'تم رفض طلب الصداقة' });
+  } catch (error) {
+    console.error('خطأ في رفض طلب الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// إزالة صديق
+router.delete('/friend/:friendId', auth, async (req, res) => {
+  try {
+    const { friendId } = req.params;
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId);
+    const friend = await User.findById(friendId);
+    
+    if (!user || !friend) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    // إزالة من قائمة الأصدقاء لكلا المستخدمين
+    user.relationships.friends = user.relationships.friends.filter(
+      f => f.userId.toString() !== friendId
+    );
+    
+    friend.relationships.friends = friend.relationships.friends.filter(
+      f => f.userId.toString() !== userId
+    );
+    
+    await user.save();
+    await friend.save();
+    
+    res.json({ message: 'تم إزالة الصديق بنجاح' });
+  } catch (error) {
+    console.error('خطأ في إزالة الصديق:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// الحصول على قائمة الأصدقاء
+router.get('/friends', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId).populate('relationships.friends.userId', 'username profile');
+    
+    const friends = user.relationships.friends
+      .filter(friend => friend.status === 'accepted')
+      .map(friend => ({
+        id: friend.userId._id,
+        username: friend.userId.username,
+        displayName: friend.userId.profile.displayName,
+        avatar: friend.userId.profile.avatar,
+        status: friend.userId.profile.status,
+        level: friend.userId.profile.level,
+        addedAt: friend.addedAt
+      }));
+    
+    res.json(friends);
+  } catch (error) {
+    console.error('خطأ في الحصول على قائمة الأصدقاء:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// الحصول على طلبات الصداقة
+router.get('/friend-requests', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId).populate('relationships.friendRequests.from', 'username profile');
+    
+    const requests = user.relationships.friendRequests.map(req => ({
+      id: req.from._id,
+      username: req.from.username,
+      displayName: req.from.profile.displayName,
+      avatar: req.from.profile.avatar,
+      message: req.message,
+      sentAt: req.sentAt
+    }));
+    
+    res.json(requests);
+  } catch (error) {
+    console.error('خطأ في الحصول على طلبات الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// حظر مستخدم
+router.post('/block', auth, async (req, res) => {
+  try {
+    const { username, reason = '' } = req.body;
+    const userId = req.user.id;
+    
+    const targetUser = await User.findOne({ username });
+    if (!targetUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    if (targetUser._id.toString() === userId) {
+      return res.status(400).json({ error: 'لا يمكنك حظر نفسك' });
+    }
+    
+    const user = await User.findById(userId);
+    
+    // التحقق من عدم الحظر مسبقاً
+    const alreadyBlocked = user.relationships.blockedUsers.find(
+      blocked => blocked.userId.toString() === targetUser._id.toString()
+    );
+    
+    if (alreadyBlocked) {
+      return res.status(400).json({ error: 'تم حظر هذا المستخدم مسبقاً' });
+    }
+    
+    // إضافة للمستخدمين المحظورين
+    user.relationships.blockedUsers.push({
+      userId: targetUser._id,
+      username: targetUser.username,
+      reason
+    });
+    
+    // إزالة من الأصدقاء إذا كانوا أصدقاء
+    user.relationships.friends = user.relationships.friends.filter(
+      friend => friend.userId.toString() !== targetUser._id.toString()
+    );
+    
+    await user.save();
+    
+    res.json({ message: 'تم حظر المستخدم بنجاح' });
+  } catch (error) {
+    console.error('خطأ في حظر المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// إلغاء حظر مستخدم
+router.delete('/block/:userId', auth, async (req, res) => {
+  try {
+    const { userId: blockedUserId } = req.params;
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    // إزالة من المستخدمين المحظورين
+    user.relationships.blockedUsers = user.relationships.blockedUsers.filter(
+      blocked => blocked.userId.toString() !== blockedUserId
+    );
+    
+    await user.save();
+    
+    res.json({ message: 'تم إلغاء حظر المستخدم بنجاح' });
+  } catch (error) {
+    console.error('خطأ في إلغاء حظر المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// تحديث إعدادات الخصوصية
+router.put('/privacy-settings', auth, async (req, res) => {
+  try {
+    const { showProfile, showStats, allowFriendRequests, allowMessages } = req.body;
+    const userId = req.user.id;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    // تحديث إعدادات الخصوصية
+    if (typeof showProfile === 'boolean') user.settings.privacy.showProfile = showProfile;
+    if (typeof showStats === 'boolean') user.settings.privacy.showStats = showStats;
+    if (typeof allowFriendRequests === 'boolean') user.settings.privacy.allowFriendRequests = allowFriendRequests;
+    if (typeof allowMessages === 'boolean') user.settings.privacy.allowMessages = allowMessages;
+    
+    await user.save();
+    
+    res.json({ 
+      message: 'تم تحديث إعدادات الخصوصية بنجاح',
+      privacy: user.settings.privacy 
+    });
+  } catch (error) {
+    console.error('خطأ في تحديث إعدادات الخصوصية:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// الحصول على إحصائيات المستخدم
+router.get('/stats', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    res.json({
+      stats: user.stats,
+      weapons: user.weapons,
+      itemsCollected: user.itemsCollected,
+      achievements: user.achievements,
+      badges: user.badges
+    });
+  } catch (error) {
+    console.error('خطأ في الحصول على الإحصائيات:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// الحصول على قائمة المستخدمين المحظورين
+router.get('/blocked-users', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId).populate('relationships.blockedUsers.userId', 'username profile');
+    
+    const blockedUsers = user.relationships.blockedUsers.map(blocked => ({
+      id: blocked.userId._id,
+      username: blocked.userId.username,
+      displayName: blocked.userId.profile.displayName,
+      avatar: blocked.userId.profile.avatar,
+      reason: blocked.reason,
+      blockedAt: blocked.blockedAt
+    }));
+    
+    res.json(blockedUsers);
+  } catch (error) {
+    console.error('خطأ في الحصول على المستخدمين المحظورين:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
   }
 });
 

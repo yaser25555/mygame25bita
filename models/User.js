@@ -19,42 +19,127 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  score: {
-    type: Number,
-    default: 0,
+  
+  // معلومات البروفايل الأساسية
+  profile: {
+    displayName: {
+      type: String,
+      default: function() {
+        return this.username;
+      }
+    },
+    bio: {
+      type: String,
+      default: 'مرحباً! أنا لاعب في VoiceBoom 🎮'
+    },
+    avatar: {
+      type: String,
+      default: 'default-avatar.png'
+    },
+    level: {
+      type: Number,
+      default: 1
+    },
+    experience: {
+      type: Number,
+      default: 0
+    },
+    joinDate: {
+      type: Date,
+      default: Date.now
+    },
+    lastSeen: {
+      type: Date,
+      default: Date.now
+    },
+    status: {
+      type: String,
+      enum: ['online', 'offline', 'away', 'busy'],
+      default: 'offline'
+    },
+    country: {
+      type: String,
+      default: ''
+    },
+    timezone: {
+      type: String,
+      default: ''
+    }
   },
-  pearls: {
-    type: Number,
-    default: 0,
+  
+  // إحصائيات اللعب
+  stats: {
+    score: {
+      type: Number,
+      default: 0,
+    },
+    pearls: {
+      type: Number,
+      default: 0,
+    },
+    boxesOpened: {
+      type: Number,
+      default: 0,
+    },
+    personalScore: {
+      type: Number,
+      default: 50,
+    },
+    highScore: {
+      type: Number,
+      default: 0,
+    },
+    roundNumber: {
+      type: Number,
+      default: 0,
+    },
+    gamesPlayed: {
+      type: Number,
+      default: 0
+    },
+    gamesWon: {
+      type: Number,
+      default: 0
+    },
+    winRate: {
+      type: Number,
+      default: 0
+    },
+    totalPlayTime: {
+      type: Number,
+      default: 0 // بالدقائق
+    },
+    averageScore: {
+      type: Number,
+      default: 0
+    }
   },
-  boxesOpened: {
-    type: Number,
-    default: 0,
+  
+  // إحصائيات الأسلحة
+  weapons: {
+    singleShotsUsed: {
+      type: Number,
+      default: 0,
+    },
+    tripleShotsUsed: {
+      type: Number,
+      default: 0,
+    },
+    hammerShotsUsed: {
+      type: Number,
+      default: 0,
+    },
+    totalShots: {
+      type: Number,
+      default: 0
+    },
+    accuracy: {
+      type: Number,
+      default: 0
+    }
   },
-  personalScore: {
-    type: Number,
-    default: 50,
-  },
-  highScore: {
-    type: Number,
-    default: 0,
-  },
-  roundNumber: {
-    type: Number,
-    default: 0,
-  },
-  singleShotsUsed: {
-    type: Number,
-    default: 0,
-  },
-  tripleShotsUsed: {
-    type: Number,
-    default: 0,
-  },
-  hammerShotsUsed: {
-    type: Number,
-    default: 0,
-  },
+  
+  // إعدادات اللعبة
   settings: {
     gameSettings: {
       numBoxes: {
@@ -66,11 +151,50 @@ const UserSchema = new mongoose.Schema({
         default: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
     },
+    privacy: {
+      showProfile: {
+        type: Boolean,
+        default: true
+      },
+      showStats: {
+        type: Boolean,
+        default: true
+      },
+      allowFriendRequests: {
+        type: Boolean,
+        default: true
+      },
+      allowMessages: {
+        type: Boolean,
+        default: true
+      }
+    },
+    notifications: {
+      friendRequests: {
+        type: Boolean,
+        default: true
+      },
+      messages: {
+        type: Boolean,
+        default: true
+      },
+      gameInvites: {
+        type: Boolean,
+        default: true
+      },
+      achievements: {
+        type: Boolean,
+        default: true
+      }
+    }
   },
+  
   boxValues: {
     type: [Number],
     default: [],
   },
+  
+  // العناصر المجمعة
   itemsCollected: {
     type: Object,
     default: {
@@ -95,14 +219,120 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  avatar: {
-    type: String,
-    default: ''
+  
+  // نظام العلاقات والأصدقاء
+  relationships: {
+    friends: [{
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      username: String,
+      addedAt: {
+        type: Date,
+        default: Date.now
+      },
+      status: {
+        type: String,
+        enum: ['pending', 'accepted', 'blocked'],
+        default: 'pending'
+      }
+    }],
+    friendRequests: [{
+      from: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      fromUsername: String,
+      sentAt: {
+        type: Date,
+        default: Date.now
+      },
+      message: {
+        type: String,
+        default: ''
+      }
+    }],
+    blockedUsers: [{
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      username: String,
+      blockedAt: {
+        type: Date,
+        default: Date.now
+      },
+      reason: String
+    }],
+    followers: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    following: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }]
   },
-  friends: [{
-    type: String, // username of the friend
+  
+  // نظام الإنجازات
+  achievements: [{
+    id: String,
+    name: String,
+    description: String,
+    icon: String,
+    unlockedAt: {
+      type: Date,
+      default: Date.now
+    },
+    progress: {
+      type: Number,
+      default: 0
+    },
+    maxProgress: {
+      type: Number,
+      default: 1
+    }
+  }],
+  
+  // نظام الرتب والألقاب
+  badges: [{
+    id: String,
+    name: String,
+    description: String,
+    icon: String,
+    earnedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  
+  // نظام الدعوات
+  inviteCode: {
+    type: String,
+    unique: true,
+    default: function() {
+      return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+  },
+  invitedBy: {
+    type: String,
+    default: null
+  },
+  invitedUsers: [{
+    type: String,
     default: []
   }],
+  inviteRewards: {
+    type: Number,
+    default: 0
+  },
+  lastInviteReward: {
+    type: Date,
+    default: null
+  },
+  
+  // نظام الأمان والمراقبة
   suspiciousActivity: [{
     timestamp: {
       type: Date,
@@ -129,31 +359,60 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
-  inviteCode: {
-    type: String,
-    unique: true,
-    default: function() {
-      // توليد كود دعوة فريد من 8 أحرف
-      return Math.random().toString(36).substring(2, 10).toUpperCase();
+  
+  // معلومات إضافية
+  preferences: {
+    language: {
+      type: String,
+      default: 'ar'
+    },
+    theme: {
+      type: String,
+      default: 'dark'
+    },
+    soundEnabled: {
+      type: Boolean,
+      default: true
+    },
+    musicEnabled: {
+      type: Boolean,
+      default: true
     }
-  },
-  invitedBy: {
-    type: String, // username of who invited this user
-    default: null
-  },
-  invitedUsers: [{
-    type: String, // usernames of users invited by this user
-    default: []
-  }],
-  inviteRewards: {
-    type: Number,
-    default: 0 // إجمالي المكافآت من الدعوات
-  },
-  lastInviteReward: {
-    type: Date,
-    default: null
   }
+}, {
+  timestamps: true // إضافة createdAt و updatedAt تلقائياً
 });
+
+// Middleware لتحديث الإحصائيات
+UserSchema.pre('save', function(next) {
+  // تحديث winRate
+  if (this.stats.gamesPlayed > 0) {
+    this.stats.winRate = Math.round((this.stats.gamesWon / this.stats.gamesPlayed) * 100);
+  }
+  
+  // تحديث averageScore
+  if (this.stats.gamesPlayed > 0) {
+    this.stats.averageScore = Math.round(this.stats.score / this.stats.gamesPlayed);
+  }
+  
+  // تحديث totalShots و accuracy
+  this.weapons.totalShots = this.weapons.singleShotsUsed + this.weapons.tripleShotsUsed + this.weapons.hammerShotsUsed;
+  if (this.weapons.totalShots > 0) {
+    this.weapons.accuracy = Math.round((this.batsHit / this.weapons.totalShots) * 100);
+  }
+  
+  // تحديث lastSeen
+  this.profile.lastSeen = new Date();
+  
+  next();
+});
+
+// Indexes للأداء
+UserSchema.index({ username: 1 });
+UserSchema.index({ email: 1 });
+UserSchema.index({ 'profile.status': 1 });
+UserSchema.index({ 'stats.score': -1 });
+UserSchema.index({ 'profile.level': -1 });
 
 const User = mongoose.model('User', UserSchema);
 
