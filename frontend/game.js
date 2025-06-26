@@ -110,26 +110,55 @@ window.addEventListener('beforeunload', () => {
 // تحميل بيانات اللاعب
 async function loadGameData() {
     const token = localStorage.getItem('token');
+    console.log('🔍 فحص token:', token ? 'موجود' : 'غير موجود');
+    
     if (!token) {
+        console.log('❌ لا يوجد token، إعادة توجيه لصفحة تسجيل الدخول');
         window.location.href = 'index.html';
         return;
     }
+    
     try {
+        console.log('🌐 إرسال طلب للخادم للتحقق من المستخدم...');
         const res = await fetch(`${BACKEND_URL}/api/users/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        console.log('📡 استجابة الخادم:', res.status, res.statusText);
+        
         if (res.ok) {
             const data = await res.json();
+            console.log('✅ تم تحميل بيانات المستخدم:', data);
+            
             username = data.username;
             score = data.score || 1000;
-            totalSpent = data.totalSpent || 0; // تحميل إجمالي النقاط المنفقة
+            totalSpent = data.totalSpent || 0;
             itemsCollected = data.itemsCollected || itemsCollected;
+            
+            console.log('📊 بيانات اللاعب:', {
+                username,
+                score,
+                totalSpent,
+                itemsCollected
+            });
+            
             updateDisplay();
         } else {
-            localStorage.removeItem('token');
-            window.location.href = 'index.html';
+            console.error('❌ فشل في تحميل بيانات المستخدم:', res.status);
+            if (res.status === 401) {
+                console.log('🔒 Token غير صالح، حذف وإعادة توجيه');
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                localStorage.removeItem('isAdmin');
+                window.location.href = 'index.html';
+            } else {
+                console.log('⚠️ خطأ آخر، إعادة توجيه');
+                window.location.href = 'index.html';
+            }
         }
-    } catch (e) {
+    } catch (error) {
+        console.error('❌ خطأ في الاتصال بالخادم:', error);
+        console.log('🔄 إعادة توجيه لصفحة تسجيل الدخول');
         window.location.href = 'index.html';
     }
 }
@@ -906,7 +935,7 @@ function createItemInfo() {
         { key: 'gem', name: 'جوهرة', emoji: '💎', description: 'جوهرة نادرة تزيد من قوة اللاعب', value: 100 },
         { key: 'key', name: 'مفتاح', emoji: '🔑', description: 'يفتح الصناديق الخاصة', value: 50 },
         { key: 'coin', name: 'عملة', emoji: '🪙', description: 'عملة ذهبية قيمة', value: 25 },
-        { key: 'pearl', name: 'لؤلؤة', emoji: '��', description: 'لؤلؤة بحرية نادرة', value: 75 },
+        { key: 'pearl', name: 'لؤلؤة', emoji: '🦪', description: 'لؤلؤة بحرية نادرة', value: 75 },
         { key: 'bomb', name: 'قنبلة', emoji: '💣', description: 'تسبب ضرراً للخصوم', value: 150 },
         { key: 'star', name: 'نجمة', emoji: '⭐', description: 'نجمة سحرية تمنح قوى خاصة', value: 200 },
         { key: 'bat', name: 'خفاش', emoji: '🦇', description: 'خفاش يطير في الظلام', value: 30 }

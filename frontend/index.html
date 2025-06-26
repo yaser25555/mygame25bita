@@ -6,6 +6,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="login-styles.css">
+    <script>
+        // التحقق من token عند تحميل الصفحة
+        (function() {
+            const token = localStorage.getItem('token');
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            
+            console.log('🔍 فحص token في index.html:', token ? 'موجود' : 'غير موجود');
+            console.log('👤 نوع المستخدم:', isAdmin ? 'مشرف' : 'لاعب عادي');
+            
+            if (token) {
+                console.log('✅ المستخدم مسجل دخول، إعادة توجيه...');
+                if (isAdmin) {
+                    // للمشرفين، إظهار خيار الدخول للعبة أو لوحة التحكم
+                    console.log('🎯 إظهار خيارات المشرف');
+                } else {
+                    // للاعبين العاديين، إعادة توجيه مباشرة للعبة
+                    console.log('🎮 إعادة توجيه للعبة');
+                    window.location.href = 'game.html';
+                }
+            } else {
+                console.log('❌ المستخدم غير مسجل دخول، البقاء في صفحة تسجيل الدخول');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="container">

@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const avatarInput = document.getElementById('avatarInput');
     const profileAvatar = document.getElementById('profileAvatar');
 
+    // متغيرات لمنع التكرار
+    let isLoggingIn = false;
+    let isRegistering = false;
+
     // Force hide admin modal on page load
     if (adminChoiceModal) {
         adminChoiceModal.style.display = 'none';
@@ -82,6 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('register-form');
 
     async function handleLogin() {
+        // منع التكرار
+        if (isLoggingIn) {
+            console.log('Login already in progress, ignoring duplicate request');
+            return;
+        }
+
         const username = loginUsernameInput.value.trim();
         const password = loginPasswordInput.value.trim();
         
@@ -93,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
+        isLoggingIn = true;
         setButtonLoading(loginButton, true);
         console.log('🌐 إرسال طلب إلى:', `${BACKEND_URL}/api/auth/login`);
         
@@ -111,18 +122,38 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('📄 بيانات الاستجابة:', data);
             
             if (response.ok) {
+                console.log('✅ تسجيل الدخول ناجح، حفظ البيانات...');
+                
+                // حفظ البيانات في localStorage
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
                 localStorage.setItem('username', data.username);
+                
+                // التحقق من حفظ البيانات
+                const savedToken = localStorage.getItem('token');
+                const savedUsername = localStorage.getItem('username');
+                const savedIsAdmin = localStorage.getItem('isAdmin');
+                
+                console.log('💾 البيانات المحفوظة:', {
+                    token: savedToken ? 'موجود' : 'غير موجود',
+                    username: savedUsername,
+                    isAdmin: savedIsAdmin
+                });
+                
                 showMessage('تم تسجيل الدخول بنجاح!', false);
-                console.log('✅ تسجيل الدخول ناجح، إعادة توجيه...');
+                
+                // منع المزيد من الطلبات
+                loginButton.disabled = true;
+                
                 setTimeout(() => {
                     if (data.isAdmin) {
+                        console.log('👑 المستخدم مشرف، إظهار خيارات المشرف');
                         adminChoiceModal.style.display = 'flex';
                     } else {
+                        console.log('🎮 المستخدم لاعب عادي، إعادة توجيه للعبة');
                         window.location.href = 'game.html';
                     }
-                }, 500);
+                }, 1500); // زيادة الوقت للتأكد من حفظ البيانات
             } else {
                 showMessage(`فشل تسجيل الدخول: ${data.message || 'خطأ غير معروف'}`, true);
                 console.error('Login failed:', data);
@@ -131,11 +162,18 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('❌ خطأ في الاتصال بالخادم:', error);
             showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة لاحقًا.', true);
         } finally {
+            isLoggingIn = false;
             setButtonLoading(loginButton, false);
         }
     }
 
     async function handleRegister() {
+        // منع التكرار
+        if (isRegistering) {
+            console.log('Registration already in progress, ignoring duplicate request');
+            return;
+        }
+
         const username = registerUsernameInput.value.trim();
         const email = registerEmailInput.value.trim();
         const password = registerPasswordInput.value.trim();
@@ -149,6 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Register error: invalid email');
             return;
         }
+        
+        isRegistering = true;
         setButtonLoading(registerButton, true);
         try {
             const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
@@ -170,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('خطأ في الاتصال بالخادم:', error);
             showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة لاحقًا.', true);
         } finally {
+            isRegistering = false;
             setButtonLoading(registerButton, false);
         }
     }
@@ -208,17 +249,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // حدث النقر على ألسنة التبويب
-    if (loginTab) loginTab.addEventListener('click', () => switchTab(loginTab));
-    if (registerTab) registerTab.addEventListener('click', () => switchTab(registerTab));
-    if (contactTab) contactTab.addEventListener('click', () => switchTab(contactTab));
+    // إزالة جميع الأحداث السابقة لمنع التكرار
+    function removeAllEventListeners() {
+        // إزالة أحداث النقر على ألسنة التبويب
+        if (loginTab) {
+            loginTab.replaceWith(loginTab.cloneNode(true));
+        }
+        if (registerTab) {
+            registerTab.replaceWith(registerTab.cloneNode(true));
+        }
+        if (contactTab) {
+            contactTab.replaceWith(contactTab.cloneNode(true));
+        }
+
+        // إزالة أحداث الأزرار
+        if (loginButton) {
+            loginButton.replaceWith(loginButton.cloneNode(true));
+        }
+        if (registerButton) {
+            registerButton.replaceWith(registerButton.cloneNode(true));
+        }
+
+        // إزالة أحداث النماذج
+        if (loginForm) {
+            loginForm.replaceWith(loginForm.cloneNode(true));
+        }
+        if (registerForm) {
+            registerForm.replaceWith(registerForm.cloneNode(true));
+        }
+    }
+
+    // إزالة الأحداث السابقة
+    removeAllEventListeners();
+
+    // إعادة الحصول على العناصر بعد الاستبدال
+    const newLoginTab = document.getElementById('login-tab');
+    const newRegisterTab = document.getElementById('register-tab');
+    const newContactTab = document.getElementById('contact-tab');
+    const newLoginButton = document.getElementById('login-button');
+    const newRegisterButton = document.getElementById('register-button');
+    const newLoginForm = document.getElementById('login-form');
+    const newRegisterForm = document.getElementById('register-form');
+
+    // إضافة الأحداث الجديدة
+    if (newLoginTab) newLoginTab.addEventListener('click', () => switchTab(newLoginTab));
+    if (newRegisterTab) newRegisterTab.addEventListener('click', () => switchTab(newRegisterTab));
+    if (newContactTab) newContactTab.addEventListener('click', () => switchTab(newContactTab));
 
     // أحداث النقر على الأزرار
-    if (loginButton) {
-        loginButton.addEventListener('click', handleLogin);
+    if (newLoginButton) {
+        newLoginButton.addEventListener('click', handleLogin);
     }
-    if (registerButton) {
-        registerButton.addEventListener('click', handleRegister);
+    if (newRegisterButton) {
+        newRegisterButton.addEventListener('click', handleRegister);
     }
 
     if(goToGameBtn) {
@@ -235,19 +318,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // السماح بالضغط على Enter لإرسال النماذج
     loginUsernameInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') loginButton.click();
+        if (e.key === 'Enter' && !isLoggingIn) {
+            handleLogin();
+        }
     });
     loginPasswordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') loginButton.click();
+        if (e.key === 'Enter' && !isLoggingIn) {
+            handleLogin();
+        }
     });
     registerUsernameInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') registerButton.click();
+        if (e.key === 'Enter' && !isRegistering) {
+            handleRegister();
+        }
     });
     registerEmailInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') registerButton.click();
+        if (e.key === 'Enter' && !isRegistering) {
+            handleRegister();
+        }
     });
     registerPasswordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') registerButton.click();
+        if (e.key === 'Enter' && !isRegistering) {
+            handleRegister();
+        }
     });
 
     // إخفاء زر تسجيل دخول المسؤول القديم إذا كان موجوداً
@@ -257,20 +350,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // افتراضيًا, إظهار قسم تسجيل الدخول عند تحميل الصفحة
-    switchTab(loginTab);
+    switchTab(newLoginTab);
 
     // استماع على إرسال نموذج تسجيل الدخول
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+    if (newLoginForm) {
+        newLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            handleLogin();
+            if (!isLoggingIn) {
+                handleLogin();
+            }
         });
     }
     // استماع على إرسال نموذج التسجيل
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
+    if (newRegisterForm) {
+        newRegisterForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            handleRegister();
+            if (!isRegistering) {
+                handleRegister();
+            }
         });
     }
 }); 

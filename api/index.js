@@ -96,120 +96,173 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-
+// تحسين إدارة WebSocket
 voiceServer.on('connection', (ws, req) => {
   console.log('New WebSocket connection');
   
+  // إضافة معرف فريد للاتصال
+  ws.connectionId = Date.now() + Math.random();
+  ws.isAuthenticated = false;
+  
+  console.log(`WebSocket connection ${ws.connectionId} established`);
+  
   ws.on('message', (message) => {
-    console.log('Received:', message);
-    const data = JSON.parse(message);
-    
-    // معالجة أنواع مختلفة من الرسائل
-    if (data.type === 'join') {
-      console.log(`Player ${data.username} joined`);
-      ws.username = data.username;
-      userSockets.set(data.username, ws); // حفظ السوكيت باسم المستخدم
-      broadcast({ type: 'player_joined', username: data.username });
-      broadcastPlayerList();
-    } else if (data.type === 'chat_message') {
-      // رسالة عامة
-      console.log(`Message from ${data.sender}: ${data.text}`);
-      broadcast({
-        type: 'chat_message',
-        sender: data.sender,
-        text: data.text
-      });
-    } else if (data.type === 'voice_message') {
-      // رسالة صوتية عامة
-      console.log(`Voice message from ${data.sender}`);
-      broadcast({
-        type: 'voice_message',
-        sender: data.sender,
-        audio: data.audio
-      });
-    } else if (data.type === 'private_message') {
-      // رسالة نصية خاصة
-      const targetSocket = userSockets.get(data.target);
-      if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
-        targetSocket.send(JSON.stringify({
-          type: 'private_message',
+    try {
+      console.log(`Received message from connection ${ws.connectionId}:`, message.toString());
+      const data = JSON.parse(message);
+      
+      // معالجة أنواع مختلفة من الرسائل
+      if (data.type === 'join') {
+        console.log(`Player ${data.username} joined via connection ${ws.connectionId}`);
+        ws.username = data.username;
+        ws.isAuthenticated = true;
+        
+        // إزالة الاتصالات القديمة لنفس المستخدم
+        const existingConnections = Array.from(voiceServer.clients).filter(client => 
+          client.username === data.username && client !== ws
+        );
+        existingConnections.forEach(client => {
+          console.log(`Closing duplicate connection for user ${data.username}`);
+          client.close(1000, 'Duplicate connection');
+        });
+        
+        userSockets.set(data.username, ws); // حفظ السوكيت باسم المستخدم
+        broadcast({ type: 'player_joined', username: data.username });
+        broadcastPlayerList();
+      } else if (data.type === 'chat_message') {
+        // رسالة عامة
+        if (!ws.isAuthenticated) {
+          console.log(`Unauthorized chat message attempt from connection ${ws.connectionId}`);
+          return;
+        }
+        console.log(`Message from ${data.sender}: ${data.text}`);
+        broadcast({
+          type: 'chat_message',
           sender: data.sender,
           text: data.text
-        }));
-      }
-      // أرسل نسخة للمرسل أيضًا (اختياري)
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          type: 'private_message',
-          sender: data.sender,
-          text: data.text,
-          self: true
-        }));
-      }
-    } else if (data.type === 'private_voice_message') {
-      // رسالة صوتية خاصة
-      const targetSocket = userSockets.get(data.target);
-      if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
-        targetSocket.send(JSON.stringify({
-          type: 'private_voice_message',
+        });
+      } else if (data.type === 'voice_message') {
+        // رسالة صوتية عامة
+        if (!ws.isAuthenticated) {
+          console.log(`Unauthorized voice message attempt from connection ${ws.connectionId}`);
+          return;
+        }
+        console.log(`Voice message from ${data.sender}`);
+        broadcast({
+          type: 'voice_message',
           sender: data.sender,
           audio: data.audio
-        }));
-      }
-      // أرسل نسخة للمرسل أيضًا (اختياري)
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          type: 'private_voice_message',
-          sender: data.sender,
-          audio: data.audio,
-          self: true
-        }));
-      }
-    } else if (data.type === 'join_voice_room') {
-      // انضمام المستخدم لغرفة صوتية
-      const { roomName, username } = data;
-      console.log('User joined voice room:', username, roomName);
-      ws.voiceRoom = roomName;
-      ws.username = username; // ضروري لتتبع المستخدم عند الخروج
-      userSockets.set(username, ws); // إضافة ضرورية
-      if (!voiceRooms.has(roomName)) voiceRooms.set(roomName, new Set());
-      voiceRooms.get(roomName).add(username);
-      // أبلغ البقية أن هناك مستخدم جديد
-      broadcastToVoiceRoom(roomName, { type: 'voice_user_joined', username }, username);
-    } else if (data.type === 'leave_voice_room') {
-      // خروج المستخدم من غرفة صوتية
-      const { roomName, username } = data;
-      if (voiceRooms.has(roomName)) {
-        voiceRooms.get(roomName).delete(username);
-        if (voiceRooms.get(roomName).size === 0) voiceRooms.delete(roomName);
-      }
-      ws.voiceRoom = null;
-      broadcastToVoiceRoom(roomName, { type: 'voice_user_left', username }, username);
-    } else if (data.type === 'webrtc_signal') {
-      // تمرير إشارات WebRTC (offer/answer/candidate) لباقي أعضاء الغرفة
-      const { roomName, signal, from, to } = data;
-      if (to) {
-        // إرسال إشارة مباشرة لمستخدم محدد (ثنائي)
-        const targetSocket = userSockets.get(to);
-        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
-          targetSocket.send(JSON.stringify({ type: 'webrtc_signal', signal, from }));
+        });
+      } else if (data.type === 'private_message') {
+        // رسالة نصية خاصة
+        if (!ws.isAuthenticated) {
+          console.log(`Unauthorized private message attempt from connection ${ws.connectionId}`);
+          return;
         }
-      } else if (roomName) {
-        // إرسال إشارة لكل أعضاء الغرفة (جماعي)
-        broadcastToVoiceRoom(roomName, { type: 'webrtc_signal', signal, from }, from);
+        const targetSocket = userSockets.get(data.target);
+        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+          targetSocket.send(JSON.stringify({
+            type: 'private_message',
+            sender: data.sender,
+            text: data.text
+          }));
+        }
+        // أرسل نسخة للمرسل أيضًا (اختياري)
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'private_message',
+            sender: data.sender,
+            text: data.text,
+            self: true
+          }));
+        }
+      } else if (data.type === 'private_voice_message') {
+        // رسالة صوتية خاصة
+        if (!ws.isAuthenticated) {
+          console.log(`Unauthorized private voice message attempt from connection ${ws.connectionId}`);
+          return;
+        }
+        const targetSocket = userSockets.get(data.target);
+        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+          targetSocket.send(JSON.stringify({
+            type: 'private_voice_message',
+            sender: data.sender,
+            audio: data.audio
+          }));
+        }
+        // أرسل نسخة للمرسل أيضًا (اختياري)
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'private_voice_message',
+            sender: data.sender,
+            audio: data.audio,
+            self: true
+          }));
+        }
+      } else if (data.type === 'join_voice_room') {
+        // انضمام المستخدم لغرفة صوتية
+        const { roomName, username } = data;
+        console.log(`User ${username} joined voice room ${roomName} via connection ${ws.connectionId}`);
+        ws.voiceRoom = roomName;
+        ws.username = username; // ضروري لتتبع المستخدم عند الخروج
+        ws.isAuthenticated = true;
+        
+        // إزالة الاتصالات القديمة لنفس المستخدم
+        const existingConnections = Array.from(voiceServer.clients).filter(client => 
+          client.username === username && client !== ws
+        );
+        existingConnections.forEach(client => {
+          console.log(`Closing duplicate voice connection for user ${username}`);
+          client.close(1000, 'Duplicate voice connection');
+        });
+        
+        userSockets.set(username, ws); // إضافة ضرورية
+        if (!voiceRooms.has(roomName)) voiceRooms.set(roomName, new Set());
+        voiceRooms.get(roomName).add(username);
+        // أبلغ البقية أن هناك مستخدم جديد
+        broadcastToVoiceRoom(roomName, { type: 'voice_user_joined', username }, username);
+      } else if (data.type === 'leave_voice_room') {
+        // خروج المستخدم من غرفة صوتية
+        const { roomName, username } = data;
+        console.log(`User ${username} left voice room ${roomName} via connection ${ws.connectionId}`);
+        if (voiceRooms.has(roomName)) {
+          voiceRooms.get(roomName).delete(username);
+          if (voiceRooms.get(roomName).size === 0) voiceRooms.delete(roomName);
+        }
+        ws.voiceRoom = null;
+        broadcastToVoiceRoom(roomName, { type: 'voice_user_left', username }, username);
+      } else if (data.type === 'webrtc_signal') {
+        // تمرير إشارات WebRTC (offer/answer/candidate) لباقي أعضاء الغرفة
+        const { roomName, signal, from, to } = data;
+        if (to) {
+          // إرسال إشارة مباشرة لمستخدم محدد (ثنائي)
+          const targetSocket = userSockets.get(to);
+          if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+            targetSocket.send(JSON.stringify({ type: 'webrtc_signal', signal, from }));
+          }
+        } else if (roomName) {
+          // إرسال إشارة لكل أعضاء الغرفة (جماعي)
+          broadcastToVoiceRoom(roomName, { type: 'webrtc_signal', signal, from }, from);
+        }
+      } else if (data.type === 'mute_user') {
+        // كتم مستخدم من قبل المشرف
+        const { targetUsername } = data;
+        const targetSocket = userSockets.get(targetUsername);
+        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+          targetSocket.send(JSON.stringify({ type: 'muted_by_admin' }));
+        }
+      } else {
+        console.log(`Unknown message type: ${data.type} from connection ${ws.connectionId}`);
       }
-    } else if (data.type === 'mute_user') {
-      // كتم مستخدم من قبل المشرف
-      const { targetUsername } = data;
-      const targetSocket = userSockets.get(targetUsername);
-      if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
-        targetSocket.send(JSON.stringify({ type: 'muted_by_admin' }));
-      }
+    } catch (error) {
+      console.error(`Error processing message from connection ${ws.connectionId}:`, error);
     }
   });
   
-  ws.on('close', () => {
-    console.log(`Client ${ws.username || ''} disconnected`);
+  ws.on('close', (code, reason) => {
+    console.log(`Client ${ws.username || 'unknown'} disconnected from connection ${ws.connectionId}`);
+    console.log(`Close code: ${code}, reason: ${reason}`);
+    
     if(ws.username) {
       userSockets.delete(ws.username); // إزالة السوكيت عند الخروج
       broadcast({ type: 'player_left', username: ws.username });
@@ -219,6 +272,10 @@ voiceServer.on('connection', (ws, req) => {
       voiceRooms.get(ws.voiceRoom).delete(ws.username);
       if (voiceRooms.get(ws.voiceRoom).size === 0) voiceRooms.delete(ws.voiceRoom);
     }
+  });
+  
+  ws.on('error', (error) => {
+    console.error(`WebSocket error on connection ${ws.connectionId}:`, error);
   });
 });
 
