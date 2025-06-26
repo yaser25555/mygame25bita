@@ -1,4 +1,4 @@
-/* أنماط CSS لصفحة تسجيل الدخول - تصميم تطبيق الجوال */
+/* أنماط CSS لصفحة تسجيل الدخول */
 :root {
     --primary-bg-color: #002A1B; /* أخضر غامق للخلفية */
     --secondary-color: #003D25; /* أخضر أعمق للحاويات */
@@ -20,16 +20,6 @@
 
 * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html, body {
-    height: 100%;
-    width: 100%;
-    overflow: hidden; /* منع التمرير */
-    position: fixed; /* تثبيت الصفحة */
-    -webkit-overflow-scrolling: touch; /* تمرير سلس على iOS */
 }
 
 body {
@@ -41,18 +31,10 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    height: 100vh; /* ارتفاع كامل الشاشة */
-    width: 100vw; /* عرض كامل الشاشة */
+    margin: 0;
+    padding: 15px;
     position: relative;
-    overflow: hidden;
-    /* إعدادات تطبيق الجوال */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
 }
 
 body::before {
@@ -71,39 +53,31 @@ body::before {
 
 .container {
     background: linear-gradient(180deg, var(--secondary-color) 0%, #002A1B 100%);
-    padding: 20px 15px;
-    border-radius: 0; /* إزالة الزوايا المستديرة */
+    padding: 30px 25px;
+    border-radius: 25px;
     box-shadow: 
-        0 0 0 rgba(0, 42, 27, 0.8),
+        0 20px 40px rgba(0, 42, 27, 0.8),
         inset 0 0 20px rgba(0, 255, 0, 0.1),
         0 0 30px rgba(0, 255, 0, 0.2);
     text-align: center;
+    max-width: 500px;
     width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
     position: relative;
     z-index: 1;
-    border: none;
+    border: 2px solid var(--border-color);
     backdrop-filter: blur(10px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     animation: containerGlow 3s ease-in-out infinite alternate;
-    /* إعدادات تطبيق الجوال */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes containerGlow {
-    0% { box-shadow: 0 0 0 rgba(0, 42, 27, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.1), 0 0 30px rgba(0, 255, 0, 0.2); }
-    100% { box-shadow: 0 0 0 rgba(0, 42, 27, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.15), 0 0 40px rgba(0, 255, 0, 0.3); }
+    0% { box-shadow: 0 20px 40px rgba(0, 42, 27, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.1), 0 0 30px rgba(0, 255, 0, 0.2); }
+    100% { box-shadow: 0 20px 40px rgba(0, 42, 27, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.15), 0 0 40px rgba(0, 255, 0, 0.3); }
 }
 
 .logo {
-    width: 100px;
+    width: 120px;
     height: auto;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     filter: drop-shadow(0 0 15px rgba(0, 255, 0, 0.6));
     animation: logoFloat 4s ease-in-out infinite;
 }
@@ -123,7 +97,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -133,13 +107,13 @@ body::before {
 
 .modal-content {
     background: linear-gradient(135deg, var(--secondary-color) 0%, #002A1B 100%);
-    padding: 25px 20px;
+    padding: 30px 25px;
     border-radius: 20px;
     text-align: center;
     box-shadow: 0 15px 35px rgba(0,0,0,0.8);
     border: 2px solid var(--border-color);
     position: relative;
-    max-width: 90%;
+    max-width: 350px;
     width: 90%;
     animation: modalSlideIn 0.3s ease-out;
 }
@@ -190,8 +164,8 @@ body::before {
 h1 {
     color: var(--accent-color-2);
     font-family: 'Amiri', 'Noto Naskh Arabic', serif;
-    margin-bottom: 15px;
-    font-size: 2em;
+    margin-bottom: 20px;
+    font-size: 2.2em;
     text-shadow: 0 0 15px rgba(0, 255, 0, 0.8), 0 0 25px rgba(0, 255, 0, 0.4);
     letter-spacing: 1px;
     font-weight: bold;
@@ -200,19 +174,18 @@ h1 {
 .tabs {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     border-bottom: 2px solid var(--border-color);
     justify-content: center;
-    gap: 2px;
-    width: 100%;
+    gap: 5px;
 }
 
 .tab-button {
     flex: 1;
-    min-width: 80px;
-    padding: 12px 8px;
+    min-width: 100px;
+    padding: 15px 12px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 1em;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.7);
     background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 0, 0.05) 100%);
@@ -277,12 +250,9 @@ h1 {
 
 .content-section {
     display: none;
-    padding: 15px 0;
+    padding: 20px 0;
     text-align: right;
     animation: fadeIn 0.3s ease-in;
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes fadeIn {
@@ -295,7 +265,7 @@ h1 {
 }
 
 .content-section .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .content-section .btn {
@@ -303,7 +273,7 @@ h1 {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     text-align: right;
     position: relative;
 }
@@ -355,8 +325,8 @@ h1 {
 /* أنماط خاصة لقسم تسجيل دخول المشرف */
 .admin-login-header {
     text-align: center;
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: 25px;
+    padding: 20px;
     background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
     border-radius: 15px;
     border: 1px solid rgba(255, 107, 53, 0.3);
@@ -365,14 +335,14 @@ h1 {
 .admin-login-header h3 {
     color: #FF6B35;
     margin-bottom: 10px;
-    font-size: 1.4em;
+    font-size: 1.5em;
     text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
 }
 
 .admin-login-header p {
     color: var(--text-color-light);
     margin: 0;
-    font-size: 0.9em;
+    font-size: 0.95em;
     opacity: 0.9;
 }
 
@@ -394,7 +364,7 @@ h1 {
     background: linear-gradient(135deg, var(--button-bg-color) 0%, var(--button-hover-bg-color) 100%);
     color: var(--text-color-dark);
     border: none;
-    padding: 18px 25px;
+    padding: 15px 25px;
     border-radius: 15px;
     cursor: pointer;
     font-size: 1.1em;
@@ -465,7 +435,7 @@ h1 {
 }
 
 .message-box {
-    margin: 10px 0;
+    margin: 15px 0;
     padding: 12px 18px;
     border-radius: 12px;
     font-weight: 600;
@@ -497,44 +467,43 @@ h1 {
     color: #74b9ff;
 }
 
-/* أنماط للجوال - تحسينات إضافية */
+/* أنماط للجوال - تحسينات محسنة */
 @media (max-width: 768px) {
     body {
-        padding: 0;
+        padding: 10px;
     }
     
     .container {
-        padding: 15px 10px;
-        border-radius: 0;
+        padding: 25px 20px;
+        border-radius: 20px;
         max-width: 100%;
-        height: 100vh;
     }
     
     .logo {
-        width: 80px;
-        margin-bottom: 10px;
-    }
-    
-    h1 {
-        font-size: 1.6em;
-        margin-bottom: 10px;
-    }
-    
-    .tabs {
-        flex-direction: row;
-        gap: 1px;
+        width: 100px;
         margin-bottom: 15px;
     }
     
+    h1 {
+        font-size: 1.8em;
+        margin-bottom: 15px;
+    }
+    
+    .tabs {
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 20px;
+    }
+    
     .tab-button {
-        padding: 10px 6px;
-        font-size: 0.8em;
+        padding: 12px 10px;
+        font-size: 0.9em;
         border-radius: 10px;
-        min-width: 60px;
+        min-width: auto;
     }
     
     .form-group {
-        margin-bottom: 12px;
+        margin-bottom: 15px;
     }
     
     .form-group input,
@@ -544,48 +513,43 @@ h1 {
     }
     
     .btn {
-        padding: 15px 20px;
+        padding: 12px 20px;
         font-size: 1em;
         min-height: 45px;
     }
     
     .modal-content {
-        padding: 20px 15px;
-        max-width: 95%;
-        width: 95%;
+        padding: 25px 20px;
+        max-width: 90%;
     }
     
     .admin-login-header {
-        padding: 12px;
-        margin-bottom: 15px;
+        padding: 15px;
+        margin-bottom: 20px;
     }
     
     .admin-login-header h3 {
-        font-size: 1.2em;
-    }
-    
-    .content-section {
-        padding: 10px 0;
+        font-size: 1.3em;
     }
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 10px 8px;
+        padding: 20px 15px;
+        border-radius: 15px;
     }
     
     .logo {
-        width: 70px;
+        width: 80px;
     }
     
     h1 {
-        font-size: 1.4em;
+        font-size: 1.5em;
     }
     
     .tab-button {
-        padding: 8px 4px;
-        font-size: 0.75em;
-        min-width: 50px;
+        padding: 10px 8px;
+        font-size: 0.85em;
     }
     
     .form-group input,
@@ -595,44 +559,13 @@ h1 {
     }
     
     .btn {
-        padding: 12px 15px;
+        padding: 10px 15px;
         font-size: 0.95em;
         min-height: 40px;
     }
     
     .modal-content {
-        padding: 15px 10px;
-    }
-    
-    .content-section {
-        padding: 8px 0;
-    }
-}
-
-/* أنماط خاصة للشاشات الصغيرة جداً */
-@media (max-width: 360px) {
-    .container {
-        padding: 8px 5px;
-    }
-    
-    .logo {
-        width: 60px;
-    }
-    
-    h1 {
-        font-size: 1.2em;
-    }
-    
-    .tab-button {
-        padding: 6px 3px;
-        font-size: 0.7em;
-        min-width: 45px;
-    }
-    
-    .btn {
-        padding: 10px 12px;
-        font-size: 0.9em;
-        min-height: 35px;
+        padding: 20px 15px;
     }
 }
 
@@ -734,30 +667,4 @@ h1 {
 .contact-info-item a:hover {
     color: var(--accent-color-2);
     text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
-}
-
-/* منع التحديد والنسخ */
-* {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-/* السماح بالتحديد في حقول الإدخال */
-input, textarea {
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-}
-
-/* إخفاء شريط التمرير */
-::-webkit-scrollbar {
-    display: none;
-}
-
-* {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
 }
