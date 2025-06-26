@@ -14,7 +14,7 @@
     <!-- زر الوضع الليلي -->
     <button id="darkModeToggle" title="تبديل الوضع الليلي/الفاتح">🌙</button>
     <!-- زر غرفة المحادثة الصوتية -->
-    <button onclick="window.open('voice-chat-room.html', '_blank')" 
+    <button id="voiceChatRoomBtn"
         style="
             position: fixed;
             bottom: 30px;
@@ -823,6 +823,16 @@
             invitedUsersDiv.innerHTML = '<p style="text-align: center; color: #666;">لم تدع أي مستخدم بعد</p>';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var voiceBtn = document.getElementById('voiceChatRoomBtn');
+        if (voiceBtn) {
+            voiceBtn.onclick = function(e) {
+                e.preventDefault();
+                window.open('voice-chat-room.html', '_blank');
+            };
+        }
+    });
     </script>
 </body>
 </html>

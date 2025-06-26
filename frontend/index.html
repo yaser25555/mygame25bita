@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="login-styles.css">
     <script>
         // التحقق من token عند تحميل الصفحة
-        (function() {
+        (async function() {
             const token = localStorage.getItem('token');
             const isAdmin = localStorage.getItem('isAdmin') === 'true';
             
@@ -16,14 +16,27 @@
             console.log('👤 نوع المستخدم:', isAdmin ? 'مشرف' : 'لاعب عادي');
             
             if (token) {
-                console.log('✅ المستخدم مسجل دخول، إعادة توجيه...');
-                if (isAdmin) {
-                    // للمشرفين، إظهار خيار الدخول للعبة أو لوحة التحكم
-                    console.log('🎯 إظهار خيارات المشرف');
-                } else {
-                    // للاعبين العاديين، إعادة توجيه مباشرة للعبة
-                    console.log('🎮 إعادة توجيه للعبة');
-                    window.location.href = 'game.html';
+                // تحقق من صلاحية التوكن عبر API
+                try {
+                    const res = await fetch('https://mygame25bita-7eqw.onrender.com/api/users/me', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (isAdmin) {
+                            // للمشرفين، إظهار خيار الدخول للعبة أو لوحة التحكم
+                            console.log('🎯 إظهار خيارات المشرف');
+                        } else {
+                            window.location.href = 'game.html';
+                        }
+                    } else {
+                        // Token غير صالح، حذف وإبقاء المستخدم في صفحة تسجيل الدخول
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('isAdmin');
+                    }
+                } catch (e) {
+                    // في حال فشل الاتصال، إبقاء المستخدم في صفحة تسجيل الدخول
                 }
             } else {
                 console.log('❌ المستخدم غير مسجل دخول، البقاء في صفحة تسجيل الدخول');
