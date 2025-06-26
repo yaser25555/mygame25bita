@@ -491,12 +491,13 @@ h1 {
     }
     
     .logo {
-        width: 100px;
+        width: 80px;
+        height: auto;
         margin-bottom: 15px;
     }
     
     h1 {
-        font-size: 1.8em;
+        font-size: 1.6em;
         margin-bottom: 15px;
     }
     
@@ -548,6 +549,22 @@ h1 {
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
+    
+    /* تعديل أحجام الأيقونات للجوال */
+    .contact-info-item i {
+        font-size: 1.2em;
+        margin-left: 8px;
+    }
+    
+    .btn i {
+        font-size: 1.1em;
+        margin-left: 5px;
+    }
+    
+    .tab-button i {
+        font-size: 1em;
+        margin-left: 3px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -556,11 +573,12 @@ h1 {
     }
     
     .logo {
-        width: 80px;
+        width: 70px;
+        height: auto;
     }
     
     h1 {
-        font-size: 1.5em;
+        font-size: 1.4em;
     }
     
     .tab-button {
@@ -582,6 +600,49 @@ h1 {
     
     .modal-content {
         padding: 20px 15px;
+    }
+    
+    /* تعديل أحجام الأيقونات للشاشات الصغيرة */
+    .contact-info-item i {
+        font-size: 1.1em;
+        margin-left: 6px;
+    }
+    
+    .btn i {
+        font-size: 1em;
+        margin-left: 4px;
+    }
+    
+    .tab-button i {
+        font-size: 0.9em;
+        margin-left: 2px;
+    }
+}
+
+@media (max-width: 360px) {
+    .logo {
+        width: 60px;
+        height: auto;
+    }
+    
+    h1 {
+        font-size: 1.2em;
+    }
+    
+    /* تعديل أحجام الأيقونات للشاشات الصغيرة جداً */
+    .contact-info-item i {
+        font-size: 1em;
+        margin-left: 5px;
+    }
+    
+    .btn i {
+        font-size: 0.9em;
+        margin-left: 3px;
+    }
+    
+    .tab-button i {
+        font-size: 0.8em;
+        margin-left: 2px;
     }
 }
 
