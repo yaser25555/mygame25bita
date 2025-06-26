@@ -2170,6 +2170,34 @@
           color: #222;
           transform: scale(1.12);
         }
+
+        .boxes-grid {
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          grid-template-rows: repeat(4, 1fr);
+          gap: 20px;
+          width: 100%;
+          max-width: 900px;
+          margin: 30px auto;
+          justify-items: center;
+          align-items: center;
+        }
+        .items-grid {
+          display: flex;
+          flex-direction: row;
+          gap: 18px;
+          overflow-x: auto;
+          justify-content: flex-start;
+          align-items: center;
+          padding: 8px 0;
+        }
+        .item-display {
+          min-width: 80px;
+          min-height: 80px;
+          max-width: 100px;
+          max-height: 100px;
+          font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
