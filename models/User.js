@@ -378,6 +378,207 @@ const UserSchema = new mongoose.Schema({
       type: Boolean,
       default: true
     }
+  },
+  
+  // نظام التداول
+  trading: {
+    // طلبات التداول المرسلة
+    sentTrades: [{
+      tradeId: {
+        type: String,
+        unique: true
+      },
+      toUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      toUsername: String,
+      offeredItems: {
+        score: { type: Number, default: 0 },
+        pearls: { type: Number, default: 0 },
+        gems: { type: Number, default: 0 },
+        keys: { type: Number, default: 0 },
+        coins: { type: Number, default: 0 },
+        bombs: { type: Number, default: 0 },
+        stars: { type: Number, default: 0 },
+        bats: { type: Number, default: 0 }
+      },
+      requestedItems: {
+        score: { type: Number, default: 0 },
+        pearls: { type: Number, default: 0 },
+        gems: { type: Number, default: 0 },
+        keys: { type: Number, default: 0 },
+        coins: { type: Number, default: 0 },
+        bombs: { type: Number, default: 0 },
+        stars: { type: Number, default: 0 },
+        bats: { type: Number, default: 0 }
+      },
+      message: String,
+      status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected', 'cancelled'],
+        default: 'pending'
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      },
+      expiresAt: {
+        type: Date,
+        default: function() {
+          return new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 ساعة
+        }
+      }
+    }],
+    
+    // طلبات التداول المستلمة
+    receivedTrades: [{
+      tradeId: {
+        type: String,
+        unique: true
+      },
+      fromUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      fromUsername: String,
+      offeredItems: {
+        score: { type: Number, default: 0 },
+        pearls: { type: Number, default: 0 },
+        gems: { type: Number, default: 0 },
+        keys: { type: Number, default: 0 },
+        coins: { type: Number, default: 0 },
+        bombs: { type: Number, default: 0 },
+        stars: { type: Number, default: 0 },
+        bats: { type: Number, default: 0 }
+      },
+      requestedItems: {
+        score: { type: Number, default: 0 },
+        pearls: { type: Number, default: 0 },
+        gems: { type: Number, default: 0 },
+        keys: { type: Number, default: 0 },
+        coins: { type: Number, default: 0 },
+        bombs: { type: Number, default: 0 },
+        stars: { type: Number, default: 0 },
+        bats: { type: Number, default: 0 }
+      },
+      message: String,
+      status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected', 'cancelled'],
+        default: 'pending'
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      },
+      expiresAt: {
+        type: Date,
+        default: function() {
+          return new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 ساعة
+        }
+      }
+    }],
+    
+    // سجل التداولات المكتملة
+    tradeHistory: [{
+      tradeId: String,
+      partnerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      partnerUsername: String,
+      tradedItems: {
+        given: {
+          score: { type: Number, default: 0 },
+          pearls: { type: Number, default: 0 },
+          gems: { type: Number, default: 0 },
+          keys: { type: Number, default: 0 },
+          coins: { type: Number, default: 0 },
+          bombs: { type: Number, default: 0 },
+          stars: { type: Number, default: 0 },
+          bats: { type: Number, default: 0 }
+        },
+        received: {
+          score: { type: Number, default: 0 },
+          pearls: { type: Number, default: 0 },
+          gems: { type: Number, default: 0 },
+          keys: { type: Number, default: 0 },
+          coins: { type: Number, default: 0 },
+          bombs: { type: Number, default: 0 },
+          stars: { type: Number, default: 0 },
+          bats: { type: Number, default: 0 }
+        }
+      },
+      completedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    
+    // إعدادات التداول
+    tradingSettings: {
+      allowTrades: {
+        type: Boolean,
+        default: true
+      },
+      allowScoreTrading: {
+        type: Boolean,
+        default: true
+      },
+      allowPearlTrading: {
+        type: Boolean,
+        default: true
+      },
+      allowItemTrading: {
+        type: Boolean,
+        default: true
+      },
+      minTradeAmount: {
+        type: Number,
+        default: 10
+      },
+      maxTradeAmount: {
+        type: Number,
+        default: 10000
+      },
+      autoRejectTrades: {
+        type: Boolean,
+        default: false
+      }
+    },
+    
+    // إحصائيات التداول
+    tradingStats: {
+      totalTrades: {
+        type: Number,
+        default: 0
+      },
+      successfulTrades: {
+        type: Number,
+        default: 0
+      },
+      cancelledTrades: {
+        type: Number,
+        default: 0
+      },
+      totalTradedScore: {
+        type: Number,
+        default: 0
+      },
+      totalTradedPearls: {
+        type: Number,
+        default: 0
+      },
+      totalTradedGems: {
+        type: Number,
+        default: 0
+      },
+      reputation: {
+        type: Number,
+        default: 100
+      }
+    }
   }
 }, {
   timestamps: true // إضافة createdAt و updatedAt تلقائياً
