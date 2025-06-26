@@ -1,16 +1,22 @@
 const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 تحميل صفحة تسجيل الدخول...');
+    
     // التحقق من وجود token صالح عند تحميل الصفحة
     checkExistingToken();
     
     setupEventListeners();
     setupTabSwitching();
+    
+    console.log('✅ تم تحميل صفحة تسجيل الدخول بنجاح');
 });
 
 // التحقق من وجود token صالح
 async function checkExistingToken() {
     const token = localStorage.getItem('token');
+    console.log('🔍 فحص token:', token ? 'موجود' : 'غير موجود');
+    
     if (!token) return;
     
     try {
@@ -20,19 +26,22 @@ async function checkExistingToken() {
         
         if (response.ok) {
             const data = await response.json();
+            console.log('✅ token صالح، المستخدم:', data.username);
+            
             if (data.isAdmin) {
                 showAdminChoiceModal();
             } else {
+                console.log('🔄 توجيه المستخدم العادي إلى اللعبة');
                 window.location.href = 'game.html';
             }
         } else {
-            // Token غير صالح، حذفه
+            console.log('❌ token غير صالح، حذفه');
             localStorage.removeItem('token');
             localStorage.removeItem('username');
             localStorage.removeItem('isAdmin');
         }
     } catch (error) {
-        console.error('خطأ في التحقق من التوكن:', error);
+        console.error('❌ خطأ في التحقق من التوكن:', error);
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('isAdmin');
@@ -131,6 +140,8 @@ async function handleLogin(event) {
     const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value.trim();
     
+    console.log('🔐 محاولة تسجيل دخول للمستخدم:', username);
+    
     if (!username || !password) {
         showMessage('الرجاء إدخال اسم المستخدم وكلمة المرور', true);
         return;
@@ -143,6 +154,7 @@ async function handleLogin(event) {
     }
     
     try {
+        console.log('🌐 إرسال طلب تسجيل الدخول للخادم...');
         const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
@@ -152,6 +164,7 @@ async function handleLogin(event) {
         });
         
         const data = await response.json();
+        console.log('📡 استجابة الخادم:', response.status, data);
         
         if (response.ok) {
             // حفظ البيانات
@@ -159,21 +172,25 @@ async function handleLogin(event) {
             localStorage.setItem('username', data.username);
             localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
             
+            console.log('✅ تم تسجيل الدخول بنجاح');
             showMessage('تم تسجيل الدخول بنجاح!');
             
             // التوجيه بعد ثانية
             setTimeout(() => {
                 if (data.isAdmin) {
+                    console.log('👑 المستخدم مشرف، عرض خيارات المشرف');
                     showAdminChoiceModal();
                 } else {
+                    console.log('🎮 توجيه المستخدم العادي إلى اللعبة');
                     window.location.href = 'game.html';
                 }
             }, 1000);
         } else {
+            console.log('❌ فشل تسجيل الدخول:', data.message);
             showMessage(data.message || 'فشل تسجيل الدخول', true);
         }
     } catch (error) {
-        console.error('خطأ في تسجيل الدخول:', error);
+        console.error('❌ خطأ في تسجيل الدخول:', error);
         showMessage('خطأ في الاتصال بالخادم', true);
     } finally {
         if (loginButton) {
