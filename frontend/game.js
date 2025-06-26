@@ -60,6 +60,9 @@ let chatVolume = 0.5;
 // WebSocket للدردشة
 let ws = null;
 let isConnected = false;
+let reconnectAttempts = 0;
+let maxReconnectAttempts = 5;
+let reconnectTimeout = null;
 
 // رسائل وهمية في الدردشة
 const fakeUsernames = ['علي', 'احمد', 'دانيال', 'سعار', 'ليلى', 'نيرمين'];
@@ -88,23 +91,33 @@ const fakeMessages = [
 
 // عند تحميل الصفحة
 window.addEventListener('DOMContentLoaded', () => {
-    loadGameData();
-    setupGameButtons();
-    setupChatSystem();
-    connectWebSocket();
-    // إعداد إغلاق صور الفوز والخسارة
-    setupGifCloseButtons();
-    // إعداد أزرار المودال الصوتي
-    setupVoiceModalButtons();
-    createBoxes();
-    createItemsGrid();
-    createItemInfo();
-    setupItemInfoButtons();
+    try {
+        loadGameData();
+        setupGameButtons();
+        setupChatSystem();
+        connectWebSocket();
+        // إعداد إغلاق صور الفوز والخسارة
+        setupGifCloseButtons();
+        // إعداد أزرار المودال الصوتي
+        setupVoiceModalButtons();
+        createBoxes();
+        createItemsGrid();
+        createItemInfo();
+        setupItemInfoButtons();
+    } catch (error) {
+        console.error('خطأ في تحميل اللعبة:', error);
+    }
 });
 
 // حفظ البيانات عند إغلاق الصفحة
 window.addEventListener('beforeunload', () => {
     saveGameData();
+    if (ws) {
+        ws.close(1000, 'Page unload');
+    }
+    if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+    }
 });
 
 // تحميل بيانات اللاعب
@@ -177,18 +190,19 @@ async function saveGameData() {
             },
             body: JSON.stringify({
                 score: score,
-                totalSpent: totalSpent, // حفظ إجمالي النقاط المنفقة
+                totalSpent: totalSpent,
                 itemsCollected: itemsCollected
             })
         });
         
         if (res.ok) {
-            console.log('تم حفظ بيانات اللعبة بنجاح');
+            console.log('✅ تم حفظ بيانات اللعبة بنجاح');
         } else {
-            console.error('فشل في حفظ بيانات اللعبة');
+            console.error('❌ فشل في حفظ بيانات اللعبة:', res.status);
         }
     } catch (e) {
-        console.error('خطأ في حفظ بيانات اللعبة:', e);
+        console.error('❌ خطأ في حفظ بيانات اللعبة:', e);
+        // لا نعيد توجيه المستخدم هنا، فقط نسجل الخطأ
     }
 }
 
@@ -478,18 +492,70 @@ function addMessageToChat(sender, message) {
 
 // WebSocket للدردشة
 function connectWebSocket() {
+    // منع الاتصالات المتعددة
+    if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
+        console.log('WebSocket connection already exists');
+        return;
+    }
+    
     try {
+        console.log('🔌 محاولة الاتصال بـ WebSocket...');
         ws = new WebSocket('wss://mygame25bita-7eqw.onrender.com');
-        ws.onopen = () => { isConnected = true; addMessageToChat('النظام', 'تم الاتصال بالخادم'); };
-        ws.onmessage = event => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'message') addMessageToChat(data.username, data.message);
+        
+        ws.onopen = () => { 
+            console.log('✅ تم الاتصال بـ WebSocket بنجاح');
+            isConnected = true; 
+            reconnectAttempts = 0;
+            addMessageToChat('النظام', 'تم الاتصال بالخادم'); 
         };
-        ws.onclose = () => { isConnected = false; addMessageToChat('النظام', 'تم قطع الاتصال بالخادم'); };
-        ws.onerror = () => { addMessageToChat('النظام', 'خطأ في الاتصال'); };
-    } catch (e) { addMessageToChat('النظام', 'خطأ في الاتصال'); }
+        
+        ws.onmessage = event => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'message') {
+                    addMessageToChat(data.username, data.message);
+                }
+            } catch (e) {
+                console.error('خطأ في معالجة رسالة WebSocket:', e);
+            }
+        };
+        
+        ws.onclose = (event) => { 
+            console.log('❌ تم قطع الاتصال بـ WebSocket:', event.code, event.reason);
+            isConnected = false; 
+            addMessageToChat('النظام', 'تم قطع الاتصال بالخادم'); 
+            
+            // محاولة إعادة الاتصال إذا لم يكن السبب إغلاق عمدي
+            if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
+                reconnectAttempts++;
+                console.log(`🔄 محاولة إعادة الاتصال ${reconnectAttempts}/${maxReconnectAttempts}`);
+                reconnectTimeout = setTimeout(connectWebSocket, 3000);
+            }
+        };
+        
+        ws.onerror = (error) => { 
+            console.error('❌ خطأ في WebSocket:', error);
+            addMessageToChat('النظام', 'خطأ في الاتصال'); 
+        };
+    } catch (e) { 
+        console.error('❌ خطأ في إنشاء WebSocket:', e);
+        addMessageToChat('النظام', 'خطأ في الاتصال'); 
+    }
 }
-function reconnectWebSocket() { if (ws) ws.close(); connectWebSocket(); }
+
+function reconnectWebSocket() { 
+    if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = null;
+    }
+    
+    if (ws) {
+        ws.close(1000, 'Manual reconnect');
+    }
+    
+    reconnectAttempts = 0;
+    setTimeout(connectWebSocket, 1000);
+}
 
 // تحكمات الدردشة
 function toggleVoiceChat() {

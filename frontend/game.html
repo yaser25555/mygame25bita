@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoiceBoom Game</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Scheherazade+New:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="mobile-optimization.css">
     <link rel="stylesheet" href="box-styles.css">
     <link rel="stylesheet" href="game-styles.css">
@@ -325,7 +325,6 @@
 
     <!-- قبل وسم </body> مباشرة أضف: -->
     <script src="game.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="daily-quests.js"></script>
     <script>
     // تفعيل الوضع الليلي تلقائياً حسب تفضيل النظام
@@ -348,60 +347,86 @@
       document.body.classList.add('dark-mode');
     }
 
-    // رسم الإحصائيات بعد تحميل بيانات اللاعب
-    function renderPlayerStatsChart(stats) {
-      const ctx = document.getElementById('playerStatsChart').getContext('2d');
-      if(window.playerStatsChartInstance) window.playerStatsChartInstance.destroy();
-      window.playerStatsChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['النقاط', 'الصناديق المفتوحة', 'الجواهر', 'المفاتيح', 'اللآلئ', 'النجوم'],
-          datasets: [{
-            label: 'إحصائياتي',
-            data: [
-              stats.score || 0,
-              stats.boxesOpened || 0,
-              stats.itemsCollected?.gem || 0,
-              stats.itemsCollected?.key || 0,
-              stats.itemsCollected?.pearl || 0,
-              stats.itemsCollected?.star || 0
-            ],
-            backgroundColor: [
-              '#6366f1','#f59e42','#10b981','#fbbf24','#38bdf8','#f43f5e'
-            ],
-            borderRadius: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            title: { display: false }
-          },
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
+    // عرض الإحصائيات بدون Chart.js
+    function displayPlayerStats(stats) {
+      const statsContainer = document.getElementById('playerStatsChart');
+      if (!statsContainer) return;
+      
+      try {
+        statsContainer.innerHTML = `
+          <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            margin: 20px 0;
+          ">
+            <h3 style="margin: 0 0 15px 0; font-size: 1.2em;">📊 إحصائياتي</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px;">
+              <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 1.5em; font-weight: bold;">${stats.score || 0}</div>
+                <div style="font-size: 0.9em;">النقاط</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 1.5em; font-weight: bold;">${stats.boxesOpened || 0}</div>
+                <div style="font-size: 0.9em;">الصناديق</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 1.5em; font-weight: bold;">${stats.itemsCollected?.gem || 0}</div>
+                <div style="font-size: 0.9em;">الجواهر 💎</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 1.5em; font-weight: bold;">${stats.itemsCollected?.key || 0}</div>
+                <div style="font-size: 0.9em;">المفاتيح 🔑</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 1.5em; font-weight: bold;">${stats.itemsCollected?.pearl || 0}</div>
+                <div style="font-size: 0.9em;">اللآلئ 🦪</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 1.5em; font-weight: bold;">${stats.itemsCollected?.star || 0}</div>
+                <div style="font-size: 0.9em;">النجوم ⭐</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (e) {
+        console.error('خطأ في عرض الإحصائيات:', e);
+      }
     }
-    // استدعاء الرسم عند تحديث العرض
+    
+    // استدعاء عرض الإحصائيات عند تحديث العرض
     const origUpdateDisplay = window.updateDisplay;
     window.updateDisplay = function() {
-      if(origUpdateDisplay) origUpdateDisplay();
-      // جلب بيانات اللاعب من المتغيرات العالمية
-      renderPlayerStatsChart({
-        score: window.score,
-        boxesOpened: window.itemsCollected?.boxesOpened || 0,
-        itemsCollected: window.itemsCollected
-      });
+      try {
+        // عرض الإحصائيات
+        displayPlayerStats({
+          score: window.score || 0,
+          boxesOpened: window.itemsCollected?.boxesOpened || 0,
+          itemsCollected: window.itemsCollected || {}
+        });
+        
+        // استدعاء updateDisplay الأصلي إذا كان موجوداً
+        if(origUpdateDisplay && origUpdateDisplay !== window.updateDisplay) {
+          origUpdateDisplay();
+        }
+      } catch (e) {
+        console.error('خطأ في updateDisplay:', e);
+      }
     };
-    // رسم أولي عند التحميل
+    
+    // عرض أولي عند التحميل
     window.addEventListener('DOMContentLoaded',()=>{
-      renderPlayerStatsChart({
-        score: window.score,
-        boxesOpened: window.itemsCollected?.boxesOpened || 0,
-        itemsCollected: window.itemsCollected
-      });
+      try {
+        displayPlayerStats({
+          score: window.score || 0,
+          boxesOpened: window.itemsCollected?.boxesOpened || 0,
+          itemsCollected: window.itemsCollected || {}
+        });
+      } catch (e) {
+        console.error('خطأ في عرض الإحصائيات الأولي:', e);
+      }
     });
 
     const friendsBtn = document.getElementById('friendsBtn');
@@ -497,19 +522,34 @@
     };
 
     // تفعيل نظام المهام اليومية
-    let dailyQuestSystem;
-    let notificationSystem;
+    let dailyQuestSystem = null;
+    let notificationSystem = null;
 
     // تهيئة الأنظمة عند تحميل الصفحة
     window.addEventListener('DOMContentLoaded', () => {
-        // تهيئة نظام الإشعارات
-        notificationSystem = new NotificationSystem();
+        // تهيئة نظام الإشعارات (إذا كان متوفراً)
+        try {
+            if (typeof NotificationSystem !== 'undefined') {
+                notificationSystem = new NotificationSystem();
+            }
+        } catch (e) {
+            console.log('نظام الإشعارات غير متوفر');
+        }
         
-        // تهيئة نظام المهام اليومية
-        dailyQuestSystem = new DailyQuestSystem();
+        // تهيئة نظام المهام اليومية (إذا كان متوفراً)
+        try {
+            if (typeof DailyQuestSystem !== 'undefined') {
+                dailyQuestSystem = new DailyQuestSystem();
+            }
+        } catch (e) {
+            console.log('نظام المهام اليومية غير متوفر');
+        }
         
         // إعداد أزرار المهام اليومية
         setupDailyQuestsButtons();
+        
+        // إعداد نظام الدعوات
+        setupInviteSystem();
     });
 
     function setupDailyQuestsButtons() {
@@ -537,6 +577,11 @@
         async function loadDailyQuests() {
             dailyQuestsList.innerHTML = '...جاري التحميل';
             try {
+                if (!dailyQuestSystem) {
+                    dailyQuestsList.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">نظام المهام اليومية غير متوفر حالياً</div>';
+                    return;
+                }
+                
                 const activeQuests = dailyQuestSystem.getActiveQuests();
                 const completedCount = dailyQuestSystem.getCompletedQuestsCount();
                 const totalCount = dailyQuestSystem.getTotalQuestsCount();
@@ -626,7 +671,8 @@
                     </div>
                 `;
             } catch(e) {
-                dailyQuestsList.innerHTML = 'حدث خطأ في تحميل المهام اليومية';
+                console.error('خطأ في تحميل المهام اليومية:', e);
+                dailyQuestsList.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">حدث خطأ في تحميل المهام اليومية</div>';
             }
         }
     }
@@ -777,21 +823,6 @@
             invitedUsersDiv.innerHTML = '<p style="text-align: center; color: #666;">لم تدع أي مستخدم بعد</p>';
         }
     }
-
-    // إضافة setupInviteSystem إلى DOMContentLoaded
-    window.addEventListener('DOMContentLoaded', () => {
-        // تهيئة نظام الإشعارات
-        notificationSystem = new NotificationSystem();
-        
-        // تهيئة نظام المهام اليومية
-        dailyQuestSystem = new DailyQuestSystem();
-        
-        // إعداد أزرار المهام اليومية
-        setupDailyQuestsButtons();
-        
-        // إعداد نظام الدعوات
-        setupInviteSystem();
-    });
     </script>
 </body>
 </html>
