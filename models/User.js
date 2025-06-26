@@ -30,11 +30,46 @@ const UserSchema = new mongoose.Schema({
     },
     bio: {
       type: String,
-      default: 'مرحباً! أنا لاعب في VoiceBoom 🎮'
+      default: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
+      maxlength: 500
     },
     avatar: {
       type: String,
       default: 'default-avatar.png'
+    },
+    // إضافة دعم الصور الشخصية
+    profileImage: {
+      type: String,
+      default: null
+    },
+    coverImage: {
+      type: String,
+      default: null
+    },
+    // معلومات إضافية للبروفايل
+    age: {
+      type: Number,
+      min: 13,
+      max: 100
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other', 'prefer-not-to-say'],
+      default: 'prefer-not-to-say'
+    },
+    interests: [{
+      type: String,
+      maxlength: 50
+    }],
+    favoriteGames: [{
+      type: String,
+      maxlength: 100
+    }],
+    socialLinks: {
+      discord: String,
+      twitter: String,
+      instagram: String,
+      youtube: String
     },
     level: {
       type: Number,
@@ -64,6 +99,23 @@ const UserSchema = new mongoose.Schema({
     timezone: {
       type: String,
       default: ''
+    },
+    // إعدادات البحث عن الأصدقاء
+    searchable: {
+      type: Boolean,
+      default: true
+    },
+    showInSearch: {
+      type: Boolean,
+      default: true
+    },
+    allowFriendRequests: {
+      type: Boolean,
+      default: true
+    },
+    allowMessages: {
+      type: Boolean,
+      default: true
     }
   },
   

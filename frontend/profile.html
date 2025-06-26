@@ -32,13 +32,23 @@
 
         <!-- معلومات البروفايل الأساسية -->
         <div class="profile-header">
+            <div class="profile-cover">
+                <img id="cover-image" src="images/default-cover.jpg" alt="صورة الغلاف">
+                <button class="edit-cover-btn" onclick="editCoverImage()">📷</button>
+            </div>
             <div class="profile-avatar">
                 <img id="user-avatar" src="images/default-avatar.png" alt="الصورة الشخصية">
+                <button class="edit-avatar-btn" onclick="editProfileImage()">📷</button>
                 <div class="online-status" id="online-status"></div>
             </div>
             <div class="profile-info">
                 <h2 id="display-name">اسم المستخدم</h2>
                 <p id="user-bio">مرحباً! أنا لاعب في VoiceBoom 🎮</p>
+                <div class="profile-details">
+                    <span class="detail" id="user-age"></span>
+                    <span class="detail" id="user-country"></span>
+                    <span class="detail" id="user-gender"></span>
+                </div>
                 <div class="profile-stats">
                     <span class="stat">
                         <strong id="user-level">1</strong>
@@ -77,6 +87,48 @@
             <!-- تبويب النظرة العامة -->
             <div id="overview" class="tab-panel active">
                 <div class="overview-grid">
+                    <div class="card">
+                        <h3>👤 معلومات شخصية</h3>
+                        <div class="personal-info">
+                            <div class="info-item">
+                                <span class="info-label">الاسم المعروض:</span>
+                                <span class="info-value" id="overview-display-name">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">العمر:</span>
+                                <span class="info-value" id="overview-age">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">الجنس:</span>
+                                <span class="info-value" id="overview-gender">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">البلد:</span>
+                                <span class="info-value" id="overview-country">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">المنطقة الزمنية:</span>
+                                <span class="info-value" id="overview-timezone">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">تاريخ الانضمام:</span>
+                                <span class="info-value" id="overview-join-date">-</span>
+                            </div>
+                        </div>
+                        <div class="interests-section" id="interests-section" style="display: none;">
+                            <h4>الاهتمامات</h4>
+                            <div class="interests-tags" id="interests-tags"></div>
+                        </div>
+                        <div class="games-section" id="games-section" style="display: none;">
+                            <h4>الألعاب المفضلة</h4>
+                            <div class="games-tags" id="games-tags"></div>
+                        </div>
+                        <div class="social-links" id="social-links" style="display: none;">
+                            <h4>روابط التواصل الاجتماعي</h4>
+                            <div class="social-icons" id="social-icons"></div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <h3>🎮 إحصائيات اللعب</h3>
                         <div class="stats-grid">
@@ -320,31 +372,140 @@
 
     <!-- النوافذ المنبثقة -->
     <div id="edit-profile-modal" class="modal-overlay hidden">
-        <div class="modal-content">
+        <div class="modal-content large">
             <button class="modal-close" onclick="closeModal('edit-profile-modal')">×</button>
             <h3>تعديل البروفايل</h3>
             <form id="edit-profile-form">
-                <div class="form-group">
-                    <label for="edit-display-name">اسم العرض</label>
-                    <input type="text" id="edit-display-name" placeholder="اسم العرض">
+                <div class="form-section">
+                    <h4>المعلومات الأساسية</h4>
+                    <div class="form-group">
+                        <label for="edit-display-name">اسم العرض</label>
+                        <input type="text" id="edit-display-name" placeholder="اسم العرض" maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bio">نبذة شخصية</label>
+                        <textarea id="edit-bio" placeholder="اكتب نبذة عن نفسك" rows="3" maxlength="500"></textarea>
+                        <small class="char-count">0/500</small>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-age">العمر</label>
+                            <input type="number" id="edit-age" placeholder="العمر" min="13" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-gender">الجنس</label>
+                            <select id="edit-gender">
+                                <option value="prefer-not-to-say">أفضل عدم الإفصاح</option>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                                <option value="other">آخر</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-country">البلد</label>
+                            <input type="text" id="edit-country" placeholder="بلدك">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-timezone">المنطقة الزمنية</label>
+                            <input type="text" id="edit-timezone" placeholder="المنطقة الزمنية">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="edit-bio">نبذة شخصية</label>
-                    <textarea id="edit-bio" placeholder="اكتب نبذة عن نفسك" rows="3"></textarea>
+
+                <div class="form-section">
+                    <h4>الاهتمامات والألعاب</h4>
+                    <div class="form-group">
+                        <label for="edit-interests">الاهتمامات</label>
+                        <input type="text" id="edit-interests" placeholder="اكتب اهتماماتك مفصولة بفواصل">
+                        <small>مثال: ألعاب، موسيقى، رياضة</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-favorite-games">الألعاب المفضلة</label>
+                        <input type="text" id="edit-favorite-games" placeholder="اكتب ألعابك المفضلة مفصولة بفواصل">
+                        <small>مثال: VoiceBoom، PUBG، Fortnite</small>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="edit-country">البلد</label>
-                    <input type="text" id="edit-country" placeholder="بلدك">
+
+                <div class="form-section">
+                    <h4>روابط التواصل الاجتماعي</h4>
+                    <div class="form-group">
+                        <label for="edit-discord">Discord</label>
+                        <input type="text" id="edit-discord" placeholder="اسم المستخدم في Discord">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-twitter">Twitter</label>
+                        <input type="text" id="edit-twitter" placeholder="اسم المستخدم في Twitter">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instagram">Instagram</label>
+                        <input type="text" id="edit-instagram" placeholder="اسم المستخدم في Instagram">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-youtube">YouTube</label>
+                        <input type="text" id="edit-youtube" placeholder="رابط قناة YouTube">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="edit-timezone">المنطقة الزمنية</label>
-                    <input type="text" id="edit-timezone" placeholder="المنطقة الزمنية">
+
+                <div class="form-section">
+                    <h4>إعدادات البحث والخصوصية</h4>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="edit-searchable" checked>
+                            السماح بالبحث عني
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="edit-show-in-search" checked>
+                            الظهور في نتائج البحث
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="edit-allow-friend-requests" checked>
+                            السماح بطلبات الصداقة
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="edit-allow-messages" checked>
+                            السماح بالرسائل
+                        </label>
+                    </div>
                 </div>
+
                 <div class="form-actions">
                     <button type="button" class="btn secondary" onclick="closeModal('edit-profile-modal')">إلغاء</button>
                     <button type="submit" class="btn primary">حفظ التغييرات</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- نافذة رفع الصور -->
+    <div id="upload-image-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('upload-image-modal')">×</button>
+            <h3 id="upload-image-title">رفع صورة</h3>
+            <div class="upload-container">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-placeholder">
+                        <span class="upload-icon">📷</span>
+                        <p>اضغط هنا لاختيار صورة أو اسحب الصورة هنا</p>
+                        <small>الحد الأقصى: 5MB | الصيغ المدعومة: JPG, PNG, GIF</small>
+                    </div>
+                    <input type="file" id="image-input" accept="image/*" style="display: none;">
+                </div>
+                <div class="image-preview" id="image-preview" style="display: none;">
+                    <img id="preview-image" src="" alt="معاينة الصورة">
+                    <div class="preview-actions">
+                        <button type="button" class="btn secondary" onclick="resetImageUpload()">إعادة اختيار</button>
+                        <button type="button" class="btn primary" onclick="uploadImage()">رفع الصورة</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

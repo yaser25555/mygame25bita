@@ -57,6 +57,15 @@ function setupEventListeners() {
         editProfileForm.addEventListener('submit', handleEditProfile);
     }
     
+    // عداد الأحرف للسيرة الذاتية
+    const bioTextarea = document.getElementById('edit-bio');
+    if (bioTextarea) {
+        bioTextarea.addEventListener('input', updateCharCount);
+    }
+    
+    // نافذة رفع الصور
+    setupImageUpload();
+    
     // إعدادات الخصوصية
     setupPrivacySettings();
     
@@ -170,9 +179,20 @@ function updateProfileDisplay() {
     
     // الصورة الشخصية
     const avatarImg = document.getElementById('user-avatar');
-    if (currentUser.profile?.avatar && currentUser.profile.avatar !== 'default-avatar.png') {
+    if (currentUser.profile?.profileImage) {
+        avatarImg.src = currentUser.profile.profileImage;
+    } else if (currentUser.profile?.avatar && currentUser.profile.avatar !== 'default-avatar.png') {
         avatarImg.src = currentUser.profile.avatar;
     }
+    
+    // صورة الغلاف
+    const coverImg = document.getElementById('cover-image');
+    if (currentUser.profile?.coverImage) {
+        coverImg.src = currentUser.profile.coverImage;
+    }
+    
+    // معلومات إضافية
+    updateProfileDetails();
     
     // حالة الاتصال
     const onlineStatus = document.getElementById('online-status');
@@ -183,6 +203,128 @@ function updateProfileDisplay() {
     // الإحصائيات الأساسية
     document.getElementById('friends-count').textContent = currentUser.relationships?.friends?.filter(f => f.status === 'accepted').length || 0;
     document.getElementById('games-played').textContent = currentUser.stats?.gamesPlayed || 0;
+    
+    // تحديث معلومات النظرة العامة
+    updateOverviewInfo();
+}
+
+// تحديث تفاصيل البروفايل
+function updateProfileDetails() {
+    const ageElement = document.getElementById('user-age');
+    const countryElement = document.getElementById('user-country');
+    const genderElement = document.getElementById('user-gender');
+    
+    if (currentUser.profile?.age) {
+        ageElement.textContent = `${currentUser.profile.age} سنة`;
+        ageElement.style.display = 'inline';
+    } else {
+        ageElement.style.display = 'none';
+    }
+    
+    if (currentUser.profile?.country) {
+        countryElement.textContent = currentUser.profile.country;
+        countryElement.style.display = 'inline';
+    } else {
+        countryElement.style.display = 'none';
+    }
+    
+    if (currentUser.profile?.gender && currentUser.profile.gender !== 'prefer-not-to-say') {
+        const genderText = {
+            'male': 'ذكر',
+            'female': 'أنثى',
+            'other': 'آخر'
+        };
+        genderElement.textContent = genderText[currentUser.profile.gender];
+        genderElement.style.display = 'inline';
+    } else {
+        genderElement.style.display = 'none';
+    }
+}
+
+// تحديث معلومات النظرة العامة
+function updateOverviewInfo() {
+    if (!currentUser) return;
+    
+    // معلومات شخصية
+    document.getElementById('overview-display-name').textContent = currentUser.profile?.displayName || currentUser.username;
+    document.getElementById('overview-age').textContent = currentUser.profile?.age ? `${currentUser.profile.age} سنة` : '-';
+    document.getElementById('overview-gender').textContent = currentUser.profile?.gender && currentUser.profile.gender !== 'prefer-not-to-say' ? 
+        (currentUser.profile.gender === 'male' ? 'ذكر' : currentUser.profile.gender === 'female' ? 'أنثى' : 'آخر') : '-';
+    document.getElementById('overview-country').textContent = currentUser.profile?.country || '-';
+    document.getElementById('overview-timezone').textContent = currentUser.profile?.timezone || '-';
+    document.getElementById('overview-join-date').textContent = currentUser.profile?.joinDate ? formatDate(currentUser.profile.joinDate) : '-';
+    
+    // الاهتمامات
+    updateInterestsDisplay();
+    
+    // الألعاب المفضلة
+    updateGamesDisplay();
+    
+    // روابط التواصل الاجتماعي
+    updateSocialLinksDisplay();
+}
+
+// تحديث عرض الاهتمامات
+function updateInterestsDisplay() {
+    const interestsSection = document.getElementById('interests-section');
+    const interestsTags = document.getElementById('interests-tags');
+    
+    if (currentUser.profile?.interests && currentUser.profile.interests.length > 0) {
+        interestsTags.innerHTML = currentUser.profile.interests.map(interest => 
+            `<span class="interest-tag">${interest.trim()}</span>`
+        ).join('');
+        interestsSection.style.display = 'block';
+    } else {
+        interestsSection.style.display = 'none';
+    }
+}
+
+// تحديث عرض الألعاب المفضلة
+function updateGamesDisplay() {
+    const gamesSection = document.getElementById('games-section');
+    const gamesTags = document.getElementById('games-tags');
+    
+    if (currentUser.profile?.favoriteGames && currentUser.profile.favoriteGames.length > 0) {
+        gamesTags.innerHTML = currentUser.profile.favoriteGames.map(game => 
+            `<span class="game-tag">${game.trim()}</span>`
+        ).join('');
+        gamesSection.style.display = 'block';
+    } else {
+        gamesSection.style.display = 'none';
+    }
+}
+
+// تحديث عرض روابط التواصل الاجتماعي
+function updateSocialLinksDisplay() {
+    const socialLinksSection = document.getElementById('social-links');
+    const socialIcons = document.getElementById('social-icons');
+    
+    if (currentUser.profile?.socialLinks) {
+        const links = [];
+        const socialLinks = currentUser.profile.socialLinks;
+        
+        if (socialLinks.discord) {
+            links.push(`<a href="https://discord.com/users/${socialLinks.discord}" target="_blank" class="social-icon discord">📱 Discord</a>`);
+        }
+        if (socialLinks.twitter) {
+            links.push(`<a href="https://twitter.com/${socialLinks.twitter}" target="_blank" class="social-icon twitter">🐦 Twitter</a>`);
+        }
+        if (socialLinks.instagram) {
+            links.push(`<a href="https://instagram.com/${socialLinks.instagram}" target="_blank" class="social-icon instagram">📸 Instagram</a>`);
+        }
+        if (socialLinks.youtube) {
+            links.push(`<a href="${socialLinks.youtube}" target="_blank" class="social-icon youtube">📺 YouTube</a>`);
+        }
+        
+        if (links.length > 0) {
+            socialIcons.innerHTML = links.join('');
+            socialLinksSection.style.display = 'block';
+        } else {
+            socialLinksSection.style.display = 'none';
+        }
+    } else {
+        socialLinksSection.style.display = 'none';
+    }
 }
 
 // تحميل إحصائيات المستخدم
@@ -489,32 +631,248 @@ async function updateGameSettings() {
     console.log('تم تحديث إعدادات اللعبة');
 }
 
-// فتح نافذة تعديل البروفايل
+// عداد الأحرف للسيرة الذاتية
+function updateCharCount() {
+    const textarea = document.getElementById('edit-bio');
+    const charCount = document.querySelector('.char-count');
+    if (textarea && charCount) {
+        const count = textarea.value.length;
+        charCount.textContent = `${count}/500`;
+        charCount.style.color = count > 450 ? '#dc3545' : '#6c757d';
+    }
+}
+
+// إعداد رفع الصور
+function setupImageUpload() {
+    const uploadArea = document.getElementById('upload-area');
+    const imageInput = document.getElementById('image-input');
+    
+    if (uploadArea && imageInput) {
+        // النقر على منطقة الرفع
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+        
+        // اختيار ملف
+        imageInput.addEventListener('change', handleImageSelect);
+        
+        // السحب والإفلات
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImageFile(files[0]);
+            }
+        });
+    }
+}
+
+// معالجة اختيار الصورة
+function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        handleImageFile(file);
+    }
+}
+
+// معالجة ملف الصورة
+function handleImageFile(file) {
+    // التحقق من نوع الملف
+    if (!file.type.startsWith('image/')) {
+        showMessage('يرجى اختيار ملف صورة صحيح', true);
+        return;
+    }
+    
+    // التحقق من حجم الملف (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showMessage('حجم الصورة يجب أن يكون أقل من 5MB', true);
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        showImagePreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
+}
+
+// عرض معاينة الصورة
+function showImagePreview(imageData) {
+    const uploadArea = document.getElementById('upload-area');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImage = document.getElementById('preview-image');
+    
+    if (uploadArea && imagePreview && previewImage) {
+        previewImage.src = imageData;
+        uploadArea.style.display = 'none';
+        imagePreview.style.display = 'block';
+    }
+}
+
+// إعادة تعيين رفع الصورة
+function resetImageUpload() {
+    const uploadArea = document.getElementById('upload-area');
+    const imagePreview = document.getElementById('image-preview');
+    const imageInput = document.getElementById('image-input');
+    
+    if (uploadArea && imagePreview && imageInput) {
+        uploadArea.style.display = 'block';
+        imagePreview.style.display = 'none';
+        imageInput.value = '';
+    }
+}
+
+// رفع الصورة
+async function uploadImage() {
+    const previewImage = document.getElementById('preview-image');
+    const uploadImageTitle = document.getElementById('upload-image-title');
+    
+    if (!previewImage || !previewImage.src) {
+        showMessage('لا توجد صورة للرفع', true);
+        return;
+    }
+    
+    try {
+        const imageType = uploadImageTitle.textContent.includes('الشخصية') ? 'profileImage' : 'coverImage';
+        const imageData = previewImage.src.split(',')[1]; // إزالة data:image/jpeg;base64,
+        
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${BACKEND_URL}/api/users/upload-profile-image`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                imageData,
+                imageType
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showMessage(result.message);
+            
+            // تحديث العرض
+            if (imageType === 'profileImage') {
+                document.getElementById('user-avatar').src = result.imageUrl;
+            } else {
+                document.getElementById('cover-image').src = result.imageUrl;
+            }
+            
+            // إعادة تحميل بيانات المستخدم
+            await loadUserProfile();
+            
+            // إغلاق النافذة
+            closeModal('upload-image-modal');
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'خطأ في رفع الصورة');
+        }
+    } catch (error) {
+        console.error('خطأ في رفع الصورة:', error);
+        showMessage(error.message || 'خطأ في رفع الصورة', true);
+    }
+}
+
+// تعديل الصورة الشخصية
+function editProfileImage() {
+    const uploadImageTitle = document.getElementById('upload-image-title');
+    if (uploadImageTitle) {
+        uploadImageTitle.textContent = 'تعديل الصورة الشخصية';
+    }
+    openModal('upload-image-modal');
+    resetImageUpload();
+}
+
+// تعديل صورة الغلاف
+function editCoverImage() {
+    const uploadImageTitle = document.getElementById('upload-image-title');
+    if (uploadImageTitle) {
+        uploadImageTitle.textContent = 'تعديل صورة الغلاف';
+    }
+    openModal('upload-image-modal');
+    resetImageUpload();
+}
+
+// تحديث دالة تعديل البروفايل
 function editProfile() {
     if (!currentUser) return;
     
+    // ملء النموذج بالبيانات الحالية
     document.getElementById('edit-display-name').value = currentUser.profile?.displayName || currentUser.username;
     document.getElementById('edit-bio').value = currentUser.profile?.bio || '';
+    document.getElementById('edit-age').value = currentUser.profile?.age || '';
+    document.getElementById('edit-gender').value = currentUser.profile?.gender || 'prefer-not-to-say';
     document.getElementById('edit-country').value = currentUser.profile?.country || '';
     document.getElementById('edit-timezone').value = currentUser.profile?.timezone || '';
+    
+    // الاهتمامات
+    document.getElementById('edit-interests').value = currentUser.profile?.interests?.join(', ') || '';
+    
+    // الألعاب المفضلة
+    document.getElementById('edit-favorite-games').value = currentUser.profile?.favoriteGames?.join(', ') || '';
+    
+    // روابط التواصل الاجتماعي
+    if (currentUser.profile?.socialLinks) {
+        document.getElementById('edit-discord').value = currentUser.profile.socialLinks.discord || '';
+        document.getElementById('edit-twitter').value = currentUser.profile.socialLinks.twitter || '';
+        document.getElementById('edit-instagram').value = currentUser.profile.socialLinks.instagram || '';
+        document.getElementById('edit-youtube').value = currentUser.profile.socialLinks.youtube || '';
+    }
+    
+    // إعدادات البحث والخصوصية
+    document.getElementById('edit-searchable').checked = currentUser.profile?.searchable !== false;
+    document.getElementById('edit-show-in-search').checked = currentUser.profile?.showInSearch !== false;
+    document.getElementById('edit-allow-friend-requests').checked = currentUser.profile?.allowFriendRequests !== false;
+    document.getElementById('edit-allow-messages').checked = currentUser.profile?.allowMessages !== false;
+    
+    // تحديث عداد الأحرف
+    updateCharCount();
     
     openModal('edit-profile-modal');
 }
 
-// معالجة تعديل البروفايل
+// تحديث معالج تعديل البروفايل
 async function handleEditProfile(event) {
     event.preventDefault();
     
     try {
-        const token = localStorage.getItem('token');
         const formData = {
-            displayName: document.getElementById('edit-display-name').value,
-            bio: document.getElementById('edit-bio').value,
-            country: document.getElementById('edit-country').value,
-            timezone: document.getElementById('edit-timezone').value
+            displayName: document.getElementById('edit-display-name').value.trim(),
+            bio: document.getElementById('edit-bio').value.trim(),
+            age: parseInt(document.getElementById('edit-age').value) || null,
+            gender: document.getElementById('edit-gender').value,
+            country: document.getElementById('edit-country').value.trim(),
+            timezone: document.getElementById('edit-timezone').value.trim(),
+            interests: document.getElementById('edit-interests').value.split(',').map(i => i.trim()).filter(i => i),
+            favoriteGames: document.getElementById('edit-favorite-games').value.split(',').map(g => g.trim()).filter(g => g),
+            socialLinks: {
+                discord: document.getElementById('edit-discord').value.trim(),
+                twitter: document.getElementById('edit-twitter').value.trim(),
+                instagram: document.getElementById('edit-instagram').value.trim(),
+                youtube: document.getElementById('edit-youtube').value.trim()
+            },
+            searchable: document.getElementById('edit-searchable').checked,
+            showInSearch: document.getElementById('edit-show-in-search').checked,
+            allowFriendRequests: document.getElementById('edit-allow-friend-requests').checked,
+            allowMessages: document.getElementById('edit-allow-messages').checked
         };
         
-        const response = await fetch(`${BACKEND_URL}/api/users/profile`, {
+        const token = localStorage.getItem('token');
+        
+        // تحديث المعلومات الأساسية
+        const response1 = await fetch(`${BACKEND_URL}/api/users/update-profile-info`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -523,12 +881,37 @@ async function handleEditProfile(event) {
             body: JSON.stringify(formData)
         });
         
-        if (response.ok) {
-            const result = await response.json();
-            currentUser.profile = result.profile;
-            updateProfileDisplay();
-            closeModal('edit-profile-modal');
+        // تحديث السيرة الذاتية
+        const response2 = await fetch(`${BACKEND_URL}/api/users/update-bio`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ bio: formData.bio })
+        });
+        
+        // تحديث إعدادات البحث
+        const response3 = await fetch(`${BACKEND_URL}/api/users/update-search-settings`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                searchable: formData.searchable,
+                showInSearch: formData.showInSearch,
+                allowFriendRequests: formData.allowFriendRequests,
+                allowMessages: formData.allowMessages
+            })
+        });
+        
+        if (response1.ok && response2.ok && response3.ok) {
             showMessage('تم تحديث البروفايل بنجاح');
+            closeModal('edit-profile-modal');
+            
+            // إعادة تحميل بيانات المستخدم
+            await loadUserProfile();
         } else {
             throw new Error('فشل في تحديث البروفايل');
         }
@@ -538,189 +921,117 @@ async function handleEditProfile(event) {
     }
 }
 
-// البحث عن مستخدمين
-function searchUsers() {
-    openModal('search-users-modal');
-}
-
-// البحث الفوري
+// تحديث دالة البحث عن المستخدمين
 async function searchUsersRealTime() {
-    const query = document.getElementById('search-input').value;
-    const resultsContainer = document.getElementById('search-results');
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+    
+    if (!searchInput || !searchResults) return;
+    
+    const query = searchInput.value.trim();
     
     if (query.length < 2) {
-        resultsContainer.innerHTML = '';
+        searchResults.innerHTML = '<p class="search-placeholder">اكتب حرفين على الأقل للبحث</p>';
         return;
     }
     
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/search?q=${encodeURIComponent(query)}&limit=10`, {
+        const response = await fetch(`${BACKEND_URL}/api/users/search?q=${encodeURIComponent(query)}&limit=20`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (response.ok) {
-            const users = await response.json();
-            displaySearchResults(users);
+            const data = await response.json();
+            displaySearchResults(data.users);
+        } else {
+            throw new Error('فشل في البحث');
         }
     } catch (error) {
         console.error('خطأ في البحث:', error);
+        searchResults.innerHTML = '<p class="search-error">خطأ في البحث عن المستخدمين</p>';
     }
 }
 
-// عرض نتائج البحث
+// تحديث عرض نتائج البحث
 function displaySearchResults(users) {
-    const resultsContainer = document.getElementById('search-results');
+    const searchResults = document.getElementById('search-results');
     
-    if (users.length === 0) {
-        resultsContainer.innerHTML = '<p class="no-data">لا توجد نتائج</p>';
+    if (!users || users.length === 0) {
+        searchResults.innerHTML = '<p class="search-placeholder">لا توجد نتائج</p>';
         return;
     }
     
-    resultsContainer.innerHTML = users.map(user => `
-        <div class="search-result-item">
-            <img src="${user.profile?.avatar || 'images/default-avatar.png'}" alt="${user.username}" class="search-result-avatar">
-            <div class="search-result-info">
-                <div class="search-result-name">${user.profile?.displayName || user.username}</div>
-                <div class="search-result-status">المستوى ${user.profile?.level || 1}</div>
+    const resultsHTML = users.map(user => {
+        let actionButton = '';
+        let buttonClass = '';
+        let buttonText = '';
+        
+        if (user.isBlocked) {
+            buttonClass = 'blocked';
+            buttonText = 'محظور';
+        } else if (user.isFriend) {
+            buttonClass = 'friend';
+            buttonText = 'صديق';
+        } else if (user.hasPendingRequest) {
+            buttonClass = 'pending';
+            buttonText = 'طلب مرسل';
+        } else if (user.hasSentRequest) {
+            buttonClass = 'pending';
+            buttonText = 'طلب مستلم';
+        } else {
+            buttonClass = 'add';
+            buttonText = 'إضافة صديق';
+        }
+        
+        actionButton = `<button class="btn-friend ${buttonClass}" onclick="handleFriendAction('${user._id}', '${user.username}', '${buttonClass}')">${buttonText}</button>`;
+        
+        return `
+            <div class="user-result">
+                <img src="${user.avatar || 'images/default-avatar.png'}" alt="${user.displayName}" class="user-result-avatar">
+                <div class="user-result-info">
+                    <div class="user-result-name">${user.displayName}</div>
+                    <div class="user-result-bio">${user.bio || 'لا توجد نبذة شخصية'}</div>
+                    <div class="user-result-stats">
+                        <span>المستوى: ${user.level}</span>
+                        <span>الحالة: ${user.status === 'online' ? 'متصل' : 'غير متصل'}</span>
+                    </div>
+                </div>
+                <div class="user-result-actions">
+                    ${actionButton}
+                </div>
             </div>
-            <button class="friend-btn primary" onclick="sendFriendRequest('${user.username}')">إرسال طلب صداقة</button>
-        </div>
-    `).join('');
-}
-
-// إرسال طلب صداقة
-async function sendFriendRequest(username) {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/friend-request`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ username })
-        });
-        
-        if (response.ok) {
-            showMessage('تم إرسال طلب الصداقة بنجاح');
-            closeModal('search-users-modal');
-        } else {
-            const error = await response.json();
-            throw new Error(error.error || 'فشل في إرسال طلب الصداقة');
-        }
-    } catch (error) {
-        console.error('خطأ في إرسال طلب الصداقة:', error);
-        showMessage(error.message, true);
-    }
-}
-
-// قبول طلب صداقة
-async function acceptFriendRequest(fromUserId) {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/friend-request/accept`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ fromUserId })
-        });
-        
-        if (response.ok) {
-            showMessage('تم قبول طلب الصداقة بنجاح');
-            loadFriendRequests();
-            loadFriends();
-        } else {
-            throw new Error('فشل في قبول طلب الصداقة');
-        }
-    } catch (error) {
-        console.error('خطأ في قبول طلب الصداقة:', error);
-        showMessage('خطأ في قبول طلب الصداقة', true);
-    }
-}
-
-// رفض طلب صداقة
-async function rejectFriendRequest(fromUserId) {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/friend-request/reject`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ fromUserId })
-        });
-        
-        if (response.ok) {
-            showMessage('تم رفض طلب الصداقة');
-            loadFriendRequests();
-        } else {
-            throw new Error('فشل في رفض طلب الصداقة');
-        }
-    } catch (error) {
-        console.error('خطأ في رفض طلب الصداقة:', error);
-        showMessage('خطأ في رفض طلب الصداقة', true);
-    }
-}
-
-// إزالة صديق
-async function removeFriend(friendId) {
-    if (!confirm('هل أنت متأكد من إزالة هذا الصديق؟')) return;
+        `;
+    }).join('');
     
+    searchResults.innerHTML = resultsHTML;
+}
+
+// معالجة إجراءات الأصدقاء
+async function handleFriendAction(userId, username, action) {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/friend/${friendId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
         
-        if (response.ok) {
-            showMessage('تم إزالة الصديق بنجاح');
-            loadFriends();
-        } else {
-            throw new Error('فشل في إزالة الصديق');
+        switch (action) {
+            case 'add':
+                await sendFriendRequest(username);
+                break;
+            case 'pending':
+                showMessage('تم إرسال طلب صداقة مسبقاً');
+                break;
+            case 'friend':
+                showMessage('أنتما أصدقاء بالفعل');
+                break;
+            case 'blocked':
+                showMessage('هذا المستخدم محظور');
+                break;
         }
-    } catch (error) {
-        console.error('خطأ في إزالة الصديق:', error);
-        showMessage('خطأ في إزالة الصديق', true);
-    }
-}
-
-// إلغاء حظر مستخدم
-async function unblockUser(userId) {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/block/${userId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
         
-        if (response.ok) {
-            showMessage('تم إلغاء حظر المستخدم بنجاح');
-            loadBlockedUsers();
-        } else {
-            throw new Error('فشل في إلغاء حظر المستخدم');
-        }
+        // إعادة البحث لتحديث الأزرار
+        await searchUsersRealTime();
     } catch (error) {
-        console.error('خطأ في إلغاء حظر المستخدم:', error);
-        showMessage('خطأ في إلغاء حظر المستخدم', true);
-    }
-}
-
-// عرض بروفايل صديق
-function viewFriendProfile(username) {
-    // يمكن إضافة منطق عرض بروفايل الصديق هنا
-    console.log('عرض بروفايل:', username);
-}
-
-// تحديث عدد الأصدقاء
-function updateFriendsCount() {
-    const friendsCount = document.getElementById('friends-count');
-    if (friendsCount) {
-        friendsCount.textContent = friends.length;
+        console.error('خطأ في معالجة إجراء الصداقة:', error);
+        showMessage('خطأ في معالجة الطلب', true);
     }
 }
 
@@ -793,4 +1104,5 @@ function viewStats() {
 // عرض الأصدقاء
 function viewFriends() {
     switchTab('friends');
+} 
 } 
