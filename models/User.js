@@ -665,7 +665,7 @@ const UserSchema = new mongoose.Schema({
       message: String,
       status: {
         type: String,
-        enum: ['pending', 'accepted', 'rejected', 'auto_executed', 'expired'],
+        enum: ['pending', 'accepted', 'rejected', 'auto_executed', 'expired', 'blocked_by_shield'],
         default: 'pending'
       },
       requiresAcceptance: {
@@ -722,7 +722,7 @@ const UserSchema = new mongoose.Schema({
       message: String,
       status: {
         type: String,
-        enum: ['pending', 'accepted', 'rejected', 'auto_executed', 'expired'],
+        enum: ['pending', 'accepted', 'rejected', 'auto_executed', 'expired', 'blocked_by_shield'],
         default: 'pending'
       },
       requiresAcceptance: {
@@ -778,7 +778,7 @@ const UserSchema = new mongoose.Schema({
       message: String,
       status: {
         type: String,
-        enum: ['accepted', 'rejected', 'auto_executed', 'expired'],
+        enum: ['accepted', 'rejected', 'auto_executed', 'expired', 'blocked_by_shield'],
         required: true
       },
       executedAt: {
@@ -848,6 +848,117 @@ const UserSchema = new mongoose.Schema({
       lastGiftAt: {
         type: Date,
         default: null
+      }
+    }
+  },
+  
+  // نظام الدرع
+  shield: {
+    // معلومات الدرع الحالي
+    currentShield: {
+      isActive: {
+        type: Boolean,
+        default: false
+      },
+      activatedAt: {
+        type: Date,
+        default: null
+      },
+      expiresAt: {
+        type: Date,
+        default: null
+      },
+      type: {
+        type: String,
+        enum: ['basic', 'premium', 'ultimate'],
+        default: 'basic'
+      },
+      protectionLevel: {
+        type: Number,
+        default: 1
+      }
+    },
+    
+    // سجل استخدام الدرع
+    shieldHistory: [{
+      shieldId: {
+        type: String,
+        unique: true
+      },
+      type: {
+        type: String,
+        enum: ['basic', 'premium', 'ultimate'],
+        required: true
+      },
+      cost: {
+        type: Number,
+        required: true
+      },
+      duration: {
+        type: Number, // بالدقائق
+        required: true
+      },
+      activatedAt: {
+        type: Date,
+        default: Date.now
+      },
+      expiredAt: {
+        type: Date,
+        default: null
+      },
+      status: {
+        type: String,
+        enum: ['active', 'expired', 'cancelled'],
+        default: 'active'
+      },
+      giftsBlocked: {
+        type: Number,
+        default: 0
+      }
+    }],
+    
+    // إحصائيات الدرع
+    shieldStats: {
+      totalShieldsActivated: {
+        type: Number,
+        default: 0
+      },
+      totalCoinsSpent: {
+        type: Number,
+        default: 0
+      },
+      totalGiftsBlocked: {
+        type: Number,
+        default: 0
+      },
+      totalProtectionTime: {
+        type: Number, // بالدقائق
+        default: 0
+      },
+      lastShieldAt: {
+        type: Date,
+        default: null
+      }
+    },
+    
+    // إعدادات الدرع
+    shieldSettings: {
+      autoRenew: {
+        type: Boolean,
+        default: false
+      },
+      autoRenewType: {
+        type: String,
+        enum: ['basic', 'premium', 'ultimate'],
+        default: 'basic'
+      },
+      notifications: {
+        type: Boolean,
+        default: true
+      },
+      blockAllNegativeGifts: {
+        type: Boolean,
+        default: true
       }
     }
   }

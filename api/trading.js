@@ -407,7 +407,285 @@ router.get('/stats', auth, async (req, res) => {
   }
 });
 
-// إرسال هدية
+// تفعيل الدرع
+router.post('/activate-shield', auth, async (req, res) => {
+  try {
+    const { shieldType = 'basic' } = req.body;
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // التحقق من وجود درع نشط
+    if (user.shield.currentShield.isActive) {
+      return res.status(400).json({ error: 'لديك درع نشط بالفعل' });
+    }
+
+    // تحديد تكلفة ومدة الدرع
+    const shieldConfig = {
+      basic: { cost: 50000, duration: 1440 }, // 50k coins لمدة 24 ساعة
+      premium: { cost: 100000, duration: 2880 }, // 100k coins لمدة 48 ساعة
+      ultimate: { cost: 200000, duration: 4320 } // 200k coins لمدة 72 ساعة
+    };
+
+    const config = shieldConfig[shieldType];
+    if (!config) {
+      return res.status(400).json({ error: 'نوع درع غير صحيح' });
+    }
+
+    // التحقق من الرصيد
+    if (user.itemsCollected.coins < config.cost) {
+      return res.status(400).json({ 
+        error: `لا تملك عملات كافية. المطلوب: ${config.cost} عملة` 
+      });
+    }
+
+    // إنشاء معرف فريد للدرع
+    const shieldId = `shield_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // تفعيل الدرع
+    user.shield.currentShield = {
+      isActive: true,
+      activatedAt: new Date(),
+      expiresAt: new Date(Date.now() + config.duration * 60 * 1000), // تحويل الدقائق لمللي ثانية
+      type: shieldType,
+      protectionLevel: shieldType === 'basic' ? 1 : shieldType === 'premium' ? 2 : 3
+    };
+
+    // إضافة للسجل
+    const shieldRecord = {
+      shieldId,
+      type: shieldType,
+      cost: config.cost,
+      duration: config.duration,
+      activatedAt: new Date(),
+      expiredAt: new Date(Date.now() + config.duration * 60 * 1000),
+      status: 'active',
+      giftsBlocked: 0
+    };
+    user.shield.shieldHistory.push(shieldRecord);
+
+    // تحديث الإحصائيات
+    user.shield.shieldStats.totalShieldsActivated++;
+    user.shield.shieldStats.totalCoinsSpent += config.cost;
+    user.shield.shieldStats.totalProtectionTime += config.duration;
+    user.shield.shieldStats.lastShieldAt = new Date();
+
+    // خصم العملات
+    user.itemsCollected.coins -= config.cost;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `تم تفعيل الدرع ${shieldType === 'basic' ? 'الأساسي' : shieldType === 'premium' ? 'المميز' : 'الأقوى'} بنجاح لمدة ${config.duration / 60} ساعة`,
+      shield: {
+        type: shieldType,
+        expiresAt: user.shield.currentShield.expiresAt,
+        cost: config.cost
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في تفعيل الدرع:', error);
+    res.status(500).json({ error: 'خطأ في تفعيل الدرع' });
+  }
+});
+
+// إلغاء الدرع
+router.post('/deactivate-shield', auth, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    if (!user.shield.currentShield.isActive) {
+      return res.status(400).json({ error: 'ليس لديك درع نشط' });
+    }
+
+    // إلغاء الدرع
+    user.shield.currentShield = {
+      isActive: false,
+      activatedAt: null,
+      expiresAt: null,
+      type: 'basic',
+      protectionLevel: 1
+    };
+
+    // تحديث آخر درع في السجل
+    const lastShield = user.shield.shieldHistory[user.shield.shieldHistory.length - 1];
+    if (lastShield && lastShield.status === 'active') {
+      lastShield.status = 'cancelled';
+      lastShield.expiredAt = new Date();
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'تم إلغاء الدرع بنجاح'
+    });
+
+  } catch (error) {
+    console.error('خطأ في إلغاء الدرع:', error);
+    res.status(500).json({ error: 'خطأ في إلغاء الدرع' });
+  }
+});
+
+// الحصول على معلومات الدرع
+router.get('/shield-info', auth, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // التحقق من انتهاء صلاحية الدرع
+    if (user.shield.currentShield.isActive && 
+        user.shield.currentShield.expiresAt < new Date()) {
+      user.shield.currentShield.isActive = false;
+      user.shield.currentShield.activatedAt = null;
+      user.shield.currentShield.expiresAt = null;
+      
+      // تحديث آخر درع في السجل
+      const lastShield = user.shield.shieldHistory[user.shield.shieldHistory.length - 1];
+      if (lastShield && lastShield.status === 'active') {
+        lastShield.status = 'expired';
+        lastShield.expiredAt = new Date();
+      }
+      
+      await user.save();
+    }
+
+    res.json({
+      currentShield: user.shield.currentShield,
+      stats: user.shield.shieldStats,
+      settings: user.shield.shieldSettings,
+      coins: user.itemsCollected.coins
+    });
+
+  } catch (error) {
+    console.error('خطأ في جلب معلومات الدرع:', error);
+    res.status(500).json({ error: 'خطأ في جلب معلومات الدرع' });
+  }
+});
+
+// تحديث إعدادات الدرع
+router.put('/shield-settings', auth, async (req, res) => {
+  try {
+    const { 
+      autoRenew, 
+      autoRenewType, 
+      notifications, 
+      blockAllNegativeGifts 
+    } = req.body;
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تحديث الإعدادات
+    if (typeof autoRenew === 'boolean') {
+      user.shield.shieldSettings.autoRenew = autoRenew;
+    }
+    if (autoRenewType && ['basic', 'premium', 'ultimate'].includes(autoRenewType)) {
+      user.shield.shieldSettings.autoRenewType = autoRenewType;
+    }
+    if (typeof notifications === 'boolean') {
+      user.shield.shieldSettings.notifications = notifications;
+    }
+    if (typeof blockAllNegativeGifts === 'boolean') {
+      user.shield.shieldSettings.blockAllNegativeGifts = blockAllNegativeGifts;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'تم تحديث إعدادات الدرع بنجاح',
+      settings: user.shield.shieldSettings
+    });
+
+  } catch (error) {
+    console.error('خطأ في تحديث إعدادات الدرع:', error);
+    res.status(500).json({ error: 'خطأ في تحديث إعدادات الدرع' });
+  }
+});
+
+// الحصول على سجل الدرع
+router.get('/shield-history', auth, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const history = user.shield.shieldHistory
+      .sort((a, b) => new Date(b.activatedAt) - new Date(a.activatedAt))
+      .slice(startIndex, endIndex);
+
+    res.json({
+      history,
+      currentPage: page,
+      totalPages: Math.ceil(user.shield.shieldHistory.length / limit),
+      totalRecords: user.shield.shieldHistory.length
+    });
+
+  } catch (error) {
+    console.error('خطأ في جلب سجل الدرع:', error);
+    res.status(500).json({ error: 'خطأ في جلب سجل الدرع' });
+  }
+});
+
+// دالة مساعدة للتحقق من الدرع
+function checkShieldProtection(user, giftInfo) {
+  if (!user.shield.currentShield.isActive) {
+    return { protected: false, reason: 'no_shield' };
+  }
+
+  // التحقق من انتهاء صلاحية الدرع
+  if (user.shield.currentShield.expiresAt < new Date()) {
+    user.shield.currentShield.isActive = false;
+    return { protected: false, reason: 'expired' };
+  }
+
+  // التحقق من نوع الحماية
+  const protectionLevel = user.shield.currentShield.protectionLevel;
+  
+  // المستوى 1: يحمي من القنابل والخفافيش
+  if (protectionLevel >= 1 && (giftInfo.category === 'bomb' || giftInfo.category === 'bat')) {
+    return { protected: true, reason: 'shield_protection' };
+  }
+  
+  // المستوى 2: يحمي من جميع الهدايا السلبية
+  if (protectionLevel >= 2 && giftInfo.type === 'negative') {
+    return { protected: true, reason: 'shield_protection' };
+  }
+  
+  // المستوى 3: يحمي من جميع الهدايا
+  if (protectionLevel >= 3) {
+    return { protected: true, reason: 'shield_protection' };
+  }
+
+  return { protected: false, reason: 'not_covered' };
+}
+
+// تحديث دالة إرسال الهدية لتشمل حماية الدرع
 router.post('/send-gift', auth, async (req, res) => {
   try {
     const { toUsername, giftName, giftCount = 1, message = '' } = req.body;
@@ -436,6 +714,72 @@ router.post('/send-gift', auth, async (req, res) => {
     const giftInfo = getGiftInfo(giftName);
     if (!giftInfo) {
       return res.status(400).json({ error: 'نوع هدية غير صحيح' });
+    }
+
+    // التحقق من حماية الدرع
+    const shieldCheck = checkShieldProtection(toUser, giftInfo);
+    if (shieldCheck.protected) {
+      // إنشاء معرف فريد للهدية
+      const giftId = `gift_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // إنشاء الهدية المحظورة
+      const blockedGift = {
+        giftId,
+        toUserId: toUser._id,
+        toUsername: toUser.username,
+        giftType: giftInfo.type,
+        giftCategory: giftInfo.category,
+        giftName: giftInfo.name,
+        giftValue: giftInfo.value * giftCount,
+        giftCount,
+        message,
+        status: 'blocked_by_shield',
+        requiresAcceptance: false,
+        autoExecute: false,
+        sentAt: new Date(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        executedAt: null
+      };
+
+      // إضافة الهدية للمرسل
+      const fromUser = await User.findById(fromUserId);
+      fromUser.gifts.sentGifts.push(blockedGift);
+      fromUser.gifts.giftStats.totalGiftsSent++;
+      if (giftInfo.type === 'negative') {
+        fromUser.gifts.giftStats.negativeGiftsSent++;
+      }
+      fromUser.gifts.giftStats.lastGiftAt = new Date();
+
+      // إضافة الهدية للمستلم
+      const receivedBlockedGift = {
+        ...blockedGift,
+        fromUserId: fromUser._id,
+        fromUsername: fromUser.username,
+        receivedAt: new Date()
+      };
+      toUser.gifts.receivedGifts.push(receivedBlockedGift);
+      toUser.gifts.giftStats.totalGiftsReceived++;
+      if (giftInfo.type === 'negative') {
+        toUser.gifts.giftStats.negativeGiftsReceived++;
+      }
+
+      // تحديث إحصائيات الدرع
+      toUser.shield.shieldStats.totalGiftsBlocked++;
+      const lastShield = toUser.shield.shieldHistory[toUser.shield.shieldHistory.length - 1];
+      if (lastShield && lastShield.status === 'active') {
+        lastShield.giftsBlocked++;
+      }
+
+      await fromUser.save();
+      await toUser.save();
+
+      return res.json({
+        success: true,
+        message: `تم حظر ${giftInfo.name} بواسطة درع ${toUser.username}`,
+        giftId,
+        blocked: true,
+        shieldType: toUser.shield.currentShield.type
+      });
     }
 
     // التحقق من إعدادات الهدايا السلبية
@@ -559,230 +903,6 @@ router.post('/send-gift', auth, async (req, res) => {
   } catch (error) {
     console.error('خطأ في إرسال الهدية:', error);
     res.status(500).json({ error: 'خطأ في إرسال الهدية' });
-  }
-});
-
-// قبول هدية
-router.post('/accept-gift', auth, async (req, res) => {
-  try {
-    const { giftId } = req.body;
-    const userId = req.user.userId;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    // البحث عن الهدية
-    const gift = user.gifts.receivedGifts.find(g => g.giftId === giftId);
-    if (!gift) {
-      return res.status(404).json({ error: 'الهدية غير موجودة' });
-    }
-
-    if (gift.status !== 'pending') {
-      return res.status(400).json({ error: 'لا يمكن قبول هذه الهدية' });
-    }
-
-    // البحث عن معلومات الهدية
-    const giftInfo = getGiftInfo(gift.giftName);
-    if (!giftInfo) {
-      return res.status(400).json({ error: 'معلومات الهدية غير صحيحة' });
-    }
-
-    // تنفيذ الهدية
-    await executeGift(user, giftInfo, gift.giftCount);
-
-    // تحديث حالة الهدية
-    gift.status = 'accepted';
-    gift.executedAt = new Date();
-
-    // البحث عن المرسل وتحديث هديته
-    const fromUser = await User.findById(gift.fromUserId);
-    if (fromUser) {
-      const sentGift = fromUser.gifts.sentGifts.find(g => g.giftId === giftId);
-      if (sentGift) {
-        sentGift.status = 'accepted';
-        sentGift.executedAt = new Date();
-      }
-      await fromUser.save();
-    }
-
-    // إضافة للسجل
-    const historyEntry = {
-      giftId,
-      partnerId: fromUser._id,
-      partnerUsername: fromUser.username,
-      type: 'received',
-      giftType: giftInfo.type,
-      giftCategory: giftInfo.category,
-      giftName: giftInfo.name,
-      giftValue: giftInfo.value * gift.giftCount,
-      giftCount: gift.giftCount,
-      message: gift.message,
-      status: 'accepted',
-      executedAt: new Date()
-    };
-    user.gifts.giftHistory.push(historyEntry);
-
-    await user.save();
-
-    res.json({
-      success: true,
-      message: `تم قبول ${giftInfo.name} بنجاح`,
-      giftValue: giftInfo.value * gift.giftCount
-    });
-
-  } catch (error) {
-    console.error('خطأ في قبول الهدية:', error);
-    res.status(500).json({ error: 'خطأ في قبول الهدية' });
-  }
-});
-
-// رفض هدية
-router.post('/reject-gift', auth, async (req, res) => {
-  try {
-    const { giftId } = req.body;
-    const userId = req.user.userId;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    // البحث عن الهدية
-    const gift = user.gifts.receivedGifts.find(g => g.giftId === giftId);
-    if (!gift) {
-      return res.status(404).json({ error: 'الهدية غير موجودة' });
-    }
-
-    if (gift.status !== 'pending') {
-      return res.status(400).json({ error: 'لا يمكن رفض هذه الهدية' });
-    }
-
-    // تحديث حالة الهدية
-    gift.status = 'rejected';
-
-    // البحث عن المرسل وتحديث هديته
-    const fromUser = await User.findById(gift.fromUserId);
-    if (fromUser) {
-      const sentGift = fromUser.gifts.sentGifts.find(g => g.giftId === giftId);
-      if (sentGift) {
-        sentGift.status = 'rejected';
-      }
-      await fromUser.save();
-    }
-
-    await user.save();
-
-    res.json({
-      success: true,
-      message: 'تم رفض الهدية بنجاح'
-    });
-
-  } catch (error) {
-    console.error('خطأ في رفض الهدية:', error);
-    res.status(500).json({ error: 'خطأ في رفض الهدية' });
-  }
-});
-
-// الحصول على الهدايا المستلمة
-router.get('/received-gifts', auth, async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    // تصفية الهدايا حسب الحالة
-    const pendingGifts = user.gifts.receivedGifts.filter(g => g.status === 'pending');
-    const acceptedGifts = user.gifts.receivedGifts.filter(g => g.status === 'accepted');
-    const rejectedGifts = user.gifts.receivedGifts.filter(g => g.status === 'rejected');
-
-    res.json({
-      pending: pendingGifts,
-      accepted: acceptedGifts,
-      rejected: rejectedGifts,
-      stats: user.gifts.giftStats
-    });
-
-  } catch (error) {
-    console.error('خطأ في جلب الهدايا:', error);
-    res.status(500).json({ error: 'خطأ في جلب الهدايا' });
-  }
-});
-
-// الحصول على الهدايا المرسلة
-router.get('/sent-gifts', auth, async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    res.json({
-      sentGifts: user.gifts.sentGifts,
-      stats: user.gifts.giftStats
-    });
-
-  } catch (error) {
-    console.error('خطأ في جلب الهدايا المرسلة:', error);
-    res.status(500).json({ error: 'خطأ في جلب الهدايا المرسلة' });
-  }
-});
-
-// تحديث إعدادات الهدايا
-router.put('/gift-settings', auth, async (req, res) => {
-  try {
-    const { 
-      allowGifts, 
-      allowNegativeGifts, 
-      allowBombsAndBats, 
-      autoAcceptPositiveGifts,
-      maxGiftValue,
-      dailyGiftLimit 
-    } = req.body;
-    const userId = req.user.userId;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    // تحديث الإعدادات
-    if (typeof allowGifts === 'boolean') {
-      user.gifts.giftSettings.allowGifts = allowGifts;
-    }
-    if (typeof allowNegativeGifts === 'boolean') {
-      user.gifts.giftSettings.allowNegativeGifts = allowNegativeGifts;
-    }
-    if (typeof allowBombsAndBats === 'boolean') {
-      user.gifts.giftSettings.allowBombsAndBats = allowBombsAndBats;
-    }
-    if (typeof autoAcceptPositiveGifts === 'boolean') {
-      user.gifts.giftSettings.autoAcceptPositiveGifts = autoAcceptPositiveGifts;
-    }
-    if (typeof maxGiftValue === 'number') {
-      user.gifts.giftSettings.maxGiftValue = maxGiftValue;
-    }
-    if (typeof dailyGiftLimit === 'number') {
-      user.gifts.giftSettings.dailyGiftLimit = dailyGiftLimit;
-    }
-
-    await user.save();
-
-    res.json({
-      success: true,
-      message: 'تم تحديث إعدادات الهدايا بنجاح',
-      settings: user.gifts.giftSettings
-    });
-
-  } catch (error) {
-    console.error('خطأ في تحديث إعدادات الهدايا:', error);
-    res.status(500).json({ error: 'خطأ في تحديث إعدادات الهدايا' });
   }
 });
 
