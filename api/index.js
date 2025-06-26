@@ -1,5 +1,6 @@
 const cors = require('cors');
 const dotenv = require('dotenv');
+const helmet = require('helmet');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
@@ -22,6 +23,22 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 // --- 2. إعداد الـ Middleware ---
+// إضافة Helmet للأمان
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "wss:", "ws:"],
+      mediaSrc: ["'self'", "blob:"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: []
+    }
+  }
+}));
+
 // إعداد CORS للسماح بالطلبات من واجهة الويب فقط
 app.use(cors({
     origin: 'https://mygame25bita-1-4ue6.onrender.com', // دومين الواجهة

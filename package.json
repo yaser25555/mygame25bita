@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "api/index.js",
   "scripts": {
-    "start": "node api/server-listen.js"
+    "start": "node api/server-listen.js",
+    "dev": "nodemon api/server-listen.js"
   },
   "dependencies": {
     "agora-access-token": "^2.0.0",
@@ -12,11 +13,18 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.4",
     "multer": "^2.0.1",
     "path": "^0.12.7",
     "serverless-http": "^3.2.0",
     "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
