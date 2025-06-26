@@ -47,500 +47,139 @@
             z-index: -1;
         }
 
+        /* توزيع الأعمدة الرئيسية */
         .main-content {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 32px;
-            width: 100%;
-            max-width: 1600px;
-            margin: 0 auto;
-            box-sizing: border-box;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: flex-start;
+          gap: 32px;
+          width: 100vw;
+          min-height: 100vh;
+          box-sizing: border-box;
+          padding: 32px 0;
         }
 
-        .right-panel {
-            flex: 1;
-            min-width: 340px;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            box-sizing: border-box;
-            overflow: visible;
+        /* عمود الرسائل */
+        .messages-column {
+          flex: 0 0 350px;
+          max-width: 400px;
+          min-width: 250px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          height: 80vh;
+          box-sizing: border-box;
         }
-
-        .player-info {
-            position: relative;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 20px 25px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-            border-radius: 35px;
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            min-width: 320px;
-        }
-
-        .player-info:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .player-details {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.4;
-        }
-
-        .player-details p {
-            margin: 0;
-            font-size: 1.1em;
-            white-space: nowrap;
-            font-weight: 600;
-        }
-
-        .player-details p:first-child {
-            font-weight: bold;
-            font-size: 1.3em;
-            color: #FFD700;
-        }
-
-        .player-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .player-actions button {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: #fff;
-            font-size: 1.3em;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            backdrop-filter: blur(10px);
-        }
-
-        .player-actions button:hover {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.2) 100%);
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
-        }
-
-        .game-container {
-            width: 100%;
-            max-width: 900px;
-            position: relative;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-radius: 30px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            padding: 30px;
-            min-height: 700px;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-            z-index: 5;
-        }
-
-        .game-container:hover {
-            box-shadow: 
-                0 25px 80px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
         .message-area {
-            margin-bottom: 30px;
-            font-size: 1.4em;
-            font-weight: bold;
-            min-height: 40px;
-            text-align: center;
-            padding: 15px 20px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            z-index: 6;
+          width: 100%;
+          max-width: 370px;
+          min-height: 300px;
+          background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ef 100%);
+          border-radius: 18px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+          margin-bottom: 24px;
+          padding: 28px 28px;
+          font-size: 1.25em;
+          color: #222;
+          direction: rtl;
+          text-align: right;
+          overflow-y: auto;
+          font-family: 'Noto Naskh Arabic', 'Amiri', serif;
         }
 
-        .message-area.success { 
-            color: #4ade80; 
-            background: linear-gradient(135deg, rgba(74, 222, 128, 0.2) 0%, rgba(74, 222, 128, 0.1) 100%);
-            border-color: rgba(74, 222, 128, 0.3);
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+        /* عمود اللعبة */
+        .game-center-column {
+          flex: 2;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 18px;
+          background: #fff;
+          border-radius: 18px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+          padding: 24px 0;
         }
-        
-        .message-area.error { 
-            color: #f87171; 
-            background: linear-gradient(135deg, rgba(248, 113, 113, 0.2) 0%, rgba(248, 113, 113, 0.1) 100%);
-            border-color: rgba(248, 113, 113, 0.3);
-            box-shadow: 0 0 20px rgba(248, 113, 113, 0.3);
-        }
-        
-        .message-area.info { 
-            color: #60a5fa; 
-            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(96, 165, 250, 0.1) 100%);
-            border-color: rgba(96, 165, 250, 0.3);
-            box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
-        }
-
-        .boxes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-            gap: 10px;
-            margin: 10px 0;
-            padding: 10px;
-            position: relative;
-            z-index: 7;
-            flex-grow: 1;
+        .small-logo {
+          width: 70px;
+          height: 70px;
+          margin: 10px auto 0 auto;
+          display: block;
         }
 
-        .box {
-            width: 70px;
-            height: 70px;
-            min-width: 60px;
-            min-height: 60px;
-            max-width: 80px;
-            max-height: 80px;
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            border: 3px solid #d97706;
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            background-image: url('box_closed.png');
-            background-size: 80% 80%;
-            background-repeat: no-repeat;
-            background-position: center;
-            box-shadow: 
-                0 8px 25px rgba(0, 0, 0, 0.3),
-                inset 0 2px 4px rgba(255, 255, 255, 0.3);
-            overflow: hidden;
-            animation: floatAndGlow 4s infinite ease-in-out;
+        .circular-controls {
+          display: flex;
+          gap: 18px;
+          justify-content: center;
+          margin: 18px 0 10px 0;
+        }
+        .circular-btn {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #e0e7ef 0%, #7fbcff 100%);
+          border: none;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2em;
+          color: #333;
+          transition: background 0.2s, transform 0.2s;
+          cursor: pointer;
+        }
+        .circular-btn:hover {
+          background: linear-gradient(135deg, #facc15 0%, #f43f5e 100%);
+          color: #fff;
+          transform: scale(1.08);
         }
 
-        .box::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%);
-            border-radius: 17px;
-            pointer-events: none;
+        .large-items {
+          transform: scale(1.18);
+          margin-top: 0 !important;
+          background: #f9fafb;
+          border-radius: 12px;
+          padding: 12px;
         }
 
-        @keyframes floatAndGlow {
-            0% { 
-                transform: translateY(0px) scale(1); 
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-            }
-            25% { 
-                transform: translateY(-8px) scale(1.03); 
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-            }
-            50% { 
-                transform: translateY(0px) scale(1); 
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-            }
-            75% { 
-                transform: translateY(8px) scale(1.03); 
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-            }
-            100% { 
-                transform: translateY(0px) scale(1); 
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-            }
+        .prominent-boxes {
+          margin-top: 18px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+          border-radius: 18px;
+          background: #fff;
+          padding: 18px 0 18px 0;
+          min-height: 200px;
+          width: 90%;
+          margin-bottom: 24px;
         }
 
-        .box:hover:not(.opened) {
-            transform: translateY(-12px) scale(1.07);
-            animation: none;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.5),
-                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        /* عمود معلومات المستخدم والمحادثة */
+        .left-panel {
+          flex: 0 0 340px;
+          max-width: 400px;
+          min-width: 250px;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+          box-sizing: border-box;
+          align-items: flex-start;
+          padding-top: 32px;
         }
 
-        .box.opened {
-            background-image: none;
-            transform: scale(0.95);
-            animation: none !important;
-            cursor: default;
-        }
-
-        /* Styles for opened boxes with different results */
-        .box.opened.win {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border: 3px solid #047857;
-            box-shadow: 0 0 20px 8px rgba(16, 185, 129, 0.6);
-        }
-
-        .box.opened.lose {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            border: 3px solid #b91c1c;
-            box-shadow: 0 0 20px 8px rgba(239, 68, 68, 0.6);
-        }
-
-        .box.opened.neutral {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-            border: 3px solid #374151;
-            box-shadow: 0 0 20px 8px rgba(107, 114, 128, 0.6);
-        }
-
-        .box-content {
-            text-align: center;
-            z-index: 2;
-            position: relative;
-        }
-
-        .box-text {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-        }
-
-        .coin-icon {
-            width: 90px;
-            height: 60px;
-            background-image: url('coin.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            display: none;
-            margin: 8px auto 0;
-            animation: coinGlow 2s infinite alternate;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-            z-index: 8;
-        }
-
-        .bet-button {
-            padding: 18px 35px;
-            font-size: 1.3em;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            border-radius: 15px;
-            color: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 200px;
-            justify-content: center;
-        }
-
-        .bet-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .bet-button:hover::before {
-            left: 100%;
-        }
-
-        .bet-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .bet-button:active {
-            transform: translateY(-1px);
-        }
-
-        .bet-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .bet-button:disabled:hover {
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
-        #single-shot-button { 
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-        }
-        
-        #single-shot-button:hover {
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
-        }
-        
-        #triple-shot-button { 
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-        }
-        
-        #triple-shot-button:hover {
-            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
-        }
-        
-        #hammer-shot-button { 
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-        }
-        
-        #hammer-shot-button:hover {
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
-        }
-
-        #seeker-hero {
-            position: absolute;
-            width: 90px;
-            height: 90px;
-            background-image: url('hero.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translate(-50%, -50%);
-            z-index: 20;
-            display: none;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
-        }
-
-        @keyframes coinGlow {
-            0% {
-                filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)) brightness(1);
-                transform: scale(1);
-            }
-            50% {
-                filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) brightness(1.2);
-                transform: scale(1.05);
-            }
-            100% {
-                filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)) brightness(1);
-                transform: scale(1);
-            }
-        }
-
-        @keyframes finalSeekerPulse {
-            0% { 
-                transform: translate(-50%, -50%) scale(1);
-                filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
-            }
-            50% {
-                transform: translate(-50%, -50%) scale(1.3);
-                filter: drop-shadow(0 0 25px rgba(255, 255, 255, 1));
-            }
-            100% { 
-                transform: translate(-50%, -50%) scale(1);
-                filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
-            }
-        }
-
-        @keyframes sequentialGlow {
-            0% { 
-                box-shadow: 0 0 20px 10px rgba(255, 255, 0, 0.6);
-                transform: scale(1);
-            }
-            50% { 
-                box-shadow: 0 0 30px 15px rgba(255, 255, 0, 0.9);
-                transform: scale(1.1);
-            }
-            100% { 
-                box-shadow: 0 0 20px 10px rgba(255, 255, 0, 0.6);
-                transform: scale(1);
-            }
-        }
-
-        .sequential-glow {
-            animation: sequentialGlow 0.6s ease-in-out;
-        }
-
-        @keyframes finalGlow {
-            0% { 
-                box-shadow: 0 0 20px 10px rgba(0, 255, 0, 0.7);
-                transform: scale(1);
-            }
-            50% { 
-                box-shadow: 0 0 40px 20px rgba(0, 255, 0, 1);
-                transform: scale(1.15);
-            }
-            100% { 
-                box-shadow: 0 0 20px 10px rgba(0, 255, 0, 0.7);
-                transform: scale(1);
-            }
-        }
-
-        .single-shot-final-glow {
-            animation: finalGlow 1.2s infinite alternate;
-        }
-
-        #loading-indicator {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.2em;
-            font-weight: bold;
-            z-index: 1000;
-            display: none;
-            backdrop-filter: blur(10px);
-        }
-
-        /* Chat Window Styles */
+        /* تحسين ظهور نافذة المحادثة */
         .chat-container {
-            position: sticky;
-            top: 120px;
-            width: 380px;
-            height: 600px;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-            backdrop-filter: blur(25px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            z-index: 50;
-            transition: all 0.3s ease;
+          width: 100%;
+          max-width: 370px;
+          min-width: 0;
+          box-sizing: border-box;
+          margin: 0 auto;
+          background: linear-gradient(135deg, #e0e7ef 0%, #f3f4f6 100%);
+          border-radius: 18px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+          padding: 18px;
+          min-height: 200px;
         }
 
         .chat-container.collapsed {
@@ -2492,6 +2131,39 @@
             max-width: 100vw !important;
             padding: 1px !important;
           }
+        }
+
+        /* --- تنسيقات عمود الرسائل --- */
+        .messages-column {
+          flex: 0 0 320px;
+          max-width: 340px;
+          min-width: 240px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          height: 100vh;
+          box-sizing: border-box;
+          padding-top: 32px;
+        }
+
+        .message-area {
+          width: 100%;
+          max-width: 320px;
+          min-height: 120px;
+          background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ef 100%);
+          border-radius: 18px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+          margin-bottom: 24px;
+          padding: 18px 20px;
+          font-size: 1.1em;
+          color: #222;
+          direction: rtl;
+          text-align: right;
+          overflow-y: auto;
+        }
+
+        .item-collection-display {
+          margin-top: 0 !important;
         }
     </style>
 </head>
