@@ -3,14 +3,10 @@ const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com"; // Use your actual
 document.addEventListener('DOMContentLoaded', () => {
     const loginTab = document.getElementById('login-tab');
     const registerTab = document.getElementById('register-tab');
-    const instructionsTab = document.getElementById('instructions-tab');
-    // تم إزالة appsTab من هنا
     const contactTab = document.getElementById('contact-tab');
 
     const loginSection = document.getElementById('login-section');
     const registerSection = document.getElementById('register-section');
-    const instructionsSectionContent = document.getElementById('instructions-section-content');
-    // تم إزالة appsSectionContent من هنا
     const contactSectionContent = document.getElementById('contact-section-content');
 
     const loginUsernameInput = document.getElementById('login-username');
@@ -23,8 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerButton = document.getElementById('register-button');
 
     const messageBox = document.getElementById('message-box');
-    const getTipButton = document.getElementById('get-tip-button');
-    const gameTipOutput = document.getElementById('game-tip-output');
 
     const adminChoiceModal = document.getElementById('admin-choice-modal');
     const goToGameBtn = document.getElementById('go-to-game-btn');
@@ -65,10 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function switchTab(activeTab) {
         // Hide all sections and remove active class from all tabs
-        [loginTab, registerTab, instructionsTab, contactTab].forEach(tab => {
+        [loginTab, registerTab, contactTab].forEach(tab => {
             if (tab) tab.classList.remove('active');
         });
-        [loginSection, registerSection, instructionsSectionContent, contactSectionContent].forEach(section => {
+        [loginSection, registerSection, contactSectionContent].forEach(section => {
             if (section) section.classList.remove('active');
         });
 
@@ -180,48 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ----------------------------------------------------
-    // ميزة: الحصول على نصيحة للعبة باستخدام Gemini API
-    // ----------------------------------------------------
-    async function getMagicGameTip() {
-        setButtonLoading(getTipButton, true);
-        gameTipOutput.textContent = 'جاري توليد نصيحة سحرية...';
-        
-        try {
-            const prompt = "Please provide a short, single-sentence, motivational, or strategic tip for playing a game called 'INFINITY BOX VOICEBOOM'. The game involves opening mysterious boxes to get points, but some boxes might reduce points. Players can collect points at any time or proceed to the next round. The game also has special powers. The tip should be in Arabic.";
-            
-            let chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
-            const payload = { contents: chatHistory };
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                const text = result.candidates[0].content.parts[0].text;
-                gameTipOutput.textContent = text;
-            } else {
-                gameTipOutput.textContent = 'عذراً، لم أتمكن من توليد نصيحة الآن. يرجى المحاولة لاحقاً.';
-                console.error('Gemini API returned an unexpected response structure:', result);
-            }
-        } catch (error) {
-            console.error('Error calling Gemini API:', error);
-            gameTipOutput.textContent = 'حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. يرجى المحاولة لاحقاً.';
-        } finally {
-            setButtonLoading(getTipButton, false);
-        }
-    }
-
     // إظهار قسم الصورة الرمزية فقط إذا كان المستخدم مسجلاً الدخول
     if (localStorage.getItem('token')) {
         avatarSection.style.display = 'block';
@@ -259,8 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // حدث النقر على ألسنة التبويب
     if (loginTab) loginTab.addEventListener('click', () => switchTab(loginTab));
     if (registerTab) registerTab.addEventListener('click', () => switchTab(registerTab));
-    if (instructionsTab) instructionsTab.addEventListener('click', () => switchTab(instructionsTab));
-    // تم إزالة حدث النقر لـ appsTab
     if (contactTab) contactTab.addEventListener('click', () => switchTab(contactTab));
 
     // أحداث النقر على الأزرار
@@ -269,9 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (registerButton) {
         registerButton.addEventListener('click', handleRegister);
-    }
-    if (getTipButton) {
-        getTipButton.addEventListener('click', getMagicGameTip);
     }
 
     if(goToGameBtn) {
