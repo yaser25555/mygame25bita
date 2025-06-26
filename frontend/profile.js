@@ -1045,7 +1045,7 @@ function displaySearchResults(users) {
         
         return `
             <div class="user-result">
-                <img src="${user.avatar || 'images/default-avatar.png'}" alt="${user.displayName}" class="user-result-avatar">
+                <img src="${user.avatar || 'images/hero.png'}" alt="${user.displayName}" class="user-result-avatar">
                 <div class="user-result-info">
                     <div class="user-result-name">${user.displayName}</div>
                     <div class="user-result-bio">${user.bio || 'لا توجد نبذة شخصية'}</div>
