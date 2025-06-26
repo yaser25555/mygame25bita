@@ -19,6 +19,8 @@ async function checkExistingToken() {
     
     if (!token) {
         console.log('❌ لا يوجد token، عرض صفحة تسجيل الدخول');
+        hideLogoutButton();
+        hideGameButton();
         return;
     }
     
@@ -31,25 +33,65 @@ async function checkExistingToken() {
             const data = await response.json();
             console.log('✅ token صالح، المستخدم:', data.username);
             
-            // توجيه المستخدم العادي مباشرة إلى اللعبة
-            if (!data.isAdmin) {
-                console.log('🔄 توجيه المستخدم العادي إلى اللعبة');
-                window.location.href = 'game.html';
+            // إظهار الأزرار المناسبة حسب نوع المستخدم
+            if (data.isAdmin) {
+                showLogoutButton(data.username);
+                showMessage(`مرحباً بعودتك ${data.username}! يمكنك تسجيل الدخول مرة أخرى أو تسجيل الخروج.`);
+                console.log('👑 المستخدم مشرف، يمكنه تسجيل الدخول مرة أخرى أو تسجيل الخروج');
             } else {
-                console.log('👑 المستخدم مشرف، عرض خيارات المشرف');
-                showAdminChoiceModal();
+                showGameButton(data.username);
+                showLogoutButton(data.username);
+                showMessage(`مرحباً بعودتك ${data.username}! يمكنك الدخول للعبة أو تسجيل الخروج.`);
+                console.log('👤 المستخدم عادي، يمكنه الدخول للعبة أو تسجيل الخروج');
             }
+            
         } else {
             console.log('❌ token غير صالح، حذفه');
             localStorage.removeItem('token');
             localStorage.removeItem('username');
             localStorage.removeItem('isAdmin');
+            hideLogoutButton();
         }
     } catch (error) {
         console.error('❌ خطأ في التحقق من التوكن:', error);
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('isAdmin');
+        hideLogoutButton();
+    }
+}
+
+// إظهار زر تسجيل الخروج
+function showLogoutButton(username) {
+    const logoutTab = document.getElementById('logout-tab');
+    if (logoutTab) {
+        logoutTab.style.display = 'inline-block';
+        logoutTab.textContent = `تسجيل الخروج (${username})`;
+    }
+}
+
+// إظهار زر الدخول للعبة
+function showGameButton(username) {
+    const gameTab = document.getElementById('game-tab');
+    if (gameTab) {
+        gameTab.style.display = 'inline-block';
+        gameTab.textContent = `🎮 الدخول للعبة (${username})`;
+    }
+}
+
+// إخفاء زر تسجيل الخروج
+function hideLogoutButton() {
+    const logoutTab = document.getElementById('logout-tab');
+    if (logoutTab) {
+        logoutTab.style.display = 'none';
+    }
+}
+
+// إخفاء زر الدخول للعبة
+function hideGameButton() {
+    const gameTab = document.getElementById('game-tab');
+    if (gameTab) {
+        gameTab.style.display = 'none';
     }
 }
 
@@ -59,6 +101,8 @@ function setupEventListeners() {
     const registerForm = document.getElementById('register-form');
     const goToGameBtn = document.getElementById('go-to-game-btn');
     const goToAdminBtn = document.getElementById('go-to-admin-btn');
+    const logoutTab = document.getElementById('logout-tab');
+    const gameTab = document.getElementById('game-tab');
     
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
@@ -79,6 +123,16 @@ function setupEventListeners() {
             window.location.href = 'admin.html';
         });
     }
+    
+    if (logoutTab) {
+        logoutTab.addEventListener('click', handleLogout);
+    }
+    
+    if (gameTab) {
+        gameTab.addEventListener('click', () => {
+            window.location.href = 'game.html';
+        });
+    }
 }
 
 // إعداد تبديل الألسنة
@@ -86,6 +140,7 @@ function setupTabSwitching() {
     const loginTab = document.getElementById('login-tab');
     const registerTab = document.getElementById('register-tab');
     const contactTab = document.getElementById('contact-tab');
+    const logoutTab = document.getElementById('logout-tab');
     
     const loginSection = document.getElementById('login-section');
     const registerSection = document.getElementById('register-section');
@@ -94,6 +149,7 @@ function setupTabSwitching() {
     if (loginTab) loginTab.addEventListener('click', () => switchTab(loginTab, loginSection));
     if (registerTab) registerTab.addEventListener('click', () => switchTab(registerTab, registerSection));
     if (contactTab) contactTab.addEventListener('click', () => switchTab(contactTab, contactSection));
+    if (logoutTab) logoutTab.addEventListener('click', handleLogout);
 }
 
 function switchTab(activeTab, activeSection) {
@@ -103,7 +159,9 @@ function switchTab(activeTab, activeSection) {
     
     // إضافة الفئة النشطة للعنصر المحدد
     activeTab.classList.add('active');
-    activeSection.classList.add('active');
+    if (activeSection) {
+        activeSection.classList.add('active');
+    }
     
     // إخفاء رسائل الخطأ
     hideMessage();
@@ -135,6 +193,14 @@ function showAdminChoiceModal() {
     const modal = document.getElementById('admin-choice-modal');
     if (modal) {
         modal.classList.remove('hidden');
+    }
+}
+
+// إغلاق مودال خيارات المشرف
+function closeAdminModal() {
+    const modal = document.getElementById('admin-choice-modal');
+    if (modal) {
+        modal.classList.add('hidden');
     }
 }
 
@@ -264,5 +330,35 @@ async function handleRegister(event) {
             registerButton.disabled = false;
             registerButton.innerHTML = '<span class="btn-text">تسجيل</span>';
         }
+    }
+}
+
+// معالجة تسجيل الخروج
+function handleLogout() {
+    try {
+        console.log('🚪 جاري تسجيل الخروج...');
+        
+        // حذف البيانات المحلية
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('isAdmin');
+        
+        // إخفاء جميع الأزرار
+        hideLogoutButton();
+        hideGameButton();
+        
+        // إظهار رسالة نجاح
+        showMessage('تم تسجيل الخروج بنجاح');
+        
+        console.log('✅ تم تسجيل الخروج بنجاح');
+        
+        // إعادة تحميل الصفحة بعد ثانية
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ خطأ في تسجيل الخروج:', error);
+        showMessage('خطأ في تسجيل الخروج', true);
     }
 } 

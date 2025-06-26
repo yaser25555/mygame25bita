@@ -90,6 +90,9 @@ body::before {
     text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     border: 1px solid var(--border-color);
+    position: relative;
+    max-width: 400px;
+    width: 90%;
 }
 
 .modal-content h3 {
@@ -105,6 +108,26 @@ body::before {
 .modal-content .btn {
     margin: 10px 0;
     width: 100%;
+}
+
+/* تنسيقات أزرار المودال */
+.modal-content .admin-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.modal-content .admin-buttons .btn {
+    padding: 15px 20px;
+    font-size: 1.1em;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.modal-content .admin-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
 }
 
 h1 {
@@ -322,4 +345,77 @@ h1 {
     .modal-content {
         padding: 15px;
     }
+}
+
+/* تنسيقات زر تسجيل الخروج */
+.logout-btn {
+    background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%) !important;
+    color: white !important;
+    border-bottom-color: #cc0000 !important;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #ff6666 0%, #dd0000 100%) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3) !important;
+}
+
+.logout-btn.active {
+    background: linear-gradient(135deg, #ff6666 0%, #dd0000 100%) !important;
+    border-bottom-color: #ff4444 !important;
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4) !important;
+}
+
+/* تنسيقات زر الدخول للعبة */
+.game-btn {
+    background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%) !important;
+    color: white !important;
+    border-bottom-color: #00cc00 !important;
+}
+
+.game-btn:hover {
+    background: linear-gradient(135deg, #00ff66 0%, #00dd00 100%) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3) !important;
+}
+
+.game-btn.active {
+    background: linear-gradient(135deg, #00ff66 0%, #00dd00 100%) !important;
+    border-bottom-color: #00ff00 !important;
+    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4) !important;
+}
+
+/* تنسيقات قسم لوحة التحكم */
+.admin-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.admin-actions .btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+/* تنسيقات زر إغلاق المودال */
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--text-color-light);
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
 }
