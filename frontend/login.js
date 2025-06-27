@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+const BACKEND_URL = "https://mygame25bita-1-4ue6.onrender.com";
 
 // تسجيل Service Worker
 if ('serviceWorker' in navigator) {

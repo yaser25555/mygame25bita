@@ -4,7 +4,7 @@
 (function() {
     'use strict';
     
-    const BACKEND_URL = 'https://voiceboom-backend.onrender.com';
+    const BACKEND_URL = 'https://mygame25bita-1-4ue6.onrender.com';
     let currentUser = null;
     
     // دالة للحصول على معرف المستخدم

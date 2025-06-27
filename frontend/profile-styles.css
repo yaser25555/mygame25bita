@@ -862,14 +862,17 @@ body {
 }
 
 .search-result-item {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 15px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 15px;
-  background: rgba(0, 255, 0, 0.1);
-  border-radius: 10px;
-  margin-bottom: 10px;
-  border: 1px solid var(--border-color);
+  gap: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  color: #222 !important;
 }
 
 .search-result-avatar {
@@ -892,6 +895,14 @@ body {
 .search-result-status {
   font-size: 0.9em;
   color: var(--text-color-light);
+}
+
+.user-details, .user-name, .user-username, .user-id, .user-bio, .user-level {
+  color: #222 !important;
+}
+
+.user-actions .btn {
+  color: #fff;
 }
 
 /* التجاوب مع الشاشات الصغيرة */
@@ -1608,18 +1619,20 @@ body {
   margin-bottom: 20px;
 }
 
-#search-input {
+.search-input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  padding: 12px 15px;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 25px;
   font-size: 16px;
-  transition: border-color 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+  color: #222 !important;
 }
 
-#search-input:focus {
-  border-color: #007bff;
-  outline: none;
+.search-input::placeholder {
+  color: #888 !important;
+  opacity: 1;
 }
 
 .search-results {
@@ -1639,6 +1652,7 @@ body {
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   border: 1px solid rgba(102, 126, 234, 0.2);
   transition: all 0.3s ease;
+  color: #222 !important;
 }
 
 .search-result-item:hover {
@@ -1751,163 +1765,6 @@ body {
 /* نافذة البحث المنبثقة */
 #search-users-modal .modal-content {
   max-width: 600px;
-  width: 90%;
-}
-
-.search-container {
-  margin-bottom: 20px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 12px 15px;
-  border: 2px solid rgba(102, 126, 234, 0.3);
-  border-radius: 25px;
-  font-size: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  transition: all 0.3s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.search-tips {
-  margin-top: 10px;
-  text-align: center;
-}
-
-.search-tips small {
-  color: #667eea;
-  font-style: italic;
-}
-
-/* تحسينات للأزرار في تبويب الأصدقاء */
-.friends-header .search-container {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.friends-header .search-input {
-  flex: 1;
-  min-width: 200px;
-}
-
-.friends-header .btn.small {
-  white-space: nowrap;
-}
-
-/* أنماط الرسائل */
-.message {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 15px 20px;
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
-  z-index: 10000;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  animation: slideIn 0.3s ease-out;
-  max-width: 300px;
-}
-
-.message.error {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-}
-
-.message.success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* تحسين أنماط النوافذ المنبثقة */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
-}
-
-.modal-overlay.hidden {
-  display: none;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
-  max-width: 90%;
-  max-height: 90%;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-.modal-content.large {
-  max-width: 600px;
-  width: 90%;
-}
-
-@keyframes modalSlideIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.modal-close {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #666;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.modal-close:hover {
-  background: #f0f0f0;
-  color: #333;
-}
-
-/* تحسين أنماط النافذة المنبثقة للبحث */
-#search-users-modal .modal-content {
-  max-width: 500px;
   width: 90%;
 }
 
