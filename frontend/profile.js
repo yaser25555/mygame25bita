@@ -426,20 +426,21 @@ function updateProfileDisplay() {
     // عرض معرف المستخدم (User ID)
     const userIdElement = document.getElementById('user-id');
     if (userIdElement) {
-        let userIdText = 'غير متاح';
+        let userIdText = '';
         if (currentUser.userId && typeof currentUser.userId === 'number') {
-            userIdText = currentUser.userId;
+            userIdText = `ID:${currentUser.userId}`;
         }
-        userIdElement.textContent = `معرف المستخدم: ${userIdText}`;
+        userIdElement.textContent = userIdText;
         userIdElement.style.cssText = `
             background: rgba(255, 255, 255, 0.1);
             padding: 8px 12px;
             border-radius: 8px;
             font-family: monospace;
-            font-size: 0.9em;
+            font-size: 1.1em;
             color: #fff;
-            margin: 10px 0;
+            margin: 10px 0 0 0;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
         `;
     }
     
