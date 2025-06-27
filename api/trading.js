@@ -427,7 +427,8 @@ router.post('/activate-shield', auth, async (req, res) => {
     const shieldConfig = {
       basic: { cost: 50000, duration: 1440 }, // 50k coins لمدة 24 ساعة
       premium: { cost: 100000, duration: 2880 }, // 100k coins لمدة 48 ساعة
-      ultimate: { cost: 200000, duration: 4320 } // 200k coins لمدة 72 ساعة
+      extended: { cost: 90000, duration: 4320 }, // 90k coins لمدة 72 ساعة
+      ultimate: { cost: 135000, duration: 4320 } // 135k coins لمدة 72 ساعة (3 أيام)
     };
 
     const config = shieldConfig[shieldType];
@@ -597,7 +598,7 @@ router.put('/shield-settings', auth, async (req, res) => {
     if (typeof autoRenew === 'boolean') {
       user.shield.shieldSettings.autoRenew = autoRenew;
     }
-    if (autoRenewType && ['basic', 'premium', 'ultimate'].includes(autoRenewType)) {
+    if (autoRenewType && ['basic', 'premium', 'extended', 'ultimate'].includes(autoRenewType)) {
       user.shield.shieldSettings.autoRenewType = autoRenewType;
     }
     if (typeof notifications === 'boolean') {
