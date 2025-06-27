@@ -12,7 +12,7 @@ let searchResults = [];
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 تحميل صفحة البروفايل...');
     
-    // التحقق من تسجيل الدخول
+    // التحقق من المصادقة
     checkAuth();
     
     // إعداد مستمعي الأحداث
@@ -20,6 +20,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // تحميل بيانات المستخدم
     loadUserProfile();
+    
+    // تحميل الإحصائيات
+    loadUserStats();
+    
+    // تحميل الأصدقاء
+    loadFriends();
+    
+    // تحميل الإنجازات
+    loadAchievements();
+    
+    // إعداد إعدادات الخصوصية
+    setupPrivacySettings();
+    
+    // إعداد إعدادات الإشعارات
+    setupNotificationSettings();
+    
+    // إعداد إعدادات اللعبة
+    setupGameSettings();
+    
+    // إعداد رفع الصور
+    setupImageUpload();
+    
+    // إعداد البحث
+    setupSearch();
+    
+    // إضافة تحذير الخروج
+    setupExitWarning();
     
     console.log('✅ تم تحميل صفحة البروفايل بنجاح');
 });
@@ -63,9 +90,6 @@ function setupEventListeners() {
     if (bioTextarea) {
         bioTextarea.addEventListener('input', updateCharCount);
     }
-    
-    // نافذة رفع الصور
-    setupImageUpload();
     
     // إعدادات الخصوصية
     setupPrivacySettings();
@@ -254,7 +278,6 @@ async function loadUserProfile() {
         if (response.ok) {
             currentUser = await response.json();
             updateProfileDisplay();
-            loadUserStats();
         } else {
             throw new Error('فشل في تحميل بيانات المستخدم');
         }
@@ -1489,5 +1512,52 @@ function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('hidden');
+    }
+}
+
+// إعداد التحذير عند محاولة الخروج
+function setupExitWarning() {
+    console.log('⚠️ إعداد تحذير الخروج...');
+    
+    // التحذير عند محاولة إغلاق التبويب/المتصفح
+    window.addEventListener('beforeunload', function(e) {
+        if (currentUser) {
+            const message = 'هل تريد الخروج من الموقع؟ سيتم فقدان تقدمك في اللعبة.';
+            e.preventDefault();
+            e.returnValue = message;
+            return message;
+        }
+    });
+    
+    // التحذير عند محاولة العودة للصفحة السابقة
+    window.addEventListener('popstate', function(e) {
+        if (currentUser) {
+            e.preventDefault();
+            showExitConfirmation();
+        }
+    });
+    
+    // منع استخدام زر العودة في المتصفح
+    history.pushState(null, null, location.href);
+    window.addEventListener('popstate', function() {
+        if (currentUser) {
+            history.pushState(null, null, location.href);
+            showExitConfirmation();
+        }
+    });
+    
+    console.log('✅ تم إعداد تحذير الخروج');
+}
+
+// عرض تأكيد الخروج
+function showExitConfirmation() {
+    const confirmed = confirm('هل تريد الخروج من الموقع؟\n\n✅ البقاء - للاستمرار في اللعبة\n❌ الخروج - للعودة للصفحة السابقة');
+    
+    if (confirmed) {
+        // إذا اختار الخروج، نسمح بالعودة
+        window.history.back();
+    } else {
+        // إذا اختار البقاء، نبقى في الصفحة الحالية
+        console.log('👤 المستخدم اختار البقاء في الموقع');
     }
 }

@@ -7,24 +7,21 @@ let currentFilter = 'pending';
 
 // تهيئة الصفحة
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('تهيئة صفحة الهدايا...');
+    console.log('🚀 تحميل صفحة الهدايا...');
     
     // التحقق من تسجيل الدخول
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    // تحميل بيانات المستخدم
-    loadUserData();
+    checkAuth();
     
     // إعداد مستمعي الأحداث
     setupEventListeners();
     
-    // تحميل الهدايا
-    loadReceivedGifts();
-    loadSentGifts();
+    // تحميل بيانات الهدايا
+    loadGiftsData();
+    
+    // إضافة تحذير الخروج
+    setupExitWarning();
+    
+    console.log('✅ تم تحميل صفحة الهدايا بنجاح');
 });
 
 // إعداد مستمعي الأحداث
@@ -505,4 +502,51 @@ style.textContent = `
         margin-top: 30px;
     }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);
+
+// إعداد التحذير عند محاولة الخروج
+function setupExitWarning() {
+    console.log('⚠️ إعداد تحذير الخروج...');
+    
+    // التحذير عند محاولة إغلاق التبويب/المتصفح
+    window.addEventListener('beforeunload', function(e) {
+        if (currentUser) {
+            const message = 'هل تريد الخروج من الموقع؟ سيتم فقدان تقدمك في اللعبة.';
+            e.preventDefault();
+            e.returnValue = message;
+            return message;
+        }
+    });
+    
+    // التحذير عند محاولة العودة للصفحة السابقة
+    window.addEventListener('popstate', function(e) {
+        if (currentUser) {
+            e.preventDefault();
+            showExitConfirmation();
+        }
+    });
+    
+    // منع استخدام زر العودة في المتصفح
+    history.pushState(null, null, location.href);
+    window.addEventListener('popstate', function() {
+        if (currentUser) {
+            history.pushState(null, null, location.href);
+            showExitConfirmation();
+        }
+    });
+    
+    console.log('✅ تم إعداد تحذير الخروج');
+}
+
+// عرض تأكيد الخروج
+function showExitConfirmation() {
+    const confirmed = confirm('هل تريد الخروج من الموقع؟\n\n✅ البقاء - للاستمرار في اللعبة\n❌ الخروج - للعودة للصفحة السابقة');
+    
+    if (confirmed) {
+        // إذا اختار الخروج، نسمح بالعودة
+        window.history.back();
+    } else {
+        // إذا اختار البقاء، نبقى في الصفحة الحالية
+        console.log('👤 المستخدم اختار البقاء في الموقع');
+    }
+} 
