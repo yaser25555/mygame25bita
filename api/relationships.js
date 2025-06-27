@@ -73,7 +73,7 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
 
     // البحث عن المستخدمين باستخدام userId (رقم) وليس _id
     const currentUser = await getCurrentUser(currentUserId);
-    const targetUser = await User.findOne({ userId: targetUserId });
+    const targetUser = await getCurrentUser(targetUserId);
 
     console.log('👥 نتائج البحث:', { 
       currentUser: currentUser ? currentUser.username : 'غير موجود',
@@ -513,7 +513,7 @@ router.get('/friends', verifyToken, async (req, res) => {
     for (const friend of currentUser.relationships.friends) {
       try {
         console.log('🔍 البحث عن الصديق:', friend.userId);
-        const friendUser = await User.findOne({ userId: friend.userId })
+        const friendUser = await getCurrentUser(friend.userId)
           .select('userId username profile.displayName profile.avatar stats.score');
         
         if (friendUser) {
