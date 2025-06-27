@@ -420,7 +420,11 @@ function updateProfileDisplay() {
     // عرض معرف المستخدم (User ID)
     const userIdElement = document.getElementById('user-id');
     if (userIdElement) {
-        userIdElement.textContent = `معرف المستخدم: ${currentUser.userId || currentUser._id || 'غير متاح'}`;
+        let userIdText = 'غير متاح';
+        if (currentUser.userId && typeof currentUser.userId === 'number' && currentUser.userId >= 1500) {
+            userIdText = currentUser.userId;
+        }
+        userIdElement.textContent = `معرف المستخدم: ${userIdText}`;
         userIdElement.style.cssText = `
             background: rgba(255, 255, 255, 0.1);
             padding: 8px 12px;
@@ -1568,31 +1572,33 @@ async function searchUsers() {
             query = friendsSearchInput.value.trim();
         }
         
-        if (!query || query.length < 2) {
-            // إظهار رسالة للمستخدم
-            showMessage('يرجى إدخال نص بحث مكون من حرفين على الأقل');
+        if (!query || query.length < 1) {
+            showMessage('يرجى إدخال نص بحث مكون من حرف واحد على الأقل');
             return;
         }
 
+        // إذا كان البحث رقم فقط (userId)
+        if (!isNaN(query) && Number(query) >= 1500) {
+            const response = await fetch(`${BACKEND_URL}/api/relationships/search-users?userId=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (!response.ok) throw new Error('فشل في البحث عن المستخدم بالرقم');
+            const data = await response.json();
+            displaySearchResults(data.users);
+            return;
+        }
+
+        // البحث بالنص (الاسم)
         const response = await fetch(`${BACKEND_URL}/api/relationships/search-users?query=${encodeURIComponent(query)}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
-
-        if (!response.ok) {
-            throw new Error('فشل في البحث عن المستخدمين');
-        }
-
+        if (!response.ok) throw new Error('فشل في البحث عن المستخدمين');
         const data = await response.json();
-        
-        // إذا كان البحث من قسم الأصدقاء، نفتح النافذة المنبثقة لعرض النتائج
-        if (friendsSearchInput && friendsSearchInput.value.trim()) {
-            openModal('search-users-modal');
-            displaySearchResults(data.users);
-        } else {
-            displaySearchResults(data.users);
-        }
+        displaySearchResults(data.users);
     } catch (error) {
         console.error('خطأ في البحث عن المستخدمين:', error);
         showMessage('خطأ في البحث عن المستخدمين', true);

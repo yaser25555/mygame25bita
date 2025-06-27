@@ -710,100 +710,22 @@ router.get('/blocked-users', verifyToken, async (req, res) => {
 
 // البحث عن مستخدمين
 router.get('/search-users', verifyToken, async (req, res) => {
-  try {
-    console.log('🔍 محاولة البحث عن المستخدمين...');
-    
-    // التحقق من وجود المستخدم في الطلب
-    if (!req.user || !req.user.userId) {
-      console.log('❌ المستخدم غير موجود في الطلب');
-      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
-    }
-
-    const { query } = req.query;
-    const currentUserId = req.user.userId;
-
-    console.log('🔎 نص البحث:', query, '| المستخدم الحالي:', currentUserId);
-
-    if (!query || query.length < 2) {
-      console.log('❌ نص البحث قصير جداً');
-      return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
-    }
-
-    const currentUser = await getCurrentUser(currentUserId);
-
-    if (!currentUser) {
-      console.log('❌ المستخدم غير موجود في قاعدة البيانات');
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    console.log('✅ تم العثور على المستخدم:', currentUser.username);
-
-    // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
-    if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
-    if (!currentUser.relationships.friends) currentUser.relationships.friends = [];
-    if (!currentUser.relationships.blockedUsers) currentUser.relationships.blockedUsers = [];
-
-    console.log('🔍 البحث في قاعدة البيانات...');
-    
-    // البحث عن المستخدمين
-    const users = await User.find({
-      $and: [
-        { _id: { $ne: currentUser._id } },
-        { isAdmin: false },
-        {
-          $or: [
-            { username: { $regex: query, $options: 'i' } },
-            { 'profile.displayName': { $regex: query, $options: 'i' } }
-          ]
-        }
+  const { query, userId } = req.query;
+  let users = [];
+  if (userId && !isNaN(userId)) {
+    // البحث بالرقم فقط
+    const user = await User.findOne({ userId: parseInt(userId) });
+    if (user) users = [user];
+  } else if (query) {
+    // البحث بالنص
+    users = await User.find({
+      $or: [
+        { username: { $regex: query, $options: 'i' } },
+        { 'profile.displayName': { $regex: query, $options: 'i' } }
       ]
-    }).select('userId username profile.displayName profile.avatar profile.bio profile.level profile.status');
-
-    console.log('📊 عدد النتائج الأولية:', users.length);
-
-    // تصفية النتائج بناءً على العلاقات
-    const filteredUsers = users.map(user => {
-      const isFriend = currentUser.relationships.friends.some(
-        friend => friend.userId === user.userId
-      );
-      
-      const isBlocked = currentUser.relationships.blockedUsers.some(
-        blocked => blocked.userId === user.userId
-      );
-
-      const hasFriendRequest = currentUser.relationships.friendRequests.some(
-        request => request.from === user.userId
-      );
-
-      return {
-        userId: user.userId,
-        username: user.username,
-        displayName: user.profile?.displayName || user.username,
-        avatar: user.profile?.avatar || 'default-avatar.png',
-        bio: user.profile?.bio || '',
-        level: user.profile?.level || 1,
-        status: user.profile?.status || 'offline',
-        isFriend,
-        isBlocked,
-        hasFriendRequest,
-        canSendRequest: !isFriend && !isBlocked && !hasFriendRequest
-      };
     });
-
-    // إزالة المستخدمين المحظورين من النتائج
-    const finalResults = filteredUsers.filter(user => !user.isBlocked);
-
-    console.log('✅ تم العثور على', finalResults.length, 'مستخدم');
-
-    res.json({
-      users: finalResults,
-      total: finalResults.length
-    });
-
-  } catch (error) {
-    console.error('❌ خطأ في البحث عن المستخدمين:', error);
-    res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
   }
+  res.json({ users });
 });
 
 // إلغاء طلب صداقة
