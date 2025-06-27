@@ -35,7 +35,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'"],
       scriptSrcAttr: ["'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://mygame25bita-1-4ue6.onrender.com", "wss:", "ws:"], // رابط الخادم الخلفي
+      connectSrc: ["'self'", "https://mygame25bita-7eqw.onrender.com", "https://mygame25bita-1-4ue6.onrender.com", "wss:", "ws:"], // السماح بالاتصال من الواجهة الأمامية إلى الخادم الخلفي
       mediaSrc: ["'self'", "blob:"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
