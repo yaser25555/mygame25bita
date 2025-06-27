@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "api/index.js",
   "scripts": {
-    "start": "node api/index.js",
-    "dev": "nodemon api/index.js",
+    "start": "node api/server-listen.js",
+    "dev": "nodemon api/server-listen.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-test-users": "node api/create-test-users.js",
     "update-user-ids": "node api/update-user-ids.js",

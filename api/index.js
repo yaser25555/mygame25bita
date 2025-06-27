@@ -329,8 +329,8 @@ async function broadcastPlayerList() {
 module.exports = { httpServer, PORT };
 
 // تشغيل الخادم
-httpServer.listen(PORT, () => {
-  console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
-  console.log(`📡 API متاح على: http://localhost:${PORT}/api`);
-  console.log(`🌐 الواجهة الأمامية متاحة على: http://localhost:${PORT}`);
-});
+// httpServer.listen(PORT, () => {
+//   console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
+//   console.log(`📡 API متاح على: http://localhost:${PORT}/api`);
+//   console.log(`🌐 الواجهة الأمامية متاحة على: http://localhost:${PORT}`);
+// });
