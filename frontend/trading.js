@@ -1,3 +1,5 @@
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+
 // Trading System JavaScript
 class TradingSystem {
     constructor() {
@@ -52,7 +54,7 @@ class TradingSystem {
     
     async loadUserData() {
         try {
-            const response = await fetch('/api/users/profile', {
+            const response = await fetch(`${BACKEND_URL}/api/users/profile`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
@@ -210,7 +212,7 @@ class TradingSystem {
         }
         
         try {
-            const response = await fetch('/api/trading/create', {
+            const response = await fetch(`${BACKEND_URL}/api/trading/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -258,7 +260,7 @@ class TradingSystem {
     
     async loadReceivedTrades() {
         try {
-            const response = await fetch('/api/trading/received', {
+            const response = await fetch(`${BACKEND_URL}/api/trading/received`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
@@ -279,7 +281,7 @@ class TradingSystem {
     
     async loadSentTrades() {
         try {
-            const response = await fetch('/api/trading/sent', {
+            const response = await fetch(`${BACKEND_URL}/api/trading/sent`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
@@ -300,7 +302,7 @@ class TradingSystem {
     
     async loadTradeHistory() {
         try {
-            const response = await fetch('/api/trading/history', {
+            const response = await fetch(`${BACKEND_URL}/api/trading/history`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
@@ -321,7 +323,7 @@ class TradingSystem {
     
     async loadTradingStats() {
         try {
-            const response = await fetch('/api/trading/stats', {
+            const response = await fetch(`${BACKEND_URL}/api/trading/stats`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
@@ -365,7 +367,7 @@ class TradingSystem {
         };
         
         try {
-            const response = await fetch('/api/trading/settings', {
+            const response = await fetch(`${BACKEND_URL}/api/trading/settings`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -541,7 +543,7 @@ class TradingSystem {
     
     async acceptTrade(tradeId) {
         try {
-            const response = await fetch(`/api/trading/accept/${tradeId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/trading/accept/${tradeId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -568,7 +570,7 @@ class TradingSystem {
     
     async rejectTrade(tradeId) {
         try {
-            const response = await fetch(`/api/trading/reject/${tradeId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/trading/reject/${tradeId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -593,7 +595,7 @@ class TradingSystem {
     
     async cancelTrade(tradeId) {
         try {
-            const response = await fetch(`/api/trading/cancel/${tradeId}`, {
+            const response = await fetch(`${BACKEND_URL}/api/trading/cancel/${tradeId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`

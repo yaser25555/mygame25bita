@@ -1,3 +1,5 @@
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+
 // متغيرات عامة
 let currentUser = null;
 let selectedGift = null;
@@ -68,7 +70,7 @@ function setupEventListeners() {
 // تحميل بيانات المستخدم
 async function loadUserData() {
     try {
-        const response = await fetch('/api/user/profile', {
+        const response = await fetch(`${BACKEND_URL}/api/user/profile`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -151,7 +153,7 @@ async function sendGift() {
     }
 
     try {
-        const response = await fetch('/api/trading/send-gift', {
+        const response = await fetch(`${BACKEND_URL}/api/trading/send-gift`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -198,7 +200,7 @@ function clearForm() {
 // تحميل الهدايا المستلمة
 async function loadReceivedGifts() {
     try {
-        const response = await fetch('/api/trading/received-gifts', {
+        const response = await fetch(`${BACKEND_URL}/api/trading/received-gifts`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -249,7 +251,7 @@ function displayReceivedGifts(data) {
 // تحميل الهدايا المرسلة
 async function loadSentGifts() {
     try {
-        const response = await fetch('/api/trading/sent-gifts', {
+        const response = await fetch(`${BACKEND_URL}/api/trading/sent-gifts`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -317,7 +319,7 @@ function createGiftCard(gift, type) {
 // قبول هدية
 async function acceptGift(giftId) {
     try {
-        const response = await fetch('/api/trading/accept-gift', {
+        const response = await fetch(`${BACKEND_URL}/api/trading/accept-gift`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -343,7 +345,7 @@ async function acceptGift(giftId) {
 // رفض هدية
 async function rejectGift(giftId) {
     try {
-        const response = await fetch('/api/trading/reject-gift', {
+        const response = await fetch(`${BACKEND_URL}/api/trading/reject-gift`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -406,7 +408,7 @@ async function saveSettings() {
     };
 
     try {
-        const response = await fetch('/api/trading/gift-settings', {
+        const response = await fetch(`${BACKEND_URL}/api/trading/gift-settings`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
