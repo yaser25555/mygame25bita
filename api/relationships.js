@@ -1,10 +1,46 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const auth = require('./auth');
+
+// استيراد middleware المصادقة من user.js
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123';
+
+// دالة Middleware للتحقق من التوكن
+function verifyToken(req, res, next) {
+  console.log('🔐 محاولة التحقق من التوكن في relationships...');
+  let token;
+  
+  // 1. Check for token in Authorization header
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+    console.log('✅ تم العثور على التوكن في Authorization header');
+  } 
+  // 2. If not in header, check for token in query parameters (for sendBeacon)
+  else if (req.query.token) {
+    token = req.query.token;
+    console.log('✅ تم العثور على التوكن في query parameters');
+  }
+
+  if (!token) {
+    console.log('❌ التوكن مفقود في relationships');
+    return res.status(401).json({ message: 'التوكن مفقود' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    console.log('✅ تم فك تشفير التوكن بنجاح في relationships:', { userId: decoded.userId, username: decoded.username });
+    req.user = decoded; // تخزين معلومات المستخدم (userId, username, isAdmin) في req.user
+    next();
+  } catch (err) {
+    console.log('❌ خطأ في فك تشفير التوكن في relationships:', err.message);
+    return res.status(401).json({ message: 'توكن غير صالح' });
+  }
+}
 
 // إرسال طلب صداقة
-router.post('/send-friend-request', auth, async (req, res) => {
+router.post('/send-friend-request', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -81,7 +117,7 @@ router.post('/send-friend-request', auth, async (req, res) => {
 });
 
 // قبول طلب صداقة
-router.post('/accept-friend-request', auth, async (req, res) => {
+router.post('/accept-friend-request', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -168,7 +204,7 @@ router.post('/accept-friend-request', auth, async (req, res) => {
 });
 
 // رفض طلب صداقة
-router.post('/reject-friend-request', auth, async (req, res) => {
+router.post('/reject-friend-request', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -233,7 +269,7 @@ router.post('/reject-friend-request', auth, async (req, res) => {
 });
 
 // حظر مستخدم
-router.post('/block-user', auth, async (req, res) => {
+router.post('/block-user', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -313,7 +349,7 @@ router.post('/block-user', auth, async (req, res) => {
 });
 
 // إلغاء حظر مستخدم
-router.post('/unblock-user', auth, async (req, res) => {
+router.post('/unblock-user', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -361,7 +397,7 @@ router.post('/unblock-user', auth, async (req, res) => {
 });
 
 // إزالة صديق
-router.post('/remove-friend', auth, async (req, res) => {
+router.post('/remove-friend', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -422,7 +458,7 @@ router.post('/remove-friend', auth, async (req, res) => {
 });
 
 // الحصول على قائمة الأصداقاء
-router.get('/friends', auth, async (req, res) => {
+router.get('/friends', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -478,7 +514,7 @@ router.get('/friends', auth, async (req, res) => {
 });
 
 // الحصول على طلبات الصداقة
-router.get('/friend-requests', auth, async (req, res) => {
+router.get('/friend-requests', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -532,7 +568,7 @@ router.get('/friend-requests', auth, async (req, res) => {
 });
 
 // الحصول على قائمة المستخدمين المحظورين
-router.get('/blocked-users', auth, async (req, res) => {
+router.get('/blocked-users', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -570,7 +606,7 @@ router.get('/blocked-users', auth, async (req, res) => {
 });
 
 // البحث عن مستخدمين
-router.get('/search-users', auth, async (req, res) => {
+router.get('/search-users', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -652,7 +688,7 @@ router.get('/search-users', auth, async (req, res) => {
 });
 
 // إلغاء طلب صداقة
-router.post('/cancel-friend-request', auth, async (req, res) => {
+router.post('/cancel-friend-request', verifyToken, async (req, res) => {
   try {
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
