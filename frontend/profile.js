@@ -123,6 +123,36 @@ function setupDataActionListeners() {
                     closeModal(modalId);
                 }
                 break;
+            case 'viewFriendProfile':
+                const friendId = e.target.dataset.userId;
+                if (friendId) {
+                    viewFriendProfile(friendId);
+                }
+                break;
+            case 'removeFriend':
+                const removeFriendId = e.target.dataset.userId;
+                if (removeFriendId) {
+                    removeFriend(removeFriendId);
+                }
+                break;
+            case 'acceptFriendRequest':
+                const acceptUserId = e.target.dataset.userId;
+                if (acceptUserId) {
+                    acceptFriendRequest(acceptUserId);
+                }
+                break;
+            case 'rejectFriendRequest':
+                const rejectUserId = e.target.dataset.userId;
+                if (rejectUserId) {
+                    rejectFriendRequest(rejectUserId);
+                }
+                break;
+            case 'unblockUser':
+                const unblockUserId = e.target.dataset.userId;
+                if (unblockUserId) {
+                    unblockUser(unblockUserId);
+                }
+                break;
         }
     });
     
@@ -433,120 +463,72 @@ function updateStatsDisplay(stats) {
 // تحميل الأصدقاء
 async function loadFriends() {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/friends`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const response = await fetch(`${BACKEND_URL}/api/relationships/friends`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
-        
-        if (response.ok) {
-            friends = await response.json();
-            updateFriendsCount();
+
+        if (!response.ok) {
+            throw new Error('فشل في جلب الأصدقاء');
         }
+
+        const data = await response.json();
+        friends = data.friends;
+        updateFriendsDisplay();
     } catch (error) {
         console.error('خطأ في تحميل الأصدقاء:', error);
+        showMessage('خطأ في تحميل الأصدقاء', true);
     }
 }
 
-// تحميل قائمة الأصدقاء
+// تحميل قائمة الأصدقاء للعرض
 function loadFriendsList() {
-    const friendsGrid = document.getElementById('friends-grid');
-    if (!friendsGrid) return;
-    
-    if (friends.length === 0) {
-        friendsGrid.innerHTML = '<p class="no-data">لا توجد أصدقاء حالياً</p>';
-        return;
-    }
-    
-    friendsGrid.innerHTML = friends.map(friend => `
-        <div class="friend-card">
-            <img src="${friend.avatar || 'images/default-avatar.png'}" alt="${friend.username}" class="friend-avatar">
-            <div class="friend-name">${friend.displayName || friend.username}</div>
-            <div class="friend-status">المستوى ${friend.level}</div>
-            <div class="friend-actions">
-                <button class="friend-btn primary" onclick="viewFriendProfile('${friend.username}')">عرض البروفايل</button>
-                <button class="friend-btn secondary" onclick="removeFriend('${friend.id}')">إزالة</button>
-            </div>
-        </div>
-    `).join('');
+    loadFriends();
 }
 
 // تحميل طلبات الصداقة
 async function loadFriendRequests() {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/friend-requests`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const response = await fetch(`${BACKEND_URL}/api/relationships/friend-requests`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
-        
-        if (response.ok) {
-            friendRequests = await response.json();
-            updateFriendRequestsDisplay();
+
+        if (!response.ok) {
+            throw new Error('فشل في جلب طلبات الصداقة');
         }
+
+        const data = await response.json();
+        friendRequests = data.requests;
+        updateFriendRequestsDisplay();
     } catch (error) {
         console.error('خطأ في تحميل طلبات الصداقة:', error);
+        showMessage('خطأ في تحميل طلبات الصداقة', true);
     }
-}
-
-// تحديث عرض طلبات الصداقة
-function updateFriendRequestsDisplay() {
-    const requestsList = document.getElementById('requests-list');
-    if (!requestsList) return;
-    
-    if (friendRequests.length === 0) {
-        requestsList.innerHTML = '<p class="no-data">لا توجد طلبات صداقة جديدة</p>';
-        return;
-    }
-    
-    requestsList.innerHTML = friendRequests.map(request => `
-        <div class="friend-card">
-            <img src="${request.avatar || 'images/default-avatar.png'}" alt="${request.username}" class="friend-avatar">
-            <div class="friend-name">${request.displayName || request.username}</div>
-            <div class="friend-status">${request.message || 'يريد إضافتك كصديق'}</div>
-            <div class="friend-actions">
-                <button class="friend-btn primary" onclick="acceptFriendRequest('${request.id}')">قبول</button>
-                <button class="friend-btn secondary" onclick="rejectFriendRequest('${request.id}')">رفض</button>
-            </div>
-        </div>
-    `).join('');
 }
 
 // تحميل المستخدمين المحظورين
 async function loadBlockedUsers() {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/users/blocked-users`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const response = await fetch(`${BACKEND_URL}/api/relationships/blocked-users`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
-        
-        if (response.ok) {
-            blockedUsers = await response.json();
-            updateBlockedUsersDisplay();
+
+        if (!response.ok) {
+            throw new Error('فشل في جلب المستخدمين المحظورين');
         }
+
+        const data = await response.json();
+        blockedUsers = data.blockedUsers;
+        updateBlockedUsersDisplay();
     } catch (error) {
         console.error('خطأ في تحميل المستخدمين المحظورين:', error);
+        showMessage('خطأ في تحميل المستخدمين المحظورين', true);
     }
-}
-
-// تحديث عرض المستخدمين المحظورين
-function updateBlockedUsersDisplay() {
-    const blockedList = document.getElementById('blocked-list');
-    if (!blockedList) return;
-    
-    if (blockedUsers.length === 0) {
-        blockedList.innerHTML = '<p class="no-data">لا توجد مستخدمين محظورين</p>';
-        return;
-    }
-    
-    blockedList.innerHTML = blockedUsers.map(user => `
-        <div class="friend-card">
-            <img src="${user.avatar || 'images/default-avatar.png'}" alt="${user.username}" class="friend-avatar">
-            <div class="friend-name">${user.displayName || user.username}</div>
-            <div class="friend-status">محظور منذ ${formatDate(user.blockedAt)}</div>
-            <div class="friend-actions">
-                <button class="friend-btn primary" onclick="unblockUser('${user.id}')">إلغاء الحظر</button>
-            </div>
-        </div>
-    `).join('');
 }
 
 // تحميل الإنجازات
@@ -1161,4 +1143,179 @@ function viewStats() {
 // عرض الأصدقاء
 function viewFriends() {
     switchTab('friends');
+}
+
+// تحديث عرض الأصدقاء
+function updateFriendsDisplay() {
+    const friendsGrid = document.getElementById('friends-grid');
+    if (!friendsGrid) return;
+    
+    if (friends.length === 0) {
+        friendsGrid.innerHTML = '<p class="no-data">لا توجد أصدقاء حالياً</p>';
+        return;
+    }
+    
+    friendsGrid.innerHTML = friends.map(friend => `
+        <div class="friend-card">
+            <img src="${friend.avatar || 'images/default-avatar.png'}" alt="${friend.username}" class="friend-avatar">
+            <div class="friend-name">${friend.displayName || friend.username}</div>
+            <div class="friend-status">النقاط: ${friend.score}</div>
+            <div class="friend-actions">
+                <button class="friend-btn primary" data-action="viewFriendProfile" data-user-id="${friend.id}">عرض البروفايل</button>
+                <button class="friend-btn secondary" data-action="removeFriend" data-user-id="${friend.id}">إزالة</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// تحديث عرض طلبات الصداقة
+function updateFriendRequestsDisplay() {
+    const requestsList = document.getElementById('requests-list');
+    if (!requestsList) return;
+    
+    if (friendRequests.length === 0) {
+        requestsList.innerHTML = '<p class="no-data">لا توجد طلبات صداقة جديدة</p>';
+        return;
+    }
+    
+    requestsList.innerHTML = friendRequests.map(request => `
+        <div class="friend-card">
+            <img src="${request.avatar || 'images/default-avatar.png'}" alt="${request.username}" class="friend-avatar">
+            <div class="friend-name">${request.displayName || request.username}</div>
+            <div class="friend-status">${request.message || 'يريد إضافتك كصديق'}</div>
+            <div class="friend-actions">
+                <button class="friend-btn primary" data-action="acceptFriendRequest" data-user-id="${request.id}">قبول</button>
+                <button class="friend-btn secondary" data-action="rejectFriendRequest" data-user-id="${request.id}">رفض</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// تحديث عرض المستخدمين المحظورين
+function updateBlockedUsersDisplay() {
+    const blockedList = document.getElementById('blocked-list');
+    if (!blockedList) return;
+    
+    if (blockedUsers.length === 0) {
+        blockedList.innerHTML = '<p class="no-data">لا توجد مستخدمين محظورين</p>';
+        return;
+    }
+    
+    blockedList.innerHTML = blockedUsers.map(user => `
+        <div class="friend-card">
+            <img src="${user.avatar || 'images/default-avatar.png'}" alt="${user.username}" class="friend-avatar">
+            <div class="friend-name">${user.displayName || user.username}</div>
+            <div class="friend-status">محظور منذ ${formatDate(user.blockedAt)}</div>
+            <div class="friend-actions">
+                <button class="friend-btn primary" data-action="unblockUser" data-user-id="${user.id}">إلغاء الحظر</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// عرض بروفايل الصديق
+function viewFriendProfile(friendId) {
+    // يمكن إضافة نافذة منبثقة لعرض بروفايل الصديق
+    showMessage('سيتم إضافة هذه الميزة قريباً');
+}
+
+// إزالة صديق
+async function removeFriend(friendId) {
+    if (!confirm('هل أنت متأكد من إزالة هذا الصديق؟')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/relationships/remove-friend`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ friendId })
+        });
+
+        if (!response.ok) {
+            throw new Error('فشل في إزالة الصديق');
+        }
+
+        showMessage('تم إزالة الصديق بنجاح');
+        loadFriends(); // إعادة تحميل قائمة الأصدقاء
+    } catch (error) {
+        console.error('خطأ في إزالة الصديق:', error);
+        showMessage('خطأ في إزالة الصديق', true);
+    }
+}
+
+// قبول طلب صداقة
+async function acceptFriendRequest(fromUserId) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/relationships/accept-friend-request`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ fromUserId })
+        });
+
+        if (!response.ok) {
+            throw new Error('فشل في قبول طلب الصداقة');
+        }
+
+        showMessage('تم قبول طلب الصداقة بنجاح');
+        loadFriendRequests(); // إعادة تحميل طلبات الصداقة
+        loadFriends(); // إعادة تحميل قائمة الأصدقاء
+    } catch (error) {
+        console.error('خطأ في قبول طلب الصداقة:', error);
+        showMessage('خطأ في قبول طلب الصداقة', true);
+    }
+}
+
+// رفض طلب صداقة
+async function rejectFriendRequest(fromUserId) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/relationships/reject-friend-request`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ fromUserId })
+        });
+
+        if (!response.ok) {
+            throw new Error('فشل في رفض طلب الصداقة');
+        }
+
+        showMessage('تم رفض طلب الصداقة');
+        loadFriendRequests(); // إعادة تحميل طلبات الصداقة
+    } catch (error) {
+        console.error('خطأ في رفض طلب الصداقة:', error);
+        showMessage('خطأ في رفض طلب الصداقة', true);
+    }
+}
+
+// إلغاء حظر مستخدم
+async function unblockUser(userId) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/relationships/unblock-user`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ userId })
+        });
+
+        if (!response.ok) {
+            throw new Error('فشل في إلغاء حظر المستخدم');
+        }
+
+        showMessage('تم إلغاء حظر المستخدم بنجاح');
+        loadBlockedUsers(); // إعادة تحميل المستخدمين المحظورين
+    } catch (error) {
+        console.error('خطأ في إلغاء حظر المستخدم:', error);
+        showMessage('خطأ في إلغاء حظر المستخدم', true);
+    }
 } 

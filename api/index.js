@@ -13,6 +13,7 @@ const authApiRoutes = require('./auth');
 const userRoutes = require('./user');
 const voiceRoutes = require('./voiceRoutes');
 const tradingRoutes = require('./trading');
+const relationshipsRoutes = require('./relationships');
 // const gameRoutes = require('./game'); // استيراد مسار اللعبة الجديد
 
 dotenv.config();
@@ -80,6 +81,7 @@ app.use('/api/auth', authApiRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/voice', voiceRoutes);
 app.use('/api/trading', tradingRoutes);
+app.use('/api/relationships', relationshipsRoutes);
 // app.use('/api/game', gameRoutes); // مسار اللعبة
 
 // --- 5. إعداد الملفات الثابتة ---

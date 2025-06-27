@@ -530,236 +530,414 @@ router.get('/by-username/:username', verifyToken, verifyAdmin, async (req, res) 
   }
 });
 
-// جلب قائمة الأصدقاء
-router.get('/friends', verifyToken, async (req, res) => {
+// الحصول على قائمة الأصدقاء
+router.get('/friends', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
-    if (!user) return res.status(404).json({ message: 'المستخدم غير موجود' });
-    res.json({ friends: user.friends || [] });
-  } catch (err) {
-    res.status(500).json({ message: 'خطأ في الخادم عند جلب الأصدقاء' });
-  }
-});
+    const userId = req.user.userId;
+    const user = await User.findById(userId).populate('relationships.friends.userId', 'username profile.displayName profile.avatar stats.score');
 
-// إضافة صديق
-router.post('/friends/add', verifyToken, async (req, res) => {
-  const { friendUsername } = req.body;
-  if (!friendUsername) return res.status(400).json({ message: 'يرجى تحديد اسم الصديق' });
-  if (friendUsername === req.user.username) return res.status(400).json({ message: 'لا يمكنك إضافة نفسك' });
-  try {
-    const user = await User.findById(req.user.userId);
-    const friend = await User.findOne({ username: friendUsername });
-    if (!user || !friend) return res.status(404).json({ message: 'المستخدم أو الصديق غير موجود' });
-    if (user.friends.includes(friendUsername)) return res.status(400).json({ message: 'الصديق مضاف بالفعل' });
-    user.friends.push(friendUsername);
-    await user.save();
-    res.json({ message: 'تمت إضافة الصديق بنجاح', friends: user.friends });
-  } catch (err) {
-    res.status(500).json({ message: 'خطأ في الخادم عند إضافة الصديق' });
-  }
-});
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
 
-// إزالة صديق
-router.post('/friends/remove', verifyToken, async (req, res) => {
-  const { friendUsername } = req.body;
-  if (!friendUsername) return res.status(400).json({ message: 'يرجى تحديد اسم الصديق' });
-  try {
-    const user = await User.findById(req.user.userId);
-    if (!user) return res.status(404).json({ message: 'المستخدم غير موجود' });
-    user.friends = user.friends.filter(f => f !== friendUsername);
-    await user.save();
-    res.json({ message: 'تمت إزالة الصديق بنجاح', friends: user.friends });
-  } catch (err) {
-    res.status(500).json({ message: 'خطأ في الخادم عند إزالة الصديق' });
-  }
-});
-
-// مراقبة النشاطات المشبوهة (للمشرفين فقط)
-router.get('/admin/suspicious-activity', verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const users = await User.find({
-      $or: [
-        { 'suspiciousActivity.0': { $exists: true } },
-        { score: { $gt: 100000 } },
-        { 'itemsCollected.gem': { $gt: 500 } }
-      ]
-    }).select('username score suspiciousActivity itemsCollected createdAt lastLogin');
-
-    const suspiciousUsers = users.map(user => ({
-      username: user.username,
-      score: user.score,
-      suspiciousActivityCount: user.suspiciousActivity ? user.suspiciousActivity.length : 0,
-      lastSuspiciousActivity: user.suspiciousActivity && user.suspiciousActivity.length > 0 
-        ? user.suspiciousActivity[user.suspiciousActivity.length - 1] 
-        : null,
-      itemsCollected: user.itemsCollected,
-      createdAt: user.createdAt,
-      riskLevel: calculateRiskLevel(user)
+    const friends = user.relationships.friends.map(friend => ({
+      id: friend.userId._id,
+      username: friend.userId.username,
+      displayName: friend.userId.profile.displayName,
+      avatar: friend.userId.profile.avatar,
+      score: friend.userId.stats.score,
+      addedAt: friend.addedAt,
+      status: friend.status
     }));
 
     res.json({
-      totalSuspiciousUsers: suspiciousUsers.length,
-      users: suspiciousUsers
+      friends,
+      totalFriends: friends.length
     });
+
   } catch (error) {
-    console.error('Error fetching suspicious activity:', error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء جلب النشاطات المشبوهة' });
+    console.error('خطأ في جلب الأصدقاء:', error);
+    res.status(500).json({ error: 'خطأ في جلب الأصدقاء' });
   }
 });
 
-// حظر/إلغاء حظر مستخدم (للمشرفين)
-router.post('/admin/ban-user', verifyToken, verifyAdmin, async (req, res) => {
-  const { username, reason } = req.body;
-  
+// الحصول على طلبات الصداقة
+router.get('/friend-requests', auth, async (req, res) => {
   try {
-    const user = await User.findOne({ username });
+    const userId = req.user.userId;
+    const user = await User.findById(userId).populate('relationships.friendRequests.fromUserId', 'username profile.displayName profile.avatar stats.score');
+
     if (!user) {
-      return res.status(404).json({ message: 'المستخدم غير موجود' });
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    user.isBanned = true;
-    user.banReason = reason;
-    user.bannedAt = new Date();
-    await user.save();
+    const requests = user.relationships.friendRequests.map(request => ({
+      id: request.fromUserId._id,
+      username: request.fromUserId.username,
+      displayName: request.fromUserId.profile.displayName,
+      avatar: request.fromUserId.profile.avatar,
+      score: request.fromUserId.stats.score,
+      sentAt: request.sentAt,
+      message: request.message
+    }));
 
-    res.json({ message: `تم حظر المستخدم ${username} بنجاح` });
-  } catch (error) {
-    console.error('Error banning user:', error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء حظر المستخدم' });
-  }
-});
-
-// إعادة تعيين نقاط مستخدم (للمشرفين)
-router.post('/admin/reset-user-score', verifyToken, verifyAdmin, async (req, res) => {
-  const { username, newScore } = req.body;
-  
-  try {
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(404).json({ message: 'المستخدم غير موجود' });
-    }
-
-    const oldScore = user.score;
-    user.score = newScore || 1000; // إعادة تعيين إلى 1000 إذا لم يتم تحديد قيمة
-    user.suspiciousActivity = []; // مسح النشاطات المشبوهة
-    await user.save();
-
-    res.json({ 
-      message: `تم إعادة تعيين نقاط ${username} من ${oldScore} إلى ${user.score}`,
-      oldScore,
-      newScore: user.score
-    });
-  } catch (error) {
-    console.error('Error resetting user score:', error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء إعادة تعيين النقاط' });
-  }
-});
-
-// دالة حساب مستوى الخطورة
-function calculateRiskLevel(user) {
-  let riskScore = 0;
-  
-  // النشاطات المشبوهة
-  if (user.suspiciousActivity && user.suspiciousActivity.length > 0) {
-    riskScore += user.suspiciousActivity.length * 10;
-  }
-  
-  // النقاط العالية
-  if (user.score > 100000) riskScore += 20;
-  if (user.score > 500000) riskScore += 30;
-  
-  // العناصر الكثيرة
-  if (user.itemsCollected) {
-    Object.values(user.itemsCollected).forEach(count => {
-      if (count > 100) riskScore += 5;
-      if (count > 500) riskScore += 10;
-    });
-  }
-  
-  // تحديد مستوى الخطورة
-  if (riskScore >= 50) return 'عالي';
-  if (riskScore >= 20) return 'متوسط';
-  return 'منخفض';
-}
-
-// جلب كود الدعوة الخاص بالمستخدم
-router.get('/invite-code', verifyToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId);
-    if (!user) return res.status(404).json({ message: 'المستخدم غير موجود' });
-    
-    res.json({ 
-      inviteCode: user.inviteCode,
-      invitedUsers: user.invitedUsers || [],
-      inviteRewards: user.inviteRewards || 0
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'خطأ في الخادم عند جلب كود الدعوة' });
-  }
-});
-
-// استخدام كود دعوة
-router.post('/use-invite-code', verifyToken, async (req, res) => {
-  const { inviteCode } = req.body;
-  if (!inviteCode) return res.status(400).json({ message: 'يرجى إدخال كود الدعوة' });
-  
-  try {
-    const user = await User.findById(req.user.userId);
-    const inviter = await User.findOne({ inviteCode: inviteCode.toUpperCase() });
-    
-    if (!user || !inviter) {
-      return res.status(404).json({ message: 'كود الدعوة غير صحيح' });
-    }
-    
-    if (user.invitedBy) {
-      return res.status(400).json({ message: 'لقد استخدمت كود دعوة من قبل' });
-    }
-    
-    if (inviter.username === user.username) {
-      return res.status(400).json({ message: 'لا يمكنك استخدام كود دعوتك الخاصة' });
-    }
-    
-    // تحديث بيانات المستخدم
-    user.invitedBy = inviter.username;
-    user.score += 500; // مكافأة للمستخدم الجديد
-    
-    // تحديث بيانات الداعي
-    inviter.invitedUsers.push(user.username);
-    inviter.inviteRewards += 1000; // مكافأة للداعي
-    inviter.score += 1000;
-    
-    await user.save();
-    await inviter.save();
-    
-    res.json({ 
-      message: 'تم استخدام كود الدعوة بنجاح! حصلت على 500 نقطة مكافأة',
-      reward: 500,
-      inviterUsername: inviter.username
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'خطأ في الخادم عند استخدام كود الدعوة' });
-  }
-});
-
-// جلب إحصائيات الدعوات
-router.get('/invite-stats', verifyToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId);
-    if (!user) return res.status(404).json({ message: 'المستخدم غير موجود' });
-    
-    const invitedUsers = await User.find({ username: { $in: user.invitedUsers || [] } })
-      .select('username score createdAt');
-    
     res.json({
-      inviteCode: user.inviteCode,
-      invitedUsers: user.invitedUsers || [],
-      inviteRewards: user.inviteRewards || 0,
-      invitedBy: user.invitedBy,
-      invitedUsersDetails: invitedUsers,
-      totalInvited: (user.invitedUsers || []).length
+      requests,
+      totalRequests: requests.length
     });
-  } catch (err) {
-    res.status(500).json({ message: 'خطأ في الخادم عند جلب إحصائيات الدعوات' });
+
+  } catch (error) {
+    console.error('خطأ في جلب طلبات الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في جلب طلبات الصداقة' });
+  }
+});
+
+// الحصول على المستخدمين المحظورين
+router.get('/blocked-users', auth, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId).populate('relationships.blockedUsers.userId', 'username profile.displayName profile.avatar stats.score');
+
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    const blockedUsers = user.relationships.blockedUsers.map(blocked => ({
+      id: blocked.userId._id,
+      username: blocked.userId.username,
+      displayName: blocked.userId.profile.displayName,
+      avatar: blocked.userId.profile.avatar,
+      score: blocked.userId.stats.score,
+      blockedAt: blocked.blockedAt,
+      reason: blocked.reason
+    }));
+
+    res.json({
+      blockedUsers,
+      totalBlocked: blockedUsers.length
+    });
+
+  } catch (error) {
+    console.error('خطأ في جلب المستخدمين المحظورين:', error);
+    res.status(500).json({ error: 'خطأ في جلب المستخدمين المحظورين' });
+  }
+});
+
+// إرسال طلب صداقة
+router.post('/friend-request', auth, async (req, res) => {
+  try {
+    const { toUserId, message = '' } = req.body;
+    const fromUserId = req.user.userId;
+
+    if (!toUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    }
+
+    if (fromUserId === toUserId) {
+      return res.status(400).json({ error: 'لا يمكنك إرسال طلب صداقة لنفسك' });
+    }
+
+    const toUser = await User.findById(toUserId);
+    if (!toUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // التحقق من عدم وجود طلب سابق
+    const existingRequest = toUser.relationships.friendRequests.find(
+      req => req.fromUserId.toString() === fromUserId
+    );
+
+    if (existingRequest) {
+      return res.status(400).json({ error: 'تم إرسال طلب صداقة بالفعل' });
+    }
+
+    // التحقق من عدم وجود صداقة
+    const existingFriendship = toUser.relationships.friends.find(
+      friend => friend.userId.toString() === fromUserId
+    );
+
+    if (existingFriendship) {
+      return res.status(400).json({ error: 'أنتما أصدقاء بالفعل' });
+    }
+
+    // إضافة طلب الصداقة
+    toUser.relationships.friendRequests.push({
+      fromUserId: fromUserId,
+      sentAt: new Date(),
+      message: message
+    });
+
+    await toUser.save();
+
+    res.json({
+      success: true,
+      message: 'تم إرسال طلب الصداقة بنجاح'
+    });
+
+  } catch (error) {
+    console.error('خطأ في إرسال طلب الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في إرسال طلب الصداقة' });
+  }
+});
+
+// قبول طلب صداقة
+router.post('/accept-friend-request', auth, async (req, res) => {
+  try {
+    const { fromUserId } = req.body;
+    const toUserId = req.user.userId;
+
+    if (!fromUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    }
+
+    const toUser = await User.findById(toUserId);
+    const fromUser = await User.findById(fromUserId);
+
+    if (!toUser || !fromUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // البحث عن طلب الصداقة
+    const requestIndex = toUser.relationships.friendRequests.findIndex(
+      req => req.fromUserId.toString() === fromUserId
+    );
+
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'طلب الصداقة غير موجود' });
+    }
+
+    // إزالة طلب الصداقة
+    const request = toUser.relationships.friendRequests.splice(requestIndex, 1)[0];
+
+    // إضافة الصداقة لكلا المستخدمين
+    toUser.relationships.friends.push({
+      userId: fromUserId,
+      addedAt: new Date(),
+      status: 'active'
+    });
+
+    fromUser.relationships.friends.push({
+      userId: toUserId,
+      addedAt: new Date(),
+      status: 'active'
+    });
+
+    await toUser.save();
+    await fromUser.save();
+
+    res.json({
+      success: true,
+      message: 'تم قبول طلب الصداقة بنجاح'
+    });
+
+  } catch (error) {
+    console.error('خطأ في قبول طلب الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في قبول طلب الصداقة' });
+  }
+});
+
+// رفض طلب صداقة
+router.post('/reject-friend-request', auth, async (req, res) => {
+  try {
+    const { fromUserId } = req.body;
+    const toUserId = req.user.userId;
+
+    if (!fromUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    }
+
+    const toUser = await User.findById(toUserId);
+
+    if (!toUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // البحث عن طلب الصداقة
+    const requestIndex = toUser.relationships.friendRequests.findIndex(
+      req => req.fromUserId.toString() === fromUserId
+    );
+
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'طلب الصداقة غير موجود' });
+    }
+
+    // إزالة طلب الصداقة
+    toUser.relationships.friendRequests.splice(requestIndex, 1);
+
+    await toUser.save();
+
+    res.json({
+      success: true,
+      message: 'تم رفض طلب الصداقة'
+    });
+
+  } catch (error) {
+    console.error('خطأ في رفض طلب الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في رفض طلب الصداقة' });
+  }
+});
+
+// حظر مستخدم
+router.post('/block-user', auth, async (req, res) => {
+  try {
+    const { userId: userToBlock, reason = '' } = req.body;
+    const currentUserId = req.user.userId;
+
+    if (!userToBlock) {
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    }
+
+    if (currentUserId === userToBlock) {
+      return res.status(400).json({ error: 'لا يمكنك حظر نفسك' });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    const userToBlockData = await User.findById(userToBlock);
+
+    if (!currentUser || !userToBlockData) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // التحقق من عدم وجود حظر سابق
+    const existingBlock = currentUser.relationships.blockedUsers.find(
+      block => block.userId.toString() === userToBlock
+    );
+
+    if (existingBlock) {
+      return res.status(400).json({ error: 'المستخدم محظور بالفعل' });
+    }
+
+    // إضافة الحظر
+    currentUser.relationships.blockedUsers.push({
+      userId: userToBlock,
+      blockedAt: new Date(),
+      reason: reason
+    });
+
+    // إزالة الصداقة إذا كانت موجودة
+    const friendshipIndex = currentUser.relationships.friends.findIndex(
+      friend => friend.userId.toString() === userToBlock
+    );
+
+    if (friendshipIndex !== -1) {
+      currentUser.relationships.friends.splice(friendshipIndex, 1);
+    }
+
+    // إزالة طلبات الصداقة
+    const requestIndex = currentUser.relationships.friendRequests.findIndex(
+      req => req.fromUserId.toString() === userToBlock
+    );
+
+    if (requestIndex !== -1) {
+      currentUser.relationships.friendRequests.splice(requestIndex, 1);
+    }
+
+    await currentUser.save();
+
+    res.json({
+      success: true,
+      message: 'تم حظر المستخدم بنجاح'
+    });
+
+  } catch (error) {
+    console.error('خطأ في حظر المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في حظر المستخدم' });
+  }
+});
+
+// إلغاء حظر مستخدم
+router.post('/unblock-user', auth, async (req, res) => {
+  try {
+    const { userId: userToUnblock } = req.body;
+    const currentUserId = req.user.userId;
+
+    if (!userToUnblock) {
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+
+    if (!currentUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // البحث عن الحظر
+    const blockIndex = currentUser.relationships.blockedUsers.findIndex(
+      block => block.userId.toString() === userToUnblock
+    );
+
+    if (blockIndex === -1) {
+      return res.status(404).json({ error: 'المستخدم غير محظور' });
+    }
+
+    // إزالة الحظر
+    currentUser.relationships.blockedUsers.splice(blockIndex, 1);
+
+    await currentUser.save();
+
+    res.json({
+      success: true,
+      message: 'تم إلغاء حظر المستخدم بنجاح'
+    });
+
+  } catch (error) {
+    console.error('خطأ في إلغاء حظر المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في إلغاء حظر المستخدم' });
+  }
+});
+
+// البحث عن مستخدمين
+router.get('/search-users', auth, async (req, res) => {
+  try {
+    const { query, limit = 10 } = req.query;
+    const currentUserId = req.user.userId;
+
+    if (!query || query.length < 2) {
+      return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
+    }
+
+    const users = await User.find({
+      $and: [
+        {
+          $or: [
+            { username: { $regex: query, $options: 'i' } },
+            { 'profile.displayName': { $regex: query, $options: 'i' } }
+          ]
+        },
+        { _id: { $ne: currentUserId } }
+      ]
+    })
+    .select('username profile.displayName profile.avatar stats.score relationships.friends relationships.friendRequests relationships.blockedUsers')
+    .limit(parseInt(limit));
+
+    const currentUser = await User.findById(currentUserId);
+    const currentUserFriends = currentUser.relationships.friends.map(f => f.userId.toString());
+    const currentUserRequests = currentUser.relationships.friendRequests.map(r => r.fromUserId.toString());
+    const currentUserBlocked = currentUser.relationships.blockedUsers.map(b => b.userId.toString());
+
+    const searchResults = users.map(user => {
+      const isFriend = currentUserFriends.includes(user._id.toString());
+      const hasRequest = currentUserRequests.includes(user._id.toString());
+      const isBlocked = currentUserBlocked.includes(user._id.toString());
+
+      return {
+        id: user._id,
+        username: user.username,
+        displayName: user.profile.displayName,
+        avatar: user.profile.avatar,
+        score: user.stats.score,
+        relationship: isFriend ? 'friend' : hasRequest ? 'request_sent' : isBlocked ? 'blocked' : 'none'
+      };
+    });
+
+    res.json({
+      users: searchResults,
+      total: searchResults.length
+    });
+
+  } catch (error) {
+    console.error('خطأ في البحث عن المستخدمين:', error);
+    res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
   }
 });
 
