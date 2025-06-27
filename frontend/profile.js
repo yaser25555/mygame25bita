@@ -427,7 +427,7 @@ function updateProfileDisplay() {
     const userIdElement = document.getElementById('user-id');
     if (userIdElement) {
         let userIdText = 'غير متاح';
-        if (currentUser.userId && typeof currentUser.userId === 'number' && currentUser.userId >= 1500) {
+        if (currentUser.userId && typeof currentUser.userId === 'number') {
             userIdText = currentUser.userId;
         }
         userIdElement.textContent = `معرف المستخدم: ${userIdText}`;
@@ -466,6 +466,16 @@ function updateProfileDisplay() {
     
     // تحديث معلومات النظرة العامة
     updateOverviewInfo();
+
+    // إظهار أو إخفاء زر إدارة المعرفات حسب صلاحية الأدمن
+    const adminIdsBtn = document.querySelector('button[onclick*="admin-user-ids.html"]');
+    if (adminIdsBtn) {
+        if (currentUser.isAdmin) {
+            adminIdsBtn.style.display = '';
+        } else {
+            adminIdsBtn.style.display = 'none';
+        }
+    }
 }
 
 // تحديث تفاصيل البروفايل
