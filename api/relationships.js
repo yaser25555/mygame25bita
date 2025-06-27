@@ -6,6 +6,11 @@ const auth = require('./auth');
 // إرسال طلب صداقة
 router.post('/send-friend-request', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const { userId: targetUserId } = req.body;
     const currentUserId = req.user.userId;
 
@@ -78,6 +83,11 @@ router.post('/send-friend-request', auth, async (req, res) => {
 // قبول طلب صداقة
 router.post('/accept-friend-request', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const { fromUserId } = req.body;
     const currentUserId = req.user.userId;
 
@@ -160,6 +170,11 @@ router.post('/accept-friend-request', auth, async (req, res) => {
 // رفض طلب صداقة
 router.post('/reject-friend-request', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const { fromUserId } = req.body;
     const currentUserId = req.user.userId;
 
@@ -220,6 +235,11 @@ router.post('/reject-friend-request', auth, async (req, res) => {
 // حظر مستخدم
 router.post('/block-user', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const { userId: targetUserId, reason } = req.body;
     const currentUserId = req.user.userId;
 
@@ -295,6 +315,11 @@ router.post('/block-user', auth, async (req, res) => {
 // إلغاء حظر مستخدم
 router.post('/unblock-user', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const { userId: targetUserId } = req.body;
     const currentUserId = req.user.userId;
 
@@ -338,6 +363,11 @@ router.post('/unblock-user', auth, async (req, res) => {
 // إزالة صديق
 router.post('/remove-friend', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const { userId: friendUserId } = req.body;
     const currentUserId = req.user.userId;
 
@@ -394,6 +424,11 @@ router.post('/remove-friend', auth, async (req, res) => {
 // الحصول على قائمة الأصداقاء
 router.get('/friends', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const currentUserId = req.user.userId;
 
     const currentUser = await User.findById(currentUserId);
@@ -445,6 +480,11 @@ router.get('/friends', auth, async (req, res) => {
 // الحصول على طلبات الصداقة
 router.get('/friend-requests', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const currentUserId = req.user.userId;
 
     const currentUser = await User.findById(currentUserId);
@@ -494,6 +534,11 @@ router.get('/friend-requests', auth, async (req, res) => {
 // الحصول على قائمة المستخدمين المحظورين
 router.get('/blocked-users', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const currentUserId = req.user.userId;
 
     const currentUser = await User.findById(currentUserId);
@@ -527,6 +572,11 @@ router.get('/blocked-users', auth, async (req, res) => {
 // البحث عن مستخدمين
 router.get('/search-users', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const { query } = req.query;
     const currentUserId = req.user.userId;
 
@@ -604,6 +654,11 @@ router.get('/search-users', auth, async (req, res) => {
 // إلغاء طلب صداقة
 router.post('/cancel-friend-request', auth, async (req, res) => {
   try {
+    // التحقق من وجود المستخدم في الطلب
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
+    }
+
     const { userId: targetUserId } = req.body;
     const currentUserId = req.user.userId;
 
