@@ -111,6 +111,9 @@ async function checkAuthStatus() {
             // إظهار الأزرار المناسبة حسب نوع المستخدم
             showNavigationButtons(userData);
             
+            // عرض بيانات المستخدم في الواجهة
+            displayUserData(userData);
+            
         } else {
             console.log('❌ token غير صالح، إخفاء أزرار التنقل');
             localStorage.removeItem('token');
@@ -122,6 +125,42 @@ async function checkAuthStatus() {
         console.error('❌ خطأ في التحقق من المصادقة:', error);
         hideAllNavigationButtons();
     }
+}
+
+// عرض بيانات المستخدم في الواجهة
+function displayUserData(userData) {
+    console.log('📊 عرض بيانات المستخدم:', userData);
+    
+    // عرض اسم المستخدم
+    const usernameDisplay = document.getElementById('username-display');
+    if (usernameDisplay) {
+        usernameDisplay.textContent = userData.username || userData.displayName || 'مستخدم';
+        console.log('✅ تم تحديث اسم المستخدم:', usernameDisplay.textContent);
+    }
+    
+    // عرض الرصيد
+    const balanceDisplay = document.getElementById('balance-display');
+    if (balanceDisplay) {
+        const balance = userData.balance || userData.stats?.score || 0;
+        balanceDisplay.textContent = balance.toLocaleString();
+        console.log('✅ تم تحديث الرصيد:', balance);
+    }
+    
+    // عرض اللآلئ
+    const pearlBalance = document.getElementById('pearl-balance');
+    if (pearlBalance) {
+        const pearls = userData.pearls || userData.stats?.pearls || 0;
+        pearlBalance.textContent = pearls.toLocaleString();
+        console.log('✅ تم تحديث اللآلئ:', pearls);
+    }
+    
+    // عرض معرف المستخدم إذا كان متوفراً
+    const userIdDisplay = document.getElementById('user-id-display');
+    if (userIdDisplay && userData.userId) {
+        userIdDisplay.textContent = `ID: ${userData.userId}`;
+    }
+    
+    console.log('✅ تم عرض جميع بيانات المستخدم بنجاح');
 }
 
 // إعداد أزرار التنقل
@@ -311,6 +350,9 @@ async function refreshNavigationStatus() {
             const userData = await response.json();
             window.currentUser = userData;
             showNavigationButtons(userData);
+            
+            // تحديث عرض بيانات المستخدم
+            displayUserData(userData);
         } else {
             hideAllNavigationButtons();
         }
@@ -326,13 +368,31 @@ window.Navigation = {
     refresh: refreshNavigationStatus,
     showMessage: showMessage,
     handleLogout: handleLogout,
-    showExitConfirmation: showExitConfirmation
+    showExitConfirmation: showExitConfirmation,
+    displayUserData: displayUserData
 };
+
+// دالة لتحديث بيانات المستخدم يدوياً
+function refreshUserData() {
+    if (window.currentUser) {
+        displayUserData(window.currentUser);
+    } else {
+        checkAuthStatus();
+    }
+}
+
+// تصدير دالة تحديث البيانات
+window.refreshUserData = refreshUserData;
 
 // تهيئة التنقل عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📱 تحميل نظام التنقل...');
     initializeNavigation();
+    
+    // تحديث البيانات بعد ثانيتين للتأكد من تحميل جميع العناصر
+    setTimeout(() => {
+        refreshUserData();
+    }, 2000);
 });
 
 // تحديث حالة التنقل كل 5 دقائق

@@ -1,3 +1,6 @@
+// ملف اللعبة الرئيسي
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+
 // أصوات
 const sounds = {
     win: new Audio('sounds/win.mp3'),
@@ -22,4 +25,83 @@ function playSound(soundName) {
 }
 
 // تصدير دالة playSound للاستخدام العام
-window.playSound = playSound; 
+window.playSound = playSound;
+
+// دالة تحديث بيانات المستخدم في اللعبة
+function updateGameUserData() {
+    console.log('🎮 تحديث بيانات المستخدم في اللعبة...');
+    
+    // محاولة الحصول على بيانات المستخدم من navigation.js
+    if (window.currentUser) {
+        displayGameUserData(window.currentUser);
+    } else {
+        // إذا لم تكن متاحة، نحاول تحميلها
+        loadGameUserData();
+    }
+}
+
+// عرض بيانات المستخدم في اللعبة
+function displayGameUserData(userData) {
+    console.log('📊 عرض بيانات المستخدم في اللعبة:', userData);
+    
+    // عرض اسم المستخدم
+    const usernameDisplay = document.getElementById('username-display');
+    if (usernameDisplay) {
+        usernameDisplay.textContent = userData.username || userData.displayName || 'مستخدم';
+    }
+    
+    // عرض الرصيد
+    const balanceDisplay = document.getElementById('balance-display');
+    if (balanceDisplay) {
+        const balance = userData.balance || userData.stats?.score || 0;
+        balanceDisplay.textContent = balance.toLocaleString();
+    }
+    
+    // عرض اللآلئ
+    const pearlBalance = document.getElementById('pearl-balance');
+    if (pearlBalance) {
+        const pearls = userData.pearls || userData.stats?.pearls || 0;
+        pearlBalance.textContent = pearls.toLocaleString();
+    }
+    
+    console.log('✅ تم تحديث بيانات اللعبة بنجاح');
+}
+
+// تحميل بيانات المستخدم للعبة
+async function loadGameUserData() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/users/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const userData = await response.json();
+            window.currentUser = userData;
+            displayGameUserData(userData);
+        }
+    } catch (error) {
+        console.error('❌ خطأ في تحميل بيانات اللعبة:', error);
+    }
+}
+
+// تصدير الدوال للاستخدام العام
+window.updateGameUserData = updateGameUserData;
+window.displayGameUserData = displayGameUserData;
+
+// تحديث بيانات المستخدم عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎮 تحميل صفحة اللعبة...');
+    
+    // تحديث البيانات بعد تحميل الصفحة
+    setTimeout(() => {
+        updateGameUserData();
+    }, 1000);
+    
+    // تحديث البيانات كل 30 ثانية
+    setInterval(() => {
+        updateGameUserData();
+    }, 30000);
+}); 
