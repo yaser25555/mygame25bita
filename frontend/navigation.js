@@ -1,16 +1,16 @@
-﻿// Ù…Ù„Ù Ø§Ù„ØªÙ†Ù‚Ù„ - ÙŠØªØ¹Ø§Ù…Ù„ Ù…Ø¹ Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„ Ø¨ÙŠÙ† Ø§Ù„ØµÙØ­Ø§Øª
+﻿// ملف التنقل - يتعامل مع أزرار التنقل بين الصفحات
 const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
-// Ø¯Ø§Ù„Ø© ØªØ´ØºÙŠÙ„ Ø§Ù„ØµÙˆØª (Ù…Ø¤Ù‚ØªØ© Ù„Ø­Ù„ Ù…Ø´ÙƒÙ„Ø© ReferenceError)
+// دالة تشغيل الصوت (مؤقتة لحل مشكلة ReferenceError)
 function playSound(soundName) {
     try {
-        // Ù…Ø­Ø§ÙˆÙ„Ø© Ø§Ù„ÙˆØµÙˆÙ„ Ù„Ø¯Ø§Ù„Ø© playSound Ù…Ù† game.js Ø¥Ø°Ø§ ÙƒØ§Ù†Øª Ù…ØªØ§Ø­Ø©
+        // محاولة الوصول لدالة playSound من game.js إذا كانت متاحة
         if (typeof window.playSound === 'function') {
             window.playSound(soundName);
             return;
         }
         
-        // Ø¥Ø°Ø§ Ù„Ù… ØªÙƒÙ† Ù…ØªØ§Ø­Ø©ØŒ Ø§Ø³ØªØ®Ø¯Ù… Ø§Ù„Ø£ØµÙˆØ§Øª Ø§Ù„Ù…Ø¨Ø§Ø´Ø±Ø©
+        // إذا لم تكن متاحة، استخدم الأصوات المباشرة
         const sounds = {
             buttonClick: document.getElementById('buttonClick'),
             win: document.getElementById('winSound'),
@@ -23,37 +23,37 @@ function playSound(soundName) {
             sound.play().catch(() => {});
         }
     } catch (error) {
-        console.log('Ù„Ø§ ÙŠÙ…ÙƒÙ† ØªØ´ØºÙŠÙ„ Ø§Ù„ØµÙˆØª:', soundName);
+        console.log('لا يمكن تشغيل الصوت:', soundName);
     }
 }
 
-// Ø¯Ø§Ù„Ø© ØªÙ‡ÙŠØ¦Ø© Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„
+// دالة تهيئة أزرار التنقل
 function initializeNavigation() {
-    console.log('ðŸš€ ØªÙ‡ÙŠØ¦Ø© Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„...');
+    console.log('🚀 تهيئة أزرار التنقل...');
     
-    // Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø­Ø§Ù„Ø© ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹
+    // التحقق من حالة تسجيل الدخول أولاً
     checkAuthStatus().then(() => {
         setupNavigationButtons();
-        setupExitWarning(); // Ø¥Ø¶Ø§ÙØ© Ø§Ù„ØªØ­Ø°ÙŠØ± Ø¹Ù†Ø¯ Ø§Ù„Ø®Ø±ÙˆØ¬
+        setupExitWarning(); // إضافة التحذير عند الخروج
     });
 }
 
-// Ø¥Ø¹Ø¯Ø§Ø¯ Ø§Ù„ØªØ­Ø°ÙŠØ± Ø¹Ù†Ø¯ Ù…Ø­Ø§ÙˆÙ„Ø© Ø§Ù„Ø®Ø±ÙˆØ¬
+// إعداد التحذير عند محاولة الخروج
 function setupExitWarning() {
-    console.log('âš ï¸ Ø¥Ø¹Ø¯Ø§Ø¯ ØªØ­Ø°ÙŠØ± Ø§Ù„Ø®Ø±ÙˆØ¬...');
+    console.log('⚠️ إعداد تحذير الخروج...');
     
-    // Ø§Ù„ØªØ­Ø°ÙŠØ± Ø¹Ù†Ø¯ Ù…Ø­Ø§ÙˆÙ„Ø© Ø¥ØºÙ„Ø§Ù‚ Ø§Ù„ØªØ¨ÙˆÙŠØ¨/Ø§Ù„Ù…ØªØµÙØ­
+    // التحذير عند محاولة إغلاق التبويب/المتصفح
     window.addEventListener('beforeunload', function(e) {
-        // Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø£Ù† Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ù…Ø³Ø¬Ù„ Ø¯Ø®ÙˆÙ„
+        // التحقق من أن المستخدم مسجل دخول
         if (window.currentUser) {
-            const message = 'Ù‡Ù„ ØªØ±ÙŠØ¯ Ø§Ù„Ø®Ø±ÙˆØ¬ Ù…Ù† Ø§Ù„Ù…ÙˆÙ‚Ø¹ØŸ Ø³ÙŠØªÙ… ÙÙ‚Ø¯Ø§Ù† ØªÙ‚Ø¯Ù…Ùƒ ÙÙŠ Ø§Ù„Ù„Ø¹Ø¨Ø©.';
+            const message = 'هل تريد الخروج من الموقع؟ سيتم فقدان تقدمك في اللعبة.';
             e.preventDefault();
             e.returnValue = message;
             return message;
         }
     });
     
-    // Ø§Ù„ØªØ­Ø°ÙŠØ± Ø¹Ù†Ø¯ Ù…Ø­Ø§ÙˆÙ„Ø© Ø§Ù„Ø¹ÙˆØ¯Ø© Ù„Ù„ØµÙØ­Ø© Ø§Ù„Ø³Ø§Ø¨Ù‚Ø©
+    // التحذير عند محاولة العودة للصفحة السابقة
     window.addEventListener('popstate', function(e) {
         if (window.currentUser) {
             e.preventDefault();
@@ -61,7 +61,7 @@ function setupExitWarning() {
         }
     });
     
-    // Ù…Ù†Ø¹ Ø§Ø³ØªØ®Ø¯Ø§Ù… Ø²Ø± Ø§Ù„Ø¹ÙˆØ¯Ø© ÙÙŠ Ø§Ù„Ù…ØªØµÙØ­
+    // منع استخدام زر العودة في المتصفح
     history.pushState(null, null, location.href);
     window.addEventListener('popstate', function() {
         if (window.currentUser) {
@@ -70,28 +70,28 @@ function setupExitWarning() {
         }
     });
     
-    console.log('âœ… ØªÙ… Ø¥Ø¹Ø¯Ø§Ø¯ ØªØ­Ø°ÙŠØ± Ø§Ù„Ø®Ø±ÙˆØ¬');
+    console.log('✅ تم إعداد تحذير الخروج');
 }
 
-// Ø¹Ø±Ø¶ ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø®Ø±ÙˆØ¬
+// عرض تأكيد الخروج
 function showExitConfirmation() {
-    const confirmed = confirm('Ù‡Ù„ ØªØ±ÙŠØ¯ Ø§Ù„Ø®Ø±ÙˆØ¬ Ù…Ù† Ø§Ù„Ù…ÙˆÙ‚Ø¹ØŸ\n\nâœ… Ø§Ù„Ø¨Ù‚Ø§Ø¡ - Ù„Ù„Ø§Ø³ØªÙ…Ø±Ø§Ø± ÙÙŠ Ø§Ù„Ù„Ø¹Ø¨Ø©\nâŒ Ø§Ù„Ø®Ø±ÙˆØ¬ - Ù„Ù„Ø¹ÙˆØ¯Ø© Ù„Ù„ØµÙØ­Ø© Ø§Ù„Ø³Ø§Ø¨Ù‚Ø©');
+    const confirmed = confirm('هل تريد الخروج من الموقع؟\n\n✅ البقاء - للاستمرار في اللعبة\n❌ الخروج - للعودة للصفحة السابقة');
     
     if (confirmed) {
-        // Ø¥Ø°Ø§ Ø§Ø®ØªØ§Ø± Ø§Ù„Ø®Ø±ÙˆØ¬ØŒ Ù†Ø³Ù…Ø­ Ø¨Ø§Ù„Ø¹ÙˆØ¯Ø©
+        // إذا اختار الخروج، نسمح بالعودة
         window.history.back();
     } else {
-        // Ø¥Ø°Ø§ Ø§Ø®ØªØ§Ø± Ø§Ù„Ø¨Ù‚Ø§Ø¡ØŒ Ù†Ø¨Ù‚Ù‰ ÙÙŠ Ø§Ù„ØµÙØ­Ø© Ø§Ù„Ø­Ø§Ù„ÙŠØ©
-        console.log('ðŸ‘¤ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø§Ø®ØªØ§Ø± Ø§Ù„Ø¨Ù‚Ø§Ø¡ ÙÙŠ Ø§Ù„Ù…ÙˆÙ‚Ø¹');
+        // إذا اختار البقاء، نبقى في الصفحة الحالية
+        console.log('👤 المستخدم اختار البقاء في الموقع');
     }
 }
 
-// Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø­Ø§Ù„Ø© Ø§Ù„Ù…ØµØ§Ø¯Ù‚Ø© Ù…Ù† Ø§Ù„Ø®Ø§Ø¯Ù…
+// التحقق من حالة المصادقة من الخادم
 async function checkAuthStatus() {
     const token = localStorage.getItem('token');
     
     if (!token) {
-        console.log('âŒ Ù„Ø§ ÙŠÙˆØ¬Ø¯ tokenØŒ Ø¥Ø®ÙØ§Ø¡ Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„');
+        console.log('❌ لا يوجد token، إخفاء أزرار التنقل');
         hideAllNavigationButtons();
         return;
     }
@@ -103,69 +103,69 @@ async function checkAuthStatus() {
         
         if (response.ok) {
             const userData = await response.json();
-            console.log('âœ… ØªÙ… Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ù…ØµØ§Ø¯Ù‚Ø©:', userData.username);
+            console.log('✅ تم التحقق من المصادقة:', userData.username);
             
-            // Ø­ÙØ¸ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ø°Ø§ÙƒØ±Ø© (ÙˆÙ„ÙŠØ³ localStorage)
+            // حفظ بيانات المستخدم في الذاكرة (وليس localStorage)
             window.currentUser = userData;
             
-            // Ø¥Ø¸Ù‡Ø§Ø± Ø§Ù„Ø£Ø²Ø±Ø§Ø± Ø§Ù„Ù…Ù†Ø§Ø³Ø¨Ø© Ø­Ø³Ø¨ Ù†ÙˆØ¹ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…
+            // إظهار الأزرار المناسبة حسب نوع المستخدم
             showNavigationButtons(userData);
             
-            // Ø¹Ø±Ø¶ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„ÙˆØ§Ø¬Ù‡Ø©
+            // عرض بيانات المستخدم في الواجهة
             displayUserData(userData);
             
         } else {
-            console.log('âŒ token ØºÙŠØ± ØµØ§Ù„Ø­ØŒ Ø¥Ø®ÙØ§Ø¡ Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„');
+            console.log('❌ token غير صالح، إخفاء أزرار التنقل');
             localStorage.removeItem('token');
             localStorage.removeItem('username');
             localStorage.removeItem('isAdmin');
             hideAllNavigationButtons();
         }
     } catch (error) {
-        console.error('âŒ Ø®Ø·Ø£ ÙÙŠ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ù…ØµØ§Ø¯Ù‚Ø©:', error);
+        console.error('❌ خطأ في التحقق من المصادقة:', error);
         hideAllNavigationButtons();
     }
 }
 
-// Ø¹Ø±Ø¶ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„ÙˆØ§Ø¬Ù‡Ø©
+// عرض بيانات المستخدم في الواجهة
 function displayUserData(userData) {
-    console.log('ðŸ“Š Ø¹Ø±Ø¶ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…:', userData);
+    console.log('📊 عرض بيانات المستخدم:', userData);
     
-    // Ø¹Ø±Ø¶ Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…
+    // عرض اسم المستخدم
     const usernameDisplay = document.getElementById('username-display');
     if (usernameDisplay) {
-        usernameDisplay.textContent = userData.username || userData.displayName || 'Ù…Ø³ØªØ®Ø¯Ù…';
-        console.log('âœ… ØªÙ… ØªØ­Ø¯ÙŠØ« Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…:', usernameDisplay.textContent);
+        usernameDisplay.textContent = userData.username || userData.displayName || 'مستخدم';
+        console.log('✅ تم تحديث اسم المستخدم:', usernameDisplay.textContent);
     }
     
-    // Ø¹Ø±Ø¶ Ø§Ù„Ø±ØµÙŠØ¯
+    // عرض الرصيد
     const balanceDisplay = document.getElementById('balance-display');
     if (balanceDisplay) {
         const balance = userData.balance || userData.stats?.score || 0;
         balanceDisplay.textContent = balance.toLocaleString();
-        console.log('âœ… ØªÙ… ØªØ­Ø¯ÙŠØ« Ø§Ù„Ø±ØµÙŠØ¯:', balance);
+        console.log('✅ تم تحديث الرصيد:', balance);
     }
     
-    // Ø¹Ø±Ø¶ Ø§Ù„Ù„Ø¢Ù„Ø¦
+    // عرض اللآلئ
     const pearlBalance = document.getElementById('pearl-balance');
     if (pearlBalance) {
         const pearls = userData.pearls || userData.stats?.pearls || 0;
         pearlBalance.textContent = pearls.toLocaleString();
-        console.log('âœ… ØªÙ… ØªØ­Ø¯ÙŠØ« Ø§Ù„Ù„Ø¢Ù„Ø¦:', pearls);
+        console.log('✅ تم تحديث اللآلئ:', pearls);
     }
     
-    // Ø¹Ø±Ø¶ Ù…Ø¹Ø±Ù Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø¥Ø°Ø§ ÙƒØ§Ù† Ù…ØªÙˆÙØ±Ø§Ù‹
+    // عرض معرف المستخدم إذا كان متوفراً
     const userIdDisplay = document.getElementById('user-id-display');
     if (userIdDisplay && userData.userId) {
         userIdDisplay.textContent = `ID: ${userData.userId}`;
     }
     
-    console.log('âœ… ØªÙ… Ø¹Ø±Ø¶ Ø¬Ù…ÙŠØ¹ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø¨Ù†Ø¬Ø§Ø­');
+    console.log('✅ تم عرض جميع بيانات المستخدم بنجاح');
 }
 
-// Ø¥Ø¹Ø¯Ø§Ø¯ Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„
+// إعداد أزرار التنقل
 function setupNavigationButtons() {
-    // Ø²Ø± Ø§Ù„Ø¨Ø±ÙˆÙØ§ÙŠÙ„
+    // زر البروفايل
     const profileButton = document.getElementById('profile-button');
     if (profileButton) {
         profileButton.addEventListener('click', () => {
@@ -173,12 +173,12 @@ function setupNavigationButtons() {
             if (window.currentUser) {
                 window.location.href = 'profile.html';
             } else {
-                showMessage('ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹', 'error');
+                showMessage('يرجى تسجيل الدخول أولاً', 'error');
             }
         });
     }
     
-    // Ø²Ø± Ø§Ù„ØªØ¯Ø§ÙˆÙ„
+    // زر التداول
     const tradingButton = document.getElementById('trading-button');
     if (tradingButton) {
         tradingButton.addEventListener('click', () => {
@@ -186,12 +186,12 @@ function setupNavigationButtons() {
             if (window.currentUser) {
                 window.location.href = 'trading.html';
             } else {
-                showMessage('ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹', 'error');
+                showMessage('يرجى تسجيل الدخول أولاً', 'error');
             }
         });
     }
     
-    // Ø²Ø± Ø§Ù„Ù‡Ø¯Ø§ÙŠØ§
+    // زر الهدايا
     const giftsButton = document.getElementById('gifts-button');
     if (giftsButton) {
         giftsButton.addEventListener('click', () => {
@@ -199,12 +199,12 @@ function setupNavigationButtons() {
             if (window.currentUser) {
                 window.location.href = 'gifts.html';
             } else {
-                showMessage('ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹', 'error');
+                showMessage('يرجى تسجيل الدخول أولاً', 'error');
             }
         });
     }
     
-    // Ø²Ø± Ø§Ù„Ø¯Ø±Ø¹
+    // زر الدرع
     const shieldButton = document.getElementById('shield-button');
     if (shieldButton) {
         shieldButton.addEventListener('click', () => {
@@ -212,12 +212,39 @@ function setupNavigationButtons() {
             if (window.currentUser) {
                 window.location.href = 'shield.html';
             } else {
-                showMessage('ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹', 'error');
+                showMessage('يرجى تسجيل الدخول أولاً', 'error');
             }
         });
     }
     
-    // Ø²Ø± ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬
+    // زر تعبئة الرصيد
+    const rechargeButton = document.getElementById('recharge-button');
+    if (rechargeButton) {
+        rechargeButton.addEventListener('click', () => {
+            playSound('buttonClick');
+            showMessage('لشحن الرصيد، تواصل معنا عبر الواتساب: 00966554593007', 'info');
+        });
+    }
+    
+    // زر المصباح
+    const lampButton = document.getElementById('lamp-button');
+    if (lampButton) {
+        lampButton.addEventListener('click', () => {
+            playSound('buttonClick');
+            showMessage('ميزة المصباح قيد التطوير', 'info');
+        });
+    }
+    
+    // زر كتم الصوت
+    const muteButton = document.getElementById('mute-button');
+    if (muteButton) {
+        muteButton.addEventListener('click', () => {
+            playSound('buttonClick');
+            toggleMute();
+        });
+    }
+    
+    // زر تسجيل الخروج
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
@@ -226,178 +253,111 @@ function setupNavigationButtons() {
         });
     }
     
-    console.log('âœ… ØªÙ… Ø¥Ø¹Ø¯Ø§Ø¯ Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„');
+    console.log('✅ تم إعداد أزرار التنقل');
 }
 
-// Ø¥Ø¸Ù‡Ø§Ø± Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„ Ø­Ø³Ø¨ Ù†ÙˆØ¹ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…
+// إظهار أزرار التنقل حسب نوع المستخدم
 function showNavigationButtons(userData) {
-    const buttons = {
-        profile: document.getElementById('profile-button'),
-        trading: document.getElementById('trading-button'),
-        gifts: document.getElementById('gifts-button'),
-        shield: document.getElementById('shield-button'),
-        logout: document.getElementById('logout-button')
-    };
+    console.log('✅ تم إظهار أزرار التنقل للمستخدم:', userData.username);
     
-    // Ø¥Ø¸Ù‡Ø§Ø± Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø£Ø²Ø±Ø§Ø± Ù„Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ† Ø§Ù„Ø¹Ø§Ø¯ÙŠÙŠÙ†
-    Object.values(buttons).forEach(button => {
+    // إظهار جميع الأزرار للمستخدمين العاديين
+    const buttons = [
+        'profile-button', 'trading-button', 'gifts-button', 
+        'shield-button', 'recharge-button', 'lamp-button', 
+        'logout-button', 'mute-button'
+    ];
+    
+    buttons.forEach(buttonId => {
+        const button = document.getElementById(buttonId);
         if (button) {
-            button.style.display = 'flex';
-            button.disabled = false;
+            button.style.display = 'inline-block';
         }
     });
     
-    // Ø¥Ø¶Ø§ÙØ© ØªØ£Ø«ÙŠØ±Ø§Øª Ø¨ØµØ±ÙŠØ© Ù„Ù„Ø£Ø²Ø±Ø§Ø±
-    Object.values(buttons).forEach(button => {
-        if (button) {
-            button.style.opacity = '1';
-            button.style.pointerEvents = 'auto';
-        }
-    });
-    
-    console.log('âœ… ØªÙ… Ø¥Ø¸Ù‡Ø§Ø± Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„ Ù„Ù„Ù…Ø³ØªØ®Ø¯Ù…:', userData.username);
+    // إذا كان المستخدم مشرف، إظهار أزرار إضافية
+    if (userData.isAdmin) {
+        const adminButtons = ['admin-button'];
+        adminButtons.forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.style.display = 'inline-block';
+            }
+        });
+    }
 }
 
-// Ø¥Ø®ÙØ§Ø¡ Ø¬Ù…ÙŠØ¹ Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„
+// إخفاء جميع أزرار التنقل
 function hideAllNavigationButtons() {
     const buttons = [
-        'profile-button',
-        'trading-button', 
-        'gifts-button',
-        'shield-button',
-        'logout-button'
+        'profile-button', 'trading-button', 'gifts-button', 
+        'shield-button', 'recharge-button', 'lamp-button', 
+        'logout-button', 'mute-button', 'admin-button'
     ];
     
     buttons.forEach(buttonId => {
         const button = document.getElementById(buttonId);
         if (button) {
             button.style.display = 'none';
-            button.disabled = true;
         }
     });
-    
-    console.log('âŒ ØªÙ… Ø¥Ø®ÙØ§Ø¡ Ø¬Ù…ÙŠØ¹ Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„');
 }
 
-// Ù…Ø¹Ø§Ù„Ø¬Ø© ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬
+// معالجة تسجيل الخروج
 function handleLogout() {
-    if (confirm('Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ Ù…Ù† ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬ØŸ')) {
-        // Ø­Ø°Ù Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø­Ù„ÙŠØ©
+    if (confirm('هل تريد تسجيل الخروج؟')) {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('isAdmin');
-        
-        // Ø­Ø°Ù Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ù…Ù† Ø§Ù„Ø°Ø§ÙƒØ±Ø©
         window.currentUser = null;
         
-        // Ø¥Ø®ÙØ§Ø¡ Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„
-        hideAllNavigationButtons();
+        showMessage('تم تسجيل الخروج بنجاح');
         
-        // Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„ØªÙˆØ¬ÙŠÙ‡ Ù„ØµÙØ­Ø© ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„
-        window.location.href = 'index.html';
-        
-        console.log('âœ… ØªÙ… ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬ Ø¨Ù†Ø¬Ø§Ø­');
-    }
-}
-
-// Ø¯Ø§Ù„Ø© Ù„Ø¹Ø±Ø¶ Ø§Ù„Ø±Ø³Ø§Ø¦Ù„
-function showMessage(message, type = 'info') {
-    // Ø§Ù„Ø¨Ø­Ø« Ø¹Ù† Ø¹Ù†ØµØ± Ø¹Ø±Ø¶ Ø§Ù„Ø±Ø³Ø§Ø¦Ù„
-    let messageContainer = document.getElementById('message-box') || 
-                          document.getElementById('message-area') ||
-                          document.querySelector('.message-area');
-    
-    if (messageContainer) {
-        // Ø¥Ø²Ø§Ù„Ø© Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ Ø§Ù„Ø³Ø§Ø¨Ù‚Ø©
-        messageContainer.innerHTML = '';
-        
-        // Ø¥Ù†Ø´Ø§Ø¡ Ø±Ø³Ø§Ù„Ø© Ø¬Ø¯ÙŠØ¯Ø©
-        const messageElement = document.createElement('div');
-        messageElement.className = `message ${type}`;
-        messageElement.textContent = message;
-        
-        // Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ø±Ø³Ø§Ù„Ø© Ù„Ù„Ø­Ø§ÙˆÙŠØ©
-        messageContainer.appendChild(messageElement);
-        
-        // Ø¥Ø²Ø§Ù„Ø© Ø§Ù„Ø±Ø³Ø§Ù„Ø© Ø¨Ø¹Ø¯ 5 Ø«ÙˆØ§Ù†Ù
+        // إعادة توجيه إلى صفحة تسجيل الدخول
         setTimeout(() => {
-            if (messageElement.parentNode) {
-                messageElement.remove();
-            }
-        }, 5000);
-    } else {
-        // Ø¥Ø°Ø§ Ù„Ù… Ù†Ø¬Ø¯ Ø­Ø§ÙˆÙŠØ© Ù„Ù„Ø±Ø³Ø§Ø¦Ù„ØŒ Ù†Ø³ØªØ®Ø¯Ù… alert
-        alert(message);
+            window.location.href = 'index.html';
+        }, 1000);
     }
 }
 
-// Ø¯Ø§Ù„Ø© Ù„ØªØ­Ø¯ÙŠØ« Ø­Ø§Ù„Ø© Ø§Ù„Ø£Ø²Ø±Ø§Ø± Ø¨Ù†Ø§Ø¡Ù‹ Ø¹Ù„Ù‰ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø®Ø§Ø¯Ù…
-async function refreshNavigationStatus() {
-    console.log('ðŸ”„ ØªØ­Ø¯ÙŠØ« Ø­Ø§Ù„Ø© Ø£Ø²Ø±Ø§Ø± Ø§Ù„ØªÙ†Ù‚Ù„...');
+// عرض رسالة للمستخدم
+function showMessage(message, type = 'info') {
+    // يمكن تحسين هذه الدالة لتعرض رسائل أكثر جمالاً
+    console.log(`[${type.toUpperCase()}] ${message}`);
     
-    const token = localStorage.getItem('token');
-    if (!token) {
-        hideAllNavigationButtons();
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/users/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+    // إذا كان هناك عنصر لعرض الرسائل، استخدمه
+    const messageContainer = document.getElementById('message-container');
+    if (messageContainer) {
+        messageContainer.textContent = message;
+        messageContainer.className = `message ${type}`;
+        messageContainer.style.display = 'block';
         
-        if (response.ok) {
-            const userData = await response.json();
-            window.currentUser = userData;
-            showNavigationButtons(userData);
-            
-            // ØªØ­Ø¯ÙŠØ« Ø¹Ø±Ø¶ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…
-            displayUserData(userData);
-        } else {
-            hideAllNavigationButtons();
-        }
-    } catch (error) {
-        console.error('âŒ Ø®Ø·Ø£ ÙÙŠ ØªØ­Ø¯ÙŠØ« Ø­Ø§Ù„Ø© Ø§Ù„ØªÙ†Ù‚Ù„:', error);
-        hideAllNavigationButtons();
+        setTimeout(() => {
+            messageContainer.style.display = 'none';
+        }, 3000);
     }
 }
 
-// ØªØµØ¯ÙŠØ± Ø§Ù„Ø¯ÙˆØ§Ù„ Ù„Ù„Ø§Ø³ØªØ®Ø¯Ø§Ù… ÙÙŠ Ù…Ù„ÙØ§Øª Ø£Ø®Ø±Ù‰
-window.Navigation = {
-    initialize: initializeNavigation,
-    refresh: refreshNavigationStatus,
-    showMessage: showMessage,
-    handleLogout: handleLogout,
-    showExitConfirmation: showExitConfirmation,
-    displayUserData: displayUserData
-};
+// تحديث حالة التنقل
+async function refreshNavigationStatus() {
+    console.log('🔄 تحديث حالة التنقل...');
+    await checkAuthStatus();
+}
 
-// Ø¯Ø§Ù„Ø© Ù„ØªØ­Ø¯ÙŠØ« Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙŠØ¯ÙˆÙŠØ§Ù‹
+// تحديث بيانات المستخدم
 function refreshUserData() {
     if (window.currentUser) {
         displayUserData(window.currentUser);
-    } else {
-        checkAuthStatus();
     }
 }
 
-// ØªØµØ¯ÙŠØ± Ø¯Ø§Ù„Ø© ØªØ­Ø¯ÙŠØ« Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª
+// تصدير الدوال للاستخدام العام
+window.initializeNavigation = initializeNavigation;
+window.refreshNavigationStatus = refreshNavigationStatus;
 window.refreshUserData = refreshUserData;
+window.showMessage = showMessage;
 
-// ØªÙ‡ÙŠØ¦Ø© Ø§Ù„ØªÙ†Ù‚Ù„ Ø¹Ù†Ø¯ ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØµÙØ­Ø©
+// تهيئة التنقل عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('ðŸ“± ØªØ­Ù…ÙŠÙ„ Ù†Ø¸Ø§Ù… Ø§Ù„ØªÙ†Ù‚Ù„...');
+    console.log('🚀 تحميل نظام التنقل...');
     initializeNavigation();
-    
-    // ØªØ­Ø¯ÙŠØ« Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø¨Ø¹Ø¯ Ø«Ø§Ù†ÙŠØªÙŠÙ† Ù„Ù„ØªØ£ÙƒØ¯ Ù…Ù† ØªØ­Ù…ÙŠÙ„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø¹Ù†Ø§ØµØ±
-    setTimeout(() => {
-        refreshUserData();
-    }, 2000);
-});
-
-// ØªØ­Ø¯ÙŠØ« Ø­Ø§Ù„Ø© Ø§Ù„ØªÙ†Ù‚Ù„ ÙƒÙ„ 5 Ø¯Ù‚Ø§Ø¦Ù‚
-setInterval(() => {
-    if (window.currentUser) {
-        refreshNavigationStatus();
-    }
-}, 5 * 60 * 1000); 
+}); 

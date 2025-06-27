@@ -1,107 +1,372 @@
-﻿// Ù…Ù„Ù Ø§Ù„Ù„Ø¹Ø¨Ø© Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ
-// BACKEND_URL ÙŠØªÙ… ØªØ¹Ø±ÙŠÙÙ‡ ÙÙŠ navigation.js
+﻿// ملف اللعبة الرئيسي
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
-// Ø£ØµÙˆØ§Øª
-const sounds = {
-    win: new Audio('sounds/win.mp3'),
-    lose: new Audio('sounds/lose.mp3'),
-    buttonClick: new Audio('sounds/click.mp3'),
-    singleShot: new Audio('sounds/single_shot.mp3'),
-    tripleShot: new Audio('sounds/triple_shot.mp3'),
-    hammerShot: new Audio('sounds/hammer_shot.mp3')
+// متغيرات اللعبة
+let gameState = {
+    isPlaying: false,
+    score: 0,
+    level: 1,
+    lives: 3,
+    isMuted: false
 };
 
-let isMuted = false;
-let chatVolume = 0.5;
-
-// Ø¯Ø§Ù„Ø© ØªØ´ØºÙŠÙ„ Ø§Ù„ØµÙˆØª
+// دالة تشغيل الصوت
 function playSound(soundName) {
-    if (isMuted) return;
-    const sound = sounds[soundName];
-    if (sound) {
-        sound.currentTime = 0;
-        sound.play().catch(() => {});
+    if (gameState.isMuted) return;
+    
+    try {
+        const sounds = {
+            buttonClick: document.getElementById('buttonClick'),
+            win: document.getElementById('winSound'),
+            lose: document.getElementById('loseSound'),
+            hammer: document.getElementById('hammerSound'),
+            single: document.getElementById('singleSound'),
+            triple: document.getElementById('tripleSound')
+        };
+        
+        const sound = sounds[soundName];
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(() => {});
+        }
+    } catch (error) {
+        console.log('لا يمكن تشغيل الصوت:', soundName);
     }
 }
 
-// ØªØµØ¯ÙŠØ± Ø¯Ø§Ù„Ø© playSound Ù„Ù„Ø§Ø³ØªØ®Ø¯Ø§Ù… Ø§Ù„Ø¹Ø§Ù…
-window.playSound = playSound;
+// دالة كتم/إلغاء كتم الصوت
+function toggleMute() {
+    gameState.isMuted = !gameState.isMuted;
+    const muteButton = document.getElementById('mute-button');
+    if (muteButton) {
+        muteButton.textContent = gameState.isMuted ? '🔇' : '🔊';
+    }
+    console.log(gameState.isMuted ? '🔇 تم كتم الصوت' : '🔊 تم إلغاء كتم الصوت');
+}
 
-// Ø¯Ø§Ù„Ø© ØªØ­Ø¯ÙŠØ« Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ù„Ø¹Ø¨Ø©
-function updateGameUserData() {
-    console.log('ðŸŽ® ØªØ­Ø¯ÙŠØ« Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ù„Ø¹Ø¨Ø©...');
+// تحديث بيانات المستخدم في اللعبة
+function updateUserDataInGame() {
+    console.log('🎮 تحديث بيانات المستخدم في اللعبة...');
     
-    // Ù…Ø­Ø§ÙˆÙ„Ø© Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ù…Ù† navigation.js
-    if (window.currentUser) {
-        displayGameUserData(window.currentUser);
-    } else {
-        // Ø¥Ø°Ø§ Ù„Ù… ØªÙƒÙ† Ù…ØªØ§Ø­Ø©ØŒ Ù†Ø­Ø§ÙˆÙ„ ØªØ­Ù…ÙŠÙ„Ù‡Ø§
-        loadGameUserData();
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.log('❌ لا يوجد token، لا يمكن تحديث البيانات');
+        return;
+    }
+    
+    fetch(`${BACKEND_URL}/api/users/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(response => response.json())
+    .then(userData => {
+        console.log('📊 عرض بيانات المستخدم في اللعبة:', userData);
+        
+        // تحديث اسم المستخدم
+        const usernameElement = document.getElementById('game-username');
+        if (usernameElement) {
+            usernameElement.textContent = userData.username || 'مستخدم';
+        }
+        
+        // تحديث الرصيد
+        const balanceElement = document.getElementById('game-balance');
+        if (balanceElement) {
+            const balance = userData.balance || userData.stats?.score || 0;
+            balanceElement.textContent = balance.toLocaleString();
+        }
+        
+        // تحديث اللآلئ
+        const pearlsElement = document.getElementById('game-pearls');
+        if (pearlsElement) {
+            const pearls = userData.pearls || userData.stats?.pearls || 0;
+            pearlsElement.textContent = pearls.toLocaleString();
+        }
+        
+        // حفظ بيانات المستخدم في الذاكرة
+        window.currentUser = userData;
+        
+        console.log('✅ تم تحديث بيانات اللعبة بنجاح');
+    })
+    .catch(error => {
+        console.error('❌ خطأ في تحديث بيانات اللعبة:', error);
+    });
+}
+
+// دالة بدء اللعبة
+function startGame() {
+    console.log('🎮 بدء اللعبة...');
+    
+    if (!window.currentUser) {
+        showMessage('يرجى تسجيل الدخول أولاً', 'error');
+        return;
+    }
+    
+    gameState.isPlaying = true;
+    gameState.score = 0;
+    gameState.lives = 3;
+    
+    // إخفاء شاشة البداية
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        startScreen.style.display = 'none';
+    }
+    
+    // إظهار منطقة اللعبة
+    const gameArea = document.getElementById('game-area');
+    if (gameArea) {
+        gameArea.style.display = 'block';
+    }
+    
+    // بدء حلقة اللعبة
+    gameLoop();
+    
+    console.log('✅ تم بدء اللعبة بنجاح');
+}
+
+// دالة إيقاف اللعبة
+function stopGame() {
+    console.log('⏹️ إيقاف اللعبة...');
+    
+    gameState.isPlaying = false;
+    
+    // إظهار شاشة النتائج
+    showGameResults();
+    
+    console.log('✅ تم إيقاف اللعبة');
+}
+
+// دالة عرض نتائج اللعبة
+function showGameResults() {
+    const resultsScreen = document.getElementById('results-screen');
+    if (resultsScreen) {
+        // تحديث النتائج
+        const finalScoreElement = document.getElementById('final-score');
+        if (finalScoreElement) {
+            finalScoreElement.textContent = gameState.score.toLocaleString();
+        }
+        
+        // إظهار الشاشة
+        resultsScreen.style.display = 'block';
     }
 }
 
-// Ø¹Ø±Ø¶ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ù„Ø¹Ø¨Ø©
-function displayGameUserData(userData) {
-    console.log('ðŸ“Š Ø¹Ø±Ø¶ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ù„Ø¹Ø¨Ø©:', userData);
+// دالة إعادة تشغيل اللعبة
+function restartGame() {
+    console.log('🔄 إعادة تشغيل اللعبة...');
     
-    // Ø¹Ø±Ø¶ Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…
-    const usernameDisplay = document.getElementById('username-display');
-    if (usernameDisplay) {
-        usernameDisplay.textContent = userData.username || userData.displayName || 'Ù…Ø³ØªØ®Ø¯Ù…';
+    // إخفاء شاشة النتائج
+    const resultsScreen = document.getElementById('results-screen');
+    if (resultsScreen) {
+        resultsScreen.style.display = 'none';
     }
     
-    // Ø¹Ø±Ø¶ Ø§Ù„Ø±ØµÙŠØ¯
-    const balanceDisplay = document.getElementById('balance-display');
-    if (balanceDisplay) {
-        const balance = userData.balance || userData.stats?.score || 0;
-        balanceDisplay.textContent = balance.toLocaleString();
-    }
+    // إعادة تعيين حالة اللعبة
+    gameState.score = 0;
+    gameState.lives = 3;
+    gameState.level = 1;
     
-    // Ø¹Ø±Ø¶ Ø§Ù„Ù„Ø¢Ù„Ø¦
-    const pearlBalance = document.getElementById('pearl-balance');
-    if (pearlBalance) {
-        const pearls = userData.pearls || userData.stats?.pearls || 0;
-        pearlBalance.textContent = pearls.toLocaleString();
-    }
-    
-    console.log('âœ… ØªÙ… ØªØ­Ø¯ÙŠØ« Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù„Ø¹Ø¨Ø© Ø¨Ù†Ø¬Ø§Ø­');
+    // بدء اللعبة من جديد
+    startGame();
 }
 
-// ØªØ­Ù…ÙŠÙ„ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ù„Ù„Ø¹Ø¨Ø©
-async function loadGameUserData() {
+// دالة العودة للقائمة الرئيسية
+function backToMainMenu() {
+    console.log('🏠 العودة للقائمة الرئيسية...');
+    
+    // إيقاف اللعبة
+    gameState.isPlaying = false;
+    
+    // إخفاء جميع شاشات اللعبة
+    const screens = ['start-screen', 'game-area', 'results-screen'];
+    screens.forEach(screenId => {
+        const screen = document.getElementById(screenId);
+        if (screen) {
+            screen.style.display = 'none';
+        }
+    });
+    
+    // إظهار شاشة البداية
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        startScreen.style.display = 'block';
+    }
+    
+    console.log('✅ تم العودة للقائمة الرئيسية');
+}
+
+// حلقة اللعبة الرئيسية
+function gameLoop() {
+    if (!gameState.isPlaying) return;
+    
+    // تحديث اللعبة
+    updateGame();
+    
+    // رسم اللعبة
+    drawGame();
+    
+    // استمرار الحلقة
+    requestAnimationFrame(gameLoop);
+}
+
+// دالة تحديث اللعبة
+function updateGame() {
+    // هنا يتم تحديث منطق اللعبة
+    // مثل حركة الكائنات، التصادمات، إلخ
+}
+
+// دالة رسم اللعبة
+function drawGame() {
+    // هنا يتم رسم عناصر اللعبة
+    // مثل اللاعب، الأعداء، الخلفية، إلخ
+}
+
+// دالة إضافة نقاط
+function addScore(points) {
+    gameState.score += points;
+    
+    // تحديث عرض النقاط
+    const scoreElement = document.getElementById('current-score');
+    if (scoreElement) {
+        scoreElement.textContent = gameState.score.toLocaleString();
+    }
+    
+    console.log(`➕ تم إضافة ${points} نقطة. المجموع: ${gameState.score}`);
+}
+
+// دالة خسارة حياة
+function loseLife() {
+    gameState.lives--;
+    
+    // تحديث عرض الحياة
+    const livesElement = document.getElementById('current-lives');
+    if (livesElement) {
+        livesElement.textContent = gameState.lives;
+    }
+    
+    console.log(`💔 خسرت حياة. المتبقي: ${gameState.lives}`);
+    
+    if (gameState.lives <= 0) {
+        gameOver();
+    }
+}
+
+// دالة انتهاء اللعبة
+function gameOver() {
+    console.log('💀 انتهت اللعبة');
+    
+    playSound('lose');
+    stopGame();
+    
+    // حفظ النتيجة في الخادم
+    saveGameResult();
+}
+
+// دالة حفظ نتيجة اللعبة
+async function saveGameResult() {
     const token = localStorage.getItem('token');
     if (!token) return;
     
     try {
-        const response = await fetch(`${BACKEND_URL}/api/users/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const response = await fetch(`${BACKEND_URL}/api/users/update-score`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                score: gameState.score,
+                level: gameState.level
+            })
         });
         
         if (response.ok) {
-            const userData = await response.json();
-            window.currentUser = userData;
-            displayGameUserData(userData);
+            console.log('✅ تم حفظ النتيجة بنجاح');
+            // تحديث بيانات المستخدم
+            updateUserDataInGame();
+        } else {
+            console.error('❌ فشل في حفظ النتيجة');
         }
     } catch (error) {
-        console.error('âŒ Ø®Ø·Ø£ ÙÙŠ ØªØ­Ù…ÙŠÙ„ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù„Ø¹Ø¨Ø©:', error);
+        console.error('❌ خطأ في حفظ النتيجة:', error);
     }
 }
 
-// ØªØµØ¯ÙŠØ± Ø§Ù„Ø¯ÙˆØ§Ù„ Ù„Ù„Ø§Ø³ØªØ®Ø¯Ø§Ù… Ø§Ù„Ø¹Ø§Ù…
-window.updateGameUserData = updateGameUserData;
-window.displayGameUserData = displayGameUserData;
+// دالة عرض رسالة
+function showMessage(message, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    
+    // يمكن تحسين هذه الدالة لتعرض رسائل أكثر جمالاً
+    const messageContainer = document.getElementById('game-message');
+    if (messageContainer) {
+        messageContainer.textContent = message;
+        messageContainer.className = `message ${type}`;
+        messageContainer.style.display = 'block';
+        
+        setTimeout(() => {
+            messageContainer.style.display = 'none';
+        }, 3000);
+    }
+}
 
-// ØªØ­Ø¯ÙŠØ« Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø¹Ù†Ø¯ ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØµÙØ­Ø©
+// إعداد أحداث اللعبة
+function setupGameEvents() {
+    // زر بدء اللعبة
+    const startButton = document.getElementById('start-button');
+    if (startButton) {
+        startButton.addEventListener('click', () => {
+            playSound('buttonClick');
+            startGame();
+        });
+    }
+    
+    // زر إعادة التشغيل
+    const restartButton = document.getElementById('restart-button');
+    if (restartButton) {
+        restartButton.addEventListener('click', () => {
+            playSound('buttonClick');
+            restartGame();
+        });
+    }
+    
+    // زر العودة للقائمة
+    const menuButton = document.getElementById('menu-button');
+    if (menuButton) {
+        menuButton.addEventListener('click', () => {
+            playSound('buttonClick');
+            backToMainMenu();
+        });
+    }
+    
+    // زر كتم الصوت
+    const muteButton = document.getElementById('mute-button');
+    if (muteButton) {
+        muteButton.addEventListener('click', () => {
+            toggleMute();
+        });
+    }
+    
+    console.log('✅ تم إعداد أحداث اللعبة');
+}
+
+// تصدير الدوال للاستخدام العام
+window.playSound = playSound;
+window.toggleMute = toggleMute;
+window.startGame = startGame;
+window.stopGame = stopGame;
+window.restartGame = restartGame;
+window.backToMainMenu = backToMainMenu;
+window.addScore = addScore;
+window.loseLife = loseLife;
+window.showMessage = showMessage;
+
+// تهيئة اللعبة عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('ðŸŽ® ØªØ­Ù…ÙŠÙ„ ØµÙØ­Ø© Ø§Ù„Ù„Ø¹Ø¨Ø©...');
+    console.log('🎮 تحميل صفحة اللعبة...');
     
-    // ØªØ­Ø¯ÙŠØ« Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø¨Ø¹Ø¯ ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØµÙØ­Ø©
-    setTimeout(() => {
-        updateGameUserData();
-    }, 1000);
+    // تحديث بيانات المستخدم
+    updateUserDataInGame();
     
-    // ØªØ­Ø¯ÙŠØ« Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª ÙƒÙ„ 30 Ø«Ø§Ù†ÙŠØ©
-    setInterval(() => {
-        updateGameUserData();
-    }, 30000);
+    // إعداد أحداث اللعبة
+    setupGameEvents();
+    
+    console.log('✅ تم تحميل صفحة اللعبة بنجاح');
 }); 
