@@ -23,7 +23,7 @@ router.post('/register', async (req, res) => {
       email, // إضافة البريد الإلكتروني للمستخدم الجديد
       password: hashedPassword,
       isAdmin: false, // المستخدمون الجدد ليسوا مشرفين بشكل افتراضي
-      score: 0 // تعيين النتيجة الأولية
+      'stats.score': 0 // إصلاح: استخدام stats.score بدلاً من score
     });
 
     await newUser.save();
@@ -79,7 +79,7 @@ router.post('/login', async (req, res) => {
       token,
       username: user.username,
       isAdmin: user.isAdmin,
-      score: user.score // يمكنك إرجاع النقاط هنا أيضاً
+      score: user.stats.score
     });
 
   } catch (error) {
@@ -105,8 +105,8 @@ router.post('/create-test-user', async (req, res) => {
       email,
       password: hashedPassword,
       isAdmin: false,
-      score: 1000,
-      pearls: 5
+      'stats.score': 1000,
+      'stats.pearls': 5
     });
 
     await newUser.save();
@@ -134,8 +134,8 @@ router.get('/check-users', async (req, res) => {
         username: user.username,
         email: user.email,
         isAdmin: user.isAdmin,
-        score: user.score,
-        pearls: user.pearls || 0,
+        score: user.stats.score,
+        pearls: user.stats.pearls || 0,
         createdAt: user.createdAt
       }))
     });

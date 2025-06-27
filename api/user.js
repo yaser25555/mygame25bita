@@ -88,14 +88,14 @@ router.get('/me', verifyToken, async (req, res) => {
     // إرجاع البيانات التي تحتاجها الواجهة الأمامية، بما في ذلك بيانات اللعبة الجديدة
     res.json({
         username: user.username,
-        score: user.score,
+        score: user.stats.score,
         isAdmin: user.isAdmin,
-        personalScore: user.personalScore,
-        highScore: user.highScore,
-        roundNumber: user.roundNumber,
-        singleShotsUsed: user.singleShotsUsed,
-        tripleShotsUsed: user.tripleShotsUsed,
-        hammerShotsUsed: user.hammerShotsUsed,
+        personalScore: user.stats.personalScore,
+        highScore: user.stats.highScore,
+        roundNumber: user.stats.roundNumber,
+        singleShotsUsed: user.weapons.singleShotsUsed,
+        tripleShotsUsed: user.weapons.tripleShotsUsed,
+        hammerShotsUsed: user.weapons.hammerShotsUsed,
         boxValues: user.boxValues,
         itemsCollected: user.itemsCollected,
         collectedGems: user.collectedGems,
@@ -151,7 +151,7 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
         const suspiciousActivity = [];
         
         // Check for unrealistic score increase
-        const scoreDiff = score - user.score;
+        const scoreDiff = score - user.stats.score;
         if (scoreDiff > 10000) { // أكثر من 10,000 نقطة دفعة واحدة
             suspiciousActivity.push(`زيادة غير طبيعية في النقاط: ${scoreDiff}`);
         }
@@ -189,7 +189,7 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
             user.suspiciousActivity.push({
                 timestamp: new Date(),
                 activities: suspiciousActivity,
-                oldScore: user.score,
+                oldScore: user.stats.score,
                 newScore: score,
                 ip: req.ip
             });
@@ -217,9 +217,9 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
 
         res.json({ 
             message: 'تم حفظ بيانات اللعبة بنجاح', 
-            score: user.score, 
-            highScore: user.highScore, 
-            roundNumber: user.roundNumber,
+            score: user.stats.score, 
+            highScore: user.stats.highScore, 
+            roundNumber: user.stats.roundNumber,
             suspiciousActivity: suspiciousActivity.length > 0 ? suspiciousActivity : null
         });
     } catch (error) {
@@ -233,7 +233,7 @@ router.post('/update-score', verifyToken, verifyAdmin, async (req, res) => { // 
   const { username, newScore } = req.body;
 
   try {
-    const user = await User.findOneAndUpdate({ username }, { score: newScore }, { new: true }); // تصحيح score: و new: true
+    const user = await User.findOneAndUpdate({ username }, { 'stats.score': newScore }, { new: true }); // إصلاح: استخدام stats.score
     if (!user) return res.status(404).json({ message: 'المستخدم غير موجود' });
 
     res.json({ message: 'تم تحديث النقاط بنجاح', user });
@@ -256,16 +256,16 @@ router.get('/:username', verifyToken, async (req, res) => {
 
     res.json({
         username: user.username,
-        score: user.score,
-        boxesOpened: user.boxesOpened,
+        score: user.stats.score,
+        boxesOpened: user.stats.boxesOpened,
         settings: user.settings, // Include the entire settings object
         isAdmin: user.isAdmin,
-        personalScore: user.personalScore,
-        highScore: user.highScore,
-        roundNumber: user.roundNumber,
-        singleShotsUsed: user.singleShotsUsed,
-        tripleShotsUsed: user.tripleShotsUsed,
-        hammerShotsUsed: user.hammerShotsUsed,
+        personalScore: user.stats.personalScore,
+        highScore: user.stats.highScore,
+        roundNumber: user.stats.roundNumber,
+        singleShotsUsed: user.weapons.singleShotsUsed,
+        tripleShotsUsed: user.weapons.tripleShotsUsed,
+        hammerShotsUsed: user.weapons.hammerShotsUsed,
         boxValues: user.boxValues // إضافة قيم الصناديق الحالية
     });
 
@@ -348,7 +348,7 @@ router.post('/add-boxes', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
       { username },
-      { $inc: { boxesOpened: count }, $push: { boxValues: { $each: Array(count).fill(value) } } },
+      { $inc: { 'stats.boxesOpened': count }, $push: { boxValues: { $each: Array(count).fill(value) } } },
       { new: true }
     );
 
@@ -403,7 +403,7 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
       user.password = newPassword; // The pre-save hook in User.js will hash it
     }
     if (newScore !== undefined) {
-      user.score = newScore;
+      user.stats.score = newScore;
     }
 
     await user.save();
@@ -483,7 +483,7 @@ router.post('/update-game-data', verifyToken, async (req, res) => {
     }
 
     // تحديث البيانات
-    if (score !== undefined) user.score = score;
+    if (score !== undefined) user.stats.score = score;
     if (itemsCollected) user.itemsCollected = { ...user.itemsCollected, ...itemsCollected };
     if (collectedGems !== undefined) user.collectedGems = collectedGems;
     if (totalGemsCollected !== undefined) user.totalGemsCollected = totalGemsCollected;
