@@ -298,6 +298,18 @@ async function loadUserProfile() {
         if (response.ok) {
             currentUser = await response.json();
             updateProfileDisplay();
+            
+            // عرض معرف المستخدم في وحدة التحكم
+            console.log('🔍 معرف المستخدم الحالي:', currentUser.userId || currentUser._id);
+            console.log('📋 بيانات المستخدم الكاملة:', currentUser);
+            
+            // إنشاء دالة عامة للحصول على معرف المستخدم
+            window.getCurrentUserId = function() {
+                return currentUser?.userId || currentUser?._id || null;
+            };
+            
+            // عرض معرف المستخدم في الصفحة
+            showUserIDInPage();
         } else {
             throw new Error('فشل في تحميل بيانات المستخدم');
         }
@@ -307,6 +319,95 @@ async function loadUserProfile() {
     }
 }
 
+// عرض معرف المستخدم في الصفحة
+function showUserIDInPage() {
+    if (!currentUser) return;
+    
+    const userId = currentUser.userId || currentUser._id;
+    if (!userId) return;
+    
+    // إنشاء عنصر لعرض معرف المستخدم
+    let idDisplay = document.getElementById('user-id-display');
+    if (!idDisplay) {
+        idDisplay = document.createElement('div');
+        idDisplay.id = 'user-id-display';
+        idDisplay.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00FF00;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            z-index: 9999;
+            border: 1px solid #00FF00;
+            cursor: pointer;
+            user-select: none;
+        `;
+        document.body.appendChild(idDisplay);
+        
+        // إضافة إمكانية النسخ عند النقر
+        idDisplay.addEventListener('click', function() {
+            navigator.clipboard.writeText(userId.toString()).then(() => {
+                const originalText = idDisplay.textContent;
+                idDisplay.textContent = 'تم النسخ! ✓';
+                idDisplay.style.background = 'rgba(0, 255, 0, 0.2)';
+                setTimeout(() => {
+                    idDisplay.textContent = originalText;
+                    idDisplay.style.background = 'rgba(0, 0, 0, 0.8)';
+                }, 1000);
+            });
+        });
+    }
+    
+    idDisplay.textContent = `ID: ${userId}`;
+    idDisplay.title = 'انقر لنسخ معرف المستخدم';
+}
+
+// دالة عامة للحصول على معرف المستخدم (متاحة في وحدة التحكم)
+window.getUserId = function() {
+    const userId = currentUser?.userId || currentUser?._id;
+    if (userId) {
+        console.log('🔍 معرف المستخدم الحالي:', userId);
+        console.log('📋 نوع المعرف:', typeof userId);
+        return userId;
+    } else {
+        console.log('❌ لم يتم العثور على معرف المستخدم');
+        return null;
+    }
+};
+
+// دالة لعرض معلومات المستخدم الكاملة
+window.showUserInfo = function() {
+    if (currentUser) {
+        console.log('👤 معلومات المستخدم الكاملة:', currentUser);
+        console.log('🆔 معرف المستخدم:', currentUser.userId || currentUser._id);
+        console.log('👤 اسم المستخدم:', currentUser.username);
+        console.log('📧 البريد الإلكتروني:', currentUser.email);
+        console.log('📅 تاريخ الإنشاء:', currentUser.createdAt);
+        return currentUser;
+    } else {
+        console.log('❌ لم يتم تحميل بيانات المستخدم');
+        return null;
+    }
+};
+
+// دالة لنسخ معرف المستخدم إلى الحافظة
+window.copyUserId = function() {
+    const userId = currentUser?.userId || currentUser?._id;
+    if (userId) {
+        navigator.clipboard.writeText(userId.toString()).then(() => {
+            console.log('✅ تم نسخ معرف المستخدم إلى الحافظة:', userId);
+        }).catch(() => {
+            console.log('❌ فشل في نسخ معرف المستخدم');
+        });
+    } else {
+        console.log('❌ لم يتم العثور على معرف المستخدم');
+    }
+};
+
 // تحديث عرض البروفايل
 function updateProfileDisplay() {
     if (!currentUser) return;
@@ -315,6 +416,22 @@ function updateProfileDisplay() {
     document.getElementById('display-name').textContent = currentUser.profile?.displayName || currentUser.username;
     document.getElementById('user-bio').textContent = currentUser.profile?.bio || 'مرحباً! أنا لاعب في VoiceBoom 🎮';
     document.getElementById('user-level').textContent = currentUser.profile?.level || 1;
+    
+    // عرض معرف المستخدم (User ID)
+    const userIdElement = document.getElementById('user-id');
+    if (userIdElement) {
+        userIdElement.textContent = `معرف المستخدم: ${currentUser.userId || currentUser._id || 'غير متاح'}`;
+        userIdElement.style.cssText = `
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #fff;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        `;
+    }
     
     // الصورة الشخصية
     const avatarImg = document.getElementById('user-avatar');
@@ -1566,44 +1683,36 @@ function checkAuth() {
 }
 
 // تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 تحميل صفحة البروفايل...');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 تم تحميل صفحة البروفايل');
+    console.log('💡 يمكنك استخدام الأوامر التالية في وحدة التحكم:');
+    console.log('   - getUserId() - للحصول على معرف المستخدم');
+    console.log('   - showUserInfo() - لعرض معلومات المستخدم الكاملة');
+    console.log('   - copyUserId() - لنسخ معرف المستخدم إلى الحافظة');
     
-    // التحقق من المصادقة
     checkAuth();
-    
-    // إعداد مستمعي الأحداث
     setupEventListeners();
+    setupDataActionListeners();
+    setupSearch();
+    setupExitWarning();
     
     // تحميل بيانات المستخدم
     loadUserProfile();
-    
-    // تحميل الإحصائيات
     loadUserStats();
-    
-    // تحميل الأصدقاء
     loadFriends();
-    
-    // تحميل الإنجازات
     loadAchievements();
-    
-    // إعداد إعدادات الخصوصية
     setupPrivacySettings();
-    
-    // إعداد إعدادات الإشعارات
     setupNotificationSettings();
-    
-    // إعداد إعدادات اللعبة
     setupGameSettings();
-    
-    // إعداد رفع الصور
     setupImageUpload();
     
-    // إعداد البحث
-    setupSearch();
-    
-    // إضافة تحذير الخروج
-    setupExitWarning();
-    
-    console.log('✅ تم تحميل صفحة البروفايل بنجاح');
+    // عرض معرف المستخدم في وحدة التحكم بعد تحميل البيانات
+    setTimeout(() => {
+        if (currentUser) {
+            console.log('✅ تم تحميل بيانات المستخدم بنجاح');
+            console.log('🆔 معرف المستخدم:', currentUser.userId || currentUser._id);
+        } else {
+            console.log('⚠️ لم يتم تحميل بيانات المستخدم بعد');
+        }
+    }, 2000);
 });

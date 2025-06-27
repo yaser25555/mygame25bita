@@ -327,3 +327,10 @@ async function broadcastPlayerList() {
 
 // Export httpServer and PORT for use in external scripts (like server-listen.js)
 module.exports = { httpServer, PORT };
+
+// تشغيل الخادم
+httpServer.listen(PORT, () => {
+  console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
+  console.log(`📡 API متاح على: http://localhost:${PORT}/api`);
+  console.log(`🌐 الواجهة الأمامية متاحة على: http://localhost:${PORT}`);
+});
