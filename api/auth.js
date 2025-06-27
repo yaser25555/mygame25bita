@@ -54,7 +54,10 @@ router.post('/login', async (req, res) => {
     // التحقق من وجود البيانات المطلوبة
     if (!username || !password) {
       console.log('❌ بيانات ناقصة:', { username: !!username, password: !!password });
-      return res.status(400).json({ message: 'اسم المستخدم وكلمة المرور مطلوبان' });
+      return res.status(400).json({ 
+        message: 'اسم المستخدم وكلمة المرور مطلوبان',
+        error: 'MISSING_CREDENTIALS'
+      });
     }
 
     // البحث عن المستخدم باستخدام اسم المستخدم أو البريد الإلكتروني
@@ -62,7 +65,10 @@ router.post('/login', async (req, res) => {
 
     if (!user) {
       console.log('❌ المستخدم غير موجود:', username);
-      return res.status(400).json({ message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
+      return res.status(400).json({ 
+        message: 'اسم المستخدم أو كلمة المرور غير صحيحة',
+        error: 'INVALID_CREDENTIALS'
+      });
     }
 
     console.log('✅ تم العثور على المستخدم:', user.username);
@@ -70,7 +76,10 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       console.log('❌ كلمة المرور غير صحيحة للمستخدم:', username);
-      return res.status(400).json({ message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
+      return res.status(400).json({ 
+        message: 'اسم المستخدم أو كلمة المرور غير صحيحة',
+        error: 'INVALID_CREDENTIALS'
+      });
     }
 
     console.log('✅ كلمة المرور صحيحة للمستخدم:', username);
@@ -89,15 +98,26 @@ router.post('/login', async (req, res) => {
       token,
       username: user.username,
       isAdmin: user.isAdmin,
-      score: user.stats.score
+      score: user.stats ? user.stats.score : 0
     };
 
     console.log('✅ إرسال الاستجابة:', { ...response, token: '***' });
+    
+    // إضافة headers إضافية للاستجابة
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     res.json(response);
 
   } catch (error) {
     console.error("❌ خطأ أثناء تسجيل الدخول:", error); // طباعة الخطأ كاملاً
-    res.status(500).json({ message: 'خطأ داخلي أثناء تسجيل الدخول', error: error.message });
+    res.status(500).json({ 
+      message: 'خطأ داخلي أثناء تسجيل الدخول', 
+      error: error.message,
+      errorCode: 'INTERNAL_SERVER_ERROR'
+    });
   }
 });
 

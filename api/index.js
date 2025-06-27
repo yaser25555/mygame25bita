@@ -27,9 +27,17 @@ const app = express();
 
 // --- 2. إعداد CORS ---
 app.use(cors({
-  origin: 'https://mygame25bita-7eqw.onrender.com',
+  origin: [
+    'https://mygame25bita-7eqw.onrender.com',
+    'https://mygame25bita-1-4ue6.onrender.com',
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5000'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  credentials: true
 }));
 
 // --- 3. إعداد الـ Middleware ---
@@ -75,10 +83,32 @@ app.use('/api/relationships', relationshipsRoutes);
 app.use('/api/shield', shieldRoutes);
 // app.use('/api/game', gameRoutes); // مسار اللعبة
 
-// --- 5. نقطة نهاية لفحص الحالة الصحية (Health Check) ---
+// --- 5. إعداد الملفات الثابتة (Static Files) ---
+// خدمة ملفات الواجهة الأمامية
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// --- 6. نقطة نهاية لفحص الحالة الصحية (Health Check) ---
 // Render يستخدم هذا المسار للتأكد من أن الخدمة تعمل بشكل سليم
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
+});
+
+// مسار اختبار بسيط
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: 'الخادم يعمل بشكل صحيح',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
+// مسار اختبار CORS
+app.get('/test-cors', (req, res) => {
+  res.json({ 
+    message: 'CORS يعمل بشكل صحيح',
+    origin: req.headers.origin,
+    method: req.method
+  });
 });
 
 // نقطة نهاية للصفحة الرئيسية - رسالة بسيطة
@@ -93,6 +123,21 @@ app.get('/', (req, res) => {
       </body>
     </html>
   `);
+});
+
+// --- 7. معالجة الأخطاء ---
+// معالجة الأخطاء العامة
+app.use((err, req, res, next) => {
+  console.error('❌ خطأ في الخادم:', err);
+  res.status(500).json({ 
+    message: 'خطأ داخلي في الخادم',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'حدث خطأ غير متوقع'
+  });
+});
+
+// معالجة المسارات غير الموجودة
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'المسار غير موجود' });
 });
 
 // تحسين إدارة WebSocket

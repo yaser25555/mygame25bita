@@ -16,6 +16,9 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 تحميل صفحة تسجيل الدخول...');
     
+    // اختبار الاتصال بالخادم أولاً
+    testServerConnection();
+    
     // التحقق من وجود token صالح عند تحميل الصفحة
     checkExistingToken();
     
@@ -25,6 +28,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('✅ تم تحميل صفحة تسجيل الدخول بنجاح');
 });
+
+// اختبار الاتصال بالخادم
+async function testServerConnection() {
+    try {
+        console.log('🔗 اختبار الاتصال بالخادم...');
+        const response = await fetch(`${BACKEND_URL}/health`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            console.log('✅ الاتصال بالخادم يعمل بشكل صحيح');
+        } else {
+            console.warn('⚠️ الخادم يستجيب ولكن بحالة غير طبيعية:', response.status);
+        }
+    } catch (error) {
+        console.error('❌ فشل في الاتصال بالخادم:', error);
+        showMessage('تحذير: لا يمكن الاتصال بالخادم. قد تكون هناك مشكلة في الشبكة.', true);
+    }
+}
 
 // التحقق من وجود token صالح
 async function checkExistingToken() {
@@ -39,8 +64,19 @@ async function checkExistingToken() {
     }
     
     try {
+        console.log('🔐 التحقق من صحة التوكن...');
+        
         const response = await fetch(`${BACKEND_URL}/api/users/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+        
+        console.log('📡 استجابة التحقق من التوكن:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
         });
         
         if (response.ok) {
@@ -65,6 +101,7 @@ async function checkExistingToken() {
             localStorage.removeItem('username');
             localStorage.removeItem('isAdmin');
             hideLogoutButton();
+            hideGameButton();
         }
     } catch (error) {
         console.error('❌ خطأ في التحقق من التوكن:', error);
@@ -72,6 +109,7 @@ async function checkExistingToken() {
         localStorage.removeItem('username');
         localStorage.removeItem('isAdmin');
         hideLogoutButton();
+        hideGameButton();
     }
 }
 
@@ -250,17 +288,44 @@ async function handleAdminLogin(event) {
     adminLoginButton.disabled = true;
     
     try {
+        console.log('🔐 بدء طلب تسجيل دخول المشرف...');
+        
         const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ username, password })
         });
         
-        const data = await response.json();
+        console.log('📡 استجابة الخادم للمشرف:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
+        });
         
-        if (response.ok && data.token) {
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.log('📄 نص الخطأ:', errorText);
+            let errorMessage = 'فشل في تسجيل دخول المشرف';
+            
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+                if (errorText) {
+                    errorMessage = errorText;
+                }
+            }
+            
+            throw new Error(errorMessage);
+        }
+        
+        const data = await response.json();
+        console.log('✅ تم تحليل JSON بنجاح للمشرف:', { ...data, token: '***' });
+        
+        if (data.token) {
             // التحقق من أن المستخدم مشرف
             if (data.isAdmin) {
                 localStorage.setItem('token', data.token);
@@ -285,7 +350,7 @@ async function handleAdminLogin(event) {
         }
     } catch (error) {
         console.error('❌ خطأ في تسجيل دخول المشرف:', error);
-        showMessage('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.', true);
+        showMessage(error.message || 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.', true);
     } finally {
         // إخفاء حالة التحميل
         adminLoginButton.classList.remove('loading');
@@ -318,7 +383,8 @@ async function handleLogin(event) {
         const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ username, password })
         });
@@ -326,37 +392,29 @@ async function handleLogin(event) {
         console.log('📡 استجابة الخادم:', {
             status: response.status,
             statusText: response.statusText,
-            ok: response.ok,
-            headers: Object.fromEntries(response.headers.entries())
+            ok: response.ok
         });
         
-        // التحقق من نوع المحتوى
-        const contentType = response.headers.get('content-type');
-        console.log('📄 نوع المحتوى:', contentType);
-        
         if (!response.ok) {
-            console.log('❌ خطأ في الاستجابة:', response.status, response.statusText);
             const errorText = await response.text();
             console.log('📄 نص الخطأ:', errorText);
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        // محاولة قراءة JSON
-        let data;
-        try {
-            const responseText = await response.text();
-            console.log('📄 نص الاستجابة:', responseText);
+            let errorMessage = 'فشل في تسجيل الدخول';
             
-            if (!responseText || responseText.trim() === '') {
-                throw new Error('الاستجابة فارغة');
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+                // إذا لم نتمكن من تحليل JSON، نستخدم النص كما هو
+                if (errorText) {
+                    errorMessage = errorText;
+                }
             }
             
-            data = JSON.parse(responseText);
-            console.log('✅ تم تحليل JSON بنجاح:', data);
-        } catch (parseError) {
-            console.error('❌ خطأ في تحليل JSON:', parseError);
-            throw new Error('خطأ في تحليل استجابة الخادم');
+            throw new Error(errorMessage);
         }
+        
+        const data = await response.json();
+        console.log('✅ تم تحليل JSON بنجاح:', { ...data, token: '***' });
         
         if (data.token) {
             localStorage.setItem('token', data.token);
@@ -385,7 +443,7 @@ async function handleLogin(event) {
         }
     } catch (error) {
         console.error('❌ خطأ في تسجيل الدخول:', error);
-        showMessage('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.', true);
+        showMessage(error.message || 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.', true);
     } finally {
         // إخفاء حالة التحميل
         loginButton.classList.remove('loading');
@@ -417,37 +475,59 @@ async function handleRegister(event) {
     registerButton.disabled = true;
     
     try {
+        console.log('🚀 بدء طلب التسجيل...');
+        
         const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ username, email, password })
         });
         
-        const data = await response.json();
+        console.log('📡 استجابة الخادم للتسجيل:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
+        });
         
-        if (response.ok) {
-            showMessage('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.');
-            console.log('✅ تم التسجيل بنجاح:', username);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.log('📄 نص الخطأ:', errorText);
+            let errorMessage = 'فشل في التسجيل';
             
-            // مسح النموذج
-            document.getElementById('register-form').reset();
-            
-            // الانتقال إلى تبويب تسجيل الدخول
-            const loginTab = document.getElementById('login-tab');
-            const loginSection = document.getElementById('login-section');
-            if (loginTab && loginSection) {
-                switchTab(loginTab, loginSection);
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+                if (errorText) {
+                    errorMessage = errorText;
+                }
             }
             
-        } else {
-            showMessage(data.message || 'فشل في التسجيل', true);
-            console.log('❌ فشل في التسجيل:', data.message);
+            throw new Error(errorMessage);
         }
+        
+        const data = await response.json();
+        console.log('✅ تم تحليل JSON بنجاح للتسجيل:', data);
+        
+        showMessage('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.');
+        console.log('✅ تم التسجيل بنجاح:', username);
+        
+        // مسح النموذج
+        document.getElementById('register-form').reset();
+        
+        // الانتقال إلى تبويب تسجيل الدخول
+        const loginTab = document.getElementById('login-tab');
+        const loginSection = document.getElementById('login-section');
+        if (loginTab && loginSection) {
+            switchTab(loginTab, loginSection);
+        }
+        
     } catch (error) {
         console.error('❌ خطأ في التسجيل:', error);
-        showMessage('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.', true);
+        showMessage(error.message || 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.', true);
     } finally {
         // إخفاء حالة التحميل
         registerButton.classList.remove('loading');

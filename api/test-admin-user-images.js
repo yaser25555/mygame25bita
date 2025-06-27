@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BACKEND_URL = 'https://mygame25bita-7eqw.onrender.com';
+const BACKEND_URL = 'https://mygame25bita-1-4ue6.onrender.com';
 
 // بيانات المشرف للاختبار
 const adminCredentials = {
