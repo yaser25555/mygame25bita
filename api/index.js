@@ -103,9 +103,18 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// نقطة نهاية للصفحة الرئيسية - إعادة توجيه للواجهة الأمامية
+// نقطة نهاية للصفحة الرئيسية - رسالة بسيطة
 app.get('/', (req, res) => {
-  res.redirect('https://mygame25bita-7eqw.onrender.com');
+  res.send(`
+    <html>
+      <head><title>Voice Boom Backend API</title></head>
+      <body>
+        <h1>Voice Boom Backend API</h1>
+        <p>Status: Running</p>
+        <p>This is the backend server. Please use the frontend at: <a href="https://mygame25bita-7eqw.onrender.com">Frontend</a></p>
+      </body>
+    </html>
+  `);
 });
 
 // تحسين إدارة WebSocket
