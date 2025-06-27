@@ -470,30 +470,40 @@ router.post('/remove-friend', verifyToken, async (req, res) => {
 // الحصول على قائمة الأصداقاء
 router.get('/friends', verifyToken, async (req, res) => {
   try {
+    console.log('🔍 محاولة جلب قائمة الأصدقاء...');
+    
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
+      console.log('❌ المستخدم غير موجود في الطلب');
       return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
     }
 
     const currentUserId = req.user.userId;
+    console.log('👤 معرف المستخدم الحالي:', currentUserId);
 
     const currentUser = await User.findOne({ userId: currentUserId });
 
     if (!currentUser) {
+      console.log('❌ المستخدم غير موجود في قاعدة البيانات');
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
+
+    console.log('✅ تم العثور على المستخدم:', currentUser.username);
 
     // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
     if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
     if (!currentUser.relationships.friends) currentUser.relationships.friends = [];
+
+    console.log('📊 عدد الأصدقاء:', currentUser.relationships.friends.length);
 
     // تحميل بيانات الأصدقاء بشكل منفصل لتجنب مشاكل populate
     const friendsData = [];
     
     for (const friend of currentUser.relationships.friends) {
       try {
+        console.log('🔍 البحث عن الصديق:', friend.userId);
         const friendUser = await User.findOne({ userId: friend.userId })
-          .select('username profile.displayName profile.avatar stats.score');
+          .select('userId username profile.displayName profile.avatar stats.score');
         
         if (friendUser) {
           friendsData.push({
@@ -504,13 +514,18 @@ router.get('/friends', verifyToken, async (req, res) => {
             score: friendUser.stats?.score || 0,
             addedAt: friend.addedAt
           });
+          console.log('✅ تم إضافة الصديق:', friendUser.username);
+        } else {
+          console.log('⚠️ الصديق غير موجود:', friend.userId);
         }
       } catch (friendError) {
-        console.error('خطأ في تحميل بيانات الصديق:', friendError);
+        console.error('❌ خطأ في تحميل بيانات الصديق:', friendError);
         // تجاهل الأصدقاء الذين لا يمكن تحميل بياناتهم
         continue;
       }
     }
+
+    console.log('✅ تم تحميل', friendsData.length, 'صديق بنجاح');
 
     res.json({
       friends: friendsData,
@@ -518,7 +533,7 @@ router.get('/friends', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('خطأ في جلب قائمة الأصداقاء:', error);
+    console.error('❌ خطأ في جلب قائمة الأصداقاء:', error);
     res.status(500).json({ error: 'خطأ في جلب قائمة الأصداقاء' });
   }
 });
@@ -618,28 +633,39 @@ router.get('/blocked-users', verifyToken, async (req, res) => {
 // البحث عن مستخدمين
 router.get('/search-users', verifyToken, async (req, res) => {
   try {
+    console.log('🔍 محاولة البحث عن المستخدمين...');
+    
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
+      console.log('❌ المستخدم غير موجود في الطلب');
       return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
     }
 
     const { query } = req.query;
     const currentUserId = req.user.userId;
 
+    console.log('🔎 نص البحث:', query, '| المستخدم الحالي:', currentUserId);
+
     if (!query || query.length < 2) {
+      console.log('❌ نص البحث قصير جداً');
       return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
     }
 
     const currentUser = await User.findOne({ userId: currentUserId });
     if (!currentUser) {
+      console.log('❌ المستخدم غير موجود في قاعدة البيانات');
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
+
+    console.log('✅ تم العثور على المستخدم:', currentUser.username);
 
     // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
     if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
     if (!currentUser.relationships.friends) currentUser.relationships.friends = [];
     if (!currentUser.relationships.blockedUsers) currentUser.relationships.blockedUsers = [];
 
+    console.log('🔍 البحث في قاعدة البيانات...');
+    
     // البحث عن المستخدمين
     const users = await User.find({
       $and: [
@@ -653,6 +679,8 @@ router.get('/search-users', verifyToken, async (req, res) => {
         }
       ]
     }).select('userId username profile.displayName profile.avatar profile.bio profile.level profile.status');
+
+    console.log('📊 عدد النتائج الأولية:', users.length);
 
     // تصفية النتائج بناءً على العلاقات
     const filteredUsers = users.map(user => {
@@ -686,13 +714,15 @@ router.get('/search-users', verifyToken, async (req, res) => {
     // إزالة المستخدمين المحظورين من النتائج
     const finalResults = filteredUsers.filter(user => !user.isBlocked);
 
+    console.log('✅ تم العثور على', finalResults.length, 'مستخدم');
+
     res.json({
       users: finalResults,
       total: finalResults.length
     });
 
   } catch (error) {
-    console.error('خطأ في البحث عن المستخدمين:', error);
+    console.error('❌ خطأ في البحث عن المستخدمين:', error);
     res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
   }
 });
@@ -727,7 +757,7 @@ router.post('/cancel-friend-request', verifyToken, async (req, res) => {
 
     // البحث عن الطلب في قائمة المستخدم الحالي
     const currentUserRequestIndex = currentUser.relationships.friendRequests.findIndex(
-      request => request.from === currentUser.userId && request.from !== targetUser.userId
+      request => request.from === currentUser.userId
     );
 
     if (currentUserRequestIndex === -1) {
