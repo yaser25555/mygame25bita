@@ -8,58 +8,78 @@ let blockedUsers = [];
 let achievements = [];
 let searchResults = [];
 
-// تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 تحميل صفحة البروفايل...');
+// إعداد البحث
+function setupSearch() {
+    console.log('🔍 إعداد نظام البحث...');
     
-    // التحقق من المصادقة
-    checkAuth();
+    // إعداد البحث المباشر في نافذة البحث المنبثقة
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', searchUsersRealTime);
+        console.log('✅ تم إعداد البحث المباشر في النافذة المنبثقة');
+    }
     
-    // إعداد مستمعي الأحداث
-    setupEventListeners();
+    // إعداد البحث المباشر في قسم الأصدقاء
+    const friendsSearchInput = document.getElementById('friends-search-input');
+    if (friendsSearchInput) {
+        friendsSearchInput.addEventListener('input', searchUsersRealTime);
+        console.log('✅ تم إعداد البحث المباشر في قسم الأصدقاء');
+    }
     
-    // تحميل بيانات المستخدم
-    loadUserProfile();
+    // إعداد أزرار البحث
+    const searchButton = document.getElementById('search-button');
+    if (searchButton) {
+        searchButton.addEventListener('click', searchUsers);
+        console.log('✅ تم إعداد زر البحث');
+    }
     
-    // تحميل الإحصائيات
-    loadUserStats();
-    
-    // تحميل الأصدقاء
-    loadFriends();
-    
-    // تحميل الإنجازات
-    loadAchievements();
-    
-    // إعداد إعدادات الخصوصية
-    setupPrivacySettings();
-    
-    // إعداد إعدادات الإشعارات
-    setupNotificationSettings();
-    
-    // إعداد إعدادات اللعبة
-    setupGameSettings();
-    
-    // إعداد رفع الصور
-    setupImageUpload();
-    
-    // إعداد البحث
-    setupSearch();
-    
-    // إضافة تحذير الخروج
-    setupExitWarning();
-    
-    console.log('✅ تم تحميل صفحة البروفايل بنجاح');
-});
+    console.log('✅ تم إعداد نظام البحث بنجاح');
+}
 
-// التحقق من تسجيل الدخول
-function checkAuth() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showMessage('يجب تسجيل الدخول أولاً', true);
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 2000);
-        return;
+// إعداد التحذير عند محاولة الخروج
+function setupExitWarning() {
+    console.log('⚠️ إعداد تحذير الخروج...');
+    
+    // التحذير عند محاولة إغلاق التبويب/المتصفح
+    window.addEventListener('beforeunload', function(e) {
+        if (currentUser) {
+            const message = 'هل تريد الخروج من الموقع؟ سيتم فقدان تقدمك في اللعبة.';
+            e.preventDefault();
+            e.returnValue = message;
+            return message;
+        }
+    });
+    
+    // التحذير عند محاولة العودة للصفحة السابقة
+    window.addEventListener('popstate', function(e) {
+        if (currentUser) {
+            e.preventDefault();
+            showExitConfirmation();
+        }
+    });
+    
+    // منع استخدام زر العودة في المتصفح
+    history.pushState(null, null, location.href);
+    window.addEventListener('popstate', function() {
+        if (currentUser) {
+            history.pushState(null, null, location.href);
+            showExitConfirmation();
+        }
+    });
+    
+    console.log('✅ تم إعداد تحذير الخروج');
+}
+
+// عرض تأكيد الخروج
+function showExitConfirmation() {
+    const confirmed = confirm('هل تريد الخروج من الموقع؟\n\n✅ البقاء - للاستمرار في اللعبة\n❌ الخروج - للعودة للصفحة السابقة');
+    
+    if (confirmed) {
+        // إذا اختار الخروج، نسمح بالعودة
+        window.history.back();
+    } else {
+        // إذا اختار البقاء، نبقى في الصفحة الحالية
+        console.log('👤 المستخدم اختار البقاء في الموقع');
     }
 }
 
@@ -1524,77 +1544,57 @@ function closeModal(modalId) {
     }
 }
 
-// إعداد التحذير عند محاولة الخروج
-function setupExitWarning() {
-    console.log('⚠️ إعداد تحذير الخروج...');
-    
-    // التحذير عند محاولة إغلاق التبويب/المتصفح
-    window.addEventListener('beforeunload', function(e) {
-        if (currentUser) {
-            const message = 'هل تريد الخروج من الموقع؟ سيتم فقدان تقدمك في اللعبة.';
-            e.preventDefault();
-            e.returnValue = message;
-            return message;
-        }
-    });
-    
-    // التحذير عند محاولة العودة للصفحة السابقة
-    window.addEventListener('popstate', function(e) {
-        if (currentUser) {
-            e.preventDefault();
-            showExitConfirmation();
-        }
-    });
-    
-    // منع استخدام زر العودة في المتصفح
-    history.pushState(null, null, location.href);
-    window.addEventListener('popstate', function() {
-        if (currentUser) {
-            history.pushState(null, null, location.href);
-            showExitConfirmation();
-        }
-    });
-    
-    console.log('✅ تم إعداد تحذير الخروج');
-}
-
-// عرض تأكيد الخروج
-function showExitConfirmation() {
-    const confirmed = confirm('هل تريد الخروج من الموقع؟\n\n✅ البقاء - للاستمرار في اللعبة\n❌ الخروج - للعودة للصفحة السابقة');
-    
-    if (confirmed) {
-        // إذا اختار الخروج، نسمح بالعودة
-        window.history.back();
-    } else {
-        // إذا اختار البقاء، نبقى في الصفحة الحالية
-        console.log('👤 المستخدم اختار البقاء في الموقع');
+// التحقق من تسجيل الدخول
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showMessage('يجب تسجيل الدخول أولاً', true);
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+        return;
     }
 }
 
-// إعداد البحث
-function setupSearch() {
-    console.log('🔍 إعداد نظام البحث...');
+// تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 تحميل صفحة البروفايل...');
     
-    // إعداد البحث المباشر في نافذة البحث المنبثقة
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', searchUsersRealTime);
-        console.log('✅ تم إعداد البحث المباشر في النافذة المنبثقة');
-    }
+    // التحقق من المصادقة
+    checkAuth();
     
-    // إعداد البحث المباشر في قسم الأصدقاء
-    const friendsSearchInput = document.getElementById('friends-search-input');
-    if (friendsSearchInput) {
-        friendsSearchInput.addEventListener('input', searchUsersRealTime);
-        console.log('✅ تم إعداد البحث المباشر في قسم الأصدقاء');
-    }
+    // إعداد مستمعي الأحداث
+    setupEventListeners();
     
-    // إعداد أزرار البحث
-    const searchButton = document.getElementById('search-button');
-    if (searchButton) {
-        searchButton.addEventListener('click', searchUsers);
-        console.log('✅ تم إعداد زر البحث');
-    }
+    // تحميل بيانات المستخدم
+    loadUserProfile();
     
-    console.log('✅ تم إعداد نظام البحث بنجاح');
-}
+    // تحميل الإحصائيات
+    loadUserStats();
+    
+    // تحميل الأصدقاء
+    loadFriends();
+    
+    // تحميل الإنجازات
+    loadAchievements();
+    
+    // إعداد إعدادات الخصوصية
+    setupPrivacySettings();
+    
+    // إعداد إعدادات الإشعارات
+    setupNotificationSettings();
+    
+    // إعداد إعدادات اللعبة
+    setupGameSettings();
+    
+    // إعداد رفع الصور
+    setupImageUpload();
+    
+    // إعداد البحث
+    setupSearch();
+    
+    // إضافة تحذير الخروج
+    setupExitWarning();
+    
+    console.log('✅ تم تحميل صفحة البروفايل بنجاح');
+});
