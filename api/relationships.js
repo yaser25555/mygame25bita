@@ -43,21 +43,19 @@ router.post('/send-friend-request', auth, async (req, res) => {
 
     // التحقق من وجود طلب صداقة مسبق
     const existingRequest = currentUser.relationships.friendRequests.some(
-      request => request.fromUserId.toString() === targetUserId || request.toUserId.toString() === targetUserId
+      request => request.from.toString() === targetUserId || request.from.toString() === currentUserId
     );
 
     if (existingRequest) {
       return res.status(400).json({ error: 'يوجد طلب صداقة مسبق' });
     }
 
-    // إضافة طلب الصداقة
+    // إضافة طلب الصداقة للمستخدم الحالي
     const friendRequest = {
-      fromUserId: currentUserId,
-      toUserId: targetUserId,
+      from: currentUserId,
       fromUsername: currentUser.username,
-      toUsername: targetUser.username,
-      status: 'pending',
-      sentAt: new Date()
+      sentAt: new Date(),
+      message: ''
     };
 
     currentUser.relationships.friendRequests.push(friendRequest);
@@ -80,11 +78,11 @@ router.post('/send-friend-request', auth, async (req, res) => {
 // قبول طلب صداقة
 router.post('/accept-friend-request', auth, async (req, res) => {
   try {
-    const { requestId } = req.body;
+    const { fromUserId } = req.body;
     const currentUserId = req.user.userId;
 
-    if (!requestId) {
-      return res.status(400).json({ error: 'معرف الطلب مطلوب' });
+    if (!fromUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم المرسل مطلوب' });
     }
 
     const currentUser = await User.findById(currentUserId);
@@ -99,7 +97,7 @@ router.post('/accept-friend-request', auth, async (req, res) => {
 
     // البحث عن الطلب
     const requestIndex = currentUser.relationships.friendRequests.findIndex(
-      request => request._id.toString() === requestId && request.toUserId.toString() === currentUserId
+      request => request.from.toString() === fromUserId
     );
 
     if (requestIndex === -1) {
@@ -107,7 +105,7 @@ router.post('/accept-friend-request', auth, async (req, res) => {
     }
 
     const request = currentUser.relationships.friendRequests[requestIndex];
-    const fromUser = await User.findById(request.fromUserId);
+    const fromUser = await User.findById(request.from);
 
     if (!fromUser) {
       return res.status(404).json({ error: 'المستخدم المرسل غير موجود' });
@@ -122,13 +120,15 @@ router.post('/accept-friend-request', auth, async (req, res) => {
     const currentUserFriend = {
       userId: fromUser._id,
       username: fromUser.username,
-      addedAt: new Date()
+      addedAt: new Date(),
+      status: 'accepted'
     };
 
     const fromUserFriend = {
       userId: currentUser._id,
       username: currentUser.username,
-      addedAt: new Date()
+      addedAt: new Date(),
+      status: 'accepted'
     };
 
     currentUser.relationships.friends.push(currentUserFriend);
@@ -137,7 +137,7 @@ router.post('/accept-friend-request', auth, async (req, res) => {
     // إزالة الطلب من كلا المستخدمين
     currentUser.relationships.friendRequests.splice(requestIndex, 1);
     const fromUserRequestIndex = fromUser.relationships.friendRequests.findIndex(
-      req => req._id.toString() === requestId
+      req => req.from.toString() === currentUserId
     );
     if (fromUserRequestIndex !== -1) {
       fromUser.relationships.friendRequests.splice(fromUserRequestIndex, 1);
@@ -160,11 +160,11 @@ router.post('/accept-friend-request', auth, async (req, res) => {
 // رفض طلب صداقة
 router.post('/reject-friend-request', auth, async (req, res) => {
   try {
-    const { requestId } = req.body;
+    const { fromUserId } = req.body;
     const currentUserId = req.user.userId;
 
-    if (!requestId) {
-      return res.status(400).json({ error: 'معرف الطلب مطلوب' });
+    if (!fromUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم المرسل مطلوب' });
     }
 
     const currentUser = await User.findById(currentUserId);
@@ -178,7 +178,7 @@ router.post('/reject-friend-request', auth, async (req, res) => {
 
     // البحث عن الطلب
     const requestIndex = currentUser.relationships.friendRequests.findIndex(
-      request => request._id.toString() === requestId && request.toUserId.toString() === currentUserId
+      request => request.from.toString() === fromUserId
     );
 
     if (requestIndex === -1) {
@@ -186,7 +186,7 @@ router.post('/reject-friend-request', auth, async (req, res) => {
     }
 
     const request = currentUser.relationships.friendRequests[requestIndex];
-    const fromUser = await User.findById(request.fromUserId);
+    const fromUser = await User.findById(request.from);
 
     // إزالة الطلب من كلا المستخدمين
     currentUser.relationships.friendRequests.splice(requestIndex, 1);
@@ -196,7 +196,7 @@ router.post('/reject-friend-request', auth, async (req, res) => {
       if (!fromUser.relationships.friendRequests) fromUser.relationships.friendRequests = [];
       
       const fromUserRequestIndex = fromUser.relationships.friendRequests.findIndex(
-        req => req._id.toString() === requestId
+        req => req.from.toString() === currentUserId
       );
       if (fromUserRequestIndex !== -1) {
         fromUser.relationships.friendRequests.splice(fromUserRequestIndex, 1);
@@ -208,7 +208,7 @@ router.post('/reject-friend-request', auth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم رفض طلب الصداقة'
+      message: 'تم رفض طلب الصداقة بنجاح'
     });
 
   } catch (error) {
@@ -220,21 +220,21 @@ router.post('/reject-friend-request', auth, async (req, res) => {
 // حظر مستخدم
 router.post('/block-user', auth, async (req, res) => {
   try {
-    const { userId: userToBlock } = req.body;
+    const { userId: targetUserId, reason } = req.body;
     const currentUserId = req.user.userId;
 
-    if (!userToBlock) {
+    if (!targetUserId) {
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
 
-    if (currentUserId === userToBlock) {
-      return res.status(400).json({ error: 'لا يمكنك حظر نفسك' });
+    if (currentUserId === targetUserId) {
+      return res.status(400).json({ error: 'لا يمكن حظر نفسك' });
     }
 
     const currentUser = await User.findById(currentUserId);
-    const userToBlockDoc = await User.findById(userToBlock);
+    const targetUser = await User.findById(targetUserId);
 
-    if (!currentUser || !userToBlockDoc) {
+    if (!currentUser || !targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
@@ -246,40 +246,44 @@ router.post('/block-user', auth, async (req, res) => {
 
     // التحقق من أن المستخدم محظور بالفعل
     const alreadyBlocked = currentUser.relationships.blockedUsers.some(
-      blocked => blocked.userId.toString() === userToBlock
+      blocked => blocked.userId.toString() === targetUserId
     );
 
     if (alreadyBlocked) {
       return res.status(400).json({ error: 'المستخدم محظور بالفعل' });
     }
 
-    // إضافة المستخدم لقائمة المحظورين
+    // إضافة المستخدم إلى قائمة المحظورين
     const blockedUser = {
-      userId: userToBlockDoc._id,
-      username: userToBlockDoc.username,
-      blockedAt: new Date()
+      userId: targetUser._id,
+      username: targetUser.username,
+      blockedAt: new Date(),
+      reason: reason || 'لا يوجد سبب محدد'
     };
 
     currentUser.relationships.blockedUsers.push(blockedUser);
 
-    // إزالة الصداقة إذا كانت موجودة
+    // إزالة من قائمة الأصدقاء إذا كانوا أصدقاء
     const friendIndex = currentUser.relationships.friends.findIndex(
-      friend => friend.userId.toString() === userToBlock
+      friend => friend.userId.toString() === targetUserId
     );
     if (friendIndex !== -1) {
       currentUser.relationships.friends.splice(friendIndex, 1);
     }
 
     // إزالة طلبات الصداقة
-    currentUser.relationships.friendRequests = currentUser.relationships.friendRequests.filter(
-      request => request.fromUserId.toString() !== userToBlock && request.toUserId.toString() !== userToBlock
+    const requestIndex = currentUser.relationships.friendRequests.findIndex(
+      request => request.from.toString() === targetUserId
     );
+    if (requestIndex !== -1) {
+      currentUser.relationships.friendRequests.splice(requestIndex, 1);
+    }
 
     await currentUser.save();
 
     res.json({
       success: true,
-      message: `تم حظر ${userToBlockDoc.username} بنجاح`
+      message: `تم حظر ${targetUser.username} بنجاح`
     });
 
   } catch (error) {
@@ -291,15 +295,14 @@ router.post('/block-user', auth, async (req, res) => {
 // إلغاء حظر مستخدم
 router.post('/unblock-user', auth, async (req, res) => {
   try {
-    const { userId: userToUnblock } = req.body;
+    const { userId: targetUserId } = req.body;
     const currentUserId = req.user.userId;
 
-    if (!userToUnblock) {
+    if (!targetUserId) {
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
 
     const currentUser = await User.findById(currentUserId);
-
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -308,18 +311,17 @@ router.post('/unblock-user', auth, async (req, res) => {
     if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
     if (!currentUser.relationships.blockedUsers) currentUser.relationships.blockedUsers = [];
 
-    // البحث عن الحظر
-    const blockIndex = currentUser.relationships.blockedUsers.findIndex(
-      block => block.userId.toString() === userToUnblock
+    // البحث عن المستخدم المحظور
+    const blockedIndex = currentUser.relationships.blockedUsers.findIndex(
+      blocked => blocked.userId.toString() === targetUserId
     );
 
-    if (blockIndex === -1) {
+    if (blockedIndex === -1) {
       return res.status(404).json({ error: 'المستخدم غير محظور' });
     }
 
-    // إزالة الحظر
-    currentUser.relationships.blockedUsers.splice(blockIndex, 1);
-
+    // إزالة من قائمة المحظورين
+    currentUser.relationships.blockedUsers.splice(blockedIndex, 1);
     await currentUser.save();
 
     res.json({
@@ -336,15 +338,15 @@ router.post('/unblock-user', auth, async (req, res) => {
 // إزالة صديق
 router.post('/remove-friend', auth, async (req, res) => {
   try {
-    const { friendId } = req.body;
+    const { userId: friendUserId } = req.body;
     const currentUserId = req.user.userId;
 
-    if (!friendId) {
+    if (!friendUserId) {
       return res.status(400).json({ error: 'معرف الصديق مطلوب' });
     }
 
     const currentUser = await User.findById(currentUserId);
-    const friendUser = await User.findById(friendId);
+    const friendUser = await User.findById(friendUserId);
 
     if (!currentUser || !friendUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -356,27 +358,23 @@ router.post('/remove-friend', auth, async (req, res) => {
     if (!friendUser.relationships) friendUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
     if (!friendUser.relationships.friends) friendUser.relationships.friends = [];
 
-    // البحث عن الصداقة في قائمة المستخدم الحالي
-    const currentUserFriendIndex = currentUser.relationships.friends.findIndex(
-      friend => friend.userId.toString() === friendId
+    // البحث عن الصديق في قائمة الأصدقاء
+    const friendIndex = currentUser.relationships.friends.findIndex(
+      friend => friend.userId.toString() === friendUserId
     );
 
-    // البحث عن الصداقة في قائمة الصديق
-    const friendUserFriendIndex = friendUser.relationships.friends.findIndex(
+    if (friendIndex === -1) {
+      return res.status(404).json({ error: 'المستخدم ليس في قائمة الأصدقاء' });
+    }
+
+    // إزالة من قائمة الأصدقاء لكلا المستخدمين
+    currentUser.relationships.friends.splice(friendIndex, 1);
+    
+    const currentUserFriendIndex = friendUser.relationships.friends.findIndex(
       friend => friend.userId.toString() === currentUserId
     );
-
-    if (currentUserFriendIndex === -1) {
-      return res.status(404).json({ error: 'الصداقة غير موجودة' });
-    }
-
-    // إزالة الصداقة من كلا المستخدمين
     if (currentUserFriendIndex !== -1) {
-      currentUser.relationships.friends.splice(currentUserFriendIndex, 1);
-    }
-
-    if (friendUserFriendIndex !== -1) {
-      friendUser.relationships.friends.splice(friendUserFriendIndex, 1);
+      friendUser.relationships.friends.splice(currentUserFriendIndex, 1);
     }
 
     await currentUser.save();
@@ -384,7 +382,7 @@ router.post('/remove-friend', auth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم إزالة الصديق بنجاح'
+      message: `تم إزالة ${friendUser.username} من قائمة الأصدقاء`
     });
 
   } catch (error) {
@@ -458,25 +456,25 @@ router.get('/friend-requests', auth, async (req, res) => {
     if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
     if (!currentUser.relationships.friendRequests) currentUser.relationships.friendRequests = [];
 
-    // طلبات الصداقة المرسلة
+    // طلبات الصداقة المرسلة (حيث from = currentUserId)
     const sentRequests = currentUser.relationships.friendRequests
-      .filter(request => request.fromUserId && request.fromUserId.toString() === currentUserId)
+      .filter(request => request.from && request.from.toString() === currentUserId)
       .map(request => ({
         id: request._id,
-        toUserId: request.toUserId,
-        toUsername: request.toUsername,
-        status: request.status,
+        toUserId: request.toUserId || request.from, // fallback
+        toUsername: request.toUsername || 'مستخدم غير معروف',
+        status: request.status || 'pending',
         sentAt: request.sentAt
       }));
 
-    // طلبات الصداقة المستلمة
+    // طلبات الصداقة المستلمة (حيث to = currentUserId أو من المستخدمين الآخرين)
     const receivedRequests = currentUser.relationships.friendRequests
-      .filter(request => request.toUserId && request.toUserId.toString() === currentUserId)
+      .filter(request => request.from && request.from.toString() !== currentUserId)
       .map(request => ({
         id: request._id,
-        fromUserId: request.fromUserId,
-        fromUsername: request.fromUsername,
-        status: request.status,
+        fromUserId: request.from,
+        fromUsername: request.fromUsername || 'مستخدم غير معروف',
+        status: request.status || 'pending',
         sentAt: request.sentAt
       }));
 
@@ -529,62 +527,134 @@ router.get('/blocked-users', auth, async (req, res) => {
 // البحث عن مستخدمين
 router.get('/search-users', auth, async (req, res) => {
   try {
-    const { query, limit = 10 } = req.query;
+    const { query } = req.query;
     const currentUserId = req.user.userId;
 
     if (!query || query.length < 2) {
       return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
     }
 
+    const currentUser = await User.findById(currentUserId);
+    if (!currentUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
+    if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
+    if (!currentUser.relationships.friends) currentUser.relationships.friends = [];
+    if (!currentUser.relationships.blockedUsers) currentUser.relationships.blockedUsers = [];
+
+    // البحث عن المستخدمين
     const users = await User.find({
       $and: [
+        { _id: { $ne: currentUserId } },
+        { isAdmin: false },
         {
           $or: [
             { username: { $regex: query, $options: 'i' } },
             { 'profile.displayName': { $regex: query, $options: 'i' } }
           ]
-        },
-        { _id: { $ne: currentUserId } }
+        }
       ]
-    })
-    .select('username profile.displayName profile.avatar stats.score relationships.friends relationships.friendRequests relationships.blockedUsers')
-    .limit(parseInt(limit));
+    }).select('userId username profile.displayName profile.avatar profile.bio profile.level profile.status');
 
-    const currentUser = await User.findById(currentUserId);
-    
-    // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
-    if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
-    if (!currentUser.relationships.friends) currentUser.relationships.friends = [];
-    if (!currentUser.relationships.friendRequests) currentUser.relationships.friendRequests = [];
-    if (!currentUser.relationships.blockedUsers) currentUser.relationships.blockedUsers = [];
+    // تصفية النتائج بناءً على العلاقات
+    const filteredUsers = users.map(user => {
+      const isFriend = currentUser.relationships.friends.some(
+        friend => friend.userId.toString() === user._id.toString()
+      );
+      
+      const isBlocked = currentUser.relationships.blockedUsers.some(
+        blocked => blocked.userId.toString() === user._id.toString()
+      );
 
-    const currentUserFriends = currentUser.relationships.friends.map(f => f.userId.toString());
-    const currentUserRequests = currentUser.relationships.friendRequests.map(r => r.fromUserId.toString());
-    const currentUserBlocked = currentUser.relationships.blockedUsers.map(b => b.userId.toString());
-
-    const searchResults = users.map(user => {
-      const isFriend = currentUserFriends.includes(user._id.toString());
-      const hasRequest = currentUserRequests.includes(user._id.toString());
-      const isBlocked = currentUserBlocked.includes(user._id.toString());
+      const hasFriendRequest = currentUser.relationships.friendRequests.some(
+        request => request.from.toString() === user._id.toString()
+      );
 
       return {
-        id: user._id,
+        userId: user.userId,
         username: user.username,
-        displayName: user.profile.displayName,
-        avatar: user.profile.avatar,
-        score: user.stats.score,
-        relationship: isFriend ? 'friend' : hasRequest ? 'request_sent' : isBlocked ? 'blocked' : 'none'
+        displayName: user.profile?.displayName || user.username,
+        avatar: user.profile?.avatar || 'default-avatar.png',
+        bio: user.profile?.bio || '',
+        level: user.profile?.level || 1,
+        status: user.profile?.status || 'offline',
+        isFriend,
+        isBlocked,
+        hasFriendRequest,
+        canSendRequest: !isFriend && !isBlocked && !hasFriendRequest
       };
     });
 
+    // إزالة المستخدمين المحظورين من النتائج
+    const finalResults = filteredUsers.filter(user => !user.isBlocked);
+
     res.json({
-      users: searchResults,
-      total: searchResults.length
+      users: finalResults,
+      total: finalResults.length
     });
 
   } catch (error) {
     console.error('خطأ في البحث عن المستخدمين:', error);
     res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
+  }
+});
+
+// إلغاء طلب صداقة
+router.post('/cancel-friend-request', auth, async (req, res) => {
+  try {
+    const { userId: targetUserId } = req.body;
+    const currentUserId = req.user.userId;
+
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!currentUser || !targetUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
+    if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
+    if (!currentUser.relationships.friendRequests) currentUser.relationships.friendRequests = [];
+    if (!targetUser.relationships) targetUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
+    if (!targetUser.relationships.friendRequests) targetUser.relationships.friendRequests = [];
+
+    // البحث عن الطلب في قائمة المستخدم الحالي
+    const currentUserRequestIndex = currentUser.relationships.friendRequests.findIndex(
+      request => request.from.toString() === currentUserId && request.from.toString() !== targetUserId
+    );
+
+    if (currentUserRequestIndex === -1) {
+      return res.status(404).json({ error: 'طلب الصداقة غير موجود' });
+    }
+
+    // البحث عن الطلب في قائمة المستخدم المستهدف
+    const targetUserRequestIndex = targetUser.relationships.friendRequests.findIndex(
+      request => request.from.toString() === currentUserId
+    );
+
+    // إزالة الطلب من كلا المستخدمين
+    currentUser.relationships.friendRequests.splice(currentUserRequestIndex, 1);
+    if (targetUserRequestIndex !== -1) {
+      targetUser.relationships.friendRequests.splice(targetUserRequestIndex, 1);
+    }
+
+    await currentUser.save();
+    await targetUser.save();
+
+    res.json({
+      success: true,
+      message: 'تم إلغاء طلب الصداقة بنجاح'
+    });
+
+  } catch (error) {
+    console.error('خطأ في إلغاء طلب الصداقة:', error);
+    res.status(500).json({ error: 'خطأ في إلغاء طلب الصداقة' });
   }
 });
 
