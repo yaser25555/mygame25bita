@@ -39,6 +39,17 @@ function verifyToken(req, res, next) {
   }
 }
 
+// دالة مساعدة للحصول على المستخدم الحالي
+async function getCurrentUser(currentUserId) {
+  if (currentUserId.match(/^[0-9a-fA-F]{24}$/)) {
+    // إذا كان userId هو ObjectId (MongoDB ID)
+    return await User.findById(currentUserId);
+  } else {
+    // إذا كان userId رقم
+    return await User.findOne({ userId: currentUserId });
+  }
+}
+
 // إرسال طلب صداقة
 router.post('/send-friend-request', verifyToken, async (req, res) => {
   try {
@@ -61,7 +72,7 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
     }
 
     // البحث عن المستخدمين باستخدام userId (رقم) وليس _id
-    const currentUser = await User.findOne({ userId: currentUserId });
+    const currentUser = await getCurrentUser(currentUserId);
     const targetUser = await User.findOne({ userId: targetUserId });
 
     console.log('👥 نتائج البحث:', { 
@@ -141,7 +152,7 @@ router.post('/accept-friend-request', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف المستخدم المرسل مطلوب' });
     }
 
-    const currentUser = await User.findOne({ userId: currentUserId });
+    const currentUser = await getCurrentUser(currentUserId);
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -161,7 +172,7 @@ router.post('/accept-friend-request', verifyToken, async (req, res) => {
     }
 
     const request = currentUser.relationships.friendRequests[requestIndex];
-    const fromUser = await User.findOne({ userId: request.from });
+    const fromUser = await getCurrentUser(request.from);
 
     if (!fromUser) {
       return res.status(404).json({ error: 'المستخدم المرسل غير موجود' });
@@ -228,7 +239,7 @@ router.post('/reject-friend-request', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف المستخدم المرسل مطلوب' });
     }
 
-    const currentUser = await User.findOne({ userId: currentUserId });
+    const currentUser = await getCurrentUser(currentUserId);
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -247,7 +258,7 @@ router.post('/reject-friend-request', verifyToken, async (req, res) => {
     }
 
     const request = currentUser.relationships.friendRequests[requestIndex];
-    const fromUser = await User.findOne({ userId: request.from });
+    const fromUser = await getCurrentUser(request.from);
 
     // إزالة الطلب من كلا المستخدمين
     currentUser.relationships.friendRequests.splice(requestIndex, 1);
@@ -297,8 +308,8 @@ router.post('/block-user', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'لا يمكن حظر نفسك' });
     }
 
-    const currentUser = await User.findOne({ userId: currentUserId });
-    const targetUser = await User.findOne({ userId: targetUserId });
+    const currentUser = await getCurrentUser(currentUserId);
+    const targetUser = await getCurrentUser(targetUserId);
 
     if (!currentUser || !targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -373,7 +384,7 @@ router.post('/unblock-user', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
 
-    const currentUser = await User.findOne({ userId: currentUserId });
+    const currentUser = await getCurrentUser(currentUserId);
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -421,8 +432,8 @@ router.post('/remove-friend', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف الصديق مطلوب' });
     }
 
-    const currentUser = await User.findOne({ userId: currentUserId });
-    const friendUser = await User.findOne({ userId: friendUserId });
+    const currentUser = await getCurrentUser(currentUserId);
+    const friendUser = await getCurrentUser(friendUserId);
 
     if (!currentUser || !friendUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -481,7 +492,7 @@ router.get('/friends', verifyToken, async (req, res) => {
     const currentUserId = req.user.userId;
     console.log('👤 معرف المستخدم الحالي:', currentUserId);
 
-    const currentUser = await User.findOne({ userId: currentUserId });
+    const currentUser = await getCurrentUser(currentUserId);
 
     if (!currentUser) {
       console.log('❌ المستخدم غير موجود في قاعدة البيانات');
@@ -548,7 +559,8 @@ router.get('/friend-requests', verifyToken, async (req, res) => {
 
     const currentUserId = req.user.userId;
 
-    const currentUser = await User.findOne({ userId: currentUserId });
+    const currentUser = await getCurrentUser(currentUserId);
+
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -602,7 +614,8 @@ router.get('/blocked-users', verifyToken, async (req, res) => {
 
     const currentUserId = req.user.userId;
 
-    const currentUser = await User.findOne({ userId: currentUserId });
+    const currentUser = await getCurrentUser(currentUserId);
+
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -651,7 +664,8 @@ router.get('/search-users', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
     }
 
-    const currentUser = await User.findOne({ userId: currentUserId });
+    const currentUser = await getCurrentUser(currentUserId);
+
     if (!currentUser) {
       console.log('❌ المستخدم غير موجود في قاعدة البيانات');
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -669,7 +683,7 @@ router.get('/search-users', verifyToken, async (req, res) => {
     // البحث عن المستخدمين
     const users = await User.find({
       $and: [
-        { userId: { $ne: currentUserId } },
+        { _id: { $ne: currentUser._id } },
         { isAdmin: false },
         {
           $or: [
@@ -742,8 +756,8 @@ router.post('/cancel-friend-request', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
 
-    const currentUser = await User.findOne({ userId: currentUserId });
-    const targetUser = await User.findOne({ userId: targetUserId });
+    const currentUser = await getCurrentUser(currentUserId);
+    const targetUser = await getCurrentUser(targetUserId);
 
     if (!currentUser || !targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
