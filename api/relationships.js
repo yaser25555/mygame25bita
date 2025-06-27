@@ -398,8 +398,7 @@ router.get('/friends', auth, async (req, res) => {
   try {
     const currentUserId = req.user.userId;
 
-    const currentUser = await User.findById(currentUserId)
-      .populate('relationships.friends.userId', 'username profile.displayName profile.avatar stats.score');
+    const currentUser = await User.findById(currentUserId);
 
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -409,18 +408,34 @@ router.get('/friends', auth, async (req, res) => {
     if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
     if (!currentUser.relationships.friends) currentUser.relationships.friends = [];
 
-    const friends = currentUser.relationships.friends.map(friend => ({
-      id: friend.userId._id,
-      username: friend.userId.username,
-      displayName: friend.userId.profile.displayName,
-      avatar: friend.userId.profile.avatar,
-      score: friend.userId.stats.score,
-      addedAt: friend.addedAt
-    }));
+    // تحميل بيانات الأصدقاء بشكل منفصل لتجنب مشاكل populate
+    const friendsData = [];
+    
+    for (const friend of currentUser.relationships.friends) {
+      try {
+        const friendUser = await User.findById(friend.userId)
+          .select('username profile.displayName profile.avatar stats.score');
+        
+        if (friendUser) {
+          friendsData.push({
+            id: friendUser._id,
+            username: friendUser.username,
+            displayName: friendUser.profile?.displayName || friendUser.username,
+            avatar: friendUser.profile?.avatar || 'images/default-avatar.png',
+            score: friendUser.stats?.score || 0,
+            addedAt: friend.addedAt
+          });
+        }
+      } catch (friendError) {
+        console.error('خطأ في تحميل بيانات الصديق:', friendError);
+        // تجاهل الأصدقاء الذين لا يمكن تحميل بياناتهم
+        continue;
+      }
+    }
 
     res.json({
-      friends,
-      total: friends.length
+      friends: friendsData,
+      total: friendsData.length
     });
 
   } catch (error) {
@@ -445,7 +460,7 @@ router.get('/friend-requests', auth, async (req, res) => {
 
     // طلبات الصداقة المرسلة
     const sentRequests = currentUser.relationships.friendRequests
-      .filter(request => request.fromUserId.toString() === currentUserId)
+      .filter(request => request.fromUserId && request.fromUserId.toString() === currentUserId)
       .map(request => ({
         id: request._id,
         toUserId: request.toUserId,
@@ -456,7 +471,7 @@ router.get('/friend-requests', auth, async (req, res) => {
 
     // طلبات الصداقة المستلمة
     const receivedRequests = currentUser.relationships.friendRequests
-      .filter(request => request.toUserId.toString() === currentUserId)
+      .filter(request => request.toUserId && request.toUserId.toString() === currentUserId)
       .map(request => ({
         id: request._id,
         fromUserId: request.fromUserId,
@@ -492,11 +507,13 @@ router.get('/blocked-users', auth, async (req, res) => {
     if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
     if (!currentUser.relationships.blockedUsers) currentUser.relationships.blockedUsers = [];
 
-    const blockedUsers = currentUser.relationships.blockedUsers.map(block => ({
-      id: block.userId,
-      username: block.username,
-      blockedAt: block.blockedAt
-    }));
+    const blockedUsers = currentUser.relationships.blockedUsers
+      .filter(block => block.userId) // التأكد من وجود userId
+      .map(block => ({
+        id: block.userId,
+        username: block.username,
+        blockedAt: block.blockedAt
+      }));
 
     res.json({
       blockedUsers,

@@ -1561,3 +1561,24 @@ function showExitConfirmation() {
         console.log('👤 المستخدم اختار البقاء في الموقع');
     }
 }
+
+// إعداد البحث
+function setupSearch() {
+    console.log('🔍 إعداد نظام البحث...');
+    
+    // إعداد البحث المباشر
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', searchUsersRealTime);
+        console.log('✅ تم إعداد البحث المباشر');
+    }
+    
+    // إعداد أزرار البحث
+    const searchButton = document.getElementById('search-button');
+    if (searchButton) {
+        searchButton.addEventListener('click', searchUsers);
+        console.log('✅ تم إعداد زر البحث');
+    }
+    
+    console.log('✅ تم إعداد نظام البحث بنجاح');
+}
