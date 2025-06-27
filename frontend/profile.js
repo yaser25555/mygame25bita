@@ -153,6 +153,14 @@ function setupDataActionListeners() {
                     unblockUser(unblockUserId);
                 }
                 break;
+            case 'handleFriendAction':
+                const friendUserId = e.target.dataset.userId;
+                const friendUsername = e.target.dataset.username;
+                const actionType = e.target.dataset.actionType;
+                if (friendUserId && friendUsername && actionType) {
+                    handleFriendAction(friendUserId, friendUsername, actionType);
+                }
+                break;
         }
     });
     
@@ -1023,7 +1031,7 @@ function displaySearchResults(users) {
             buttonText = 'إضافة صديق';
         }
         
-        actionButton = `<button class="btn-friend ${buttonClass}" onclick="handleFriendAction('${user._id}', '${user.username}', '${buttonClass}')">${buttonText}</button>`;
+        actionButton = `<button class="btn-friend ${buttonClass}" data-action="handleFriendAction" data-user-id="${user._id}" data-username="${user.username}" data-action-type="${buttonClass}">${buttonText}</button>`;
         
         return `
             <div class="user-result">
