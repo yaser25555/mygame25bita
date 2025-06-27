@@ -204,9 +204,9 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
         }
 
         // Update user data
-        user.score = score;
-        user.highScore = highScore;
-        user.roundNumber = roundNumber;
+        user.stats.score = score;
+        user.stats.highScore = highScore;
+        user.stats.roundNumber = roundNumber;
         if (itemsCollected) user.itemsCollected = itemsCollected;
         if (collectedGems !== undefined) user.collectedGems = collectedGems;
         if (totalGemsCollected !== undefined) user.totalGemsCollected = totalGemsCollected;
@@ -977,7 +977,7 @@ router.get('/profile/:username', async (req, res) => {
 router.put('/profile', auth, async (req, res) => {
   try {
     const { displayName, bio, avatar, country, timezone } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const user = await User.findById(userId);
     if (!user) {
@@ -1007,7 +1007,7 @@ router.put('/profile', auth, async (req, res) => {
 router.get('/search', auth, async (req, res) => {
   try {
     const { q, limit = 20, page = 1 } = req.query;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     if (!q || q.trim().length < 2) {
       return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
@@ -1085,7 +1085,7 @@ router.get('/search', auth, async (req, res) => {
 router.post('/upload-profile-image', auth, async (req, res) => {
   try {
     const { imageData, imageType } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     if (!imageData || !imageType) {
       return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
@@ -1121,7 +1121,7 @@ router.post('/upload-profile-image', auth, async (req, res) => {
 router.delete('/delete-profile-image', auth, async (req, res) => {
   try {
     const { imageType } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     if (!imageType || !['profileImage', 'coverImage'].includes(imageType)) {
       return res.status(400).json({ error: 'نوع صورة غير صحيح' });
@@ -1146,7 +1146,7 @@ router.delete('/delete-profile-image', auth, async (req, res) => {
 router.put('/update-bio', auth, async (req, res) => {
   try {
     const { bio } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     if (!bio || bio.length > 500) {
       return res.status(400).json({ error: 'السيرة الذاتية يجب أن تكون أقل من 500 حرف' });
@@ -1180,7 +1180,7 @@ router.put('/update-profile-info', auth, async (req, res) => {
       country,
       timezone 
     } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const updateData = {};
 
@@ -1237,7 +1237,7 @@ router.put('/update-search-settings', auth, async (req, res) => {
       allowFriendRequests, 
       allowMessages 
     } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const updateData = {};
 

@@ -7,7 +7,7 @@ const auth = require('./auth');
 router.post('/create', auth, async (req, res) => {
   try {
     const { toUsername, offeredItems, requestedItems, message = '' } = req.body;
-    const fromUserId = req.user.id;
+    const fromUserId = req.user.userId;
     
     if (!toUsername || !offeredItems || !requestedItems) {
       return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
@@ -102,7 +102,7 @@ router.post('/create', auth, async (req, res) => {
 router.post('/accept/:tradeId', auth, async (req, res) => {
   try {
     const { tradeId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const user = await User.findById(userId);
     if (!user) {
@@ -171,7 +171,7 @@ router.post('/accept/:tradeId', auth, async (req, res) => {
 router.post('/reject/:tradeId', auth, async (req, res) => {
   try {
     const { tradeId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const user = await User.findById(userId);
     if (!user) {
@@ -220,7 +220,7 @@ router.post('/reject/:tradeId', auth, async (req, res) => {
 router.post('/cancel/:tradeId', auth, async (req, res) => {
   try {
     const { tradeId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const user = await User.findById(userId);
     if (!user) {
@@ -268,7 +268,7 @@ router.post('/cancel/:tradeId', auth, async (req, res) => {
 // الحصول على طلبات التداول المستلمة
 router.get('/received', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const user = await User.findById(userId).populate('trading.receivedTrades.fromUserId', 'username profile');
     
     if (!user) {
@@ -301,7 +301,7 @@ router.get('/received', auth, async (req, res) => {
 // الحصول على طلبات التداول المرسلة
 router.get('/sent', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const user = await User.findById(userId).populate('trading.sentTrades.toUserId', 'username profile');
     
     if (!user) {
@@ -333,7 +333,7 @@ router.get('/sent', auth, async (req, res) => {
 // الحصول على سجل التداول
 router.get('/history', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const user = await User.findById(userId).populate('trading.tradeHistory.partnerId', 'username profile');
     
     if (!user) {
@@ -361,7 +361,7 @@ router.get('/history', auth, async (req, res) => {
 // تحديث إعدادات التداول
 router.put('/settings', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const { allowTrades, allowScoreTrading, allowPearlTrading, allowItemTrading, minTradeAmount, maxTradeAmount, autoRejectTrades } = req.body;
     
     const user = await User.findById(userId);
@@ -393,7 +393,7 @@ router.put('/settings', auth, async (req, res) => {
 // الحصول على إحصائيات التداول
 router.get('/stats', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const user = await User.findById(userId);
     
     if (!user) {
