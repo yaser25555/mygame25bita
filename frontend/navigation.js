@@ -1,5 +1,5 @@
 // ملف التنقل - يتعامل مع أزرار التنقل بين الصفحات
-const BACKEND_URL = "https://mygame25bita-1-4ue6.onrender.com";
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
 // دالة تشغيل الصوت (مؤقتة لحل مشكلة ReferenceError)
 function playSound(soundName) {

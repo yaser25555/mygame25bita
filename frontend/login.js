@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://mygame25bita-1-4ue6.onrender.com";
+const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
 // تسجيل Service Worker
 if ('serviceWorker' in navigator) {
@@ -311,6 +311,10 @@ async function handleLogin(event) {
     loginButton.disabled = true;
     
     try {
+        console.log('🚀 بدء طلب تسجيل الدخول...');
+        console.log('📝 البيانات:', { username, password: '***' });
+        console.log('🔗 الرابط:', `${BACKEND_URL}/api/auth/login`);
+        
         const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
@@ -319,9 +323,42 @@ async function handleLogin(event) {
             body: JSON.stringify({ username, password })
         });
         
-        const data = await response.json();
+        console.log('📡 استجابة الخادم:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            headers: Object.fromEntries(response.headers.entries())
+        });
         
-        if (response.ok && data.token) {
+        // التحقق من نوع المحتوى
+        const contentType = response.headers.get('content-type');
+        console.log('📄 نوع المحتوى:', contentType);
+        
+        if (!response.ok) {
+            console.log('❌ خطأ في الاستجابة:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.log('📄 نص الخطأ:', errorText);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        // محاولة قراءة JSON
+        let data;
+        try {
+            const responseText = await response.text();
+            console.log('📄 نص الاستجابة:', responseText);
+            
+            if (!responseText || responseText.trim() === '') {
+                throw new Error('الاستجابة فارغة');
+            }
+            
+            data = JSON.parse(responseText);
+            console.log('✅ تم تحليل JSON بنجاح:', data);
+        } catch (parseError) {
+            console.error('❌ خطأ في تحليل JSON:', parseError);
+            throw new Error('خطأ في تحليل استجابة الخادم');
+        }
+        
+        if (data.token) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('username', data.username);
             localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
