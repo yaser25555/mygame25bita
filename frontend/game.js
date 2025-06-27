@@ -1,5 +1,5 @@
 // ملف اللعبة الرئيسي
-const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+// BACKEND_URL يتم تعريفه في navigation.js
 
 // أصوات
 const sounds = {
