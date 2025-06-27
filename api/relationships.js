@@ -58,6 +58,7 @@ async function getCurrentUser(currentUserId) {
 router.post('/send-friend-request', verifyToken, async (req, res) => {
   try {
     console.log('🔍 محاولة إرسال طلب صداقة...');
+    console.log('📦 البيانات المستلمة:', req.body);
     
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
@@ -87,10 +88,24 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
 
     // البحث عن المستخدمين باستخدام userId (رقم) وليس _id
     console.log('🔍 البحث عن المستخدم الحالي...');
-    const currentUser = await getCurrentUser(currentUserId);
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser(currentUserId);
+      console.log('✅ تم العثور على المستخدم الحالي:', currentUser ? currentUser.username : 'غير موجود');
+    } catch (error) {
+      console.error('❌ خطأ في البحث عن المستخدم الحالي:', error);
+      return res.status(500).json({ error: 'خطأ في البحث عن المستخدم الحالي' });
+    }
     
     console.log('🔍 البحث عن المستخدم المستهدف...');
-    const targetUser = await getCurrentUser(targetUserId);
+    let targetUser;
+    try {
+      targetUser = await getCurrentUser(targetUserId);
+      console.log('✅ تم العثور على المستخدم المستهدف:', targetUser ? targetUser.username : 'غير موجود');
+    } catch (error) {
+      console.error('❌ خطأ في البحث عن المستخدم المستهدف:', error);
+      return res.status(500).json({ error: 'خطأ في البحث عن المستخدم المستهدف' });
+    }
 
     console.log('👥 نتائج البحث:', { 
       currentUser: currentUser ? { username: currentUser.username, userId: currentUser.userId } : 'غير موجود',
@@ -144,8 +159,21 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
     targetUser.relationships.friendRequests.push(friendRequest);
 
     console.log('💾 حفظ البيانات...');
-    await currentUser.save();
-    await targetUser.save();
+    try {
+      await currentUser.save();
+      console.log('✅ تم حفظ بيانات المستخدم الحالي');
+    } catch (error) {
+      console.error('❌ خطأ في حفظ بيانات المستخدم الحالي:', error);
+      return res.status(500).json({ error: 'خطأ في حفظ البيانات' });
+    }
+
+    try {
+      await targetUser.save();
+      console.log('✅ تم حفظ بيانات المستخدم المستهدف');
+    } catch (error) {
+      console.error('❌ خطأ في حفظ بيانات المستخدم المستهدف:', error);
+      return res.status(500).json({ error: 'خطأ في حفظ البيانات' });
+    }
 
     console.log('✅ تم إرسال طلب الصداقة بنجاح');
 
@@ -156,6 +184,7 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
 
   } catch (error) {
     console.error('❌ خطأ في إرسال طلب الصداقة:', error);
+    console.error('❌ تفاصيل الخطأ:', error.stack);
     res.status(500).json({ error: 'خطأ في إرسال طلب الصداقة' });
   }
 });
