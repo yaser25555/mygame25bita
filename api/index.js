@@ -26,22 +26,22 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 // --- 2. إعداد الـ Middleware ---
-// إضافة Helmet للأمان
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrcAttr: ["'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://mygame25bita-7eqw.onrender.com", "https://mygame25bita-1-4ue6.onrender.com", "wss:", "ws:"], // السماح بالاتصال من الواجهة الأمامية إلى الخادم الخلفي
-      mediaSrc: ["'self'", "blob:"],
-      objectSrc: ["'none'"],
-      upgradeInsecureRequests: []
-    }
-  }
-}));
+// إضافة Helmet للأمان (معلق مؤقتاً لحل مشكلة CSP)
+// app.use(helmet({
+//   contentSecurityPolicy: {
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       styleSrc: ["'self'", "'unsafe-inline'"],
+//       scriptSrc: ["'self'", "'unsafe-inline'"],
+//       scriptSrcAttr: ["'unsafe-inline'"],
+//       imgSrc: ["'self'", "data:", "https:"],
+//       connectSrc: ["'self'", "https://mygame25bita-7eqw.onrender.com", "https://mygame25bita-1-4ue6.onrender.com", "wss:", "ws:"], // السماح بالاتصال من الواجهة الأمامية إلى الخادم الخلفي
+//       mediaSrc: ["'self'", "blob:"],
+//       objectSrc: ["'none'"],
+//       upgradeInsecureRequests: []
+//     }
+//   }
+// }));
 
 // إعداد CORS للسماح بالطلبات من واجهة الويب فقط
 app.use(cors({
