@@ -25,39 +25,14 @@ const PORT = process.env.PORT || 3000;
 // إنشاء تطبيق Express
 const app = express();
 
-// --- 2. إعداد الـ Middleware ---
-// إضافة Helmet للأمان (معلق مؤقتاً لحل مشكلة CSP)
-// app.use(helmet({
-//   contentSecurityPolicy: {
-//     directives: {
-//       defaultSrc: ["'self'"],
-//       styleSrc: ["'self'", "'unsafe-inline'"],
-//       scriptSrc: ["'self'", "'unsafe-inline'"],
-//       scriptSrcAttr: ["'unsafe-inline'"],
-//       imgSrc: ["'self'", "data:", "https:"],
-//       connectSrc: ["'self'", "https://mygame25bita-7eqw.onrender.com", "https://mygame25bita-1-4ue6.onrender.com", "wss:", "ws:"], // السماح بالاتصال من الواجهة الأمامية إلى الخادم الخلفي
-//       mediaSrc: ["'self'", "blob:"],
-//       objectSrc: ["'none'"],
-//       upgradeInsecureRequests: []
-//     }
-//   }
-// }));
+// --- 2. إعداد CORS ---
+app.use(cors({
+  origin: 'https://mygame25bita-7eqw.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+}));
 
-// إعداد CORS للسماح بالاتصال من الواجهة الأمامية
-app.use((req, res, next) => {
-  // السماح بالاتصال من الستاتيك سايت
-  res.header('Access-Control-Allow-Origin', 'https://mygame25bita-7eqw.onrender.com');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  // التعامل مع طلبات OPTIONS (preflight)
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
-
+// --- 3. إعداد الـ Middleware ---
 app.use(express.json());
 
 // إعدادات لحجم الطلبات الكبير (لرفع الصور)
@@ -106,14 +81,19 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// نقطة نهاية للصفحة الرئيسية - توجيه للواجهة الأمامية
+// نقطة نهاية للصفحة الرئيسية - رسالة بسيطة
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  res.send(`
+    <html>
+      <head><title>Voice Boom Backend API</title></head>
+      <body>
+        <h1>Voice Boom Backend API</h1>
+        <p>Status: Running</p>
+        <p>This is the backend server. The frontend is served separately.</p>
+      </body>
+    </html>
+  `);
 });
-
-// --- 3. إعداد الملفات الثابتة (Static Files) ---
-// خدمة ملفات الواجهة الأمامية
-app.use(express.static(path.join(__dirname, '../frontend')));
 
 // تحسين إدارة WebSocket
 voiceServer.on('connection', (ws, req) => {
