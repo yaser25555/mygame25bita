@@ -41,15 +41,28 @@ function verifyToken(req, res, next) {
 
 // دالة مساعدة للحصول على المستخدم الحالي
 async function getCurrentUser(currentUserId) {
+  // فحص القيم الفارغة أو غير الصحيحة
+  if (!currentUserId || currentUserId === 'undefined' || currentUserId === 'null') {
+    console.log('❌ userId غير صحيح:', currentUserId);
+    return null;
+  }
+
   // إذا كان userId هو ObjectId (MongoDB ID)
   if (currentUserId && typeof currentUserId === 'string' && currentUserId.match(/^[0-9a-fA-F]{24}$/)) {
     return await User.findById(currentUserId);
   } else {
     // إذا كان userId رقم أو string رقمي
     let numericUserId = currentUserId;
-    if (typeof currentUserId === 'string' && !isNaN(currentUserId)) {
+    if (typeof currentUserId === 'string' && !isNaN(currentUserId) && currentUserId.trim() !== '') {
       numericUserId = parseInt(currentUserId);
     }
+    
+    // فحص إضافي للتأكد من أن القيمة صحيحة
+    if (isNaN(numericUserId) || numericUserId === null || numericUserId === undefined) {
+      console.log('❌ userId غير صحيح بعد التحويل:', numericUserId);
+      return null;
+    }
+    
     return await User.findOne({ userId: numericUserId });
   }
 }
@@ -76,9 +89,9 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
       targetUserIdType: typeof targetUserId 
     });
 
-    if (!targetUserId) {
-      console.log('❌ معرف المستخدم المستهدف مفقود');
-      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    if (!targetUserId || targetUserId === 'undefined' || targetUserId === 'null') {
+      console.log('❌ معرف المستخدم المستهدف مفقود أو غير صحيح:', targetUserId);
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب وصحيح' });
     }
 
     if (currentUserId === targetUserId) {

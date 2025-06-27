@@ -1171,7 +1171,15 @@ function displaySearchResults(users) {
         return;
     }
     
-    const resultsHTML = users.map(user => `
+    const resultsHTML = users.map(user => {
+        // التأكد من وجود userId صحيح
+        const userId = user.userId || user._id || user.id;
+        if (!userId) {
+            console.log('❌ userId مفقود للمستخدم:', user.username);
+            return '';
+        }
+        
+        return `
         <div class="search-result-item">
             <div class="user-info">
                 <img src="${user.avatar || 'images/default-avatar.png'}" alt="${user.username}" class="user-avatar">
@@ -1188,12 +1196,13 @@ function displaySearchResults(users) {
                     user.hasFriendRequest ? 
                         '<button class="btn small disabled">طلب مرسل</button>' :
                         user.canSendRequest ? 
-                            `<button class="btn small primary" onclick="sendFriendRequest('${user.userId}')">إرسال طلب</button>` :
+                            `<button class="btn small primary" onclick="sendFriendRequest('${userId}')">إرسال طلب</button>` :
                             '<button class="btn small disabled">غير متاح</button>'
                 }
             </div>
         </div>
-    `).join('');
+    `;
+    }).filter(html => html !== '').join('');
     
     searchResults.innerHTML = resultsHTML;
 }
