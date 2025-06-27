@@ -1182,6 +1182,39 @@ router.put('/update-profile-info', auth, async (req, res) => {
     } = req.body;
     const userId = req.user.userId;
 
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة حقل profile إذا لم يكن موجوداً
+    if (!user.profile) {
+      user.profile = {
+        displayName: user.username,
+        bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
+        avatar: 'default-avatar.png',
+        profileImage: null,
+        coverImage: null,
+        age: null,
+        gender: 'prefer-not-to-say',
+        interests: [],
+        favoriteGames: [],
+        socialLinks: {},
+        level: 1,
+        experience: 0,
+        joinDate: new Date(),
+        lastSeen: new Date(),
+        status: 'offline',
+        country: '',
+        timezone: '',
+        searchable: true,
+        showInSearch: true,
+        allowFriendRequests: true,
+        allowMessages: true
+      };
+      await user.save();
+    }
+
     const updateData = {};
 
     if (displayName && displayName.length <= 50) {
@@ -1238,6 +1271,39 @@ router.put('/update-search-settings', auth, async (req, res) => {
       allowMessages 
     } = req.body;
     const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة حقل profile إذا لم يكن موجوداً
+    if (!user.profile) {
+      user.profile = {
+        displayName: user.username,
+        bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
+        avatar: 'default-avatar.png',
+        profileImage: null,
+        coverImage: null,
+        age: null,
+        gender: 'prefer-not-to-say',
+        interests: [],
+        favoriteGames: [],
+        socialLinks: {},
+        level: 1,
+        experience: 0,
+        joinDate: new Date(),
+        lastSeen: new Date(),
+        status: 'offline',
+        country: '',
+        timezone: '',
+        searchable: true,
+        showInSearch: true,
+        allowFriendRequests: true,
+        allowMessages: true
+      };
+      await user.save();
+    }
 
     const updateData = {};
 
