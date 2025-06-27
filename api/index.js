@@ -45,9 +45,23 @@ const app = express();
 
 // إعداد CORS للسماح بالطلبات من واجهة الويب فقط
 app.use(cors({
-    origin: 'https://mygame25bita-7eqw.onrender.com', // دومين الواجهة
-    credentials: true
+    origin: ['https://mygame25bita-7eqw.onrender.com', 'http://localhost:3000', 'http://localhost:5000'], // السماح بالاتصال من الواجهة الأمامية والتطوير المحلي
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// معالجة طلبات OPTIONS (preflight requests)
+app.options('*', cors());
+
+// إضافة headers إضافية للاستجابة
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'https://mygame25bita-7eqw.onrender.com');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
 
 app.use(express.json());
 
