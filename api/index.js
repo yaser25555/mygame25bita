@@ -43,16 +43,19 @@ const app = express();
 //   }
 // }));
 
-// إعداد CORS بسيط للاختبار
+// إعداد CORS للسماح بالاتصال من الواجهة الأمامية
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://mygame25bita-7eqw.onrender.com');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
-    } else {
-        next();
-    }
+  // السماح بالاتصال من الستاتيك سايت
+  res.header('Access-Control-Allow-Origin', 'https://mygame25bita-7eqw.onrender.com');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // التعامل مع طلبات OPTIONS (preflight)
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
 });
 
 app.use(express.json());
@@ -111,7 +114,7 @@ app.get('/', (req, res) => {
       <body>
         <h1>Voice Boom Backend API</h1>
         <p>Status: Running</p>
-        <p>This is the backend server. Please use the frontend at: <a href="https://mygame25bita-7eqw.onrender.com">Frontend</a></p>
+        <p>This is the backend server. The frontend is served separately.</p>
       </body>
     </html>
   `);
