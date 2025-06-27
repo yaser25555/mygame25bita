@@ -50,6 +50,8 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
     const { userId: targetUserId } = req.body;
     const currentUserId = req.user.userId;
 
+    console.log('🔍 محاولة إرسال طلب صداقة:', { currentUserId, targetUserId });
+
     if (!targetUserId) {
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
@@ -58,8 +60,14 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'لا يمكن إرسال طلب صداقة لنفسك' });
     }
 
-    const currentUser = await User.findById(currentUserId);
-    const targetUser = await User.findById(targetUserId);
+    // البحث عن المستخدمين باستخدام userId (رقم) وليس _id
+    const currentUser = await User.findOne({ userId: currentUserId });
+    const targetUser = await User.findOne({ userId: targetUserId });
+
+    console.log('👥 نتائج البحث:', { 
+      currentUser: currentUser ? currentUser.username : 'غير موجود',
+      targetUser: targetUser ? targetUser.username : 'غير موجود'
+    });
 
     if (!currentUser || !targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -75,7 +83,7 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
 
     // التحقق من أن المستخدمين ليسوا أصدقاء بالفعل
     const alreadyFriends = currentUser.relationships.friends.some(
-      friend => friend.userId.toString() === targetUserId
+      friend => friend.userId === targetUser.userId
     );
 
     if (alreadyFriends) {
@@ -84,7 +92,7 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
 
     // التحقق من وجود طلب صداقة مسبق
     const existingRequest = currentUser.relationships.friendRequests.some(
-      request => request.from.toString() === targetUserId || request.from.toString() === currentUserId
+      request => request.from === targetUser.userId || request.from === currentUser.userId
     );
 
     if (existingRequest) {
@@ -93,7 +101,7 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
 
     // إضافة طلب الصداقة للمستخدم الحالي
     const friendRequest = {
-      from: currentUserId,
+      from: currentUser.userId,
       fromUsername: currentUser.username,
       sentAt: new Date(),
       message: ''
@@ -105,13 +113,15 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
     await currentUser.save();
     await targetUser.save();
 
+    console.log('✅ تم إرسال طلب الصداقة بنجاح');
+
     res.json({
       success: true,
       message: `تم إرسال طلب صداقة إلى ${targetUser.username}`
     });
 
   } catch (error) {
-    console.error('خطأ في إرسال طلب الصداقة:', error);
+    console.error('❌ خطأ في إرسال طلب الصداقة:', error);
     res.status(500).json({ error: 'خطأ في إرسال طلب الصداقة' });
   }
 });
@@ -131,7 +141,7 @@ router.post('/accept-friend-request', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف المستخدم المرسل مطلوب' });
     }
 
-    const currentUser = await User.findById(currentUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -143,7 +153,7 @@ router.post('/accept-friend-request', verifyToken, async (req, res) => {
 
     // البحث عن الطلب
     const requestIndex = currentUser.relationships.friendRequests.findIndex(
-      request => request.from.toString() === fromUserId
+      request => request.from === fromUserId
     );
 
     if (requestIndex === -1) {
@@ -151,7 +161,7 @@ router.post('/accept-friend-request', verifyToken, async (req, res) => {
     }
 
     const request = currentUser.relationships.friendRequests[requestIndex];
-    const fromUser = await User.findById(request.from);
+    const fromUser = await User.findOne({ userId: request.from });
 
     if (!fromUser) {
       return res.status(404).json({ error: 'المستخدم المرسل غير موجود' });
@@ -164,14 +174,14 @@ router.post('/accept-friend-request', verifyToken, async (req, res) => {
 
     // إضافة الصداقة لكلا المستخدمين
     const currentUserFriend = {
-      userId: fromUser._id,
+      userId: fromUser.userId,
       username: fromUser.username,
       addedAt: new Date(),
       status: 'accepted'
     };
 
     const fromUserFriend = {
-      userId: currentUser._id,
+      userId: currentUser.userId,
       username: currentUser.username,
       addedAt: new Date(),
       status: 'accepted'
@@ -183,7 +193,7 @@ router.post('/accept-friend-request', verifyToken, async (req, res) => {
     // إزالة الطلب من كلا المستخدمين
     currentUser.relationships.friendRequests.splice(requestIndex, 1);
     const fromUserRequestIndex = fromUser.relationships.friendRequests.findIndex(
-      req => req.from.toString() === currentUserId
+      req => req.from === currentUser.userId
     );
     if (fromUserRequestIndex !== -1) {
       fromUser.relationships.friendRequests.splice(fromUserRequestIndex, 1);
@@ -218,7 +228,7 @@ router.post('/reject-friend-request', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف المستخدم المرسل مطلوب' });
     }
 
-    const currentUser = await User.findById(currentUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -229,7 +239,7 @@ router.post('/reject-friend-request', verifyToken, async (req, res) => {
 
     // البحث عن الطلب
     const requestIndex = currentUser.relationships.friendRequests.findIndex(
-      request => request.from.toString() === fromUserId
+      request => request.from === fromUserId
     );
 
     if (requestIndex === -1) {
@@ -237,7 +247,7 @@ router.post('/reject-friend-request', verifyToken, async (req, res) => {
     }
 
     const request = currentUser.relationships.friendRequests[requestIndex];
-    const fromUser = await User.findById(request.from);
+    const fromUser = await User.findOne({ userId: request.from });
 
     // إزالة الطلب من كلا المستخدمين
     currentUser.relationships.friendRequests.splice(requestIndex, 1);
@@ -247,7 +257,7 @@ router.post('/reject-friend-request', verifyToken, async (req, res) => {
       if (!fromUser.relationships.friendRequests) fromUser.relationships.friendRequests = [];
       
       const fromUserRequestIndex = fromUser.relationships.friendRequests.findIndex(
-        req => req.from.toString() === currentUserId
+        req => req.from === currentUser.userId
       );
       if (fromUserRequestIndex !== -1) {
         fromUser.relationships.friendRequests.splice(fromUserRequestIndex, 1);
@@ -287,8 +297,8 @@ router.post('/block-user', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'لا يمكن حظر نفسك' });
     }
 
-    const currentUser = await User.findById(currentUserId);
-    const targetUser = await User.findById(targetUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
+    const targetUser = await User.findOne({ userId: targetUserId });
 
     if (!currentUser || !targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -302,7 +312,7 @@ router.post('/block-user', verifyToken, async (req, res) => {
 
     // التحقق من أن المستخدم محظور بالفعل
     const alreadyBlocked = currentUser.relationships.blockedUsers.some(
-      blocked => blocked.userId.toString() === targetUserId
+      blocked => blocked.userId === targetUser.userId
     );
 
     if (alreadyBlocked) {
@@ -311,7 +321,7 @@ router.post('/block-user', verifyToken, async (req, res) => {
 
     // إضافة المستخدم إلى قائمة المحظورين
     const blockedUser = {
-      userId: targetUser._id,
+      userId: targetUser.userId,
       username: targetUser.username,
       blockedAt: new Date(),
       reason: reason || 'لا يوجد سبب محدد'
@@ -321,7 +331,7 @@ router.post('/block-user', verifyToken, async (req, res) => {
 
     // إزالة من قائمة الأصدقاء إذا كانوا أصدقاء
     const friendIndex = currentUser.relationships.friends.findIndex(
-      friend => friend.userId.toString() === targetUserId
+      friend => friend.userId === targetUser.userId
     );
     if (friendIndex !== -1) {
       currentUser.relationships.friends.splice(friendIndex, 1);
@@ -329,7 +339,7 @@ router.post('/block-user', verifyToken, async (req, res) => {
 
     // إزالة طلبات الصداقة
     const requestIndex = currentUser.relationships.friendRequests.findIndex(
-      request => request.from.toString() === targetUserId
+      request => request.from === targetUser.userId
     );
     if (requestIndex !== -1) {
       currentUser.relationships.friendRequests.splice(requestIndex, 1);
@@ -363,7 +373,7 @@ router.post('/unblock-user', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
 
-    const currentUser = await User.findById(currentUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -374,7 +384,7 @@ router.post('/unblock-user', verifyToken, async (req, res) => {
 
     // البحث عن المستخدم المحظور
     const blockedIndex = currentUser.relationships.blockedUsers.findIndex(
-      blocked => blocked.userId.toString() === targetUserId
+      blocked => blocked.userId === targetUserId
     );
 
     if (blockedIndex === -1) {
@@ -411,8 +421,8 @@ router.post('/remove-friend', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف الصديق مطلوب' });
     }
 
-    const currentUser = await User.findById(currentUserId);
-    const friendUser = await User.findById(friendUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
+    const friendUser = await User.findOne({ userId: friendUserId });
 
     if (!currentUser || !friendUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -426,7 +436,7 @@ router.post('/remove-friend', verifyToken, async (req, res) => {
 
     // البحث عن الصديق في قائمة الأصدقاء
     const friendIndex = currentUser.relationships.friends.findIndex(
-      friend => friend.userId.toString() === friendUserId
+      friend => friend.userId === friendUser.userId
     );
 
     if (friendIndex === -1) {
@@ -437,7 +447,7 @@ router.post('/remove-friend', verifyToken, async (req, res) => {
     currentUser.relationships.friends.splice(friendIndex, 1);
     
     const currentUserFriendIndex = friendUser.relationships.friends.findIndex(
-      friend => friend.userId.toString() === currentUserId
+      friend => friend.userId === currentUser.userId
     );
     if (currentUserFriendIndex !== -1) {
       friendUser.relationships.friends.splice(currentUserFriendIndex, 1);
@@ -467,7 +477,7 @@ router.get('/friends', verifyToken, async (req, res) => {
 
     const currentUserId = req.user.userId;
 
-    const currentUser = await User.findById(currentUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
 
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -482,12 +492,12 @@ router.get('/friends', verifyToken, async (req, res) => {
     
     for (const friend of currentUser.relationships.friends) {
       try {
-        const friendUser = await User.findById(friend.userId)
+        const friendUser = await User.findOne({ userId: friend.userId })
           .select('username profile.displayName profile.avatar stats.score');
         
         if (friendUser) {
           friendsData.push({
-            id: friendUser._id,
+            userId: friendUser.userId,
             username: friendUser.username,
             displayName: friendUser.profile?.displayName || friendUser.username,
             avatar: friendUser.profile?.avatar || 'images/default-avatar.png',
@@ -523,7 +533,7 @@ router.get('/friend-requests', verifyToken, async (req, res) => {
 
     const currentUserId = req.user.userId;
 
-    const currentUser = await User.findById(currentUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -534,7 +544,7 @@ router.get('/friend-requests', verifyToken, async (req, res) => {
 
     // طلبات الصداقة المرسلة (حيث from = currentUserId)
     const sentRequests = currentUser.relationships.friendRequests
-      .filter(request => request.from && request.from.toString() === currentUserId)
+      .filter(request => request.from === currentUser.userId)
       .map(request => ({
         id: request._id,
         toUserId: request.toUserId || request.from, // fallback
@@ -545,7 +555,7 @@ router.get('/friend-requests', verifyToken, async (req, res) => {
 
     // طلبات الصداقة المستلمة (حيث to = currentUserId أو من المستخدمين الآخرين)
     const receivedRequests = currentUser.relationships.friendRequests
-      .filter(request => request.from && request.from.toString() !== currentUserId)
+      .filter(request => request.from !== currentUser.userId)
       .map(request => ({
         id: request._id,
         fromUserId: request.from,
@@ -577,7 +587,7 @@ router.get('/blocked-users', verifyToken, async (req, res) => {
 
     const currentUserId = req.user.userId;
 
-    const currentUser = await User.findById(currentUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -589,7 +599,7 @@ router.get('/blocked-users', verifyToken, async (req, res) => {
     const blockedUsers = currentUser.relationships.blockedUsers
       .filter(block => block.userId) // التأكد من وجود userId
       .map(block => ({
-        id: block.userId,
+        userId: block.userId,
         username: block.username,
         blockedAt: block.blockedAt
       }));
@@ -620,7 +630,7 @@ router.get('/search-users', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
     }
 
-    const currentUser = await User.findById(currentUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -633,7 +643,7 @@ router.get('/search-users', verifyToken, async (req, res) => {
     // البحث عن المستخدمين
     const users = await User.find({
       $and: [
-        { _id: { $ne: currentUserId } },
+        { userId: { $ne: currentUserId } },
         { isAdmin: false },
         {
           $or: [
@@ -647,15 +657,15 @@ router.get('/search-users', verifyToken, async (req, res) => {
     // تصفية النتائج بناءً على العلاقات
     const filteredUsers = users.map(user => {
       const isFriend = currentUser.relationships.friends.some(
-        friend => friend.userId.toString() === user._id.toString()
+        friend => friend.userId === user.userId
       );
       
       const isBlocked = currentUser.relationships.blockedUsers.some(
-        blocked => blocked.userId.toString() === user._id.toString()
+        blocked => blocked.userId === user.userId
       );
 
       const hasFriendRequest = currentUser.relationships.friendRequests.some(
-        request => request.from.toString() === user._id.toString()
+        request => request.from === user.userId
       );
 
       return {
@@ -702,8 +712,8 @@ router.post('/cancel-friend-request', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
 
-    const currentUser = await User.findById(currentUserId);
-    const targetUser = await User.findById(targetUserId);
+    const currentUser = await User.findOne({ userId: currentUserId });
+    const targetUser = await User.findOne({ userId: targetUserId });
 
     if (!currentUser || !targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -717,7 +727,7 @@ router.post('/cancel-friend-request', verifyToken, async (req, res) => {
 
     // البحث عن الطلب في قائمة المستخدم الحالي
     const currentUserRequestIndex = currentUser.relationships.friendRequests.findIndex(
-      request => request.from.toString() === currentUserId && request.from.toString() !== targetUserId
+      request => request.from === currentUser.userId && request.from !== targetUser.userId
     );
 
     if (currentUserRequestIndex === -1) {
@@ -726,7 +736,7 @@ router.post('/cancel-friend-request', verifyToken, async (req, res) => {
 
     // البحث عن الطلب في قائمة المستخدم المستهدف
     const targetUserRequestIndex = targetUser.relationships.friendRequests.findIndex(
-      request => request.from.toString() === currentUserId
+      request => request.from === currentUser.userId
     );
 
     // إزالة الطلب من كلا المستخدمين
