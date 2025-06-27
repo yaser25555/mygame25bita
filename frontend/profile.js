@@ -281,12 +281,6 @@ function updateProfileDisplay() {
         avatarImg.src = currentUser.profile.avatar;
     }
     
-    // صورة الغلاف
-    const coverImg = document.getElementById('cover-image');
-    if (currentUser.profile?.coverImage) {
-        coverImg.src = currentUser.profile.coverImage;
-    }
-    
     // معلومات إضافية
     updateProfileDetails();
     
@@ -960,16 +954,6 @@ function editProfileImage() {
     const uploadImageTitle = document.getElementById('upload-image-title');
     if (uploadImageTitle) {
         uploadImageTitle.textContent = 'تعديل الصورة الشخصية';
-    }
-    openModal('upload-image-modal');
-    resetImageUpload();
-}
-
-// تعديل صورة الغلاف
-function editCoverImage() {
-    const uploadImageTitle = document.getElementById('upload-image-title');
-    if (uploadImageTitle) {
-        uploadImageTitle.textContent = 'تعديل صورة الغلاف';
     }
     openModal('upload-image-modal');
     resetImageUpload();
