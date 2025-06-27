@@ -10,26 +10,32 @@ const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123'; // تصحيح 
 
 // دالة Middleware للتحقق من التوكن (يمكن أن تكون في ملف منفصل لسهولة إعادة الاستخدام)
 function verifyToken(req, res, next) {
+  console.log('🔐 محاولة التحقق من التوكن...');
   let token;
   // 1. Check for token in Authorization header
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     token = authHeader.split(' ')[1];
+    console.log('✅ تم العثور على التوكن في Authorization header');
   } 
   // 2. If not in header, check for token in query parameters (for sendBeacon)
   else if (req.query.token) {
     token = req.query.token;
+    console.log('✅ تم العثور على التوكن في query parameters');
   }
 
   if (!token) {
+    console.log('❌ التوكن مفقود');
     return res.status(401).json({ message: 'التوكن مفقود' });
   }
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded; // تخزين معلومات المستخدم (id, isAdmin) في req.user
+    console.log('✅ تم فك تشفير التوكن بنجاح:', { userId: decoded.userId, username: decoded.username });
+    req.user = decoded; // تخزين معلومات المستخدم (userId, username, isAdmin) في req.user
     next();
   } catch (err) {
+    console.log('❌ خطأ في فك تشفير التوكن:', err.message);
     return res.status(401).json({ message: 'توكن غير صالح' });
   }
 }
@@ -53,6 +59,21 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage: storage });
+
+// مسار test للتأكد من أن المسارات تعمل
+router.get('/test', (req, res) => {
+  console.log('🧪 تم استلام طلب test');
+  res.json({ message: 'مسارات user تعمل بشكل صحيح' });
+});
+
+// مسار test مع verifyToken
+router.get('/test-auth', verifyToken, (req, res) => {
+  console.log('🧪 تم استلام طلب test-auth');
+  res.json({ 
+    message: 'المصادقة تعمل بشكل صحيح',
+    user: req.user 
+  });
+});
 
 // مسار جديد: جلب إعدادات اللعبة (للجميع) - *** يجب وضعه هنا قبل المسارات الأخرى ***
 router.get('/settings', async (req, res) => {
@@ -147,6 +168,17 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
             return res.status(404).json({ message: 'المستخدم غير موجود' });
         }
 
+        // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
+        if (!user.stats) user.stats = { score: 0, pearls: 0, highScore: 0, roundNumber: 0, personalScore: 50, boxesOpened: 0, gamesPlayed: 0, gamesWon: 0, winRate: 0, totalPlayTime: 0, averageScore: 0 };
+        if (!user.itemsCollected) user.itemsCollected = { gems: 0, keys: 0, coins: 0, pearls: 0, bombs: 0, stars: 0, bat: 0 };
+        if (!user.weapons) user.weapons = { singleShotsUsed: 0, tripleShotsUsed: 0, hammerShotsUsed: 0, totalShots: 0, accuracy: 0 };
+        if (!user.settings) user.settings = { gameSettings: { numBoxes: 10, boxValues: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }, privacy: {}, notifications: {} };
+        if (!user.boxValues) user.boxValues = [];
+        if (!user.achievements) user.achievements = [];
+        if (!user.badges) user.badges = [];
+        if (!user.relationships) user.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
+        if (!user.suspiciousActivity) user.suspiciousActivity = [];
+
         // Anti-cheat checks
         const suspiciousActivity = [];
         
@@ -185,7 +217,6 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
             console.warn(`Suspicious activity detected for user ${user.username}:`, suspiciousActivity);
             
             // Log suspicious activity to user's record
-            if (!user.suspiciousActivity) user.suspiciousActivity = [];
             user.suspiciousActivity.push({
                 timestamp: new Date(),
                 activities: suspiciousActivity,
@@ -387,31 +418,55 @@ router.post('/settings', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // مسار جديد: تحديث بيانات المستخدم (للمشرف)
-router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
-  const { currentUsername, newUsername, newPassword, newScore } = req.body;
-
+router.put('/update', verifyToken, async (req, res) => {
   try {
-    const user = await User.findOne({ username: currentUsername });
+    const { score, totalSpent, itemsCollected, stats, weapons, profile, achievements, badges, relationships } = req.body;
+    const user = await User.findById(req.user.userId);
+
     if (!user) {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
 
-    if (newUsername) {
-      user.username = newUsername;
-    }
-    if (newPassword) {
-      user.password = newPassword; // The pre-save hook in User.js will hash it
-    }
-    if (newScore !== undefined) {
-      user.stats.score = newScore;
-    }
+    // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
+    if (!user.stats) user.stats = { score: 0, pearls: 0, highScore: 0, roundNumber: 0, personalScore: 50, boxesOpened: 0, gamesPlayed: 0, gamesWon: 0, winRate: 0, totalPlayTime: 0, averageScore: 0 };
+    if (!user.itemsCollected) user.itemsCollected = { gems: 0, keys: 0, coins: 0, pearls: 0, bombs: 0, stars: 0, bat: 0 };
+    if (!user.weapons) user.weapons = { singleShotsUsed: 0, tripleShotsUsed: 0, hammerShotsUsed: 0, totalShots: 0, accuracy: 0 };
+    if (!user.profile) user.profile = { displayName: user.username, bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮', avatar: 'default-avatar.png', level: 1, experience: 0, joinDate: new Date(), lastSeen: new Date(), status: 'offline' };
+    if (!user.achievements) user.achievements = [];
+    if (!user.badges) user.badges = [];
+    if (!user.relationships) user.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
+
+    // تحديث البيانات المرسلة
+    if (score !== undefined) user.stats.score = score;
+    if (totalSpent !== undefined) user.totalSpent = totalSpent;
+    if (itemsCollected) user.itemsCollected = { ...user.itemsCollected, ...itemsCollected };
+    if (stats) user.stats = { ...user.stats, ...stats };
+    if (weapons) user.weapons = { ...user.weapons, ...weapons };
+    if (profile) user.profile = { ...user.profile, ...profile };
+    if (achievements) user.achievements = achievements;
+    if (badges) user.badges = badges;
+    if (relationships) user.relationships = { ...user.relationships, ...relationships };
 
     await user.save();
 
-    res.json({ message: 'تم تحديث بيانات المستخدم بنجاح!', user });
+    res.json({ 
+      message: 'تم تحديث بيانات المستخدم بنجاح',
+      user: {
+        username: user.username,
+        score: user.stats.score,
+        totalSpent: user.totalSpent,
+        itemsCollected: user.itemsCollected,
+        stats: user.stats,
+        weapons: user.weapons,
+        profile: user.profile,
+        achievements: user.achievements,
+        badges: user.badges,
+        relationships: user.relationships
+      }
+    });
 
   } catch (error) {
-    console.error("خطأ في تحديث بيانات المستخدم:", error);
+    console.error('خطأ في تحديث بيانات المستخدم:', error);
     res.status(500).json({ message: 'خطأ في الخادم أثناء تحديث بيانات المستخدم' });
   }
 });
@@ -531,7 +586,7 @@ router.get('/by-username/:username', verifyToken, verifyAdmin, async (req, res) 
 });
 
 // الحصول على قائمة الأصدقاء
-router.get('/friends', auth, async (req, res) => {
+router.get('/friends', verifyToken, async (req, res) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId).populate('relationships.friends.userId', 'username profile.displayName profile.avatar stats.score');
@@ -562,7 +617,7 @@ router.get('/friends', auth, async (req, res) => {
 });
 
 // الحصول على طلبات الصداقة
-router.get('/friend-requests', auth, async (req, res) => {
+router.get('/friend-requests', verifyToken, async (req, res) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId).populate('relationships.friendRequests.fromUserId', 'username profile.displayName profile.avatar stats.score');
@@ -593,7 +648,7 @@ router.get('/friend-requests', auth, async (req, res) => {
 });
 
 // الحصول على المستخدمين المحظورين
-router.get('/blocked-users', auth, async (req, res) => {
+router.get('/blocked-users', verifyToken, async (req, res) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId).populate('relationships.blockedUsers.userId', 'username profile.displayName profile.avatar stats.score');
@@ -624,7 +679,7 @@ router.get('/blocked-users', auth, async (req, res) => {
 });
 
 // إرسال طلب صداقة
-router.post('/friend-request', auth, async (req, res) => {
+router.post('/friend-request', verifyToken, async (req, res) => {
   try {
     const { toUserId, message = '' } = req.body;
     const fromUserId = req.user.userId;
@@ -681,7 +736,7 @@ router.post('/friend-request', auth, async (req, res) => {
 });
 
 // قبول طلب صداقة
-router.post('/accept-friend-request', auth, async (req, res) => {
+router.post('/accept-friend-request', verifyToken, async (req, res) => {
   try {
     const { fromUserId } = req.body;
     const toUserId = req.user.userId;
@@ -737,7 +792,7 @@ router.post('/accept-friend-request', auth, async (req, res) => {
 });
 
 // رفض طلب صداقة
-router.post('/reject-friend-request', auth, async (req, res) => {
+router.post('/reject-friend-request', verifyToken, async (req, res) => {
   try {
     const { fromUserId } = req.body;
     const toUserId = req.user.userId;
@@ -778,7 +833,7 @@ router.post('/reject-friend-request', auth, async (req, res) => {
 });
 
 // حظر مستخدم
-router.post('/block-user', auth, async (req, res) => {
+router.post('/block-user', verifyToken, async (req, res) => {
   try {
     const { userId: userToBlock, reason = '' } = req.body;
     const currentUserId = req.user.userId;
@@ -846,7 +901,7 @@ router.post('/block-user', auth, async (req, res) => {
 });
 
 // إلغاء حظر مستخدم
-router.post('/unblock-user', auth, async (req, res) => {
+router.post('/unblock-user', verifyToken, async (req, res) => {
   try {
     const { userId: userToUnblock } = req.body;
     const currentUserId = req.user.userId;
@@ -887,7 +942,7 @@ router.post('/unblock-user', auth, async (req, res) => {
 });
 
 // البحث عن مستخدمين
-router.get('/search-users', auth, async (req, res) => {
+router.get('/search-users', verifyToken, async (req, res) => {
   try {
     const { query, limit = 10 } = req.query;
     const currentUserId = req.user.userId;
@@ -974,7 +1029,7 @@ router.get('/profile/:username', async (req, res) => {
 });
 
 // تحديث بروفايل المستخدم
-router.put('/profile', auth, async (req, res) => {
+router.put('/profile', verifyToken, async (req, res) => {
   try {
     const { displayName, bio, avatar, country, timezone } = req.body;
     const userId = req.user.userId;
@@ -1004,7 +1059,7 @@ router.put('/profile', auth, async (req, res) => {
 });
 
 // البحث عن المستخدمين
-router.get('/search', auth, async (req, res) => {
+router.get('/search', verifyToken, async (req, res) => {
   try {
     const { q, limit = 20, page = 1 } = req.query;
     const userId = req.user.userId;
@@ -1082,7 +1137,7 @@ router.get('/search', auth, async (req, res) => {
 });
 
 // رفع صورة البروفايل
-router.post('/upload-profile-image', auth, async (req, res) => {
+router.post('/upload-profile-image', verifyToken, async (req, res) => {
   try {
     const { imageData, imageType } = req.body;
     const userId = req.user.userId;
@@ -1118,7 +1173,7 @@ router.post('/upload-profile-image', auth, async (req, res) => {
 });
 
 // حذف صورة البروفايل
-router.delete('/delete-profile-image', auth, async (req, res) => {
+router.delete('/delete-profile-image', verifyToken, async (req, res) => {
   try {
     const { imageType } = req.body;
     const userId = req.user.userId;
@@ -1143,10 +1198,13 @@ router.delete('/delete-profile-image', auth, async (req, res) => {
 });
 
 // تحديث السيرة الذاتية
-router.put('/update-bio', auth, async (req, res) => {
+router.put('/update-bio', verifyToken, async (req, res) => {
+  console.log('🔧 تم استلام طلب تحديث السيرة الذاتية:', req.body);
   try {
     const { bio } = req.body;
     const userId = req.user.userId;
+
+    console.log('👤 معرف المستخدم:', userId);
 
     if (!bio || bio.length > 500) {
       return res.status(400).json({ error: 'السيرة الذاتية يجب أن تكون أقل من 500 حرف' });
@@ -1156,19 +1214,22 @@ router.put('/update-bio', auth, async (req, res) => {
       'profile.bio': bio
     });
 
+    console.log('✅ تم تحديث السيرة الذاتية بنجاح');
+
     res.json({ 
       success: true, 
       message: 'تم تحديث السيرة الذاتية بنجاح',
       bio 
     });
   } catch (error) {
-    console.error('خطأ في تحديث السيرة الذاتية:', error);
+    console.error('❌ خطأ في تحديث السيرة الذاتية:', error);
     res.status(500).json({ error: 'خطأ في تحديث السيرة الذاتية' });
   }
 });
 
 // تحديث معلومات البروفايل الإضافية
-router.put('/update-profile-info', auth, async (req, res) => {
+router.put('/update-profile-info', verifyToken, async (req, res) => {
+  console.log('🔧 تم استلام طلب تحديث معلومات البروفايل:', req.body);
   try {
     const { 
       displayName, 
@@ -1181,6 +1242,8 @@ router.put('/update-profile-info', auth, async (req, res) => {
       timezone 
     } = req.body;
     const userId = req.user.userId;
+
+    console.log('👤 معرف المستخدم:', userId);
 
     const user = await User.findById(userId);
     if (!user) {
@@ -1251,6 +1314,8 @@ router.put('/update-profile-info', auth, async (req, res) => {
 
     await User.findByIdAndUpdate(userId, updateData);
 
+    console.log('✅ تم تحديث معلومات البروفايل بنجاح');
+
     res.json({ 
       success: true, 
       message: 'تم تحديث معلومات البروفايل بنجاح' 
@@ -1262,7 +1327,8 @@ router.put('/update-profile-info', auth, async (req, res) => {
 });
 
 // تحديث إعدادات البحث والخصوصية
-router.put('/update-search-settings', auth, async (req, res) => {
+router.put('/update-search-settings', verifyToken, async (req, res) => {
+  console.log('🔧 تم استلام طلب تحديث إعدادات البحث:', req.body);
   try {
     const { 
       searchable, 
@@ -1271,6 +1337,8 @@ router.put('/update-search-settings', auth, async (req, res) => {
       allowMessages 
     } = req.body;
     const userId = req.user.userId;
+
+    console.log('👤 معرف المستخدم:', userId);
 
     const user = await User.findById(userId);
     if (!user) {
@@ -1324,6 +1392,8 @@ router.put('/update-search-settings', auth, async (req, res) => {
     }
 
     await User.findByIdAndUpdate(userId, updateData);
+
+    console.log('✅ تم تحديث إعدادات البحث بنجاح');
 
     res.json({ 
       success: true, 

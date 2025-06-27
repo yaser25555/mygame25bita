@@ -706,6 +706,16 @@ router.post('/send-gift', auth, async (req, res) => {
       return res.status(400).json({ error: 'لا يمكنك إرسال هدية لنفسك' });
     }
 
+    // تهيئة الحقول المطلوبة للمستخدم المستلم
+    if (!toUser.stats) toUser.stats = { score: 0, pearls: 0 };
+    if (!toUser.itemsCollected) toUser.itemsCollected = { gems: 0, keys: 0, coins: 0, pearls: 0, bombs: 0, stars: 0, bat: 0 };
+    if (!toUser.gifts) toUser.gifts = { giftStats: { totalGiftValue: 0 }, giftSettings: { allowGifts: true, allowNegativeGifts: true, allowBombsAndBats: true } };
+    if (!toUser.gifts.giftStats) toUser.gifts.giftStats = { totalGiftValue: 0 };
+    if (!toUser.gifts.giftSettings) toUser.gifts.giftSettings = { allowGifts: true, allowNegativeGifts: true, allowBombsAndBats: true };
+    if (!toUser.gifts.sentGifts) toUser.gifts.sentGifts = [];
+    if (!toUser.gifts.receivedGifts) toUser.gifts.receivedGifts = [];
+    if (!toUser.gifts.giftHistory) toUser.gifts.giftHistory = [];
+
     // التحقق من إعدادات المستلم
     if (!toUser.gifts.giftSettings.allowGifts) {
       return res.status(403).json({ error: 'هذا المستخدم لا يقبل الهدايا' });
@@ -744,9 +754,18 @@ router.post('/send-gift', auth, async (req, res) => {
 
       // إضافة الهدية للمرسل
       const fromUser = await User.findById(fromUserId);
+      
+      // تهيئة الحقول المطلوبة للمستخدم المرسل
+      if (!fromUser.gifts) fromUser.gifts = { sentGifts: [], giftStats: { totalGiftsSent: 0, positiveGiftsSent: 0, negativeGiftsSent: 0, lastGiftAt: null }, giftHistory: [] };
+      if (!fromUser.gifts.sentGifts) fromUser.gifts.sentGifts = [];
+      if (!fromUser.gifts.giftStats) fromUser.gifts.giftStats = { totalGiftsSent: 0, positiveGiftsSent: 0, negativeGiftsSent: 0, lastGiftAt: null };
+      if (!fromUser.gifts.giftHistory) fromUser.gifts.giftHistory = [];
+      
       fromUser.gifts.sentGifts.push(blockedGift);
       fromUser.gifts.giftStats.totalGiftsSent++;
-      if (giftInfo.type === 'negative') {
+      if (giftInfo.type === 'positive') {
+        fromUser.gifts.giftStats.positiveGiftsSent++;
+      } else if (giftInfo.type === 'negative') {
         fromUser.gifts.giftStats.negativeGiftsSent++;
       }
       fromUser.gifts.giftStats.lastGiftAt = new Date();
@@ -835,6 +854,13 @@ router.post('/send-gift', auth, async (req, res) => {
 
     // إضافة الهدية للمرسل
     const fromUser = await User.findById(fromUserId);
+    
+    // تهيئة الحقول المطلوبة للمستخدم المرسل
+    if (!fromUser.gifts) fromUser.gifts = { sentGifts: [], giftStats: { totalGiftsSent: 0, positiveGiftsSent: 0, negativeGiftsSent: 0, lastGiftAt: null }, giftHistory: [] };
+    if (!fromUser.gifts.sentGifts) fromUser.gifts.sentGifts = [];
+    if (!fromUser.gifts.giftStats) fromUser.gifts.giftStats = { totalGiftsSent: 0, positiveGiftsSent: 0, negativeGiftsSent: 0, lastGiftAt: null };
+    if (!fromUser.gifts.giftHistory) fromUser.gifts.giftHistory = [];
+    
     fromUser.gifts.sentGifts.push(gift);
     fromUser.gifts.giftStats.totalGiftsSent++;
     if (giftInfo.type === 'positive') {
@@ -947,6 +973,32 @@ function shouldRequireAcceptance(giftInfo) {
 
 // دالة مساعدة لتنفيذ الهدية
 async function executeGift(user, giftInfo, count) {
+  // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء 500
+  if (!user.stats) {
+    user.stats = { score: 0, pearls: 0 };
+  }
+  if (!user.itemsCollected) {
+    user.itemsCollected = { gems: 0, keys: 0, coins: 0, pearls: 0, bombs: 0, stars: 0, bat: 0 };
+  }
+  if (!user.gifts) {
+    user.gifts = { giftStats: { totalGiftValue: 0 } };
+  }
+  if (!user.gifts.giftStats) {
+    user.gifts.giftStats = { totalGiftValue: 0 };
+  }
+  
+  // التأكد من وجود جميع الحقول المطلوبة
+  if (typeof user.stats.score === 'undefined') user.stats.score = 0;
+  if (typeof user.stats.pearls === 'undefined') user.stats.pearls = 0;
+  if (typeof user.itemsCollected.gems === 'undefined') user.itemsCollected.gems = 0;
+  if (typeof user.itemsCollected.keys === 'undefined') user.itemsCollected.keys = 0;
+  if (typeof user.itemsCollected.coins === 'undefined') user.itemsCollected.coins = 0;
+  if (typeof user.itemsCollected.pearls === 'undefined') user.itemsCollected.pearls = 0;
+  if (typeof user.itemsCollected.bombs === 'undefined') user.itemsCollected.bombs = 0;
+  if (typeof user.itemsCollected.stars === 'undefined') user.itemsCollected.stars = 0;
+  if (typeof user.itemsCollected.bat === 'undefined') user.itemsCollected.bat = 0;
+  if (typeof user.gifts.giftStats.totalGiftValue === 'undefined') user.gifts.giftStats.totalGiftValue = 0;
+
   switch (giftInfo.category) {
     case 'currency':
       switch (giftInfo.name) {
