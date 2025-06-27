@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
+  // معرف المستخدم المخصص (يبدأ من 1500)
+  userId: {
+    type: Number,
+    unique: true,
+    required: true
+  },
   username: {
     type: String,
     required: true,
@@ -968,6 +974,11 @@ const UserSchema = new mongoose.Schema({
 
 // Middleware لتحديث الإحصائيات
 UserSchema.pre('save', function(next) {
+  // توليد معرف المستخدم إذا كان جديداً
+  if (this.isNew && !this.userId) {
+    this.generateUserId();
+  }
+  
   // تحديث winRate
   if (this.stats.gamesPlayed > 0) {
     this.stats.winRate = Math.round((this.stats.gamesWon / this.stats.gamesPlayed) * 100);
@@ -990,7 +1001,30 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
+// دالة لتوليد معرف المستخدم
+UserSchema.methods.generateUserId = async function() {
+  try {
+    // البحث عن أعلى معرف موجود
+    const lastUser = await this.constructor.findOne({}, { userId: 1 })
+      .sort({ userId: -1 })
+      .limit(1);
+    
+    // إذا لم يوجد مستخدمين، ابدأ من 1500
+    if (!lastUser) {
+      this.userId = 1500;
+    } else {
+      // خذ المعرف التالي
+      this.userId = lastUser.userId + 1;
+    }
+  } catch (error) {
+    console.error('خطأ في توليد معرف المستخدم:', error);
+    // في حالة الخطأ، استخدم timestamp كبديل
+    this.userId = Math.floor(Date.now() / 1000) + 1500;
+  }
+};
+
 // Indexes للأداء
+UserSchema.index({ userId: 1 });
 UserSchema.index({ username: 1 });
 UserSchema.index({ email: 1 });
 UserSchema.index({ 'profile.status': 1 });

@@ -1142,8 +1142,15 @@ router.post('/upload-profile-image', verifyToken, async (req, res) => {
     const { imageData, imageType } = req.body;
     const userId = req.user.userId;
 
+    console.log('🖼️ طلب رفع صورة:', { imageType, userId, dataLength: imageData?.length });
+
     if (!imageData || !imageType) {
       return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
+    }
+
+    // التحقق من حجم البيانات (10MB كحد أقصى)
+    if (imageData.length > 10 * 1024 * 1024) {
+      return res.status(413).json({ error: 'حجم الصورة كبير جداً. الحد الأقصى 10MB' });
     }
 
     // التحقق من نوع الصورة
@@ -1151,9 +1158,34 @@ router.post('/upload-profile-image', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'نوع صورة غير صحيح' });
     }
 
+    // التحقق من أن البيانات صحيحة
+    if (!imageData.startsWith('data:image/') && !/^[A-Za-z0-9+/]*={0,2}$/.test(imageData)) {
+      return res.status(400).json({ error: 'بيانات الصورة غير صحيحة' });
+    }
+
+    // التحقق من نوع الملف المسموح
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const detectedType = detectImageType(imageData);
+    
+    if (!allowedTypes.includes(detectedType)) {
+      return res.status(400).json({ 
+        error: 'نوع الصورة غير مسموح. الأنواع المسموحة: JPG, JPEG, PNG فقط' 
+      });
+    }
+
+    // التحقق من المحتوى الإباحي
+    const isInappropriate = await checkInappropriateContent(imageData);
+    if (isInappropriate) {
+      console.log('🚫 تم رفض صورة لاحتوائها على محتوى غير لائق');
+      logRejectedImage(userId, 'محتوى غير لائق', imageData);
+      return res.status(400).json({ 
+        error: 'الصورة تحتوي على محتوى غير لائق. يرجى اختيار صورة مناسبة' 
+      });
+    }
+
     // في التطبيق الحقيقي، ستقوم بحفظ الصورة في خدمة تخزين مثل AWS S3
     // هنا سنقوم بحفظ البيانات كـ base64 (للتطوير فقط)
-    const imageUrl = `data:image/jpeg;base64,${imageData}`;
+    const imageUrl = imageData.startsWith('data:') ? imageData : `data:image/jpeg;base64,${imageData}`;
 
     // تحديث البروفايل
     const updateField = `profile.${imageType}`;
@@ -1161,16 +1193,143 @@ router.post('/upload-profile-image', verifyToken, async (req, res) => {
       [updateField]: imageUrl
     });
 
+    console.log('✅ تم رفع الصورة بنجاح');
+
     res.json({ 
       success: true, 
       message: 'تم رفع الصورة بنجاح',
       imageUrl 
     });
   } catch (error) {
-    console.error('خطأ في رفع الصورة:', error);
+    console.error('❌ خطأ في رفع الصورة:', error);
     res.status(500).json({ error: 'خطأ في رفع الصورة' });
   }
 });
+
+// دالة للتحقق من نوع الصورة
+function detectImageType(imageData) {
+  try {
+    // إذا كانت البيانات تحتوي على MIME type
+    if (imageData.startsWith('data:image/')) {
+      const mimeType = imageData.split(';')[0].split(':')[1];
+      return mimeType;
+    }
+    
+    // التحقق من توقيعات الملفات (File Signatures)
+    const base64Data = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // توقيعات الملفات المعروفة
+    const signatures = {
+      'image/jpeg': [0xFF, 0xD8, 0xFF],
+      'image/png': [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
+    };
+    
+    for (const [mimeType, signature] of Object.entries(signatures)) {
+      if (signature.every((byte, index) => buffer[index] === byte)) {
+        return mimeType;
+      }
+    }
+    
+    return 'unknown';
+  } catch (error) {
+    console.error('خطأ في تحديد نوع الصورة:', error);
+    return 'unknown';
+  }
+}
+
+// دالة للتحقق من المحتوى الإباحي
+async function checkInappropriateContent(imageData) {
+  try {
+    // قائمة الكلمات المفتاحية المحظورة (يمكن توسيعها)
+    const inappropriateKeywords = [
+      'nude', 'naked', 'porn', 'sex', 'adult', 'explicit', 'xxx', 'nsfw',
+      'عري', 'إباحي', 'جنس', 'كبار', 'صريح', 'ممنوع', 'محظور'
+    ];
+    
+    // التحقق من البيانات المشفرة (base64)
+    const base64Data = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
+    
+    // التحقق من حجم الصورة (الصور الإباحية عادة تكون كبيرة)
+    if (base64Data.length > 5 * 1024 * 1024) { // 5MB
+      console.log('⚠️ صورة كبيرة - قد تحتاج مراجعة يدوية');
+    }
+    
+    // التحقق من نسبة الألوان (الصور الإباحية عادة تحتوي على ألوان معينة)
+    try {
+      const buffer = Buffer.from(base64Data, 'base64');
+      const colorAnalysis = analyzeImageColors(buffer);
+      
+      // إذا كانت الصورة تحتوي على نسبة عالية من الألوان الجلدية
+      if (colorAnalysis.skinToneRatio > 0.7) {
+        console.log('⚠️ نسبة عالية من الألوان الجلدية - قد تحتاج مراجعة');
+        // يمكن إضافة تحقق إضافي هنا
+      }
+    } catch (colorError) {
+      console.log('⚠️ لا يمكن تحليل ألوان الصورة:', colorError.message);
+    }
+    
+    // التحقق من وجود كلمات محظورة في البيانات (إذا كانت الصورة تحتوي على نص)
+    try {
+      const decodedData = Buffer.from(base64Data, 'base64').toString('utf8');
+      for (const keyword of inappropriateKeywords) {
+        if (decodedData.toLowerCase().includes(keyword.toLowerCase())) {
+          console.log('🚫 تم العثور على كلمة محظورة:', keyword);
+          return true;
+        }
+      }
+    } catch (decodeError) {
+      // البيانات ليست نصية، وهذا طبيعي للصور
+    }
+    
+    // في التطبيق الحقيقي، يمكن استخدام خدمات AI مثل:
+    // - Google Cloud Vision API
+    // - AWS Rekognition
+    // - Azure Computer Vision
+    // - Cloudinary Moderation
+    
+    return false;
+  } catch (error) {
+    console.error('خطأ في التحقق من المحتوى:', error);
+    // في حالة الخطأ، نرفض الصورة من باب الأمان
+    return true;
+  }
+}
+
+// دالة لتحليل ألوان الصورة
+function analyzeImageColors(buffer) {
+  try {
+    // هذا تحليل بسيط للألوان
+    // في التطبيق الحقيقي، يمكن استخدام مكتبات مثل Sharp أو Jimp
+    
+    const data = new Uint8Array(buffer);
+    let skinTonePixels = 0;
+    let totalPixels = 0;
+    
+    // تحليل كل 10 بكسل (للسرعة)
+    for (let i = 0; i < data.length; i += 30) {
+      if (i + 2 < data.length) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        
+        // التحقق من الألوان الجلدية (تقريب بسيط)
+        if (r > 200 && g > 150 && g < 220 && b > 100 && b < 180) {
+          skinTonePixels++;
+        }
+        
+        totalPixels++;
+      }
+    }
+    
+    return {
+      skinToneRatio: totalPixels > 0 ? skinTonePixels / totalPixels : 0
+    };
+  } catch (error) {
+    console.error('خطأ في تحليل الألوان:', error);
+    return { skinToneRatio: 0 };
+  }
+}
 
 // حذف صورة البروفايل
 router.delete('/delete-profile-image', verifyToken, async (req, res) => {
@@ -1198,7 +1357,7 @@ router.delete('/delete-profile-image', verifyToken, async (req, res) => {
 });
 
 // تحديث السيرة الذاتية
-router.put('/update-bio', verifyToken, async (req, res) => {
+router.post('/update-bio', verifyToken, async (req, res) => {
   console.log('🔧 تم استلام طلب تحديث السيرة الذاتية:', req.body);
   try {
     const { bio } = req.body;
@@ -1228,7 +1387,7 @@ router.put('/update-bio', verifyToken, async (req, res) => {
 });
 
 // تحديث معلومات البروفايل الإضافية
-router.put('/update-profile-info', verifyToken, async (req, res) => {
+router.post('/update-profile-info', verifyToken, async (req, res) => {
   console.log('🔧 تم استلام طلب تحديث معلومات البروفايل:', req.body);
   try {
     const { 
@@ -1321,13 +1480,13 @@ router.put('/update-profile-info', verifyToken, async (req, res) => {
       message: 'تم تحديث معلومات البروفايل بنجاح' 
     });
   } catch (error) {
-    console.error('خطأ في تحديث معلومات البروفايل:', error);
+    console.error('❌ خطأ في تحديث معلومات البروفايل:', error);
     res.status(500).json({ error: 'خطأ في تحديث معلومات البروفايل' });
   }
 });
 
 // تحديث إعدادات البحث والخصوصية
-router.put('/update-search-settings', verifyToken, async (req, res) => {
+router.post('/update-search-settings', verifyToken, async (req, res) => {
   console.log('🔧 تم استلام طلب تحديث إعدادات البحث:', req.body);
   try {
     const { 
@@ -1400,9 +1559,343 @@ router.put('/update-search-settings', verifyToken, async (req, res) => {
       message: 'تم تحديث إعدادات البحث بنجاح' 
     });
   } catch (error) {
-    console.error('خطأ في تحديث إعدادات البحث:', error);
+    console.error('❌ خطأ في تحديث إعدادات البحث:', error);
     res.status(500).json({ error: 'خطأ في تحديث إعدادات البحث' });
   }
 });
+
+// الحصول على معرف المستخدم
+router.get('/my-id', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId).select('userId username');
+    
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+    
+    res.json({
+      userId: user.userId,
+      username: user.username
+    });
+  } catch (error) {
+    console.error('خطأ في الحصول على معرف المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// تغيير معرف المستخدم (للمشرفين فقط)
+router.put('/admin/change-user-id', verifyToken, async (req, res) => {
+  try {
+    // التحقق من أن المستخدم مشرف
+    const currentUser = await User.findById(req.user.userId);
+    if (!currentUser || !currentUser.isAdmin) {
+      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    }
+
+    const { targetUserId, newUserId } = req.body;
+
+    if (!targetUserId || newUserId === undefined) {
+      return res.status(400).json({ error: 'معرف المستخدم الهدف والمعرف الجديد مطلوبان' });
+    }
+
+    // التحقق من أن المعرف الجديد رقم موجب
+    if (newUserId < 1) {
+      return res.status(400).json({ error: 'المعرف الجديد يجب أن يكون رقم موجب' });
+    }
+
+    // البحث عن المستخدم الهدف
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // التحقق من أن المعرف الجديد غير مستخدم
+    const existingUser = await User.findOne({ userId: newUserId });
+    if (existingUser && existingUser._id.toString() !== targetUserId) {
+      return res.status(400).json({ error: 'المعرف الجديد مستخدم بالفعل' });
+    }
+
+    // حفظ المعرف القديم للتوثيق
+    const oldUserId = targetUser.userId;
+
+    // تحديث معرف المستخدم
+    targetUser.userId = newUserId;
+    await targetUser.save();
+
+    // تسجيل العملية
+    console.log(`🔧 المشرف ${currentUser.username} غير معرف المستخدم ${targetUser.username} من ${oldUserId} إلى ${newUserId}`);
+
+    res.json({
+      success: true,
+      message: `تم تغيير معرف المستخدم من ${oldUserId} إلى ${newUserId}`,
+      user: {
+        id: targetUser._id,
+        username: targetUser.username,
+        oldUserId: oldUserId,
+        newUserId: newUserId
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في تغيير معرف المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// الحصول على قائمة المستخدمين مع معرفاتهم (للمشرفين فقط)
+router.get('/admin/users-with-ids', verifyToken, async (req, res) => {
+  try {
+    // التحقق من أن المستخدم مشرف
+    const currentUser = await User.findById(req.user.userId);
+    if (!currentUser || !currentUser.isAdmin) {
+      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    }
+
+    const { page = 1, limit = 20, search = '' } = req.query;
+    const skip = (page - 1) * limit;
+
+    // بناء query البحث
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { username: { $regex: search, $options: 'i' } },
+          { 'profile.displayName': { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+
+    // البحث عن المستخدمين
+    const users = await User.find(query)
+      .select('userId username email profile.displayName profile.level stats.score createdAt')
+      .sort({ userId: 1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // إجمالي عدد المستخدمين
+    const total = await User.countDocuments(query);
+
+    res.json({
+      users,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit)
+    });
+
+  } catch (error) {
+    console.error('خطأ في جلب قائمة المستخدمين:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// البحث عن معرف مستخدم (للمشرفين فقط)
+router.get('/admin/find-user-by-id/:userId', verifyToken, async (req, res) => {
+  try {
+    // التحقق من أن المستخدم مشرف
+    const currentUser = await User.findById(req.user.userId);
+    if (!currentUser || !currentUser.isAdmin) {
+      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    }
+
+    const { userId } = req.params;
+
+    const user = await User.findOne({ userId: parseInt(userId) })
+      .select('userId username email profile.displayName profile.level stats.score createdAt');
+
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    res.json({ user });
+
+  } catch (error) {
+    console.error('خطأ في البحث عن المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// إدارة صور المستخدم (للمشرفين فقط)
+router.put('/admin/manage-user-image', verifyToken, async (req, res) => {
+  try {
+    // التحقق من أن المستخدم مشرف
+    const currentUser = await User.findById(req.user.userId);
+    if (!currentUser || !currentUser.isAdmin) {
+      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    }
+
+    const { targetUserId, action, imageData, imageType } = req.body;
+
+    if (!targetUserId || !action) {
+      return res.status(400).json({ error: 'معرف المستخدم والإجراء مطلوبان' });
+    }
+
+    // البحث عن المستخدم الهدف
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    let result = {};
+
+    switch (action) {
+      case 'change_avatar':
+        if (!imageData || !imageType) {
+          return res.status(400).json({ error: 'بيانات الصورة ونوعها مطلوبان' });
+        }
+        
+        // حفظ الصورة الجديدة
+        const avatarUrl = await saveImage(imageData, imageType, `avatar_${targetUserId}`);
+        targetUser.profile.avatar = avatarUrl;
+        result = { avatar: avatarUrl };
+        break;
+
+      case 'change_profile_image':
+        if (!imageData || !imageType) {
+          return res.status(400).json({ error: 'بيانات الصورة ونوعها مطلوبان' });
+        }
+        
+        // حفظ الصورة الجديدة
+        const profileImageUrl = await saveImage(imageData, imageType, `profile_${targetUserId}`);
+        targetUser.profile.profileImage = profileImageUrl;
+        result = { profileImage: profileImageUrl };
+        break;
+
+      case 'change_cover_image':
+        if (!imageData || !imageType) {
+          return res.status(400).json({ error: 'بيانات الصورة ونوعها مطلوبان' });
+        }
+        
+        // حفظ الصورة الجديدة
+        const coverImageUrl = await saveImage(imageData, imageType, `cover_${targetUserId}`);
+        targetUser.profile.coverImage = coverImageUrl;
+        result = { coverImage: coverImageUrl };
+        break;
+
+      case 'remove_avatar':
+        targetUser.profile.avatar = 'default-avatar.png';
+        result = { avatar: 'default-avatar.png' };
+        break;
+
+      case 'remove_profile_image':
+        targetUser.profile.profileImage = null;
+        result = { profileImage: null };
+        break;
+
+      case 'remove_cover_image':
+        targetUser.profile.coverImage = null;
+        result = { coverImage: null };
+        break;
+
+      default:
+        return res.status(400).json({ error: 'إجراء غير صحيح' });
+    }
+
+    await targetUser.save();
+
+    // تسجيل العملية
+    console.log(`🖼️ المشرف ${currentUser.username} ${action} للمستخدم ${targetUser.username}`);
+
+    res.json({
+      success: true,
+      message: `تم ${action} بنجاح`,
+      user: {
+        id: targetUser._id,
+        username: targetUser.username,
+        userId: targetUser.userId
+      },
+      result
+    });
+
+  } catch (error) {
+    console.error('خطأ في إدارة صورة المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// دالة لحفظ الصورة
+async function saveImage(imageData, imageType, filename) {
+  try {
+    // هنا يمكن إضافة منطق حفظ الصورة
+    // يمكن استخدام خدمات مثل Cloudinary أو حفظ محلي
+    const timestamp = Date.now();
+    const imageUrl = `https://example.com/images/${filename}_${timestamp}.${imageType}`;
+    
+    // في الوقت الحالي، نعيد URL مؤقت
+    return imageUrl;
+  } catch (error) {
+    console.error('خطأ في حفظ الصورة:', error);
+    throw new Error('فشل في حفظ الصورة');
+  }
+}
+
+// الحصول على معلومات صور المستخدم (للمشرفين فقط)
+router.get('/admin/user-images/:userId', verifyToken, async (req, res) => {
+  try {
+    // التحقق من أن المستخدم مشرف
+    const currentUser = await User.findById(req.user.userId);
+    if (!currentUser || !currentUser.isAdmin) {
+      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    }
+
+    const { userId } = req.params;
+
+    const user = await User.findById(userId)
+      .select('userId username profile.avatar profile.profileImage profile.coverImage');
+
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    res.json({
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username,
+        images: {
+          avatar: user.profile.avatar,
+          profileImage: user.profile.profileImage,
+          coverImage: user.profile.coverImage
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في جلب معلومات الصور:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// نظام تسجيل الصور المرفوضة
+const rejectedImages = new Map();
+
+// دالة لتسجيل الصورة المرفوضة
+function logRejectedImage(userId, reason, imageData) {
+  const logEntry = {
+    userId,
+    reason,
+    timestamp: new Date(),
+    imageHash: generateImageHash(imageData),
+    // لا نحفظ الصورة نفسها لأسباب أمنية
+  };
+  
+  rejectedImages.set(logEntry.imageHash, logEntry);
+  
+  // حفظ في قاعدة البيانات (اختياري)
+  console.log('🚫 صورة مرفوضة:', {
+    userId,
+    reason,
+    timestamp: logEntry.timestamp
+  });
+}
+
+// دالة لتوليد هاش للصورة
+function generateImageHash(imageData) {
+  const crypto = require('crypto');
+  const base64Data = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
+  return crypto.createHash('md5').update(base64Data).digest('hex');
+}
 
 module.exports = router;

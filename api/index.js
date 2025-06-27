@@ -51,6 +51,10 @@ app.use(cors({
 
 app.use(express.json());
 
+// إعدادات لحجم الطلبات الكبير (لرفع الصور)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 // --- 2.5 إعداد WebSocket ---
 const voiceServer = new WebSocket.Server({ noServer: true });
 

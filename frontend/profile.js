@@ -6,6 +6,7 @@ let friends = [];
 let friendRequests = [];
 let blockedUsers = [];
 let achievements = [];
+let searchResults = [];
 
 // تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
@@ -471,22 +472,39 @@ function updateStatsDisplay(stats) {
 // تحميل الأصدقاء
 async function loadFriends() {
     try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('لم يتم العثور على رمز المصادقة');
+        }
+
         const response = await fetch(`${BACKEND_URL}/api/relationships/friends`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            throw new Error('فشل في جلب الأصدقاء');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `خطأ في الخادم: ${response.status}`);
         }
 
         const data = await response.json();
-        friends = data.friends;
+        
+        // التأكد من أن البيانات صحيحة
+        if (!data || !Array.isArray(data.friends)) {
+            console.warn('بيانات الأصدقاء غير صحيحة، استخدام مصفوفة فارغة');
+            friends = [];
+        } else {
+            friends = data.friends;
+        }
+        
         updateFriendsDisplay();
     } catch (error) {
         console.error('خطأ في تحميل الأصدقاء:', error);
-        showMessage('خطأ في تحميل الأصدقاء', true);
+        friends = []; // تعيين مصفوفة فارغة في حالة الخطأ
+        updateFriendsDisplay();
+        showMessage('خطأ في تحميل الأصدقاء: ' + error.message, true);
     }
 }
 
@@ -498,44 +516,78 @@ function loadFriendsList() {
 // تحميل طلبات الصداقة
 async function loadFriendRequests() {
     try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('لم يتم العثور على رمز المصادقة');
+        }
+
         const response = await fetch(`${BACKEND_URL}/api/relationships/friend-requests`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            throw new Error('فشل في جلب طلبات الصداقة');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `خطأ في الخادم: ${response.status}`);
         }
 
         const data = await response.json();
-        friendRequests = data.requests;
+        
+        // التأكد من أن البيانات صحيحة
+        if (!data || !Array.isArray(data.received)) {
+            console.warn('بيانات طلبات الصداقة غير صحيحة، استخدام مصفوفة فارغة');
+            friendRequests = [];
+        } else {
+            friendRequests = data.received;
+        }
+        
         updateFriendRequestsDisplay();
     } catch (error) {
         console.error('خطأ في تحميل طلبات الصداقة:', error);
-        showMessage('خطأ في تحميل طلبات الصداقة', true);
+        friendRequests = []; // تعيين مصفوفة فارغة في حالة الخطأ
+        updateFriendRequestsDisplay();
+        showMessage('خطأ في تحميل طلبات الصداقة: ' + error.message, true);
     }
 }
 
 // تحميل المستخدمين المحظورين
 async function loadBlockedUsers() {
     try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('لم يتم العثور على رمز المصادقة');
+        }
+
         const response = await fetch(`${BACKEND_URL}/api/relationships/blocked-users`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            throw new Error('فشل في جلب المستخدمين المحظورين');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `خطأ في الخادم: ${response.status}`);
         }
 
         const data = await response.json();
-        blockedUsers = data.blockedUsers;
+        
+        // التأكد من أن البيانات صحيحة
+        if (!data || !Array.isArray(data.blockedUsers)) {
+            console.warn('بيانات المستخدمين المحظورين غير صحيحة، استخدام مصفوفة فارغة');
+            blockedUsers = [];
+        } else {
+            blockedUsers = data.blockedUsers;
+        }
+        
         updateBlockedUsersDisplay();
     } catch (error) {
         console.error('خطأ في تحميل المستخدمين المحظورين:', error);
-        showMessage('خطأ في تحميل المستخدمين المحظورين', true);
+        blockedUsers = []; // تعيين مصفوفة فارغة في حالة الخطأ
+        updateBlockedUsersDisplay();
+        showMessage('خطأ في تحميل المستخدمين المحظورين: ' + error.message, true);
     }
 }
 
@@ -735,8 +787,9 @@ function handleImageSelect(event) {
 // معالجة ملف الصورة
 function handleImageFile(file) {
     // التحقق من نوع الملف
-    if (!file.type.startsWith('image/')) {
-        showMessage('يرجى اختيار ملف صورة صحيح', true);
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+        showMessage('نوع الملف غير مسموح. الأنواع المسموحة: JPG, JPEG, PNG فقط', true);
         return;
     }
     
@@ -746,11 +799,55 @@ function handleImageFile(file) {
         return;
     }
     
+    // التحقق من اسم الملف
+    const fileName = file.name.toLowerCase();
+    const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+    const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!hasValidExtension) {
+        showMessage('امتداد الملف غير مسموح. الأنواع المسموحة: JPG, JPEG, PNG فقط', true);
+        return;
+    }
+    
     const reader = new FileReader();
     reader.onload = (e) => {
-        showImagePreview(e.target.result);
+        compressAndShowImage(e.target.result, file.type);
     };
     reader.readAsDataURL(file);
+}
+
+// ضغط وعرض الصورة
+function compressAndShowImage(imageData, fileType) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = function() {
+        // تحديد الأبعاد القصوى
+        const maxWidth = 800;
+        const maxHeight = 800;
+        
+        let { width, height } = img;
+        
+        // تغيير الحجم إذا كان كبيراً جداً
+        if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width *= ratio;
+            height *= ratio;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // رسم الصورة المضغوطة
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // تحويل إلى base64 مع جودة 0.8
+        const compressedImageData = canvas.toDataURL(fileType, 0.8);
+        showImagePreview(compressedImageData);
+    };
+    
+    img.src = imageData;
 }
 
 // عرض معاينة الصورة
@@ -793,6 +890,12 @@ async function uploadImage() {
         const imageType = uploadImageTitle.textContent.includes('الشخصية') ? 'profileImage' : 'coverImage';
         const imageData = previewImage.src.split(',')[1]; // إزالة data:image/jpeg;base64,
         
+        // التحقق من حجم البيانات
+        if (imageData.length > 10 * 1024 * 1024) { // 10MB
+            showMessage('حجم الصورة كبير جداً. يرجى اختيار صورة أصغر', true);
+            return;
+        }
+        
         const token = localStorage.getItem('token');
         const response = await fetch(`${BACKEND_URL}/api/users/upload-profile-image`, {
             method: 'POST',
@@ -823,8 +926,28 @@ async function uploadImage() {
             // إغلاق النافذة
             closeModal('upload-image-modal');
         } else {
-            const error = await response.json();
-            throw new Error(error.error || 'خطأ في رفع الصورة');
+            let errorMessage = 'خطأ في رفع الصورة';
+            
+            if (response.status === 413) {
+                errorMessage = 'حجم الصورة كبير جداً. الحد الأقصى 50MB';
+            } else if (response.status === 400) {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    errorMessage = 'بيانات الصورة غير صحيحة';
+                }
+            } else {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    // إذا لم نتمكن من قراءة JSON، نعرض رسالة عامة
+                    errorMessage = 'خطأ في الخادم';
+                }
+            }
+            
+            throw new Error(errorMessage);
         }
     } catch (error) {
         console.error('خطأ في رفع الصورة:', error);
@@ -920,7 +1043,7 @@ async function handleEditProfile(event) {
         
         // تحديث المعلومات الأساسية
         const response1 = await fetch(`${BACKEND_URL}/api/users/update-profile-info`, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -930,7 +1053,7 @@ async function handleEditProfile(event) {
         
         // تحديث السيرة الذاتية
         const response2 = await fetch(`${BACKEND_URL}/api/users/update-bio`, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -940,7 +1063,7 @@ async function handleEditProfile(event) {
         
         // تحديث إعدادات البحث
         const response3 = await fetch(`${BACKEND_URL}/api/users/update-search-settings`, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -1035,12 +1158,12 @@ function displaySearchResults(users) {
         
         return `
             <div class="user-result">
-                <img src="${user.avatar || 'images/hero.png'}" alt="${user.displayName}" class="user-result-avatar">
+                <img src="${user.avatar || 'images/default-avatar.png'}" alt="${user.displayName || user.username}" class="user-result-avatar">
                 <div class="user-result-info">
-                    <div class="user-result-name">${user.displayName}</div>
+                    <div class="user-result-name">${user.displayName || user.username}</div>
                     <div class="user-result-bio">${user.bio || 'لا توجد نبذة شخصية'}</div>
                     <div class="user-result-stats">
-                        <span>المستوى: ${user.level}</span>
+                        <span>المستوى: ${user.level || 1}</span>
                         <span>الحالة: ${user.status === 'online' ? 'متصل' : 'غير متصل'}</span>
                     </div>
                 </div>
@@ -1052,50 +1175,6 @@ function displaySearchResults(users) {
     }).join('');
     
     searchResults.innerHTML = resultsHTML;
-}
-
-// معالجة إجراءات الأصدقاء
-async function handleFriendAction(userId, username, action) {
-    try {
-        const token = localStorage.getItem('token');
-        
-        switch (action) {
-            case 'add':
-                await sendFriendRequest(username);
-                break;
-            case 'pending':
-                showMessage('تم إرسال طلب صداقة مسبقاً');
-                break;
-            case 'friend':
-                showMessage('أنتما أصدقاء بالفعل');
-                break;
-            case 'blocked':
-                showMessage('هذا المستخدم محظور');
-                break;
-        }
-        
-        // إعادة البحث لتحديث الأزرار
-        await searchUsersRealTime();
-    } catch (error) {
-        console.error('خطأ في معالجة إجراء الصداقة:', error);
-        showMessage('خطأ في معالجة الطلب', true);
-    }
-}
-
-// فتح نافذة منبثقة
-function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
-}
-
-// إغلاق نافذة منبثقة
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.add('hidden');
-    }
 }
 
 // عرض رسالة
@@ -1116,7 +1195,7 @@ function showMessage(message, isError = false) {
         color: white;
         font-weight: bold;
         z-index: 10000;
-        background: ${isError ? 'var(--error-color)' : 'var(--success-color)'};
+        background: ${isError ? '#dc3545' : '#28a745'};
         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     `;
     
@@ -1167,7 +1246,7 @@ function updateFriendsDisplay() {
         <div class="friend-card">
             <img src="${friend.avatar || 'images/default-avatar.png'}" alt="${friend.username}" class="friend-avatar">
             <div class="friend-name">${friend.displayName || friend.username}</div>
-            <div class="friend-status">النقاط: ${friend.score}</div>
+            <div class="friend-status">النقاط: ${friend.score || 0}</div>
             <div class="friend-actions">
                 <button class="friend-btn primary" data-action="viewFriendProfile" data-user-id="${friend.id}">عرض البروفايل</button>
                 <button class="friend-btn secondary" data-action="removeFriend" data-user-id="${friend.id}">إزالة</button>
@@ -1188,12 +1267,12 @@ function updateFriendRequestsDisplay() {
     
     requestsList.innerHTML = friendRequests.map(request => `
         <div class="friend-card">
-            <img src="${request.avatar || 'images/default-avatar.png'}" alt="${request.username}" class="friend-avatar">
-            <div class="friend-name">${request.displayName || request.username}</div>
-            <div class="friend-status">${request.message || 'يريد إضافتك كصديق'}</div>
+            <img src="${request.avatar || 'images/default-avatar.png'}" alt="${request.fromUsername}" class="friend-avatar">
+            <div class="friend-name">${request.fromUsername}</div>
+            <div class="friend-status">يريد إضافتك كصديق</div>
             <div class="friend-actions">
-                <button class="friend-btn primary" data-action="acceptFriendRequest" data-user-id="${request.id}">قبول</button>
-                <button class="friend-btn secondary" data-action="rejectFriendRequest" data-user-id="${request.id}">رفض</button>
+                <button class="friend-btn primary" data-action="acceptFriendRequest" data-user-id="${request.fromUserId}">قبول</button>
+                <button class="friend-btn secondary" data-action="rejectFriendRequest" data-user-id="${request.fromUserId}">رفض</button>
             </div>
         </div>
     `).join('');
@@ -1212,7 +1291,7 @@ function updateBlockedUsersDisplay() {
     blockedList.innerHTML = blockedUsers.map(user => `
         <div class="friend-card">
             <img src="${user.avatar || 'images/default-avatar.png'}" alt="${user.username}" class="friend-avatar">
-            <div class="friend-name">${user.displayName || user.username}</div>
+            <div class="friend-name">${user.username}</div>
             <div class="friend-status">محظور منذ ${formatDate(user.blockedAt)}</div>
             <div class="friend-actions">
                 <button class="friend-btn primary" data-action="unblockUser" data-user-id="${user.id}">إلغاء الحظر</button>
@@ -1326,4 +1405,105 @@ async function unblockUser(userId) {
         console.error('خطأ في إلغاء حظر المستخدم:', error);
         showMessage('خطأ في إلغاء حظر المستخدم', true);
     }
-} 
+}
+
+// دالة البحث عن المستخدمين
+async function searchUsers() {
+    try {
+        const searchInput = document.getElementById('search-input');
+        const query = searchInput ? searchInput.value.trim() : '';
+        
+        if (!query || query.length < 2) {
+            // إظهار رسالة للمستخدم
+            showMessage('يرجى إدخال نص بحث مكون من حرفين على الأقل');
+            return;
+        }
+
+        const response = await fetch(`${BACKEND_URL}/api/relationships/search-users?query=${encodeURIComponent(query)}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('فشل في البحث عن المستخدمين');
+        }
+
+        const data = await response.json();
+        displaySearchResults(data.users);
+    } catch (error) {
+        console.error('خطأ في البحث عن المستخدمين:', error);
+        showMessage('خطأ في البحث عن المستخدمين', true);
+    }
+}
+
+// إرسال طلب صداقة
+async function sendFriendRequest(userId) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/relationships/send-friend-request`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ userId })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'فشل في إرسال طلب الصداقة');
+        }
+
+        const data = await response.json();
+        showMessage(data.message || 'تم إرسال طلب الصداقة بنجاح');
+        return data;
+    } catch (error) {
+        console.error('خطأ في إرسال طلب الصداقة:', error);
+        showMessage(error.message || 'خطأ في إرسال طلب الصداقة', true);
+        throw error;
+    }
+}
+
+// معالجة إجراءات الأصدقاء
+async function handleFriendAction(userId, username, action) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        switch (action) {
+            case 'add':
+                await sendFriendRequest(userId);
+                break;
+            case 'pending':
+                showMessage('تم إرسال طلب صداقة مسبقاً');
+                break;
+            case 'friend':
+                showMessage('أنتما أصدقاء بالفعل');
+                break;
+            case 'blocked':
+                showMessage('هذا المستخدم محظور');
+                break;
+        }
+        
+        // إعادة البحث لتحديث الأزرار
+        await searchUsersRealTime();
+    } catch (error) {
+        console.error('خطأ في معالجة إجراء الصداقة:', error);
+        showMessage('خطأ في معالجة الطلب', true);
+    }
+}
+
+// فتح نافذة منبثقة
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+// إغلاق نافذة منبثقة
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}

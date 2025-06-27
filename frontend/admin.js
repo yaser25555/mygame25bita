@@ -32,6 +32,10 @@ const suspiciousUsersList = document.getElementById('suspiciousUsersList');
 const totalSuspiciousUsers = document.getElementById('totalSuspiciousUsers');
 const highRiskUsers = document.getElementById('highRiskUsers');
 
+// عناصر DOM الجديدة لإدارة المعرفات والصور
+const showUserIdsManagement = document.getElementById('showUserIdsManagement');
+const showUserImagesManagement = document.getElementById('showUserImagesManagement');
+
 // التحقق من وجود token عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('adminToken');
@@ -79,14 +83,21 @@ function showAdminPanel() {
 
 // إدارة الأقسام
 showGameManagement.addEventListener('click', function() {
+    hideAllSections();
     gameManagementSection.classList.remove('hidden');
-    userManagementSection.classList.add('hidden');
 });
 
 showUserManagement.addEventListener('click', function() {
+    hideAllSections();
     userManagementSection.classList.remove('hidden');
-    gameManagementSection.classList.add('hidden');
 });
+
+// دالة لإخفاء جميع الأقسام
+function hideAllSections() {
+    gameManagementSection.classList.add('hidden');
+    userManagementSection.classList.add('hidden');
+    suspiciousActivitySection.classList.add('hidden');
+}
 
 // جلب بيانات المستخدم
 fetchUserDataBtn.addEventListener('click', async function() {
@@ -253,9 +264,8 @@ saveGameSettingsBtn.addEventListener('click', async function() {
 
 // إضافة حدث للقسم الجديد
 showSuspiciousActivity.addEventListener('click', function() {
+    hideAllSections();
     suspiciousActivitySection.classList.remove('hidden');
-    userManagementSection.classList.add('hidden');
-    gameManagementSection.classList.add('hidden');
     loadSuspiciousActivity();
 });
 
@@ -422,4 +432,21 @@ window.viewUserDetails = function(username) {
 };
 
 // تحديث البيانات
-refreshSuspiciousActivityBtn.addEventListener('click', loadSuspiciousActivity); 
+refreshSuspiciousActivityBtn.addEventListener('click', loadSuspiciousActivity);
+
+// إضافة أحداث للأقسام الجديدة
+showUserIdsManagement.addEventListener('click', function() {
+    // إخفاء جميع الأقسام
+    hideAllSections();
+    
+    // فتح صفحة إدارة المعرفات في نافذة جديدة
+    window.open('admin-user-ids.html', '_blank');
+});
+
+showUserImagesManagement.addEventListener('click', function() {
+    // إخفاء جميع الأقسام
+    hideAllSections();
+    
+    // فتح صفحة إدارة الصور في نافذة جديدة
+    window.open('admin-user-images.html', '_blank');
+}); 

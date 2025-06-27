@@ -3,11 +3,18 @@
   "version": "1.0.0",
   "main": "api/index.js",
   "scripts": {
-    "start": "node api/server-listen.js",
-    "dev": "nodemon api/server-listen.js"
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-test-users": "node api/create-test-users.js",
+    "update-user-ids": "node api/update-user-ids.js",
+    "test-user-id-system": "node api/test-user-id-system.js",
+    "test-admin-user-ids": "node api/test-admin-user-ids.js",
+    "test-admin-user-images": "node api/test-admin-user-images.js"
   },
   "dependencies": {
     "agora-access-token": "^2.0.0",
+    "axios": "^1.6.0",
     "bcrypt": "^5.1.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -19,7 +26,8 @@
     "multer": "^2.0.1",
     "path": "^0.12.7",
     "serverless-http": "^3.2.0",
-    "ws": "^8.18.2"
+    "ws": "^8.18.2",
+    "sharp": "^0.32.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
