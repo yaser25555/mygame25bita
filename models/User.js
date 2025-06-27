@@ -870,7 +870,7 @@ const UserSchema = new mongoose.Schema({
       },
       type: {
         type: String,
-        enum: ['basic', 'premium', 'ultimate'],
+        enum: ['basic', 'premium', 'extended', 'ultimate'],
         default: 'basic'
       },
       protectionLevel: {
@@ -887,7 +887,7 @@ const UserSchema = new mongoose.Schema({
       },
       type: {
         type: String,
-        enum: ['basic', 'premium', 'ultimate'],
+        enum: ['basic', 'premium', 'extended', 'ultimate'],
         required: true
       },
       cost: {
@@ -949,7 +949,7 @@ const UserSchema = new mongoose.Schema({
       },
       autoRenewType: {
         type: String,
-        enum: ['basic', 'premium', 'ultimate'],
+        enum: ['basic', 'premium', 'extended', 'ultimate'],
         default: 'basic'
       },
       notifications: {

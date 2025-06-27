@@ -14,6 +14,34 @@ router.post('/activate', auth, async (req, res) => {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
+    // تهيئة حقل shield إذا لم يكن موجوداً
+    if (!user.shield) {
+      user.shield = {
+        currentShield: {
+          isActive: false,
+          activatedAt: null,
+          expiresAt: null,
+          type: 'basic',
+          protectionLevel: 1
+        },
+        shieldHistory: [],
+        shieldStats: {
+          totalShieldsActivated: 0,
+          totalCoinsSpent: 0,
+          totalGiftsBlocked: 0,
+          totalProtectionTime: 0,
+          lastShieldAt: null
+        },
+        shieldSettings: {
+          autoRenew: false,
+          autoRenewType: 'basic',
+          notifications: true,
+          blockAllNegativeGifts: true
+        }
+      };
+      await user.save();
+    }
+
     // التحقق من وجود درع نشط
     if (user.shield.currentShield.isActive) {
       return res.status(400).json({ error: 'لديك درع نشط بالفعل' });
@@ -101,6 +129,34 @@ router.post('/deactivate', auth, async (req, res) => {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
+    // تهيئة حقل shield إذا لم يكن موجوداً
+    if (!user.shield) {
+      user.shield = {
+        currentShield: {
+          isActive: false,
+          activatedAt: null,
+          expiresAt: null,
+          type: 'basic',
+          protectionLevel: 1
+        },
+        shieldHistory: [],
+        shieldStats: {
+          totalShieldsActivated: 0,
+          totalCoinsSpent: 0,
+          totalGiftsBlocked: 0,
+          totalProtectionTime: 0,
+          lastShieldAt: null
+        },
+        shieldSettings: {
+          autoRenew: false,
+          autoRenewType: 'basic',
+          notifications: true,
+          blockAllNegativeGifts: true
+        }
+      };
+      await user.save();
+    }
+
     if (!user.shield.currentShield.isActive) {
       return res.status(400).json({ error: 'ليس لديك درع نشط' });
     }
@@ -142,6 +198,34 @@ router.get('/status', auth, async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة حقل shield إذا لم يكن موجوداً
+    if (!user.shield) {
+      user.shield = {
+        currentShield: {
+          isActive: false,
+          activatedAt: null,
+          expiresAt: null,
+          type: 'basic',
+          protectionLevel: 1
+        },
+        shieldHistory: [],
+        shieldStats: {
+          totalShieldsActivated: 0,
+          totalCoinsSpent: 0,
+          totalGiftsBlocked: 0,
+          totalProtectionTime: 0,
+          lastShieldAt: null
+        },
+        shieldSettings: {
+          autoRenew: false,
+          autoRenewType: 'basic',
+          notifications: true,
+          blockAllNegativeGifts: true
+        }
+      };
+      await user.save();
     }
 
     // التحقق من انتهاء صلاحية الدرع
@@ -189,6 +273,34 @@ router.get('/history', auth, async (req, res) => {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
+    // تهيئة حقل shield إذا لم يكن موجوداً
+    if (!user.shield) {
+      user.shield = {
+        currentShield: {
+          isActive: false,
+          activatedAt: null,
+          expiresAt: null,
+          type: 'basic',
+          protectionLevel: 1
+        },
+        shieldHistory: [],
+        shieldStats: {
+          totalShieldsActivated: 0,
+          totalCoinsSpent: 0,
+          totalGiftsBlocked: 0,
+          totalProtectionTime: 0,
+          lastShieldAt: null
+        },
+        shieldSettings: {
+          autoRenew: false,
+          autoRenewType: 'basic',
+          notifications: true,
+          blockAllNegativeGifts: true
+        }
+      };
+      await user.save();
+    }
+
     // ترتيب السجل من الأحدث للأقدم
     const history = user.shield.shieldHistory
       .sort((a, b) => new Date(b.activatedAt) - new Date(a.activatedAt));
@@ -231,6 +343,34 @@ router.put('/settings', auth, async (req, res) => {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
+    // تهيئة حقل shield إذا لم يكن موجوداً
+    if (!user.shield) {
+      user.shield = {
+        currentShield: {
+          isActive: false,
+          activatedAt: null,
+          expiresAt: null,
+          type: 'basic',
+          protectionLevel: 1
+        },
+        shieldHistory: [],
+        shieldStats: {
+          totalShieldsActivated: 0,
+          totalCoinsSpent: 0,
+          totalGiftsBlocked: 0,
+          totalProtectionTime: 0,
+          lastShieldAt: null
+        },
+        shieldSettings: {
+          autoRenew: false,
+          autoRenewType: 'basic',
+          notifications: true,
+          blockAllNegativeGifts: true
+        }
+      };
+      await user.save();
+    }
+
     // تحديث الإعدادات
     if (typeof autoRenew === 'boolean') {
       user.shield.shieldSettings.autoRenew = autoRenew;
@@ -267,6 +407,34 @@ router.get('/settings', auth, async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة حقل shield إذا لم يكن موجوداً
+    if (!user.shield) {
+      user.shield = {
+        currentShield: {
+          isActive: false,
+          activatedAt: null,
+          expiresAt: null,
+          type: 'basic',
+          protectionLevel: 1
+        },
+        shieldHistory: [],
+        shieldStats: {
+          totalShieldsActivated: 0,
+          totalCoinsSpent: 0,
+          totalGiftsBlocked: 0,
+          totalProtectionTime: 0,
+          lastShieldAt: null
+        },
+        shieldSettings: {
+          autoRenew: false,
+          autoRenewType: 'basic',
+          notifications: true,
+          blockAllNegativeGifts: true
+        }
+      };
+      await user.save();
     }
 
     res.json(user.shield.shieldSettings);
