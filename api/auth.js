@@ -43,9 +43,19 @@ router.post('/register', async (req, res) => {
 // تسجيل دخول
 router.post('/login', async (req, res) => {
   try {
+    console.log('🔐 بدء معالجة طلب تسجيل الدخول');
+    console.log('📝 Headers:', req.headers);
+    console.log('📦 Body:', req.body);
+    
     const { username, password } = req.body;
 
     console.log('🔐 محاولة تسجيل دخول:', { username, password: password ? '***' : 'فارغة' });
+
+    // التحقق من وجود البيانات المطلوبة
+    if (!username || !password) {
+      console.log('❌ بيانات ناقصة:', { username: !!username, password: !!password });
+      return res.status(400).json({ message: 'اسم المستخدم وكلمة المرور مطلوبان' });
+    }
 
     // البحث عن المستخدم باستخدام اسم المستخدم أو البريد الإلكتروني
     const user = await User.findOne({ $or: [{ username }, { email: username }] }); // يمكن الدخول باسم المستخدم أو البريد الإلكتروني
@@ -74,16 +84,19 @@ router.post('/login', async (req, res) => {
 
     console.log('✅ تم إنشاء التوكن للمستخدم:', username);
 
-    res.json({
+    const response = {
       message: 'تم تسجيل الدخول بنجاح!',
       token,
       username: user.username,
       isAdmin: user.isAdmin,
       score: user.stats.score
-    });
+    };
+
+    console.log('✅ إرسال الاستجابة:', { ...response, token: '***' });
+    res.json(response);
 
   } catch (error) {
-    console.error("خطأ أثناء تسجيل الدخول:", error); // طباعة الخطأ كاملاً
+    console.error("❌ خطأ أثناء تسجيل الدخول:", error); // طباعة الخطأ كاملاً
     res.status(500).json({ message: 'خطأ داخلي أثناء تسجيل الدخول', error: error.message });
   }
 });
