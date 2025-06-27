@@ -41,46 +41,64 @@ function verifyToken(req, res, next) {
 
 // دالة مساعدة للحصول على المستخدم الحالي
 async function getCurrentUser(currentUserId) {
-  if (currentUserId.match(/^[0-9a-fA-F]{24}$/)) {
-    // إذا كان userId هو ObjectId (MongoDB ID)
+  // إذا كان userId هو ObjectId (MongoDB ID)
+  if (currentUserId && typeof currentUserId === 'string' && currentUserId.match(/^[0-9a-fA-F]{24}$/)) {
     return await User.findById(currentUserId);
   } else {
-    // إذا كان userId رقم
-    return await User.findOne({ userId: currentUserId });
+    // إذا كان userId رقم أو string رقمي
+    let numericUserId = currentUserId;
+    if (typeof currentUserId === 'string' && !isNaN(currentUserId)) {
+      numericUserId = parseInt(currentUserId);
+    }
+    return await User.findOne({ userId: numericUserId });
   }
 }
 
 // إرسال طلب صداقة
 router.post('/send-friend-request', verifyToken, async (req, res) => {
   try {
+    console.log('🔍 محاولة إرسال طلب صداقة...');
+    
     // التحقق من وجود المستخدم في الطلب
     if (!req.user || !req.user.userId) {
+      console.log('❌ المستخدم غير موجود في الطلب');
       return res.status(401).json({ error: 'غير مصرح - يرجى تسجيل الدخول' });
     }
 
     const { userId: targetUserId } = req.body;
     const currentUserId = req.user.userId;
 
-    console.log('🔍 محاولة إرسال طلب صداقة:', { currentUserId, targetUserId });
+    console.log('🔍 محاولة إرسال طلب صداقة:', { 
+      currentUserId, 
+      targetUserId, 
+      currentUserIdType: typeof currentUserId,
+      targetUserIdType: typeof targetUserId 
+    });
 
     if (!targetUserId) {
+      console.log('❌ معرف المستخدم المستهدف مفقود');
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
 
     if (currentUserId === targetUserId) {
+      console.log('❌ محاولة إرسال طلب صداقة لنفس المستخدم');
       return res.status(400).json({ error: 'لا يمكن إرسال طلب صداقة لنفسك' });
     }
 
     // البحث عن المستخدمين باستخدام userId (رقم) وليس _id
+    console.log('🔍 البحث عن المستخدم الحالي...');
     const currentUser = await getCurrentUser(currentUserId);
+    
+    console.log('🔍 البحث عن المستخدم المستهدف...');
     const targetUser = await getCurrentUser(targetUserId);
 
     console.log('👥 نتائج البحث:', { 
-      currentUser: currentUser ? currentUser.username : 'غير موجود',
-      targetUser: targetUser ? targetUser.username : 'غير موجود'
+      currentUser: currentUser ? { username: currentUser.username, userId: currentUser.userId } : 'غير موجود',
+      targetUser: targetUser ? { username: targetUser.username, userId: targetUser.userId } : 'غير موجود'
     });
 
     if (!currentUser || !targetUser) {
+      console.log('❌ أحد المستخدمين غير موجود');
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
@@ -98,6 +116,7 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
     );
 
     if (alreadyFriends) {
+      console.log('❌ المستخدمان أصدقاء بالفعل');
       return res.status(400).json({ error: 'أنتما أصدقاء بالفعل' });
     }
 
@@ -107,6 +126,7 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
     );
 
     if (existingRequest) {
+      console.log('❌ يوجد طلب صداقة مسبق');
       return res.status(400).json({ error: 'يوجد طلب صداقة مسبق' });
     }
 
@@ -118,9 +138,12 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
       message: ''
     };
 
+    console.log('📝 إضافة طلب الصداقة:', friendRequest);
+
     currentUser.relationships.friendRequests.push(friendRequest);
     targetUser.relationships.friendRequests.push(friendRequest);
 
+    console.log('💾 حفظ البيانات...');
     await currentUser.save();
     await targetUser.save();
 
