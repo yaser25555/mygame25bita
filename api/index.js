@@ -103,20 +103,9 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// نقطة نهاية للصفحة الرئيسية (اختيارية)
+// نقطة نهاية للصفحة الرئيسية - إعادة توجيه للواجهة الأمامية
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Voice Boom Backend API', 
-    status: 'running',
-    endpoints: {
-      auth: '/api/auth',
-      users: '/api/users',
-      voice: '/api/voice',
-      trading: '/api/trading',
-      relationships: '/api/relationships',
-      shield: '/api/shield'
-    }
-  });
+  res.redirect('https://mygame25bita-7eqw.onrender.com');
 });
 
 // تحسين إدارة WebSocket
