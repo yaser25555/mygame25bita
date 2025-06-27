@@ -106,19 +106,14 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// نقطة نهاية للصفحة الرئيسية - رسالة بسيطة
+// نقطة نهاية للصفحة الرئيسية - توجيه للواجهة الأمامية
 app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <head><title>Voice Boom Backend API</title></head>
-      <body>
-        <h1>Voice Boom Backend API</h1>
-        <p>Status: Running</p>
-        <p>This is the backend server. The frontend is served separately.</p>
-      </body>
-    </html>
-  `);
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
+
+// --- 3. إعداد الملفات الثابتة (Static Files) ---
+// خدمة ملفات الواجهة الأمامية
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // تحسين إدارة WebSocket
 voiceServer.on('connection', (ws, req) => {
@@ -345,5 +340,4 @@ module.exports = { httpServer, PORT };
 // httpServer.listen(PORT, () => {
 //   console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
 //   console.log(`📡 API متاح على: http://localhost:${PORT}/api`);
-//   console.log(`🌐 الواجهة الأمامية متاحة على: http://localhost:${PORT}`);
-// });
+//   console.log(`
