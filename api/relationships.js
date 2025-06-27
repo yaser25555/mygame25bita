@@ -148,38 +148,37 @@ router.post('/send-friend-request', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'أنتما أصدقاء بالفعل' });
     }
 
-    // التحقق من وجود طلب صداقة مسبق
-    const existingRequest = currentUser.relationships.friendRequests.some(
-      request => request.from === targetUser.userId || request.from === currentUser.userId
+    // التحقق من وجود طلب صداقة مسبق (من المستخدم الحالي إلى المستهدف)
+    const existingSentRequest = currentUser.relationships.friendRequests.some(
+      request => request.from === currentUser.userId && request.toUserId === targetUser.userId
     );
 
-    if (existingRequest) {
+    // التحقق من وجود طلب صداقة مسبق (من المستهدف إلى المستخدم الحالي)
+    const existingReceivedRequest = targetUser.relationships.friendRequests.some(
+      request => request.from === targetUser.userId && request.toUserId === currentUser.userId
+    );
+
+    if (existingSentRequest || existingReceivedRequest) {
       console.log('❌ يوجد طلب صداقة مسبق');
       return res.status(400).json({ error: 'يوجد طلب صداقة مسبق' });
     }
 
-    // إضافة طلب الصداقة للمستخدم الحالي
+    // إضافة طلب الصداقة للمستخدم المستهدف فقط
     const friendRequest = {
       from: currentUser.userId,
       fromUsername: currentUser.username,
+      toUserId: targetUser.userId,
+      toUsername: targetUser.username,
       sentAt: new Date(),
       message: ''
     };
 
     console.log('📝 إضافة طلب الصداقة:', friendRequest);
 
-    currentUser.relationships.friendRequests.push(friendRequest);
+    // إضافة الطلب فقط للمستخدم المستهدف
     targetUser.relationships.friendRequests.push(friendRequest);
 
     console.log('💾 حفظ البيانات...');
-    try {
-      await currentUser.save();
-      console.log('✅ تم حفظ بيانات المستخدم الحالي');
-    } catch (error) {
-      console.error('❌ خطأ في حفظ بيانات المستخدم الحالي:', error);
-      return res.status(500).json({ error: 'خطأ في حفظ البيانات' });
-    }
-
     try {
       await targetUser.save();
       console.log('✅ تم حفظ بيانات المستخدم المستهدف');
@@ -710,22 +709,82 @@ router.get('/blocked-users', verifyToken, async (req, res) => {
 
 // البحث عن مستخدمين
 router.get('/search-users', verifyToken, async (req, res) => {
-  const { query, userId } = req.query;
-  let users = [];
-  if (userId && !isNaN(userId)) {
-    // البحث بالرقم فقط
-    const user = await User.findOne({ userId: parseInt(userId) });
-    if (user) users = [user];
-  } else if (query) {
-    // البحث بالنص
-    users = await User.find({
-      $or: [
-        { username: { $regex: query, $options: 'i' } },
-        { 'profile.displayName': { $regex: query, $options: 'i' } }
-      ]
+  try {
+    const { query, userId } = req.query;
+    const currentUserId = req.user.userId;
+    
+    // الحصول على المستخدم الحالي مع علاقاته
+    const currentUser = await getCurrentUser(currentUserId);
+    if (!currentUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة الحقول المطلوبة
+    if (!currentUser.relationships) currentUser.relationships = { friends: [], friendRequests: [], blockedUsers: [] };
+    if (!currentUser.relationships.friends) currentUser.relationships.friends = [];
+    if (!currentUser.relationships.friendRequests) currentUser.relationships.friendRequests = [];
+
+    let users = [];
+    
+    if (userId && !isNaN(userId)) {
+      // البحث بالرقم فقط
+      const user = await User.findOne({ userId: parseInt(userId) });
+      if (user) users = [user];
+    } else if (query) {
+      // البحث بالنص
+      users = await User.find({
+        $or: [
+          { username: { $regex: query, $options: 'i' } },
+          { 'profile.displayName': { $regex: query, $options: 'i' } }
+        ]
+      });
+    }
+
+    // إضافة معلومات حالة الصداقة لكل مستخدم
+    const usersWithStatus = users.map(user => {
+      // التحقق من أن المستخدم ليس هو نفسه
+      if (user.userId === currentUser.userId) {
+        return null; // تجاهل المستخدم الحالي
+      }
+
+      // التحقق من حالة الصداقة
+      const isFriend = currentUser.relationships.friends.some(friend => 
+        friend.userId === user.userId
+      );
+      
+      // التحقق من وجود طلب صداقة مستلم من هذا المستخدم
+      const hasPendingRequest = currentUser.relationships.friendRequests.some(request => 
+        request.from === user.userId
+      );
+      
+      // التحقق من وجود طلب صداقة مرسل إلى هذا المستخدم
+      const hasSentRequest = currentUser.relationships.friendRequests.some(request => 
+        request.from === currentUser.userId && request.toUserId === user.userId
+      );
+
+      return {
+        _id: user._id,
+        userId: user.userId,
+        username: user.username,
+        displayName: user.profile?.displayName || user.username,
+        bio: user.profile?.bio || '',
+        avatar: user.profile?.avatar || 'images/default-avatar.png',
+        level: user.profile?.level || 1,
+        isFriend,
+        hasFriendRequest: hasPendingRequest || hasSentRequest,
+        canSendRequest: !isFriend && !hasPendingRequest && !hasSentRequest
+      };
+    }).filter(user => user !== null); // إزالة المستخدمين الفارغين
+
+    res.json({ 
+      users: usersWithStatus,
+      total: usersWithStatus.length 
     });
+    
+  } catch (error) {
+    console.error('خطأ في البحث عن المستخدمين:', error);
+    res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
   }
-  res.json({ users });
 });
 
 // إلغاء طلب صداقة

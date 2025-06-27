@@ -1628,204 +1628,39 @@ body {
   margin-top: 15px;
 }
 
-.user-result {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  background: white;
-  transition: all 0.3s ease;
-}
-
-.user-result:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-.user-result-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.user-result-info {
-  flex: 1;
-}
-
-.user-result-name {
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 5px;
-}
-
-.user-result-bio {
-  font-size: 14px;
-  color: #6c757d;
-  margin-bottom: 5px;
-}
-
-.user-result-stats {
-  display: flex;
-  gap: 15px;
-  font-size: 12px;
-  color: #6c757d;
-}
-
-.user-result-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-friend {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-friend.add {
-  background: #28a745;
-  color: white;
-}
-
-.btn-friend.add:hover {
-  background: #218838;
-}
-
-.btn-friend.pending {
-  background: #ffc107;
-  color: #212529;
-}
-
-.btn-friend.pending:hover {
-  background: #e0a800;
-}
-
-.btn-friend.friend {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-friend.friend:hover {
-  background: #5a6268;
-}
-
-.btn-friend.blocked {
-  background: #dc3545;
-  color: white;
-}
-
-.btn-friend.blocked:hover {
-  background: #c82333;
-}
-
-/* تحسينات للأجهزة المحمولة */
-@media (max-width: 768px) {
-  .profile-cover {
-    height: 150px;
-  }
-  
-  .profile-avatar {
-    margin-top: -40px;
-    margin-right: 15px;
-  }
-  
-  .profile-avatar img {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .edit-avatar-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
-  }
-  
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .user-result {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .user-result-actions {
-    justify-content: center;
-    margin-top: 10px;
-  }
-  
-  .modal-content.large {
-    max-width: 95vw;
-    margin: 20px;
-  }
-}
-
-/* إضافة أنماط لخانة البحث في قسم الأصدقاء */
-.search-container {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.search-input {
-  flex: 1;
-  padding: 10px 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 25px;
-  font-size: 14px;
-  background: #fff;
-  transition: border-color 0.3s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
-
-.search-input::placeholder {
-  color: #999;
-}
-
-/* تحسين أنماط نتائج البحث */
 .search-result-item {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 15px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  transition: background-color 0.3s ease;
+  gap: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
 }
 
 .search-result-item:hover {
-  background-color: #f8f9fa;
-}
-
-.search-result-item:last-child {
-  border-bottom: none;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  border-color: rgba(102, 126, 234, 0.4);
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
   flex: 1;
 }
 
 .user-avatar {
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e0e0e0;
+  border: 3px solid #007bff;
+  box-shadow: 0 4px 15px rgba(0,123,255,0.3);
 }
 
 .user-details {
@@ -1833,41 +1668,137 @@ body {
 }
 
 .user-name {
+  font-size: 18px;
   font-weight: bold;
-  font-size: 16px;
   color: #333;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
 }
 
 .user-username {
+  color: #667eea;
   font-size: 14px;
-  color: #666;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.user-id {
+  color: #28a745;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-family: 'Courier New', monospace;
 }
 
 .user-bio {
+  color: #666;
   font-size: 13px;
-  color: #888;
-  margin-bottom: 4px;
-  line-height: 1.3;
+  margin-bottom: 5px;
+  line-height: 1.4;
 }
 
 .user-level {
+  color: #ff6b35;
   font-size: 12px;
-  color: #007bff;
   font-weight: 500;
 }
 
 .user-actions {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 120px;
+}
+
+.btn.small {
+  padding: 8px 16px;
+  font-size: 12px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.btn.small.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn.small.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn.small.disabled {
+  background: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.btn.small.disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .no-results {
   text-align: center;
-  padding: 30px;
   color: #666;
   font-style: italic;
+  padding: 40px 20px;
+}
+
+/* نافذة البحث المنبثقة */
+#search-users-modal .modal-content {
+  max-width: 600px;
+  width: 90%;
+}
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 25px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-tips {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.search-tips small {
+  color: #667eea;
+  font-style: italic;
+}
+
+/* تحسينات للأزرار في تبويب الأصدقاء */
+.friends-header .search-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.friends-header .search-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.friends-header .btn.small {
+  white-space: nowrap;
 }
 
 /* أنماط الرسائل */
@@ -2318,4 +2249,18 @@ body {
 
 .form-section:last-child {
     border-bottom: none;
+}
+
+.loading {
+  text-align: center;
+  color: #667eea;
+  font-weight: 500;
+  padding: 40px 20px;
+}
+
+.error {
+  text-align: center;
+  color: #dc3545;
+  font-weight: 500;
+  padding: 40px 20px;
 } 

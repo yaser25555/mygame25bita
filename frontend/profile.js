@@ -150,11 +150,11 @@ function setupDataActionListeners() {
             case 'searchUsers':
                 searchUsers();
                 break;
+            case 'openSearchModal':
+                openModal('search-users-modal');
+                break;
             case 'editProfileImage':
                 editProfileImage();
-                break;
-            case 'editCoverImage':
-                editCoverImage();
                 break;
             case 'resetImageUpload':
                 resetImageUpload();
@@ -213,6 +213,12 @@ function setupDataActionListeners() {
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         searchInput.addEventListener('input', searchUsersRealTime);
+    }
+    
+    // مستمع للبحث في تبويب الأصدقاء
+    const friendsSearchInput = document.getElementById('friends-search-input');
+    if (friendsSearchInput) {
+        friendsSearchInput.addEventListener('input', searchUsersRealTime);
     }
 }
 
@@ -1253,27 +1259,62 @@ async function searchUsersRealTime() {
             query = friendsSearchInput.value.trim();
         }
         
-        if (!query || query.length < 2) {
+        if (!query || query.length < 1) {
             // إظهار رسالة للمستخدم
-            showMessage('يرجى إدخال نص بحث مكون من حرفين على الأقل');
+            showMessage('يرجى إدخال نص بحث مكون من حرف واحد على الأقل');
             return;
         }
 
-        const response = await fetch(`${BACKEND_URL}/api/relationships/search-users?query=${encodeURIComponent(query)}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
+        // إظهار رسالة تحميل
+        const searchResults = document.getElementById('search-results');
+        if (searchResults) {
+            searchResults.innerHTML = '<p class="loading">جاري البحث...</p>';
+        }
+
+        let response;
+        
+        // إذا كان البحث رقم فقط (userId) - تحسين للبحث بالمعرفات المميزة
+        if (!isNaN(query) && Number(query) >= 1) {
+            console.log('🔍 البحث بالرقم:', query);
+            response = await fetch(`${BACKEND_URL}/api/relationships/search-users?userId=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+        } else {
+            // البحث بالنص (الاسم)
+            console.log('🔍 البحث بالنص:', query);
+            response = await fetch(`${BACKEND_URL}/api/relationships/search-users?query=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+        }
 
         if (!response.ok) {
-            throw new Error('فشل في البحث عن المستخدمين');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'فشل في البحث عن المستخدمين');
         }
 
         const data = await response.json();
-        displaySearchResults(data.users);
+        console.log('✅ نتائج البحث:', data.users);
+        
+        if (data.users && data.users.length > 0) {
+            displaySearchResults(data.users);
+        } else {
+            if (searchResults) {
+                searchResults.innerHTML = '<p class="no-results">لا توجد نتائج للبحث</p>';
+            }
+        }
     } catch (error) {
         console.error('خطأ في البحث عن المستخدمين:', error);
-        showMessage('خطأ في البحث عن المستخدمين', true);
+        showMessage('خطأ في البحث عن المستخدمين: ' + error.message, true);
+        
+        // إظهار رسالة خطأ في نتائج البحث
+        const searchResults = document.getElementById('search-results');
+        if (searchResults) {
+            searchResults.innerHTML = '<p class="error">حدث خطأ في البحث</p>';
+        }
     }
 }
 
@@ -1300,6 +1341,18 @@ function displaySearchResults(users) {
             return '';
         }
         
+        // تحديد نوع الزر بناءً على حالة الصداقة
+        let actionButton = '';
+        if (user.isFriend) {
+            actionButton = '<button class="btn small disabled">صديق</button>';
+        } else if (user.hasFriendRequest) {
+            actionButton = '<button class="btn small disabled">طلب مرسل</button>';
+        } else if (user.canSendRequest) {
+            actionButton = `<button class="btn small primary send-friend-request" data-user-id="${userId}">إرسال طلب</button>`;
+        } else {
+            actionButton = '<button class="btn small disabled">غير متاح</button>';
+        }
+        
         return `
         <div class="search-result-item">
             <div class="user-info">
@@ -1307,25 +1360,30 @@ function displaySearchResults(users) {
                 <div class="user-details">
                     <div class="user-name">${user.displayName || user.username}</div>
                     <div class="user-username">@${user.username}</div>
+                    <div class="user-id">المعرف: ${user.userId}</div>
                     <div class="user-bio">${user.bio || ''}</div>
                     <div class="user-level">المستوى: ${user.level || 1}</div>
                 </div>
             </div>
             <div class="user-actions">
-                ${user.isFriend ? 
-                    '<button class="btn small disabled">صديق</button>' :
-                    user.hasFriendRequest ? 
-                        '<button class="btn small disabled">طلب مرسل</button>' :
-                        user.canSendRequest ? 
-                            `<button class="btn small primary" onclick="sendFriendRequest('${userId}')">إرسال طلب</button>` :
-                            '<button class="btn small disabled">غير متاح</button>'
-                }
+                ${actionButton}
             </div>
         </div>
     `;
     }).filter(html => html !== '').join('');
     
     searchResults.innerHTML = resultsHTML;
+    
+    // إضافة مستمعي الأحداث للأزرار الجديدة
+    const sendButtons = searchResults.querySelectorAll('.send-friend-request');
+    sendButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            if (userId) {
+                sendFriendRequest(userId);
+            }
+        });
+    });
 }
 
 // عرض رسالة
@@ -1608,6 +1666,16 @@ async function searchUsers() {
 // إرسال طلب صداقة
 async function sendFriendRequest(userId) {
     try {
+        console.log('🚀 محاولة إرسال طلب صداقة للمستخدم:', userId);
+        
+        // تحديث الزر فوراً إلى حالة "طلب مرسل"
+        const button = document.querySelector(`button[data-user-id="${userId}"]`);
+        if (button) {
+            button.textContent = 'طلب مرسل';
+            button.className = 'btn small disabled';
+            button.disabled = true;
+        }
+        
         const response = await fetch(`${BACKEND_URL}/api/relationships/send-friend-request`, {
             method: 'POST',
             headers: {
@@ -1624,10 +1692,25 @@ async function sendFriendRequest(userId) {
 
         const data = await response.json();
         showMessage(data.message || 'تم إرسال طلب الصداقة بنجاح');
+        
+        // إعادة البحث لتحديث الأزرار بعد ثانية واحدة
+        setTimeout(() => {
+            searchUsersRealTime();
+        }, 1000);
+        
         return data;
     } catch (error) {
         console.error('خطأ في إرسال طلب الصداقة:', error);
         showMessage(error.message || 'خطأ في إرسال طلب الصداقة', true);
+        
+        // إعادة تعيين الزر في حالة الخطأ
+        const button = document.querySelector(`button[data-user-id="${userId}"]`);
+        if (button) {
+            button.textContent = 'إرسال طلب';
+            button.className = 'btn small primary send-friend-request';
+            button.disabled = false;
+        }
+        
         throw error;
     }
 }

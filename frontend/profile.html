@@ -241,8 +241,9 @@
                     <div class="friends-header">
                         <h3>👥 الأصدقاء</h3>
                         <div class="search-container">
-                            <input type="text" id="friends-search-input" placeholder="ابحث عن مستخدم..." class="search-input">
+                            <input type="text" id="friends-search-input" placeholder="ابحث بالاسم أو المعرف..." class="search-input">
                             <button class="btn small" data-action="searchUsers">البحث</button>
+                            <button class="btn small primary" data-action="openSearchModal">🔍 بحث متقدم</button>
                         </div>
                     </div>
                     
@@ -514,9 +515,12 @@
     <div id="search-users-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="modal-close" data-action="closeModal" data-modal="search-users-modal">×</button>
-            <h3>البحث عن مستخدمين</h3>
+            <h3>🔍 البحث عن مستخدمين</h3>
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="ابحث عن مستخدم..." data-action="searchUsersRealTime">
+                <input type="text" id="search-input" placeholder="ابحث بالاسم أو المعرف (مثل: 111، 222، 333)..." data-action="searchUsersRealTime">
+                <div class="search-tips">
+                    <small>💡 يمكنك البحث بالاسم أو المعرف الرقمي</small>
+                </div>
                 <div class="search-results" id="search-results">
                     <!-- نتائج البحث -->
                 </div>
