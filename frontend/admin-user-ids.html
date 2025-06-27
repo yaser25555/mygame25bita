@@ -444,16 +444,16 @@
                     <tbody>
                         ${users.map(user => `
                             <tr>
-                                <td><span class="user-id">${user.userId}</span></td>
+                                <td><span class="user-id">${user.userId || 'غير محدد'}</span></td>
                                 <td><span class="username">${user.username}</span></td>
                                 <td>${user.email}</td>
                                 <td>${user.profile?.displayName || '-'}</td>
                                 <td><span class="level">${user.profile?.level || 1}</span></td>
                                 <td><span class="score">${user.stats?.score || 0}</span></td>
-                                <td>${new Date(user.createdAt).toLocaleDateString('ar-SA')}</td>
+                                <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString('ar-SA') : 'غير محدد'}</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button onclick="changeUserId('${user._id}', '${user.username}', ${user.userId})" class="btn btn-primary btn-small">
+                                        <button onclick="changeUserId('${user._id}', '${user.username}', ${user.userId || 0})" class="btn btn-primary btn-small">
                                             ✏️ تغيير المعرف
                                         </button>
                                     </div>
