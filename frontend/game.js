@@ -19,4 +19,7 @@ function playSound(soundName) {
         sound.currentTime = 0;
         sound.play().catch(() => {});
     }
-} 
+}
+
+// تصدير دالة playSound للاستخدام العام
+window.playSound = playSound; 

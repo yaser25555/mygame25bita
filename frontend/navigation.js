@@ -1,6 +1,32 @@
 // ملف التنقل - يتعامل مع أزرار التنقل بين الصفحات
 const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
+// دالة تشغيل الصوت (مؤقتة لحل مشكلة ReferenceError)
+function playSound(soundName) {
+    try {
+        // محاولة الوصول لدالة playSound من game.js إذا كانت متاحة
+        if (typeof window.playSound === 'function') {
+            window.playSound(soundName);
+            return;
+        }
+        
+        // إذا لم تكن متاحة، استخدم الأصوات المباشرة
+        const sounds = {
+            buttonClick: document.getElementById('buttonClick'),
+            win: document.getElementById('winSound'),
+            lose: document.getElementById('loseSound')
+        };
+        
+        const sound = sounds[soundName];
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(() => {});
+        }
+    } catch (error) {
+        console.log('لا يمكن تشغيل الصوت:', soundName);
+    }
+}
+
 // دالة تهيئة أزرار التنقل
 function initializeNavigation() {
     console.log('🚀 تهيئة أزرار التنقل...');
@@ -104,6 +130,7 @@ function setupNavigationButtons() {
     const profileButton = document.getElementById('profile-button');
     if (profileButton) {
         profileButton.addEventListener('click', () => {
+            playSound('buttonClick');
             if (window.currentUser) {
                 window.location.href = 'profile.html';
             } else {
@@ -116,6 +143,7 @@ function setupNavigationButtons() {
     const tradingButton = document.getElementById('trading-button');
     if (tradingButton) {
         tradingButton.addEventListener('click', () => {
+            playSound('buttonClick');
             if (window.currentUser) {
                 window.location.href = 'trading.html';
             } else {
@@ -128,6 +156,7 @@ function setupNavigationButtons() {
     const giftsButton = document.getElementById('gifts-button');
     if (giftsButton) {
         giftsButton.addEventListener('click', () => {
+            playSound('buttonClick');
             if (window.currentUser) {
                 window.location.href = 'gifts.html';
             } else {
@@ -140,6 +169,7 @@ function setupNavigationButtons() {
     const shieldButton = document.getElementById('shield-button');
     if (shieldButton) {
         shieldButton.addEventListener('click', () => {
+            playSound('buttonClick');
             if (window.currentUser) {
                 window.location.href = 'shield.html';
             } else {
@@ -151,7 +181,10 @@ function setupNavigationButtons() {
     // زر تسجيل الخروج
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
-        logoutButton.addEventListener('click', handleLogout);
+        logoutButton.addEventListener('click', () => {
+            playSound('buttonClick');
+            handleLogout();
+        });
     }
     
     console.log('✅ تم إعداد أزرار التنقل');

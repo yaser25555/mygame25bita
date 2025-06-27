@@ -45,7 +45,7 @@ app.use(helmet({
 
 // إعداد CORS للسماح بالطلبات من واجهة الويب فقط
 app.use(cors({
-    origin: 'https://mygame25bita-1-4ue6.onrender.com', // دومين الواجهة
+    origin: 'https://mygame25bita-7eqw.onrender.com', // دومين الواجهة
     credentials: true
 }));
 
@@ -91,7 +91,7 @@ app.use('/api/relationships', relationshipsRoutes);
 app.use('/api/shield', shieldRoutes);
 // app.use('/api/game', gameRoutes); // مسار اللعبة
 
-// --- 5. إعداد الملفات الثابتة ---
+// --- 5. إعداد الملفات الثابتة للواجهة الأمامية ---
 app.use('/sounds', express.static(path.join(__dirname, '../frontend/sounds')));
 app.use('/images', express.static(path.join(__dirname, '../frontend/images')));
 app.use(express.static(path.join(__dirname, '../frontend'))); // خدمة كل ملفات الواجهة
@@ -99,9 +99,9 @@ app.use(express.static(path.join(__dirname, '../frontend'))); // خدمة كل �
 // إعادة توجيه / إلى index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
-  });
+});
 
-// --- 7. نقطة نهاية لفحص الحالة الصحية (Health Check) ---
+// --- 6. نقطة نهاية لفحص الحالة الصحية (Health Check) ---
 // Render يستخدم هذا المسار للتأكد من أن الخدمة تعمل بشكل سليم
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
