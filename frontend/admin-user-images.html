@@ -712,8 +712,27 @@
                 if (action.startsWith('change_') && fileInput.files[0]) {
                     const file = fileInput.files[0];
                     console.log('📁 ملف محدد:', { name: file.name, type: file.type, size: file.size });
-                    imageData = await fileToBase64(file);
-                    imageType = file.type;
+                    
+                    // تحقق من حجم الملف (الحد الأقصى 2MB)
+                    const maxSize = 2 * 1024 * 1024; // 2MB
+                    if (file.size > maxSize) {
+                        throw new Error('حجم الصورة كبير جداً. الحد الأقصى 2MB');
+                    }
+                    
+                    // تحقق من نوع الملف
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(file.type)) {
+                        throw new Error('نوع الملف غير مدعوم. يرجى اختيار صورة بصيغة JPG, PNG, أو GIF');
+                    }
+                    
+                    try {
+                        imageData = await fileToBase64(file);
+                        imageType = file.type;
+                        console.log('✅ تم تحويل الصورة إلى Base64 بنجاح، الحجم:', imageData.length);
+                    } catch (error) {
+                        console.error('❌ خطأ في تحويل الصورة:', error);
+                        throw new Error('خطأ في معالجة الصورة');
+                    }
                 }
                 
                 const requestBody = {
@@ -723,7 +742,12 @@
                     imageType: imageType
                 };
                 
-                console.log('📤 إرسال البيانات:', requestBody);
+                console.log('📤 إرسال البيانات:', { 
+                    targetUserId: requestBody.targetUserId,
+                    action: requestBody.action,
+                    imageType: requestBody.imageType,
+                    imageDataLength: requestBody.imageData ? requestBody.imageData.length : 0
+                });
                 
                 // الحصول على التوكن - جرب adminToken أولاً، ثم token العادي
                 let token = localStorage.getItem('adminToken');
@@ -751,7 +775,7 @@
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     console.error('❌ خطأ في الخادم:', errorData);
-                    throw new Error(errorData.error || `خطأ ${response.status}: ${response.statusText}`);
+                    throw new Error(errorData.error || errorData.message || `خطأ ${response.status}: ${response.statusText}`);
                 }
                 
                 const result = await response.json();

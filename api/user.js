@@ -1459,7 +1459,12 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
   try {
     const { targetUserId, action, imageData, imageType } = req.body;
 
-    console.log('📝 طلب إدارة الصورة:', { targetUserId, action, imageType });
+    console.log('📝 طلب إدارة الصورة:', { 
+      targetUserId, 
+      action, 
+      imageType,
+      imageDataLength: imageData ? imageData.length : 0 
+    });
 
     if (!targetUserId || !action) {
       console.log('❌ بيانات مفقودة:', { targetUserId, action });
@@ -1495,17 +1500,20 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
     // تهيئة profile إذا لم يكن موجوداً
     if (!user.profile) {
       user.profile = {};
+      console.log('📝 تم تهيئة profile للمستخدم');
     }
 
     let message = '';
 
     switch (action) {
       case 'remove_avatar':
+        console.log('🗑️ حذف الصورة الشخصية للمستخدم:', user.username);
         user.profile.avatar = null;
         message = 'تم حذف الصورة الشخصية بنجاح';
         break;
 
       case 'remove_profile_image':
+        console.log('🗑️ حذف صورة البروفايل للمستخدم:', user.username);
         user.profile.profileImage = null;
         message = 'تم حذف صورة البروفايل بنجاح';
         break;
@@ -1515,6 +1523,15 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
           console.log('❌ بيانات الصورة مفقودة للـ change_avatar');
           return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
         }
+        
+        // تحقق من حجم البيانات (الحد الأقصى 3MB)
+        const maxDataSize = 3 * 1024 * 1024; // 3MB
+        if (imageData.length > maxDataSize) {
+          console.log('❌ حجم البيانات كبير جداً:', imageData.length, 'bytes');
+          return res.status(400).json({ error: 'حجم الصورة كبير جداً. الحد الأقصى 3MB' });
+        }
+        
+        console.log('🖼️ تغيير الصورة الشخصية للمستخدم:', user.username, 'حجم البيانات:', imageData.length);
         user.profile.avatar = imageData;
         message = 'تم تغيير الصورة الشخصية بنجاح';
         break;
@@ -1524,6 +1541,14 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
           console.log('❌ بيانات الصورة مفقودة للـ change_profile_image');
           return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
         }
+        
+        // تحقق من حجم البيانات (الحد الأقصى 3MB)
+        if (imageData.length > maxDataSize) {
+          console.log('❌ حجم البيانات كبير جداً:', imageData.length, 'bytes');
+          return res.status(400).json({ error: 'حجم الصورة كبير جداً. الحد الأقصى 3MB' });
+        }
+        
+        console.log('🖼️ تغيير صورة البروفايل للمستخدم:', user.username, 'حجم البيانات:', imageData.length);
         user.profile.profileImage = imageData;
         message = 'تم تغيير صورة البروفايل بنجاح';
         break;
@@ -1533,12 +1558,13 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
         return res.status(400).json({ error: 'إجراء غير صالح' });
     }
 
+    console.log('💾 محاولة حفظ التغييرات...');
     await user.save();
     console.log('💾 تم حفظ التغييرات بنجاح');
 
     console.log(`🖼️ المشرف ${req.user.username} ${action} للمستخدم ${user.username}`);
 
-    res.json({
+    const responseData = {
       message: message,
       user: {
         id: user._id,
@@ -1549,11 +1575,23 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
           profileImage: user.profile.profileImage
         }
       }
-    });
+    };
+
+    console.log('📤 إرسال الاستجابة:', { message, userId: user.userId });
+    res.json(responseData);
 
   } catch (error) {
-    console.error('خطأ في إدارة صورة المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
+    console.error('❌ خطأ في إدارة صورة المستخدم:', error);
+    console.error('❌ تفاصيل الخطأ:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'خطأ في الخادم',
+      message: 'حدث خطأ غير متوقع',
+      details: error.message 
+    });
   }
 });
 
