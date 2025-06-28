@@ -1,6 +1,8 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const DeletedUser = require('../models/DeletedUser');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -1043,161 +1045,18 @@ router.put('/admin/update-role', verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
-// حذف مستخدم (للمشرفين)
-router.delete('/admin/delete-user', verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { userId } = req.body;
-
-    const user = await User.findByIdAndDelete(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    res.json({
-      message: `تم حذف المستخدم ${user.username} بنجاح`
-    });
-
-  } catch (error) {
-    console.error('خطأ في حذف المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في حذف المستخدم' });
-  }
-});
-
-// إضافة صناديق للمستخدم (للمشرفين)
-router.post('/admin/add-boxes', verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { username, count, value } = req.body;
-
-    if (!username || !count || !value) {
-      return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
-    }
-
-    const user = await User.findOneAndUpdate(
-      { username },
-      { 
-        $push: { 
-          boxValues: { 
-            $each: Array(parseInt(count)).fill(parseInt(value)) 
-          } 
-        } 
-      },
-      { new: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    res.json({
-      message: `تم إضافة ${count} صندوق للمستخدم ${username} بنجاح`,
-      user: {
-        id: user._id,
-        userId: user.userId,
-        username: user.username,
-        boxCount: user.boxValues.length
-      }
-    });
-
-  } catch (error) {
-    console.error('خطأ في إضافة الصناديق:', error);
-    res.status(500).json({ error: 'خطأ في إضافة الصناديق' });
-  }
-});
-
-// تحديث معرف المستخدم (للمشرفين)
-router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { username, newUserId } = req.body;
-
-    if (!username || !newUserId) {
-      return res.status(400).json({ error: 'اسم المستخدم والمعرف الجديد مطلوبان' });
-    }
-
-    // التحقق من أن المعرف الجديد غير مستخدم
-    const existingUser = await User.findOne({ userId: newUserId });
-    if (existingUser && existingUser.username !== username) {
-      return res.status(400).json({ error: 'المعرف الجديد مستخدم بالفعل من قبل مستخدم آخر' });
-    }
-
-    // البحث عن المستخدم المراد تحديثه
-    const targetUser = await User.findOne({ username });
-    if (!targetUser) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    const oldUserId = targetUser.userId;
-    targetUser.userId = newUserId;
-    await targetUser.save();
-
-    console.log(`🔧 المشرف ${req.user.username} غير معرف المستخدم ${targetUser.username} من ${oldUserId} إلى ${newUserId}`);
-
-    res.json({
-      message: `تم تحديث معرف المستخدم ${username} من ${oldUserId} إلى ${newUserId} بنجاح`,
-      user: {
-        id: targetUser._id,
-        userId: targetUser.userId,
-        username: targetUser.username
-      }
-    });
-
-  } catch (error) {
-    console.error('خطأ في تحديث معرف المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
-  }
-});
-
-// البحث عن المستخدمين بالمعرف (للمشرفين)
-router.get('/admin/search-by-id', verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { search } = req.query;
-
-    if (!search) {
-      return res.status(400).json({ error: 'معرف البحث مطلوب' });
-    }
-
-    const users = await User.find({
-      $or: [
-        { userId: parseInt(search) || 0 },
-        { username: { $regex: search, $options: 'i' } }
-      ]
-    })
-    .select('userId username email profile.displayName profile.level stats.score createdAt');
-
-    const results = users.map(user => ({
-      id: user._id,
-      userId: user.userId,
-      username: user.username,
-      email: user.email,
-      displayName: user.profile.displayName,
-      level: user.profile.level,
-      score: user.stats.score,
-      createdAt: user.createdAt
-    }));
-
-    res.json({
-      users: results,
-      totalResults: results.length
-    });
-
-  } catch (error) {
-    console.error('خطأ في البحث عن المستخدمين:', error);
-    res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
-  }
-});
-
-// جلب معلومات صور المستخدم (للمشرفين فقط)
-router.get('/admin/user-images/:userId', verifyToken, verifyAdmin, async (req, res) => {
+// حذف المستخدم (للمشرفين فقط)
+router.delete('/admin/delete-user/:userId', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
+    const { reason } = req.body;
 
     if (!userId) {
       return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
     }
 
-    // البحث بالمعرف الرقمي أولاً
+    // البحث عن المستخدم
     let user = await User.findOne({ userId: parseInt(userId) });
-    
-    // إذا لم يتم العثور عليه، جرب البحث بالـ ObjectId
     if (!user) {
       user = await User.findById(userId);
     }
@@ -1206,29 +1065,146 @@ router.get('/admin/user-images/:userId', verifyToken, verifyAdmin, async (req, r
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
+    // منع حذف المشرفين
+    if (user.isAdmin) {
+      return res.status(403).json({ error: 'لا يمكن حذف المشرفين' });
+    }
+
+    // حفظ معلومات المستخدم في جدول المستخدمين المحذوفين
+    const deletedUserData = new DeletedUser({
+      originalUserId: user.userId,
+      username: user.username,
+      email: user.email,
+      originalData: {
+        profile: user.profile,
+        stats: user.stats,
+        boxValues: user.boxValues,
+        friends: user.friends,
+        achievements: user.achievements,
+        itemsCollected: user.itemsCollected,
+        pearls: user.pearls,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin
+      },
+      deletedBy: req.user.username,
+      reason: reason || 'حذف بواسطة المشرف'
+    });
+
+    await deletedUserData.save();
+
+    // حذف المستخدم من قاعدة البيانات
+    await User.findByIdAndDelete(user._id);
+
+    console.log(`🗑️ تم حذف المستخدم ${user.username} (ID: ${user.userId}) بواسطة المشرف ${req.user.username}`);
+
     res.json({
-      user: {
-        id: user._id,
-        userId: user.userId,
-        username: user.username,
-        images: {
-          avatar: user.profile?.avatar,
-          profileImage: user.profile?.profileImage,
-          coverImage: user.profile?.coverImage
-        }
+      message: `تم حذف المستخدم ${user.username} بنجاح`,
+      deletedUser: {
+        originalUserId: deletedUserData.originalUserId,
+        username: deletedUserData.username,
+        email: deletedUserData.email,
+        deletedAt: deletedUserData.deletedAt,
+        deletedBy: deletedUserData.deletedBy,
+        reason: deletedUserData.reason
       }
     });
 
   } catch (error) {
-    console.error('خطأ في جلب معلومات الصور:', error);
+    console.error('خطأ في حذف المستخدم:', error);
     res.status(500).json({ error: 'خطأ في الخادم' });
   }
 });
 
-// جلب المستخدمين مع معرفاتهم (للمشرفين فقط)
-router.get('/admin/users-with-ids', verifyToken, verifyAdmin, async (req, res) => {
+// حذف عدة مستخدمين دفعة واحدة (للمشرفين فقط)
+router.delete('/admin/delete-multiple-users', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { page = 1, limit = 12, search = '' } = req.query;
+    const { userIds, reason } = req.body;
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ error: 'قائمة معرفات المستخدمين مطلوبة' });
+    }
+
+    const deletedUsers = [];
+    const errors = [];
+
+    for (const userId of userIds) {
+      try {
+        // البحث عن المستخدم
+        let user = await User.findOne({ userId: parseInt(userId) });
+        if (!user) {
+          user = await User.findById(userId);
+        }
+
+        if (!user) {
+          errors.push(`المستخدم ${userId} غير موجود`);
+          continue;
+        }
+
+        // منع حذف المشرفين
+        if (user.isAdmin) {
+          errors.push(`لا يمكن حذف المشرف ${user.username}`);
+          continue;
+        }
+
+        // حفظ معلومات المستخدم في جدول المستخدمين المحذوفين
+        const deletedUserData = new DeletedUser({
+          originalUserId: user.userId,
+          username: user.username,
+          email: user.email,
+          originalData: {
+            profile: user.profile,
+            stats: user.stats,
+            boxValues: user.boxValues,
+            friends: user.friends,
+            achievements: user.achievements,
+            itemsCollected: user.itemsCollected,
+            pearls: user.pearls,
+            createdAt: user.createdAt,
+            lastLogin: user.lastLogin
+          },
+          deletedBy: req.user.username,
+          reason: reason || 'حذف جماعي بواسطة المشرف'
+        });
+
+        await deletedUserData.save();
+
+        // حذف المستخدم
+        await User.findByIdAndDelete(user._id);
+
+        deletedUsers.push({
+          originalUserId: deletedUserData.originalUserId,
+          username: deletedUserData.username,
+          email: deletedUserData.email,
+          deletedAt: deletedUserData.deletedAt,
+          deletedBy: deletedUserData.deletedBy,
+          reason: deletedUserData.reason
+        });
+
+        console.log(`🗑️ تم حذف المستخدم ${user.username} (ID: ${user.userId}) في الحذف الجماعي`);
+
+      } catch (error) {
+        errors.push(`خطأ في حذف المستخدم ${userId}: ${error.message}`);
+      }
+    }
+
+    res.json({
+      message: `تم حذف ${deletedUsers.length} مستخدم بنجاح`,
+      deletedUsers: deletedUsers,
+      errors: errors,
+      totalDeleted: deletedUsers.length,
+      totalErrors: errors.length
+    });
+
+  } catch (error) {
+    console.error('خطأ في الحذف الجماعي:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// البحث عن المستخدمين المحذوفين (للمشرفين فقط)
+router.get('/admin/deleted-users', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 20, search } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     let query = {};
@@ -1236,182 +1212,150 @@ router.get('/admin/users-with-ids', verifyToken, verifyAdmin, async (req, res) =
       query = {
         $or: [
           { username: { $regex: search, $options: 'i' } },
-          { userId: parseInt(search) || 0 },
-          { email: { $regex: search, $options: 'i' } }
+          { originalUserId: parseInt(search) || 0 },
+          { email: { $regex: search, $options: 'i' } },
+          { deletedBy: { $regex: search, $options: 'i' } }
         ]
       };
     }
 
-    const users = await User.find(query)
-      .select('userId username email profile.displayName profile.level stats.score createdAt profile.avatar')
-      .sort({ createdAt: -1 })
+    const deletedUsers = await DeletedUser.find(query)
+      .sort({ deletedAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
-    const total = await User.countDocuments(query);
+    const total = await DeletedUser.countDocuments(query);
 
-    const results = users.map(user => ({
+    const results = deletedUsers.map(user => ({
       id: user._id,
-      userId: user.userId,
+      originalUserId: user.originalUserId,
       username: user.username,
       email: user.email,
-      displayName: user.profile?.displayName || user.username,
-      level: user.profile?.level || 1,
-      score: user.stats?.score || 0,
-      avatar: user.profile?.avatar || null,
-      createdAt: user.createdAt
+      deletedAt: user.deletedAt,
+      deletedBy: user.deletedBy,
+      reason: user.reason,
+      canRestore: user.canRestore,
+      originalData: {
+        profile: user.originalData.profile,
+        stats: user.originalData.stats,
+        createdAt: user.originalData.createdAt
+      }
     }));
 
     res.json({
-      users: results,
-      total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages: Math.ceil(total / parseInt(limit))
-    });
-
-  } catch (error) {
-    console.error('خطأ في جلب المستخدمين مع المعرفات:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
-  }
-});
-
-// البحث عن مستخدم بالمعرف (للمشرفين فقط)
-router.get('/admin/find-user-by-id/:userId', verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    if (!userId) {
-      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
-    }
-
-    // البحث بالمعرف الرقمي أولاً
-    let user = await User.findOne({ userId: parseInt(userId) });
-    
-    // إذا لم يتم العثور عليه، جرب البحث بالـ ObjectId
-    if (!user) {
-      user = await User.findById(userId);
-    }
-
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    res.json({
-      user: {
-        id: user._id,
-        userId: user.userId,
-        username: user.username,
-        email: user.email,
-        displayName: user.profile?.displayName || user.username,
-        level: user.profile?.level || 1,
-        score: user.stats?.score || 0,
-        avatar: user.profile?.avatar || null,
-        createdAt: user.createdAt,
-        images: {
-          avatar: user.profile?.avatar,
-          profileImage: user.profile?.profileImage,
-          coverImage: user.profile?.coverImage
-        }
+      deletedUsers: results,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        total,
+        hasNextPage: parseInt(page) * parseInt(limit) < total,
+        hasPrevPage: parseInt(page) > 1
       }
     });
 
   } catch (error) {
-    console.error('خطأ في البحث عن المستخدم بالمعرف:', error);
+    console.error('خطأ في البحث عن المستخدمين المحذوفين:', error);
     res.status(500).json({ error: 'خطأ في الخادم' });
   }
 });
 
-// إدارة صور المستخدم (للمشرفين فقط)
-router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res) => {
+// استعادة المستخدم المحذوف (للمشرفين فقط)
+router.post('/admin/restore-user/:deletedUserId', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { targetUserId, action, imageData, imageType } = req.body;
+    const { deletedUserId } = req.params;
 
-    if (!targetUserId || !action) {
-      return res.status(400).json({ error: 'معرف المستخدم والإجراء مطلوبان' });
+    if (!deletedUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم المحذوف مطلوب' });
     }
 
-    // البحث عن المستخدم
-    let user = await User.findOne({ userId: parseInt(targetUserId) });
-    if (!user) {
-      user = await User.findById(targetUserId);
+    // البحث عن المستخدم المحذوف
+    const deletedUser = await DeletedUser.findById(deletedUserId);
+    if (!deletedUser) {
+      return res.status(404).json({ error: 'المستخدم المحذوف غير موجود' });
     }
 
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    if (!deletedUser.canRestore) {
+      return res.status(403).json({ error: 'لا يمكن استعادة هذا المستخدم' });
     }
 
-    // تهيئة profile إذا لم يكن موجوداً
-    if (!user.profile) {
-      user.profile = {};
+    // التحقق من عدم وجود مستخدم بنفس المعرف
+    const existingUser = await User.findOne({ userId: deletedUser.originalUserId });
+    if (existingUser) {
+      return res.status(400).json({ error: 'يوجد مستخدم آخر بنفس المعرف' });
     }
 
-    let message = '';
+    // إنشاء مستخدم جديد من البيانات المحذوفة
+    const restoredUser = new User({
+      userId: deletedUser.originalUserId,
+      username: deletedUser.username,
+      email: deletedUser.email,
+      password: deletedUser.originalData.password || 'tempPassword123',
+      profile: deletedUser.originalData.profile || {},
+      stats: deletedUser.originalData.stats || { score: 0, highScore: 0, roundNumber: 1 },
+      boxValues: deletedUser.originalData.boxValues || [],
+      friends: deletedUser.originalData.friends || [],
+      achievements: deletedUser.originalData.achievements || [],
+      itemsCollected: deletedUser.originalData.itemsCollected || {},
+      pearls: deletedUser.originalData.pearls || 0,
+      createdAt: deletedUser.originalData.createdAt,
+      lastLogin: new Date()
+    });
 
-    switch (action) {
-      case 'remove_avatar':
-        user.profile.avatar = null;
-        message = 'تم حذف الصورة الشخصية بنجاح';
-        break;
+    await restoredUser.save();
 
-      case 'remove_profile_image':
-        user.profile.profileImage = null;
-        message = 'تم حذف صورة البروفايل بنجاح';
-        break;
+    // حذف المستخدم من جدول المحذوفين
+    await DeletedUser.findByIdAndDelete(deletedUserId);
 
-      case 'remove_cover_image':
-        user.profile.coverImage = null;
-        message = 'تم حذف صورة الغلاف بنجاح';
-        break;
-
-      case 'change_avatar':
-        if (!imageData || !imageType) {
-          return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
-        }
-        user.profile.avatar = imageData;
-        message = 'تم تغيير الصورة الشخصية بنجاح';
-        break;
-
-      case 'change_profile_image':
-        if (!imageData || !imageType) {
-          return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
-        }
-        user.profile.profileImage = imageData;
-        message = 'تم تغيير صورة البروفايل بنجاح';
-        break;
-
-      case 'change_cover_image':
-        if (!imageData || !imageType) {
-          return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
-        }
-        user.profile.coverImage = imageData;
-        message = 'تم تغيير صورة الغلاف بنجاح';
-        break;
-
-      default:
-        return res.status(400).json({ error: 'إجراء غير صالح' });
-    }
-
-    await user.save();
-
-    console.log(`🖼️ المشرف ${req.user.username} ${action} للمستخدم ${user.username}`);
+    console.log(`🔄 تم استعادة المستخدم ${restoredUser.username} (ID: ${restoredUser.userId}) بواسطة المشرف ${req.user.username}`);
 
     res.json({
-      message: message,
-      user: {
-        id: user._id,
-        userId: user.userId,
-        username: user.username,
-        images: {
-          avatar: user.profile.avatar,
-          profileImage: user.profile.profileImage,
-          coverImage: user.profile.coverImage
-        }
+      message: `تم استعادة المستخدم ${restoredUser.username} بنجاح`,
+      restoredUser: {
+        id: restoredUser._id,
+        userId: restoredUser.userId,
+        username: restoredUser.username,
+        email: restoredUser.email,
+        createdAt: restoredUser.createdAt
       }
     });
 
   } catch (error) {
-    console.error('خطأ في إدارة صورة المستخدم:', error);
+    console.error('خطأ في استعادة المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// حذف نهائي للمستخدم المحذوف (للمشرفين فقط)
+router.delete('/admin/permanently-delete/:deletedUserId', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { deletedUserId } = req.params;
+
+    if (!deletedUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم المحذوف مطلوب' });
+    }
+
+    // البحث عن المستخدم المحذوف
+    const deletedUser = await DeletedUser.findById(deletedUserId);
+    if (!deletedUser) {
+      return res.status(404).json({ error: 'المستخدم المحذوف غير موجود' });
+    }
+
+    // حذف نهائي من جدول المحذوفين
+    await DeletedUser.findByIdAndDelete(deletedUserId);
+
+    console.log(`💀 تم الحذف النهائي للمستخدم ${deletedUser.username} (ID: ${deletedUser.originalUserId}) بواسطة المشرف ${req.user.username}`);
+
+    res.json({
+      message: `تم الحذف النهائي للمستخدم ${deletedUser.username} بنجاح`,
+      permanentlyDeleted: {
+        originalUserId: deletedUser.originalUserId,
+        username: deletedUser.username,
+        deletedAt: new Date()
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في الحذف النهائي:', error);
     res.status(500).json({ error: 'خطأ في الخادم' });
   }
 });
