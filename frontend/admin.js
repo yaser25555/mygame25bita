@@ -1,4 +1,4 @@
-// ملف admin.js لإدارة لوحة تحكم المسؤول
+﻿// ملف admin.js لإدارة لوحة تحكم المسؤول
 
 const BACKEND_URL = CONFIG.BACKEND_URL;
 

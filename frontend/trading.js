@@ -1,4 +1,4 @@
-// استخدام ملف التكوين المركزي
+﻿// استخدام ملف التكوين المركزي
 const BACKEND_URL = CONFIG.BACKEND_URL;
 
 // Trading System JavaScript

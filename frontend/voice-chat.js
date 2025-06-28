@@ -1,4 +1,4 @@
-// إعداد متغيرات WebRTC و WebSocket
+﻿// إعداد متغيرات WebRTC و WebSocket
 window.ws = null; // اتصال WebSocket عام
 let username = localStorage.getItem('username') || 'مستخدم';
 let roomName = 'game-room'; // يمكنك تغييره حسب منطق غرفتك

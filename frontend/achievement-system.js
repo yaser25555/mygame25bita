@@ -1,4 +1,4 @@
-// نظام الإنجازات والتحديات
+﻿// نظام الإنجازات والتحديات
 class AchievementSystem {
     constructor() {
         this.achievements = this.initializeAchievements();

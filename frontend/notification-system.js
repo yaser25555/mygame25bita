@@ -1,4 +1,4 @@
-// نظام الإشعارات المتقدم للعبة
+﻿// نظام الإشعارات المتقدم للعبة
 class NotificationSystem {
     constructor() {
         this.notifications = [];
