@@ -6,6 +6,34 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123';
 
+// مسار اختبار للتحقق من أن relationships يعمل
+router.get('/test', (req, res) => {
+  console.log('🧪 تم استلام طلب test في relationships');
+  res.json({ 
+    message: 'مسارات relationships تعمل بشكل صحيح',
+    timestamp: new Date().toISOString(),
+    headers: {
+      origin: req.headers.origin,
+      method: req.method,
+      'user-agent': req.headers['user-agent']
+    }
+  });
+});
+
+// مسار اختبار CORS للـ POST
+router.post('/test-cors', (req, res) => {
+  console.log('🧪 تم استلام طلب test-cors POST في relationships');
+  res.json({ 
+    message: 'POST في relationships يعمل بشكل صحيح',
+    body: req.body,
+    headers: {
+      origin: req.headers.origin,
+      method: req.method,
+      'content-type': req.headers['content-type']
+    }
+  });
+});
+
 // دالة Middleware للتحقق من التوكن
 function verifyToken(req, res, next) {
   console.log('🔐 محاولة التحقق من التوكن في relationships...');

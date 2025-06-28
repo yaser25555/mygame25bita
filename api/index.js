@@ -27,18 +27,49 @@ const app = express();
 
 // --- 2. إعداد CORS ---
 app.use(cors({
-  origin: [
-    'https://mygame25bita-7eqw.onrender.com',
-    'https://mygame25bita-1-4ue6.onrender.com',
-    'http://localhost:3000',
-    'http://localhost:5000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:5000'
+  origin: function (origin, callback) {
+    // السماح بالطلبات بدون origin (مثل mobile apps)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://mygame25bita-7eqw.onrender.com',
+      'https://mygame25bita-1-4ue6.onrender.com',
+      'http://localhost:3000',
+      'http://localhost:5000',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5000'
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Origin', 
+    'X-Requested-With', 
+    'Content-Type', 
+    'Accept', 
+    'Authorization',
+    'Cache-Control',
+    'Pragma'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  credentials: true
+  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
 }));
+
+// إضافة middleware لمعالجة preflight requests
+app.options('*', cors());
+
+// إضافة middleware للتحقق من صحة الطلبات
+app.use((req, res, next) => {
+  console.log(`🌐 ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+  next();
+});
 
 // --- 3. إعداد الـ Middleware ---
 app.use(express.json());
