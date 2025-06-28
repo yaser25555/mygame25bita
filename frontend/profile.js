@@ -49,6 +49,9 @@ function handleAction(event) {
         case 'viewStats':
             window.location.href = 'stats.html';
             break;
+        case 'privateChat':
+            showAlert('ميزة المحادثة الخاصة قيد التطوير', 'info');
+            break;
         case 'viewFriends':
             showAlert('ميزة الأصدقاء قيد التطوير', 'info');
             break;
@@ -155,33 +158,14 @@ function displayUserProfile(user) {
         userId.textContent = `ID: ${user.userId || 'غير محدد'}`;
     }
 
-    // المستوى
-    const userLevel = document.getElementById('user-level');
-    if (userLevel) {
-        userLevel.textContent = user.profile.level || 1;
-    }
-
-    // الإحصائيات
-    const totalScore = document.getElementById('total-score');
-    if (totalScore) {
-        totalScore.textContent = user.stats?.score || 0;
-    }
-
-    const gemsCount = document.getElementById('gems-count');
-    if (gemsCount) {
-        gemsCount.textContent = user.collectedGems || 0;
-    }
-
-    const friendsCount = document.getElementById('friends-count');
-    if (friendsCount) {
-        friendsCount.textContent = user.relationships?.friends?.length || 0;
-    }
-
     // حالة الدرع
     displayShieldStatus(user.shield);
 
     // الإنجازات
     displayAchievements(user.achievements || []);
+
+    // الأصدقاء
+    displayFriends(user.relationships?.friends || []);
 }
 
 // تطبيق الألوان حسب الجنس
@@ -622,4 +606,32 @@ async function updateProfile(event) {
         console.error('خطأ في تحديث البروفايل:', error);
         showAlert('خطأ في تحديث البروفايل', 'error');
     }
+}
+
+// الأصدقاء
+function displayFriends(friends) {
+    const friendsGrid = document.getElementById('friends-grid');
+    
+    if (!friends || friends.length === 0) {
+        friendsGrid.innerHTML = '<div class="friends-placeholder">لا توجد أصدقاء بعد</div>';
+        return;
+    }
+
+    const friendsHTML = friends.map(friend => `
+        <div class="friend-item" onclick="openPrivateChat('${friend.username}')">
+            <img class="friend-avatar" src="${friend.avatar || 'images/default-avatar.png'}" alt="${friend.username}">
+            <div class="friend-name">${friend.username}</div>
+            <div class="friend-status ${friend.online ? 'online' : 'offline'}">
+                ${friend.online ? '🟢 متصل' : '🔴 غير متصل'}
+            </div>
+        </div>
+    `).join('');
+
+    friendsGrid.innerHTML = friendsHTML;
+}
+
+// فتح المحادثة الخاصة
+function openPrivateChat(username) {
+    showAlert(`فتح المحادثة الخاصة مع ${username}`, 'info');
+    // هنا يمكن إضافة كود لفتح المحادثة الخاصة
 }
