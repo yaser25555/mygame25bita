@@ -14,14 +14,16 @@
   --info-color: #2196F3;
   
   /* ألوان حسب الجنس */
-  --male-primary: #1a237e;
-  --male-secondary: #0d47a1;
-  --male-accent: #2962ff;
+  --male-primary: #1e3a8a;
+  --male-secondary: #facc15;
+  --male-accent: #2563eb;
+  --male-bg: linear-gradient(135deg, #1e3a8a 60%, #facc15 100%);
   --male-card: rgba(26, 35, 126, 0.9);
   
-  --female-primary: #880e4f;
-  --female-secondary: #ad1457;
-  --female-accent: #e91e63;
+  --female-primary: #e11d48;
+  --female-secondary: #f472b6;
+  --female-accent: #f43f5e;
+  --female-bg: linear-gradient(135deg, #e11d48 60%, #f472b6 100%);
   --female-card: rgba(136, 14, 79, 0.9);
   
   /* ألوان افتراضية */
@@ -578,8 +580,9 @@ body {
 
 /* ألوان حسب الجنس */
 .profile-header.male {
-  background: linear-gradient(135deg, var(--male-primary), var(--male-secondary));
-  color: white;
+  background: var(--male-bg) !important;
+  color: #fff;
+  border: 1px solid var(--male-accent);
 }
 
 .profile-header.male .profile-info h2,
@@ -604,8 +607,9 @@ body {
 }
 
 .profile-header.female {
-  background: linear-gradient(135deg, var(--female-primary), var(--female-secondary));
-  color: white;
+  background: var(--female-bg) !important;
+  color: #fff;
+  border: 1px solid var(--female-accent);
 }
 
 .profile-header.female .profile-info h2,
@@ -805,4 +809,40 @@ body {
   color: #6c757d;
   font-style: italic;
   padding: 20px;
+}
+
+.info-container.male {
+  background: var(--male-bg) !important;
+  border: 1px solid var(--male-accent);
+}
+.info-container.female {
+  background: var(--female-bg) !important;
+  border: 1px solid var(--female-accent);
+}
+
+.shield-status.male {
+  background: var(--male-bg) !important;
+  border: 2px solid var(--male-accent);
+}
+.shield-status.female {
+  background: var(--female-bg) !important;
+  border: 2px solid var(--female-accent);
+}
+
+.achievement-item.male {
+  background: linear-gradient(135deg, #facc15 60%, #1e3a8a 100%) !important;
+  border: 2px solid var(--male-accent);
+}
+.achievement-item.female {
+  background: linear-gradient(135deg, #f472b6 60%, #e11d48 100%) !important;
+  border: 2px solid var(--female-accent);
+}
+
+.friend-item.male {
+  background: linear-gradient(135deg, #facc15 60%, #1e3a8a 100%) !important;
+  border: 2px solid var(--male-accent);
+}
+.friend-item.female {
+  background: linear-gradient(135deg, #f472b6 60%, #e11d48 100%) !important;
+  border: 2px solid var(--female-accent);
 } 

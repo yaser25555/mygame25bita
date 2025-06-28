@@ -139,6 +139,15 @@ function displayUserProfile(user) {
     // تطبيق الألوان حسب الجنس
     applyGenderColors(user.profile?.gender);
 
+    // تحديث الكلاسات على الحاويات الرئيسية
+    const genderClass = user.profile?.gender === 'female' ? 'female' : 'male';
+    document.querySelector('.profile-header').classList.remove('male', 'female');
+    document.querySelector('.profile-header').classList.add(genderClass);
+    document.querySelector('.info-container').classList.remove('male', 'female');
+    document.querySelector('.info-container').classList.add(genderClass);
+    document.getElementById('shield-status').classList.remove('male', 'female');
+    document.getElementById('shield-status').classList.add(genderClass);
+
     // الصورة الشخصية
     const avatar = document.getElementById('user-avatar');
     if (avatar) {
@@ -217,19 +226,17 @@ function displayShieldStatus(shield) {
 // عرض الإنجازات
 function displayAchievements(achievements) {
     const achievementsGrid = document.getElementById('achievements-grid');
-    
+    const genderClass = document.querySelector('.profile-header').classList.contains('female') ? 'female' : 'male';
     if (achievements.length === 0) {
         achievementsGrid.innerHTML = '<div class="achievement-placeholder">لا توجد إنجازات بعد</div>';
         return;
     }
-
     const achievementsHTML = achievements.map(achievement => `
-        <div class="achievement-item ${achievement.unlocked ? 'unlocked' : ''}">
+        <div class="achievement-item ${genderClass} ${achievement.unlocked ? 'unlocked' : ''}">
             <div class="achievement-icon">${achievement.icon || '🏆'}</div>
-            <div class="achievement-name">${achievement.name}</div>
+            <div class="achievement-name">${achievement.name || ''}</div>
         </div>
     `).join('');
-
     achievementsGrid.innerHTML = achievementsHTML;
 }
 
@@ -611,14 +618,13 @@ async function updateProfile(event) {
 // الأصدقاء
 function displayFriends(friends) {
     const friendsGrid = document.getElementById('friends-grid');
-    
+    const genderClass = document.querySelector('.profile-header').classList.contains('female') ? 'female' : 'male';
     if (!friends || friends.length === 0) {
         friendsGrid.innerHTML = '<div class="friends-placeholder">لا توجد أصدقاء بعد</div>';
         return;
     }
-
     const friendsHTML = friends.map(friend => `
-        <div class="friend-item" onclick="openPrivateChat('${friend.username}')">
+        <div class="friend-item ${genderClass}" onclick="openPrivateChat('${friend.username}')">
             <img class="friend-avatar" src="${friend.avatar || 'images/default-avatar.png'}" alt="${friend.username}">
             <div class="friend-name">${friend.username}</div>
             <div class="friend-status ${friend.online ? 'online' : 'offline'}">
@@ -626,7 +632,6 @@ function displayFriends(friends) {
             </div>
         </div>
     `).join('');
-
     friendsGrid.innerHTML = friendsHTML;
 }
 
