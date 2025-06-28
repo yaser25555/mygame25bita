@@ -776,7 +776,7 @@ function updateSoundButton() {
 
 // تهيئة صوت الرسائل
 function initMessageSound() {
-    messageSound = new Audio('sounds/MSG.mp3');
+    messageSound = new Audio('./sounds/MSG.mp3');
     messageSound.volume = 0.6; // مستوى الصوت 60%
     messageSound.preload = 'auto';
 }

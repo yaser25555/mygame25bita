@@ -33,7 +33,6 @@ app.use(cors({
     
     const allowedOrigins = [
       'https://mygame25bita-7eqw.onrender.com',
-      'https://mygame25bita-1-4ue6.onrender.com',
       'http://localhost:3000',
       'http://localhost:5000',
       'http://127.0.0.1:3000',
@@ -96,7 +95,6 @@ const io = new Server(httpServer, {
   cors: {
     origin: [
       'https://mygame25bita-7eqw.onrender.com',
-      'https://mygame25bita-1-4ue6.onrender.com',
       'http://localhost:3000',
       'http://localhost:5000',
       'http://127.0.0.1:3000',
