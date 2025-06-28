@@ -458,7 +458,7 @@ function startGame() {
 
 // Game Over
 function gameOver() {
-    console.log('ðŸ’€ Ø§Ù†ØªÙ‡Øª Ø§Ù„Ù„Ø¹Ø¨Ø©');
+    console.log('ðŸ'€ Ø§Ù†ØªÙ‡Øª Ø§Ù„Ù„Ø¹Ø¨Ø©');
     gameState.isRunning = false;
     
     // Show game over screen
@@ -510,6 +510,26 @@ function backToMenu() {
     document.getElementById('gameCanvas').style.display = 'none';
 }
 
+// دعم أزرار التحكم للجوال
+function setupMobileControls() {
+    const btnUp = document.getElementById('btn-up');
+    const btnDown = document.getElementById('btn-down');
+    const btnLeft = document.getElementById('btn-left');
+    const btnRight = document.getElementById('btn-right');
+    if (!btnUp || !btnDown || !btnLeft || !btnRight) return;
+    function setKey(code, value) {
+        gameState.keys[code] = value;
+    }
+    btnUp.addEventListener('touchstart', e => { e.preventDefault(); setKey('ArrowUp', true); });
+    btnUp.addEventListener('touchend', e => { e.preventDefault(); setKey('ArrowUp', false); });
+    btnDown.addEventListener('touchstart', e => { e.preventDefault(); setKey('ArrowDown', true); });
+    btnDown.addEventListener('touchend', e => { e.preventDefault(); setKey('ArrowDown', false); });
+    btnLeft.addEventListener('touchstart', e => { e.preventDefault(); setKey('ArrowLeft', true); });
+    btnLeft.addEventListener('touchend', e => { e.preventDefault(); setKey('ArrowLeft', false); });
+    btnRight.addEventListener('touchstart', e => { e.preventDefault(); setKey('ArrowRight', true); });
+    btnRight.addEventListener('touchend', e => { e.preventDefault(); setKey('ArrowRight', false); });
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     console.log('ðŸŽ® ØªØ­Ù…ÙŠÙ„ ØµÙØ­Ø© Ø§Ù„Ù„Ø¹Ø¨Ø©...');
@@ -521,4 +541,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('menuButton').addEventListener('click', backToMenu);
     
     console.log('âœ… ØªÙ… ØªØ­Ù…ÙŠÙ„ ØµÙØ­Ø© Ø§Ù„Ù„Ø¹Ø¨Ø© Ø¨Ù†Ø¬Ø§Ø­');
+    setupMobileControls();
 }); 
