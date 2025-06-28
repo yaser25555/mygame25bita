@@ -1608,6 +1608,11 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
     const { targetUserId, newUserId } = req.body;
 
     console.log('🆔 طلب تحديث معرف المستخدم:', { targetUserId, newUserId });
+    console.log('📋 نوع البيانات:', { 
+      targetUserId: typeof targetUserId, 
+      newUserId: typeof newUserId 
+    });
+    console.log('📋 البيانات الخام:', req.body);
 
     if (!targetUserId || !newUserId) {
       console.log('❌ بيانات مفقودة:', { targetUserId, newUserId });
@@ -1617,6 +1622,8 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
     // التحقق من أن المعرفات أرقام صحيحة
     const targetUserIdNum = parseInt(targetUserId);
     const newUserIdNum = parseInt(newUserId);
+
+    console.log('🔢 المعرفات المحولة:', { targetUserIdNum, newUserIdNum });
 
     if (isNaN(targetUserIdNum) || isNaN(newUserIdNum)) {
       console.log('❌ المعرفات ليست أرقام صحيحة:', { targetUserId, newUserId });
@@ -1629,6 +1636,7 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
     }
 
     // البحث عن المستخدم
+    console.log('🔍 البحث عن المستخدم بالمعرف:', targetUserIdNum);
     let user = await User.findOne({ userId: targetUserIdNum });
     if (!user) {
       console.log('❌ المستخدم غير موجود بالمعرف:', targetUserIdNum);
@@ -1638,6 +1646,7 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
     console.log('✅ تم العثور على المستخدم:', { userId: user.userId, username: user.username });
 
     // التحقق من أن المعرف الجديد غير مستخدم
+    console.log('🔍 التحقق من المعرف الجديد:', newUserIdNum);
     const existingUser = await User.findOne({ userId: newUserIdNum });
     if (existingUser) {
       console.log('❌ المعرف الجديد مستخدم بالفعل:', newUserIdNum, 'بواسطة:', existingUser.username);
