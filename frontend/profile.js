@@ -196,6 +196,38 @@ function displayUserProfile(user) {
         coinsElement.title = `رصيدك الحالي: ${coins.toLocaleString()} عملة نقدية`;
     }
 
+    // اللؤلؤ
+    const pearlsElement = document.getElementById('user-pearls');
+    if (pearlsElement) {
+        const pearls = user.stats?.pearls || 0;
+        pearlsElement.textContent = `${pearls} لؤلؤ`;
+        pearlsElement.title = `رصيدك الحالي: ${pearls} لؤلؤ`;
+    }
+
+    // مدة التواجد
+    const timeOnlineElement = document.getElementById('user-time-online');
+    if (timeOnlineElement && user.timeOnline) {
+        const { days, hours, minutes } = user.timeOnline;
+        let timeText = '';
+        if (days > 0) {
+            timeText += `${days} يوم `;
+        }
+        if (hours > 0) {
+            timeText += `${hours} ساعة `;
+        }
+        if (minutes > 0) {
+            timeText += `${minutes} دقيقة`;
+        }
+        if (!timeText) {
+            timeText = 'أقل من دقيقة';
+        }
+        timeOnlineElement.textContent = timeText;
+        timeOnlineElement.title = `مدة تواجدك في اللعبة: ${timeText}`;
+    }
+
+    // حالة الجوائز اليومية
+    displayDailyRewardStatus(user.dailyRewards);
+
     // حالة الدرع
     displayShieldStatus(user.shield);
 
@@ -967,4 +999,88 @@ function markAllAsReadLocally() {
 function showSidebarNotification(userId) {
     const item = document.querySelector(`.chat-list-item[data-userid="${userId}"]`);
     if (item) item.classList.add('active');
+}
+
+// عرض حالة الجوائز اليومية
+function displayDailyRewardStatus(dailyRewards) {
+    const dailyRewardElement = document.getElementById('daily-reward-status');
+    if (!dailyRewardElement) return;
+
+    if (!dailyRewards || !dailyRewards.lastClaimDate) {
+        // لم يحصل على جائزة من قبل
+        dailyRewardElement.innerHTML = `
+            <div class="daily-reward-available">
+                <span class="reward-icon">🎁</span>
+                <span class="reward-text">جائزة اليوم متاحة!</span>
+                <button class="btn primary" onclick="claimDailyReward()">احصل على الجائزة</button>
+            </div>
+        `;
+        return;
+    }
+
+    const lastClaim = new Date(dailyRewards.lastClaimDate);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const lastClaimDay = new Date(lastClaim.getFullYear(), lastClaim.getMonth(), lastClaim.getDate());
+    
+    if (lastClaimDay.getTime() === today.getTime()) {
+        // حصل على الجائزة اليوم
+        const nextReward = new Date(today);
+        nextReward.setDate(nextReward.getDate() + 1);
+        const timeUntilNext = nextReward.getTime() - now.getTime();
+        const hoursUntilNext = Math.floor(timeUntilNext / (1000 * 60 * 60));
+        const minutesUntilNext = Math.floor((timeUntilNext % (1000 * 60 * 60)) / (1000 * 60));
+        
+        dailyRewardElement.innerHTML = `
+            <div class="daily-reward-claimed">
+                <span class="reward-icon">✅</span>
+                <span class="reward-text">تم الحصول على جائزة اليوم!</span>
+                <span class="reward-streak">استمرارية: ${dailyRewards.streakDays} يوم</span>
+                <span class="reward-next">الجائزة التالية: ${hoursUntilNext}س ${minutesUntilNext}د</span>
+            </div>
+        `;
+    } else {
+        // يمكن الحصول على الجائزة
+        dailyRewardElement.innerHTML = `
+            <div class="daily-reward-available">
+                <span class="reward-icon">🎁</span>
+                <span class="reward-text">جائزة اليوم متاحة!</span>
+                <span class="reward-streak">استمرارية: ${dailyRewards.streakDays} يوم</span>
+                <button class="btn primary" onclick="claimDailyReward()">احصل على الجائزة</button>
+            </div>
+        `;
+    }
+}
+
+// دالة الحصول على الجائزة اليومية
+async function claimDailyReward() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showAlert('يجب تسجيل الدخول أولاً', 'error');
+            return;
+        }
+
+        const response = await fetch(`${BACKEND_URL}/api/auth/daily-reward`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert(data.message, 'success');
+            // إعادة تحميل البروفايل لتحديث البيانات
+            loadUserProfile();
+        } else {
+            showAlert(data.message, 'error');
+        }
+
+    } catch (error) {
+        console.error('خطأ في الحصول على الجائزة اليومية:', error);
+        showAlert('خطأ في الحصول على الجائزة اليومية', 'error');
+    }
 }

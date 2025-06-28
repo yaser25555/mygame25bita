@@ -99,96 +99,46 @@ router.get('/settings', async (req, res) => {
 });
 
 // مسار جديد: جلب بيانات المستخدم الحالي (يتطلب توكن مصادقة)
-router.get('/me', verifyToken, async (req, res) => {
+router.get('/me', async (req, res) => {
   try {
-    console.log('🔍 طلب بيانات المستخدم:', { _id: req.user._id, userId: req.user.userId, username: req.user.username });
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'توكن مطلوب' });
+    }
 
-    // البحث عن المستخدم باستخدام _id
-    const user = await User.findById(req.user._id).select('-password');
-
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const user = await User.findById(decoded._id);
+    
     if (!user) {
-      console.log('❌ المستخدم غير موجود:', req.user);
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
 
-    console.log('🔍 بيانات المستخدم من قاعدة البيانات:', {
+    // تحديث آخر ظهور
+    await user.updateLastSeen();
+
+    // حساب مدة التواجد
+    const timeOnline = user.getTimeOnline();
+
+    res.json({
       _id: user._id,
       userId: user.userId,
       username: user.username,
-      hasProfile: !!user.profile,
-      hasStats: !!user.stats
+      email: user.email,
+      isAdmin: user.isAdmin,
+      profile: user.profile,
+      stats: user.stats,
+      weapons: user.weapons,
+      achievements: user.achievements,
+      relationships: user.relationships,
+      shield: user.shield,
+      dailyRewards: user.dailyRewards,
+      timeOnline: timeOnline,
+      createdAt: user.createdAt
     });
-
-    // تهيئة profile إذا لم يكن موجوداً
-    if (!user.profile) {
-      console.log('📝 تهيئة profile للمستخدم:', user.username);
-      user.profile = {
-        bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
-        avatar: 'default-avatar.png',
-        displayName: user.username,
-        level: 1,
-        experience: 0,
-        status: 'offline',
-        joinDate: new Date(),
-        lastSeen: new Date()
-      };
-    }
-
-    // تهيئة stats إذا لم يكن موجوداً
-    if (!user.stats) {
-      console.log('📝 تهيئة stats للمستخدم:', user.username);
-      user.stats = {
-        score: 0,
-        pearls: 0,
-        highScore: 0,
-        roundNumber: 0,
-        personalScore: 50
-      };
-    }
-
-    // إرجاع البيانات التي تحتاجها الواجهة الأمامية
-    const responseData = {
-        _id: user._id,
-        userId: user.userId,
-        username: user.username,
-        score: user.stats.score || 0,
-        isAdmin: user.isAdmin,
-        personalScore: user.stats.personalScore || 50,
-        highScore: user.stats.highScore || 0,
-        roundNumber: user.stats.roundNumber || 0,
-        singleShotsUsed: user.weapons?.singleShotsUsed || 0,
-        tripleShotsUsed: user.weapons?.tripleShotsUsed || 0,
-        hammerShotsUsed: user.weapons?.hammerShotsUsed || 0,
-        boxValues: user.boxValues || [],
-        itemsCollected: user.itemsCollected || {},
-        collectedGems: user.collectedGems || 0,
-        totalGemsCollected: user.totalGemsCollected || 0,
-        batsHit: user.batsHit || 0,
-        profile: user.profile,
-        stats: user.stats,
-        weapons: user.weapons || {},
-        achievements: user.achievements || [],
-        badges: user.badges || [],
-        relationships: user.relationships || { friends: [] }
-    };
-
-    console.log('📤 إرسال البيانات:', {
-        userId: responseData.userId,
-        username: responseData.username,
-        hasProfile: !!responseData.profile,
-        hasStats: !!responseData.stats
-    });
-
-    res.json(responseData);
 
   } catch (error) {
-    console.error("خطأ في جلب بيانات المستخدم:", error);
-    console.error("تفاصيل الخطأ:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-    });
-    res.status(500).json({ message: 'خطأ في الخادم أثناء جلب بيانات المستخدم' });
+    console.error('خطأ في جلب معلومات المستخدم:', error);
+    res.status(500).json({ message: 'خطأ داخلي في جلب معلومات المستخدم', error: error.message });
   }
 });
 

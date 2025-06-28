@@ -749,6 +749,37 @@ body {
     width: 100%;
     max-width: 200px;
   }
+
+  .user-pearls,
+  .user-time-online {
+    font-size: 12px;
+    padding: 6px 10px;
+    margin: 3px 0;
+  }
+  
+  .daily-reward-container {
+    padding: 12px;
+    margin: 12px 0;
+  }
+  
+  .reward-icon {
+    font-size: 2em;
+  }
+  
+  .reward-text {
+    font-size: 14px;
+  }
+  
+  .reward-streak,
+  .reward-next {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .btn.primary {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -768,6 +799,30 @@ body {
 
   .form-actions .btn {
     max-width: none;
+  }
+
+  .user-pearls,
+  .user-time-online {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  
+  .daily-reward-container {
+    padding: 10px;
+    margin: 10px 0;
+  }
+  
+  .reward-icon {
+    font-size: 1.8em;
+  }
+  
+  .reward-text {
+    font-size: 13px;
+  }
+  
+  .btn.primary {
+    padding: 7px 14px;
+    font-size: 13px;
   }
 }
 
@@ -1202,4 +1257,122 @@ body {
     font-size: 0.95rem;
     padding: 7px 10px;
   }
+}
+
+/* اللؤلؤ */
+.user-pearls {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 5px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    border: 2px solid #FFA500;
+}
+
+/* مدة التواجد */
+.user-time-online {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 5px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    border: 2px solid #45a049;
+}
+
+/* حاوية الجوائز اليومية */
+.daily-reward-container {
+    background: var(--container-bg);
+    border-radius: 15px;
+    padding: 15px;
+    margin: 15px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--border-color);
+}
+
+.daily-reward-available {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.daily-reward-claimed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.reward-icon {
+    font-size: 2.5em;
+    animation: bounce 2s infinite;
+}
+
+.reward-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.reward-streak {
+    font-size: 14px;
+    color: #FFD700;
+    font-weight: bold;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: 1px solid #FFD700;
+}
+
+.reward-next {
+    font-size: 12px;
+    color: #888;
+    background: rgba(136, 136, 136, 0.1);
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+
+/* تأثير النطاط للجائزة */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* تحسينات للأزرار */
+.btn.primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn.primary:active {
+    transform: translateY(0);
 } 

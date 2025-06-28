@@ -227,6 +227,131 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+// مسار الجوائز اليومية
+router.post('/daily-reward', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'توكن مطلوب' });
+    }
+
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const user = await User.findById(decoded._id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // التحقق من آخر جائزة
+    if (user.dailyRewards.lastClaimDate) {
+      const lastClaim = new Date(user.dailyRewards.lastClaimDate);
+      const lastClaimDay = new Date(lastClaim.getFullYear(), lastClaim.getMonth(), lastClaim.getDate());
+      
+      if (lastClaimDay.getTime() === today.getTime()) {
+        return res.status(400).json({ 
+          message: 'لقد حصلت على الجائزة اليومية بالفعل! عد غداً للحصول على المزيد',
+          canClaim: false
+        });
+      }
+      
+      // التحقق من الاستمرارية
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      if (lastClaimDay.getTime() === yesterday.getTime()) {
+        // استمرارية
+        user.dailyRewards.streakDays += 1;
+      } else {
+        // انقطاع الاستمرارية
+        user.dailyRewards.streakDays = 1;
+      }
+    } else {
+      // أول مرة
+      user.dailyRewards.streakDays = 1;
+    }
+
+    // إعطاء الجوائز
+    const coinsReward = 20000;
+    const pearlsReward = 1;
+    
+    user.stats.coins += coinsReward;
+    user.stats.pearls += pearlsReward;
+    user.dailyRewards.lastClaimDate = now;
+    user.dailyRewards.totalRewardsClaimed += 1;
+    
+    await user.save();
+
+    console.log('🎁 جائزة يومية:', {
+      username: user.username,
+      coinsReward,
+      pearlsReward,
+      streakDays: user.dailyRewards.streakDays,
+      totalCoins: user.stats.coins,
+      totalPearls: user.stats.pearls
+    });
+
+    res.json({
+      message: `تم الحصول على الجائزة اليومية! +${coinsReward.toLocaleString()} عملة و +${pearlsReward} لؤلؤ`,
+      reward: {
+        coins: coinsReward,
+        pearls: pearlsReward
+      },
+      streak: user.dailyRewards.streakDays,
+      totalCoins: user.stats.coins,
+      totalPearls: user.stats.pearls,
+      canClaim: false
+    });
+
+  } catch (error) {
+    console.error('خطأ في الجوائز اليومية:', error);
+    res.status(500).json({ message: 'خطأ داخلي في الجوائز اليومية', error: error.message });
+  }
+});
+
+// مسار فحص حالة الجوائز اليومية
+router.get('/daily-reward-status', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'توكن مطلوب' });
+    }
+
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const user = await User.findById(decoded._id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    let canClaim = true;
+    if (user.dailyRewards.lastClaimDate) {
+      const lastClaim = new Date(user.dailyRewards.lastClaimDate);
+      const lastClaimDay = new Date(lastClaim.getFullYear(), lastClaim.getMonth(), lastClaim.getDate());
+      
+      if (lastClaimDay.getTime() === today.getTime()) {
+        canClaim = false;
+      }
+    }
+
+    res.json({
+      canClaim,
+      streakDays: user.dailyRewards.streakDays,
+      totalRewardsClaimed: user.dailyRewards.totalRewardsClaimed,
+      lastClaimDate: user.dailyRewards.lastClaimDate
+    });
+
+  } catch (error) {
+    console.error('خطأ في فحص حالة الجوائز اليومية:', error);
+    res.status(500).json({ message: 'خطأ داخلي في فحص الجوائز اليومية', error: error.message });
+  }
+});
+
 // تم إزالة دالة verifyToken ومسار /me من هنا
 // لأنها موجودة في user.js وهي مناسبة أكثر هناك
 // تأكد من أن أي مكان يستدعي verifyToken يستخدمها من user.js أو أن تكون دالة عامة

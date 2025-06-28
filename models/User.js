@@ -177,6 +177,22 @@ const UserSchema = new mongoose.Schema({
     }
   },
   
+  // نظام الجوائز اليومية
+  dailyRewards: {
+    lastClaimDate: {
+      type: Date,
+      default: null
+    },
+    streakDays: {
+      type: Number,
+      default: 0
+    },
+    totalRewardsClaimed: {
+      type: Number,
+      default: 0
+    }
+  },
+  
   // إحصائيات الأسلحة
   weapons: {
     singleShotsUsed: {
@@ -1067,6 +1083,30 @@ UserSchema.methods.generateUserId = async function() {
     this.userId = Math.floor(Date.now() / 1000) + 1500;
     console.log('🔄 استخدام timestamp كبديل:', this.userId);
   }
+};
+
+// دالة لحساب مدة التواجد
+UserSchema.methods.getTimeOnline = function() {
+  const now = new Date();
+  const joinDate = this.profile.joinDate || this.createdAt;
+  const timeDiff = now.getTime() - joinDate.getTime();
+  
+  const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  return {
+    days,
+    hours,
+    minutes,
+    totalMinutes: Math.floor(timeDiff / (1000 * 60))
+  };
+};
+
+// دالة لتحديث آخر ظهور
+UserSchema.methods.updateLastSeen = function() {
+  this.profile.lastSeen = new Date();
+  return this.save();
 };
 
 // Indexes للأداء
