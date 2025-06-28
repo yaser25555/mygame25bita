@@ -50,7 +50,7 @@ function handleAction(event) {
             window.location.href = 'stats.html';
             break;
         case 'viewFriends':
-            window.location.href = 'friends.html';
+            showAlert('ميزة الأصدقاء قيد التطوير', 'info');
             break;
     }
 }
