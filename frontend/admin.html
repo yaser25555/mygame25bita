@@ -190,6 +190,20 @@
 
   </div>
 
+  <script>
+    // تسجيل Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then((registration) => {
+                    console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+                })
+                .catch((error) => {
+                    console.log('❌ فشل في تسجيل Service Worker:', error);
+                });
+        });
+    }
+  </script>
   <script src="admin.js"></script>
 </body>
 </html>
