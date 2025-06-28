@@ -1,5 +1,5 @@
 // إصدار ذاكرة التخزين المؤقت
-const CACHE_NAME = 'voiceboom-v5';
+const CACHE_NAME = 'voiceboom-v6';
 
 // الملفات التي سيتم تخزينها مؤقتاً
 const ASSETS_TO_CACHE = [
@@ -43,6 +43,7 @@ const ASSETS_TO_CACHE = [
   '/images/default-avatar.png',
   '/images/default-cover.jpg',
   '/images/background_image.jpg',
+  '/sounds/MSG.mp3',
   '/favicon.ico',
   '/manifest.json'
 ];

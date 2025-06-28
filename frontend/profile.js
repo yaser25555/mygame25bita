@@ -18,7 +18,7 @@ let soundEnabled = true;
 // إعداد الصوت للإشعارات
 let notificationSound;
 try {
-  notificationSound = new Audio('sounds/MSG.mp3');
+  notificationSound = new Audio('./sounds/MSG.mp3');
 } catch (error) {
   console.warn('لا يمكن تحميل ملف الصوت:', error);
 }
@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSocketChat();
     initMessageSound();
     setupSoundToggle();
+    updateServiceWorker();
 });
 
 // إعداد مستمعي الأحداث
@@ -1166,5 +1167,20 @@ async function addFriend(event) {
     } catch (error) {
         console.error('خطأ في إضافة الصديق:', error);
         showAlert('خطأ في إضافة الصديق', 'error');
+    }
+}
+
+// تحديث Service Worker
+async function updateServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration) {
+                await registration.update();
+                console.log('🔄 تم تحديث Service Worker');
+            }
+        } catch (error) {
+            console.warn('⚠️ خطأ في تحديث Service Worker:', error);
+        }
     }
 }
