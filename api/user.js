@@ -420,6 +420,70 @@ router.get('/by-username/:username', verifyToken, verifyAdmin, async (req, res) 
   }
 });
 
+// مسار جديد: تحديث بيانات المستخدم (فقط للمشرف)
+router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { username, newUsername, newPassword, newScore, newPearls } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ error: 'اسم المستخدم مطلوب' });
+    }
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تحديث اسم المستخدم إذا تم توفيره
+    if (newUsername && newUsername !== username) {
+      // التحقق من أن الاسم الجديد غير مستخدم
+      const existingUser = await User.findOne({ username: newUsername });
+      if (existingUser) {
+        return res.status(400).json({ error: 'اسم المستخدم الجديد مستخدم بالفعل' });
+      }
+      user.username = newUsername;
+    }
+
+    // تحديث كلمة المرور إذا تم توفيرها
+    if (newPassword) {
+      const bcrypt = require('bcryptjs');
+      const saltRounds = 10;
+      user.password = await bcrypt.hash(newPassword, saltRounds);
+    }
+
+    // تحديث النقاط إذا تم توفيرها
+    if (newScore !== undefined) {
+      if (!user.stats) user.stats = {};
+      user.stats.score = parseInt(newScore);
+    }
+
+    // تحديث اللآلئ إذا تم توفيرها
+    if (newPearls !== undefined) {
+      if (!user.stats) user.stats = {};
+      user.stats.pearls = parseInt(newPearls);
+    }
+
+    await user.save();
+
+    console.log(`🔧 المشرف ${req.user.username} حدث بيانات المستخدم ${username}`);
+
+    res.json({
+      message: 'تم تحديث بيانات المستخدم بنجاح',
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username,
+        score: user.stats?.score || 0,
+        pearls: user.stats?.pearls || 0
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في تحديث بيانات المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في تحديث بيانات المستخدم' });
+  }
+});
+
 // الحصول على قائمة الأصدقاء
 router.get('/friends', verifyToken, async (req, res) => {
   try {
