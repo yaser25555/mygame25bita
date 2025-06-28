@@ -1152,4 +1152,101 @@ router.get('/admin/user-images/:userId', verifyToken, verifyAdmin, async (req, r
   }
 });
 
+// جلب المستخدمين مع معرفاتهم (للمشرفين فقط)
+router.get('/admin/users-with-ids', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 12, search = '' } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { username: { $regex: search, $options: 'i' } },
+          { userId: parseInt(search) || 0 },
+          { email: { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+
+    const users = await User.find(query)
+      .select('userId username email profile.displayName profile.level stats.score createdAt profile.avatar')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments(query);
+
+    const results = users.map(user => ({
+      id: user._id,
+      userId: user.userId,
+      username: user.username,
+      email: user.email,
+      displayName: user.profile?.displayName || user.username,
+      level: user.profile?.level || 1,
+      score: user.stats?.score || 0,
+      avatar: user.profile?.avatar || null,
+      createdAt: user.createdAt
+    }));
+
+    res.json({
+      users: results,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / parseInt(limit))
+    });
+
+  } catch (error) {
+    console.error('خطأ في جلب المستخدمين مع المعرفات:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
+// البحث عن مستخدم بالمعرف (للمشرفين فقط)
+router.get('/admin/find-user-by-id/:userId', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    }
+
+    // البحث بالمعرف الرقمي أولاً
+    let user = await User.findOne({ userId: parseInt(userId) });
+    
+    // إذا لم يتم العثور عليه، جرب البحث بالـ ObjectId
+    if (!user) {
+      user = await User.findById(userId);
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    res.json({
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username,
+        email: user.email,
+        displayName: user.profile?.displayName || user.username,
+        level: user.profile?.level || 1,
+        score: user.stats?.score || 0,
+        avatar: user.profile?.avatar || null,
+        createdAt: user.createdAt,
+        images: {
+          avatar: user.profile?.avatar,
+          profileImage: user.profile?.profileImage,
+          coverImage: user.profile?.coverImage
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في البحث عن المستخدم بالمعرف:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
 module.exports = router; 
