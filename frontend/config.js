@@ -1,4 +1,4 @@
-// ملف التكوين المركزي للمشروع
+﻿// ملف التكوين المركزي للمشروع
 const CONFIG = {
     // عنوان الخادم الرئيسي
     BACKEND_URL: 'https://mygame25bita-7eqw.onrender.com',
@@ -26,4 +26,4 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = CONFIG;
 } else {
     window.CONFIG = CONFIG;
-} 
+}
