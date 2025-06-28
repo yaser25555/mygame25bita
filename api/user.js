@@ -238,8 +238,9 @@ router.get('/stats', verifyToken, async (req, res) => {
   }
 });
 
-// Route to save user's game data with anti-cheat protection
-router.post('/save-game-data', verifyToken, async (req, res) => {
+// مسار جديد لحفظ النتيجة متوافق مع /api/users/score
+router.post('/score', verifyToken, async (req, res) => {
+    // إعادة استخدام نفس منطق /save-game-data
     try {
         const { score, highScore, roundNumber, itemsCollected, collectedGems, totalGemsCollected, batsHit, totalSpent } = req.body;
         const user = await User.findById(req.user.userId);
@@ -248,7 +249,6 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
             return res.status(404).json({ message: 'المستخدم غير موجود' });
         }
 
-        // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
         if (!user.stats) user.stats = { score: 0, pearls: 0, highScore: 0, roundNumber: 0, personalScore: 50, boxesOpened: 0, gamesPlayed: 0, gamesWon: 0, winRate: 0, totalPlayTime: 0, averageScore: 0 };
         if (!user.itemsCollected) user.itemsCollected = { gems: 0, keys: 0, coins: 0, pearls: 0, bombs: 0, stars: 0, bat: 0 };
         if (!user.weapons) user.weapons = { singleShotsUsed: 0, tripleShotsUsed: 0, hammerShotsUsed: 0, totalShots: 0, accuracy: 0 };
@@ -261,24 +261,16 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
 
         // Anti-cheat checks
         const suspiciousActivity = [];
-        
-        // Check for unrealistic score increase
         const scoreDiff = score - user.stats.score;
         if (scoreDiff > 10000) {
             suspiciousActivity.push(`زيادة غير طبيعية في النقاط: ${scoreDiff}`);
         }
-        
-        // Check for negative score
         if (score < 0) {
             suspiciousActivity.push('نقاط سالبة غير مسموحة');
         }
-        
-        // Check for unrealistic high score
         if (highScore > 1000000) {
             suspiciousActivity.push(`نتيجة عالية غير طبيعية: ${highScore}`);
         }
-        
-        // Check for unrealistic items collected
         if (itemsCollected) {
             Object.entries(itemsCollected).forEach(([item, count]) => {
                 if (count > 1000) {
@@ -286,17 +278,11 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
                 }
             });
         }
-        
-        // Check for unrealistic gems collected
         if (collectedGems > 1000) {
             suspiciousActivity.push(`عدد كبير من الجواهر: ${collectedGems}`);
         }
-        
-        // If suspicious activity detected, log it and potentially block the save
         if (suspiciousActivity.length > 0) {
             console.warn(`Suspicious activity detected for user ${user.username}:`, suspiciousActivity);
-            
-            // Log suspicious activity to user's record
             user.suspiciousActivity.push({
                 timestamp: new Date(),
                 activities: suspiciousActivity,
@@ -304,12 +290,7 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
                 newScore: score,
                 ip: req.ip
             });
-            
-            // For now, we'll allow the save but log the activity
-            // In production, you might want to block suspicious saves
         }
-
-        // Update user data
         user.stats.score = score;
         if (highScore > user.stats.highScore) {
             user.stats.highScore = highScore;
