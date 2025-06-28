@@ -32,12 +32,15 @@ router.post('/register', async (req, res) => {
     console.log('✅ تم إنشاء مستخدم جديد:', {
       username: newUser.username,
       userId: newUser.userId,
-      email: newUser.email
+      email: newUser.email,
+      coins: newUser.stats.coins
     });
 
     res.status(201).json({ 
       message: 'تم التسجيل بنجاح!',
-      userId: newUser.userId
+      userId: newUser.userId,
+      welcomeMessage: 'أهلاً وسهلاً بك معنا في مملكة الحظ! تقبل هديتنا المتواضعة لتبدأ: 100,000 عملة نقدية. تعامل معها جيداً لتجمع اللؤلؤ وتحوله لأموال حقيقية! 🎁💰',
+      coins: newUser.stats.coins
     });
 
   } catch (err) {
@@ -148,7 +151,8 @@ router.post('/create-test-user', async (req, res) => {
       password: hashedPassword,
       isAdmin: false,
       'stats.score': 1000,
-      'stats.pearls': 5
+      'stats.pearls': 5,
+      'stats.coins': 100000 // هدية ترحيب
     });
 
     // حفظ المستخدم (سيتم توليد userId تلقائياً)
@@ -187,6 +191,7 @@ router.get('/check-users', async (req, res) => {
         isAdmin: user.isAdmin,
         score: user.stats.score,
         pearls: user.stats.pearls || 0,
+        coins: user.stats.coins || 0,
         createdAt: user.createdAt
       }))
     });

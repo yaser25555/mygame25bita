@@ -188,6 +188,14 @@ function displayUserProfile(user) {
         userId.textContent = `ID: ${user.userId || 'غير محدد'}`;
     }
 
+    // العملات
+    const coinsElement = document.getElementById('user-coins');
+    if (coinsElement) {
+        const coins = user.stats?.coins || 0;
+        coinsElement.textContent = `${coins.toLocaleString()} عملة`;
+        coinsElement.title = `رصيدك الحالي: ${coins.toLocaleString()} عملة نقدية`;
+    }
+
     // حالة الدرع
     displayShieldStatus(user.shield);
 

@@ -164,6 +164,30 @@ body {
   font-weight: bold;
 }
 
+.user-coins {
+  background: linear-gradient(135deg, #facc15, #eab308);
+  color: #1e3a8a;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  display: inline-block;
+  margin: 8px 0;
+  box-shadow: 0 3px 8px rgba(250, 204, 21, 0.3);
+  border: 2px solid #eab308;
+  transition: all 0.3s ease;
+}
+
+.user-coins:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(250, 204, 21, 0.4);
+}
+
+.user-coins::before {
+  content: "💰 ";
+  margin-left: 4px;
+}
+
 /* حالة الدرع */
 .shield-status {
   background: #1e3a8a; /* زرقاء داكنة */

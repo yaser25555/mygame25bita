@@ -529,7 +529,15 @@ async function handleRegister(event) {
         const data = await response.json();
         console.log('✅ تم تحليل JSON بنجاح للتسجيل:', data);
         
-        showMessage('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.');
+        // عرض رسالة الترحيب إذا كانت موجودة
+        if (data.welcomeMessage) {
+            showMessage(data.welcomeMessage, false);
+            console.log('🎁 رسالة ترحيب:', data.welcomeMessage);
+            console.log('💰 العملات المهداة:', data.coins);
+        } else {
+            showMessage('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.');
+        }
+        
         console.log('✅ تم التسجيل بنجاح:', username);
         
         // مسح النموذج

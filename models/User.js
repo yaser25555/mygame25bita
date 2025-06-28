@@ -135,6 +135,10 @@ const UserSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
+    coins: {
+      type: Number,
+      default: 100000, // هدية ترحيب للمستخدمين الجدد
+    },
     boxesOpened: {
       type: Number,
       default: 0,
