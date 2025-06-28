@@ -423,8 +423,14 @@ router.get('/by-username/:username', verifyToken, verifyAdmin, async (req, res) 
       username: user.username,
       email: user.email,
       score: user.stats?.score,
-      pearls: user.stats?.pearls
+      pearls: user.stats?.pearls,
+      _id: user._id
     });
+
+    // التحقق من وجود userId
+    if (!user.userId) {
+      console.log('⚠️ تحذير: المستخدم لا يحتوي على userId:', user.username);
+    }
 
     res.json(user);
   } catch (error) {
@@ -1648,6 +1654,11 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
     let user = await User.findOne({ userId: targetUserIdNum });
     if (!user) {
       console.log('❌ المستخدم غير موجود بالمعرف:', targetUserIdNum);
+      
+      // محاولة البحث بجميع المستخدمين لمعرفة المعرفات الموجودة
+      const allUsers = await User.find({}).select('userId username').limit(10);
+      console.log('🔍 المستخدمين الموجودين:', allUsers.map(u => ({ userId: u.userId, username: u.username })));
+      
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 

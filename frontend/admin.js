@@ -771,12 +771,18 @@ function displayUserData(userData) {
     const user = userData.user || userData;
     
     console.log('📋 بيانات المستخدم المستلمة:', user);
+    console.log('🆔 معرفات المستخدم:', {
+        userId: user.userId,
+        _id: user._id,
+        id: user.id
+    });
     
     if (displayUsername) displayUsername.textContent = user.username || 'غير محدد';
     if (displayCurrentUserId) {
-        const userId = user.userId || user._id || 'غير محدد';
+        // استخدام userId الرقمي وليس _id
+        const userId = user.userId || 'غير محدد';
         displayCurrentUserId.textContent = userId;
-        console.log('🆔 تم تعيين معرف المستخدم:', userId);
+        console.log('🆔 تم تعيين معرف المستخدم:', userId, 'نوع البيانات:', typeof userId);
     }
     if (displayEmail) displayEmail.textContent = user.email || 'غير محدد';
     if (displayCoins) displayCoins.textContent = user.score || user.stats?.score || 0;
