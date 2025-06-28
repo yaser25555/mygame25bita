@@ -50,6 +50,9 @@ const displayCoins = document.getElementById('displayCoins');
 const displayPearls = document.getElementById('displayPearls');
 const displayRole = document.getElementById('displayRole');
 const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+const newUserId = document.getElementById('newUserId');
+const updateUserIdBtn = document.getElementById('updateUserIdBtn');
+const loadAllUsersBtn = document.getElementById('loadAllUsersBtn');
 
 // التحقق من وجود العناصر قبل إضافة الأحداث
 if (!adminLoginForm) console.warn('adminLoginForm not found');
@@ -93,6 +96,9 @@ if (!displayCoins) console.warn('displayCoins not found');
 if (!displayPearls) console.warn('displayPearls not found');
 if (!displayRole) console.warn('displayRole not found');
 if (!updatePasswordBtn) console.warn('updatePasswordBtn not found');
+if (!newUserId) console.warn('newUserId not found');
+if (!updateUserIdBtn) console.warn('updateUserIdBtn not found');
+if (!loadAllUsersBtn) console.warn('loadAllUsersBtn not found');
 
 // التحقق من وجود token عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
@@ -567,18 +573,17 @@ function displayUserDataForIdChange(userData) {
 }
 
 // تحديث معرف المستخدم
-const updateUserIdBtn = document.getElementById('updateUserIdBtn');
 if (updateUserIdBtn) {
     updateUserIdBtn.addEventListener('click', async function() {
         const username = displayUsername.textContent;
-        const newUserId = parseInt(document.getElementById('newUserId').value);
+        const newUserIdValue = parseInt(document.getElementById('newUserId').value);
         
         if (!username || username === 'غير محدد') {
             showMessage('يرجى البحث عن مستخدم أولاً', 'error');
             return;
         }
         
-        if (!newUserId || newUserId < 1) {
+        if (!newUserIdValue || newUserIdValue < 1) {
             showMessage('يرجى إدخال معرف صحيح', 'error');
             return;
         }
@@ -592,7 +597,7 @@ if (updateUserIdBtn) {
                 },
                 body: JSON.stringify({
                     username: username,
-                    newUserId: newUserId
+                    newUserId: newUserIdValue
                 })
             });
             
@@ -600,7 +605,7 @@ if (updateUserIdBtn) {
                 const result = await response.json();
                 showMessage(result.message, 'success');
                 // تحديث العرض
-                if (displayCurrentUserId) displayCurrentUserId.textContent = newUserId;
+                if (displayCurrentUserId) displayCurrentUserId.textContent = newUserIdValue;
                 document.getElementById('newUserId').value = '';
             } else {
                 const errorData = await response.json();
@@ -614,7 +619,6 @@ if (updateUserIdBtn) {
 }
 
 // تحميل جميع المستخدمين
-const loadAllUsersBtn = document.getElementById('loadAllUsersBtn');
 if (loadAllUsersBtn) {
     loadAllUsersBtn.addEventListener('click', async function() {
         try {
