@@ -1322,4 +1322,98 @@ router.get('/admin/find-user-by-id/:userId', verifyToken, verifyAdmin, async (re
   }
 });
 
+// إدارة صور المستخدم (للمشرفين فقط)
+router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { targetUserId, action, imageData, imageType } = req.body;
+
+    if (!targetUserId || !action) {
+      return res.status(400).json({ error: 'معرف المستخدم والإجراء مطلوبان' });
+    }
+
+    // البحث عن المستخدم
+    let user = await User.findOne({ userId: parseInt(targetUserId) });
+    if (!user) {
+      user = await User.findById(targetUserId);
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة profile إذا لم يكن موجوداً
+    if (!user.profile) {
+      user.profile = {};
+    }
+
+    let message = '';
+
+    switch (action) {
+      case 'remove_avatar':
+        user.profile.avatar = null;
+        message = 'تم حذف الصورة الشخصية بنجاح';
+        break;
+
+      case 'remove_profile_image':
+        user.profile.profileImage = null;
+        message = 'تم حذف صورة البروفايل بنجاح';
+        break;
+
+      case 'remove_cover_image':
+        user.profile.coverImage = null;
+        message = 'تم حذف صورة الغلاف بنجاح';
+        break;
+
+      case 'change_avatar':
+        if (!imageData || !imageType) {
+          return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
+        }
+        user.profile.avatar = imageData;
+        message = 'تم تغيير الصورة الشخصية بنجاح';
+        break;
+
+      case 'change_profile_image':
+        if (!imageData || !imageType) {
+          return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
+        }
+        user.profile.profileImage = imageData;
+        message = 'تم تغيير صورة البروفايل بنجاح';
+        break;
+
+      case 'change_cover_image':
+        if (!imageData || !imageType) {
+          return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
+        }
+        user.profile.coverImage = imageData;
+        message = 'تم تغيير صورة الغلاف بنجاح';
+        break;
+
+      default:
+        return res.status(400).json({ error: 'إجراء غير صالح' });
+    }
+
+    await user.save();
+
+    console.log(`🖼️ المشرف ${req.user.username} ${action} للمستخدم ${user.username}`);
+
+    res.json({
+      message: message,
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username,
+        images: {
+          avatar: user.profile.avatar,
+          profileImage: user.profile.profileImage,
+          coverImage: user.profile.coverImage
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في إدارة صورة المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
+  }
+});
+
 module.exports = router; 
