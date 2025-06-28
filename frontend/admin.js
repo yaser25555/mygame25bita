@@ -61,14 +61,6 @@ if (!showGameManagement) console.warn('showGameManagement not found');
 if (!showUserManagement) console.warn('showUserManagement not found');
 if (!gameManagementSection) console.warn('gameManagementSection not found');
 if (!userManagementSection) console.warn('userManagementSection not found');
-if (!searchUsername) console.warn('searchUsername not found');
-if (!fetchUserDataBtn) console.warn('fetchUserDataBtn not found');
-if (!editUserForm) console.warn('editUserForm not found');
-if (!currentUsername) console.warn('currentUsername not found');
-if (!editUsername) console.warn('editUsername not found');
-if (!editPassword) console.warn('editPassword not found');
-if (!manageCoins) console.warn('manageCoins not found');
-if (!managePearls) console.warn('managePearls not found');
 if (!updateUserBtn) console.warn('updateUserBtn not found');
 if (!adminRoleUsername) console.warn('adminRoleUsername not found');
 if (!assignAdminRoleBtn) console.warn('assignAdminRoleBtn not found');
@@ -96,6 +88,9 @@ if (!displayCoins) console.warn('displayCoins not found');
 if (!displayPearls) console.warn('displayPearls not found');
 if (!displayRole) console.warn('displayRole not found');
 if (!updatePasswordBtn) console.warn('updatePasswordBtn not found');
+if (!manageCoins) console.warn('manageCoins not found');
+if (!managePearls) console.warn('managePearls not found');
+if (!editPassword) console.warn('editPassword not found');
 if (!newUserId) console.warn('newUserId not found');
 if (!updateUserIdBtn) console.warn('updateUserIdBtn not found');
 if (!loadAllUsersBtn) console.warn('loadAllUsersBtn not found');
@@ -243,15 +238,15 @@ if (updateUserBtn) {
         
         try {
             const response = await fetch(`${BACKEND_URL}/api/users/update-user`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 },
                 body: JSON.stringify({
                     username: username,
-                    score: newCoins,
-                    pearls: newPearls
+                    newScore: newCoins,
+                    newPearls: newPearls
                 })
             });
             
@@ -786,14 +781,14 @@ if (updatePasswordBtn) {
         
         try {
             const response = await fetch(`${BACKEND_URL}/api/users/update-user`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 },
                 body: JSON.stringify({
                     username: username,
-                    password: newPassword
+                    newPassword: newPassword
                 })
             });
             
