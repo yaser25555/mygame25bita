@@ -62,9 +62,6 @@ function handleAction(event) {
         case 'playGame':
             window.location.href = 'game.html';
             break;
-        case 'viewStats':
-            window.location.href = 'stats.html';
-            break;
         case 'privateChat':
             openPrivateChat('صديق');
             break;

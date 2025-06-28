@@ -166,69 +166,72 @@ body {
 
 /* حالة الدرع */
 .shield-status {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  background: #1e3a8a; /* زرقاء داكنة */
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
+  justify-content: center; /* توسيط الدرع */
   gap: 12px;
   transition: all 0.3s ease;
+  color: #facc15; /* أصفر واضح */
 }
 
 /* الدرع غير الفعال */
 .shield-status.inactive {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border: 2px dashed #dee2e6;
-  opacity: 0.7;
+  background: #1e3a8a; /* زرقاء داكنة */
+  border: 2px dashed #facc15; /* حدود صفراء */
+  opacity: 0.8;
+  color: #facc15; /* أصفر واضح */
 }
 
 .shield-status.inactive .shield-icon {
-  opacity: 0.5;
-  filter: grayscale(100%);
+  opacity: 0.7;
+  filter: grayscale(50%);
 }
 
 .shield-status.inactive .shield-name {
-  color: #6c757d;
+  color: #facc15; /* أصفر واضح */
   font-style: italic;
 }
 
 .shield-status.inactive .shield-duration {
-  color: #adb5bd;
+  color: #facc15; /* أصفر واضح */
 }
 
-/* الدرع الفعال */
 .shield-status.active {
-  background: linear-gradient(135deg, #28a745, #20c997);
-  color: white;
-  border: 2px solid #28a745;
-  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
+  background: #1e3a8a; /* زرقاء داكنة */
+  border: 2px solid #facc15; /* حدود صفراء */
+  color: #facc15; /* أصفر واضح */
 }
 
 .shield-status.active .shield-name,
 .shield-status.active .shield-duration {
-  color: white;
+  color: #facc15; /* أصفر واضح */
 }
 
 .shield-icon {
-  font-size: 2rem;
-  transition: all 0.3s ease;
+  font-size: 1.5rem;
+  color: #facc15; /* أصفر واضح */
 }
 
 .shield-info {
-  flex: 1;
+  text-align: center;
+  color: #facc15; /* أصفر واضح */
 }
 
 .shield-name {
   font-weight: bold;
-  margin-bottom: 4px;
   font-size: 1rem;
+  color: #facc15; /* أصفر واضح */
+  margin-bottom: 4px;
 }
 
 .shield-duration {
-  font-size: 0.8rem;
-  opacity: 0.8;
+  font-size: 0.9rem;
+  color: #facc15; /* أصفر واضح */
 }
 
 /* حاوية المعلومات الشاملة */
@@ -285,12 +288,16 @@ body {
   color: #333;
 }
 
-.achievement-placeholder {
-  grid-column: 1 / -1;
+.achievement-placeholder,
+.friends-placeholder {
   text-align: center;
-  color: #6c757d;
-  font-style: italic;
   padding: 20px;
+  color: #facc15; /* أصفر واضح */
+  font-size: 1rem;
+  font-weight: bold;
+  background: rgba(30, 58, 138, 0.1); /* خلفية زرقاء فاتحة */
+  border-radius: 8px;
+  border: 1px solid rgba(250, 204, 21, 0.3); /* حدود صفراء فاتحة */
 }
 
 /* الإحصائيات */
@@ -803,14 +810,6 @@ body {
   color: #dc3545;
 }
 
-.friends-placeholder {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: #6c757d;
-  font-style: italic;
-  padding: 20px;
-}
-
 .info-container.male {
   background: var(--male-bg) !important;
   border: 1px solid var(--male-accent);
@@ -891,27 +890,29 @@ body {
   max-width: 900px;
   min-height: 350px;
   margin: 32px auto 0 auto;
-  background: rgba(255,255,255,0.95);
+  background: #1e3a8a; /* زرقاء داكنة */
   border-radius: 18px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.13);
   overflow: hidden;
   direction: rtl;
+  color: #facc15; /* أصفر واضح */
 }
 
 .chat-sidebar {
   width: 220px;
-  background: linear-gradient(135deg, #1e3a8a 60%, #facc15 100%);
-  color: #fff;
+  background: #1e3a8a; /* زرقاء داكنة */
+  color: #facc15; /* أصفر واضح */
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #eee;
+  border-left: 1px solid #facc15; /* حدود صفراء */
 }
 
 .chat-sidebar-header {
   padding: 18px 16px 10px 16px;
   font-weight: bold;
   font-size: 1.1rem;
-  border-bottom: 1px solid #fff3;
+  border-bottom: 1px solid rgba(250, 204, 21, 0.3); /* حدود صفراء فاتحة */
+  color: #facc15; /* أصفر واضح */
 }
 
 .chat-list {
@@ -926,12 +927,13 @@ body {
   gap: 10px;
   padding: 10px 16px;
   cursor: pointer;
-  border-bottom: 1px solid #fff2;
+  border-bottom: 1px solid rgba(250, 204, 21, 0.2); /* حدود صفراء فاتحة */
   transition: background 0.2s;
+  color: #facc15; /* أصفر واضح */
 }
 
 .chat-list-item.active, .chat-list-item:hover {
-  background: rgba(255,255,255,0.13);
+  background: rgba(250, 204, 21, 0.1); /* خلفية صفراء فاتحة */
 }
 
 .chat-list-avatar {
@@ -949,12 +951,12 @@ body {
 .chat-list-username {
   font-weight: bold;
   font-size: 1rem;
-  color: #fff;
+  color: #facc15; /* أصفر واضح */
 }
 
 .chat-list-last {
   font-size: 0.85rem;
-  color: #f3f3f3;
+  color: rgba(250, 204, 21, 0.8); /* أصفر فاتح */
   margin-top: 2px;
 }
 
@@ -971,25 +973,27 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f8f9fa;
+  background: #1e3a8a; /* زرقاء داكنة */
   position: relative;
+  color: #facc15; /* أصفر واضح */
 }
 
 .chat-header {
   padding: 16px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: #1e3a8a; /* زرقاء داكنة */
+  border-bottom: 1px solid #facc15; /* حدود صفراء */
   font-weight: bold;
   font-size: 1.1rem;
   display: flex;
   align-items: center;
   gap: 10px;
   min-height: 56px;
+  color: #facc15; /* أصفر واضح */
 }
 
 .chat-status {
   font-size: 0.9rem;
-  color: #4caf50;
+  color: #facc15; /* أصفر واضح */
   margin-right: 8px;
 }
 
@@ -1023,7 +1027,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: #f4f7fb;
+  background: #1e3a8a; /* زرقاء داكنة */
+  color: #facc15; /* أصفر واضح */
 }
 
 .chat-bubble {
@@ -1083,24 +1088,37 @@ body {
   display: flex;
   gap: 8px;
   padding: 12px 16px;
-  background: #fff;
-  border-top: 1px solid #eee;
+  background: #1e3a8a; /* زرقاء داكنة */
+  border-top: 1px solid #facc15; /* حدود صفراء */
 }
 
 .chat-input-form input[type="text"] {
   flex: 1;
   padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid #facc15; /* حدود صفراء */
   font-size: 1rem;
   outline: none;
-  background: #f4f7fb;
+  background: rgba(250, 204, 21, 0.1); /* خلفية صفراء فاتحة */
+  color: #1e3a8a; /* نص أزرق داكن */
+}
+
+.chat-input-form input[type="text"]::placeholder {
+  color: rgba(30, 58, 138, 0.6); /* لون placeholder */
 }
 
 .chat-input-form button {
   padding: 10px 18px;
   border-radius: 12px;
   font-size: 1rem;
+  background: #facc15; /* خلفية صفراء */
+  color: #1e3a8a; /* نص أزرق داكن */
+  border: none;
+  cursor: pointer;
+}
+
+.chat-input-form button:hover {
+  background: #eab308; /* أصفر أغمق عند hover */
 }
 
 .typing-indicator {
