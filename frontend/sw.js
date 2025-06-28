@@ -1,5 +1,5 @@
 // إصدار ذاكرة التخزين المؤقت
-const CACHE_NAME = 'voiceboom-v6';
+const CACHE_NAME = 'voiceboom-v7';
 
 // الملفات التي سيتم تخزينها مؤقتاً
 const ASSETS_TO_CACHE = [
@@ -92,6 +92,35 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // تجاهل طلبات API لتجنب مشاكل CORS
   if (event.request.url.includes('/api/') || event.request.url.includes('socket.io')) {
+    return;
+  }
+
+  // معالجة خاصة لملفات الصوت
+  if (event.request.url.includes('/sounds/')) {
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          if (response) {
+            return response;
+          }
+          return fetch(event.request)
+            .then((response) => {
+              if (!response || response.status !== 200) {
+                return response;
+              }
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  cache.put(event.request, responseToCache);
+                });
+              return response;
+            })
+            .catch((error) => {
+              console.warn('فشل في جلب ملف الصوت:', error);
+              return new Response('', { status: 404 });
+            });
+        })
+    );
     return;
   }
 

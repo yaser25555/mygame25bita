@@ -1948,15 +1948,9 @@ router.get('/test-avatar-route', (req, res) => {
 });
 
 // مسار لإضافة صديق بالبحث عن اسم المستخدم أو المعرف
-router.post('/friends/add', async (req, res) => {
+router.post('/friends/add', verifyToken, async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ message: 'توكن مطلوب' });
-    }
-
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const currentUser = await User.findById(decoded._id);
+    const currentUser = await User.findById(req.user._id);
     
     if (!currentUser) {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
@@ -1966,6 +1960,11 @@ router.post('/friends/add', async (req, res) => {
     
     if (!targetUsername) {
       return res.status(400).json({ message: 'اسم المستخدم أو المعرف مطلوب' });
+    }
+
+    // تهيئة relationships إذا لم تكن موجودة
+    if (!currentUser.relationships) {
+      currentUser.relationships = { friends: [] };
     }
 
     // البحث عن المستخدم الهدف (باسم المستخدم أو المعرف)
@@ -1982,6 +1981,11 @@ router.post('/friends/add', async (req, res) => {
 
     if (!targetUser) {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    // تهيئة relationships للمستخدم الهدف إذا لم تكن موجودة
+    if (!targetUser.relationships) {
+      targetUser.relationships = { friends: [] };
     }
 
     // التحقق من عدم إضافة نفسك
@@ -2002,8 +2006,8 @@ router.post('/friends/add', async (req, res) => {
     currentUser.relationships.friends.push({
       userId: targetUser.userId,
       username: targetUser.username,
-      displayName: targetUser.profile.displayName || targetUser.username,
-      avatar: targetUser.profile.avatar || 'default-avatar.png',
+      displayName: targetUser.profile?.displayName || targetUser.username,
+      avatar: targetUser.profile?.avatar || 'default-avatar.png',
       addedAt: new Date()
     });
 
@@ -2011,8 +2015,8 @@ router.post('/friends/add', async (req, res) => {
     targetUser.relationships.friends.push({
       userId: currentUser.userId,
       username: currentUser.username,
-      displayName: currentUser.profile.displayName || currentUser.username,
-      avatar: currentUser.profile.avatar || 'default-avatar.png',
+      displayName: currentUser.profile?.displayName || currentUser.username,
+      avatar: currentUser.profile?.avatar || 'default-avatar.png',
       addedAt: new Date()
     });
 
@@ -2027,12 +2031,12 @@ router.post('/friends/add', async (req, res) => {
     });
 
     res.json({
-      message: `تم إضافة ${targetUser.profile.displayName || targetUser.username} كصديق بنجاح!`,
+      message: `تم إضافة ${targetUser.profile?.displayName || targetUser.username} كصديق بنجاح!`,
       friend: {
         userId: targetUser.userId,
         username: targetUser.username,
-        displayName: targetUser.profile.displayName || targetUser.username,
-        avatar: targetUser.profile.avatar || 'default-avatar.png'
+        displayName: targetUser.profile?.displayName || targetUser.username,
+        avatar: targetUser.profile?.avatar || 'default-avatar.png'
       }
     });
 
