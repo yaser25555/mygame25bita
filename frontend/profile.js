@@ -1144,7 +1144,7 @@ async function addFriend(event) {
             return;
         }
 
-        const response = await fetch(`${BACKEND_URL}/api/user/friends/add`, {
+        const response = await fetch(`${BACKEND_URL}/api/users/friends/add`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
