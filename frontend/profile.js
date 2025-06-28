@@ -2,6 +2,10 @@
 const BACKEND_URL = 'https://mygame25bita-7eqw.onrender.com';
 let currentUser = null;
 
+// متغير لتخزين اسم المستخدم الجاري الدردشة معه
+let privateChatUser = null;
+let privateChatMessages = [];
+
 // تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     loadUserProfile();
@@ -50,7 +54,7 @@ function handleAction(event) {
             window.location.href = 'stats.html';
             break;
         case 'privateChat':
-            showAlert('ميزة المحادثة الخاصة قيد التطوير', 'info');
+            openPrivateChat('صديق');
             break;
         case 'viewFriends':
             showAlert('ميزة الأصدقاء قيد التطوير', 'info');
@@ -637,6 +641,43 @@ function displayFriends(friends) {
 
 // فتح المحادثة الخاصة
 function openPrivateChat(username) {
-    showAlert(`فتح المحادثة الخاصة مع ${username}`, 'info');
-    // هنا يمكن إضافة كود لفتح المحادثة الخاصة
+    privateChatUser = username;
+    document.getElementById('privateChatTitle').textContent = `محادثة مع ${username}`;
+    document.getElementById('privateChatModal').style.display = 'block';
+    document.getElementById('privateChatInput').value = '';
+    renderPrivateChatMessages();
+}
+
+// غلق المحادثة الخاصة
+function closePrivateChat() {
+    document.getElementById('privateChatModal').style.display = 'none';
+}
+
+// إرسال رسالة خاصة
+function sendPrivateMessage(event) {
+    event.preventDefault();
+    const input = document.getElementById('privateChatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    // أضف الرسالة كمحاكاة محلية
+    privateChatMessages.push({ sender: 'أنا', text: msg, me: true });
+    renderPrivateChatMessages();
+    input.value = '';
+    // محاكاة رد تلقائي
+    setTimeout(() => {
+        privateChatMessages.push({ sender: privateChatUser, text: '👍', me: false });
+        renderPrivateChatMessages();
+    }, 700);
+}
+
+// عرض رسائل المحادثة
+function renderPrivateChatMessages() {
+    const box = document.getElementById('privateChatMessages');
+    box.innerHTML = privateChatMessages.map(msg => `
+        <div class="private-message${msg.me ? ' me' : ''}">
+            <div class="sender">${msg.sender}</div>
+            <div>${msg.text}</div>
+        </div>
+    `).join('');
+    box.scrollTop = box.scrollHeight;
 }
