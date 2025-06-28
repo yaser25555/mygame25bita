@@ -302,10 +302,12 @@ const UserSchema = new mongoose.Schema({
   relationships: {
     friends: [{
       userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       username: String,
+      displayName: String,
+      avatar: String,
       addedAt: {
         type: Date,
         default: Date.now
@@ -313,13 +315,13 @@ const UserSchema = new mongoose.Schema({
       status: {
         type: String,
         enum: ['pending', 'accepted', 'blocked'],
-        default: 'pending'
+        default: 'accepted'
       }
     }],
     friendRequests: [{
       from: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       fromUsername: String,
       sentAt: {
@@ -333,8 +335,8 @@ const UserSchema = new mongoose.Schema({
     }],
     blockedUsers: [{
       userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       username: String,
       blockedAt: {
@@ -344,12 +346,10 @@ const UserSchema = new mongoose.Schema({
       reason: String
     }],
     followers: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      type: Number
     }],
     following: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      type: Number
     }]
   },
   
@@ -467,8 +467,8 @@ const UserSchema = new mongoose.Schema({
         unique: true
       },
       toUserId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       toUsername: String,
       offeredItems: {
@@ -517,8 +517,8 @@ const UserSchema = new mongoose.Schema({
         unique: true
       },
       fromUserId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       fromUsername: String,
       offeredItems: {
@@ -564,8 +564,8 @@ const UserSchema = new mongoose.Schema({
     tradeHistory: [{
       tradeId: String,
       partnerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       partnerUsername: String,
       type: {
@@ -668,8 +668,8 @@ const UserSchema = new mongoose.Schema({
         unique: true
       },
       toUserId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       toUsername: String,
       giftType: {
@@ -725,8 +725,8 @@ const UserSchema = new mongoose.Schema({
         unique: true
       },
       fromUserId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       fromUsername: String,
       giftType: {
@@ -779,8 +779,8 @@ const UserSchema = new mongoose.Schema({
     giftHistory: [{
       giftId: String,
       partnerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Number,
+        required: true
       },
       partnerUsername: String,
       type: {
