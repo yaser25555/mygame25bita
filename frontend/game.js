@@ -67,6 +67,12 @@ function updateUserDataInGame() {
             usernameElement.textContent = userData.username || 'مستخدم';
         }
         
+        // تحديث معرف المستخدم
+        const userIdElement = document.getElementById('user-id-display');
+        if (userIdElement && userData.userId) {
+            userIdElement.textContent = `ID: ${userData.userId}`;
+        }
+        
         // تحديث الرصيد
         const balanceElement = document.getElementById('game-balance');
         if (balanceElement) {
