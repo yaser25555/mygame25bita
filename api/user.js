@@ -1911,19 +1911,41 @@ router.put('/update-avatar', verifyToken, async (req, res) => {
 
     console.log('🖼️ طلب تحديث الصورة الشخصية للمستخدم:', req.user.username);
     console.log('📋 البيانات المرسلة:', { hasAvatar: !!avatar, avatarLength: avatar ? avatar.length : 0 });
+    console.log('🔍 معرف المستخدم من التوكن:', req.user._id);
 
     if (!avatar) {
       console.log('❌ الصورة الشخصية مفقودة');
       return res.status(400).json({ error: 'الصورة الشخصية مطلوبة' });
     }
 
-    const user = await User.findById(req.user._id);
+    // البحث عن المستخدم بعدة طرق
+    let user = await User.findById(req.user._id);
+    
     if (!user) {
-      console.log('❌ المستخدم غير موجود');
+      console.log('❌ المستخدم غير موجود بـ _id، محاولة البحث بـ username');
+      user = await User.findOne({ username: req.user.username });
+    }
+    
+    if (!user) {
+      console.log('❌ المستخدم غير موجود بـ username، محاولة البحث بـ userId');
+      user = await User.findOne({ userId: req.user.userId });
+    }
+
+    if (!user) {
+      console.log('❌ المستخدم غير موجود بأي طريقة');
+      console.log('🔍 معلومات المستخدم من التوكن:', {
+        _id: req.user._id,
+        username: req.user.username,
+        userId: req.user.userId
+      });
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    console.log('✅ تم العثور على المستخدم:', { userId: user.userId, username: user.username });
+    console.log('✅ تم العثور على المستخدم:', { 
+      _id: user._id, 
+      userId: user.userId, 
+      username: user.username 
+    });
 
     // تهيئة profile إذا لم يكن موجوداً
     if (!user.profile) {
@@ -1971,6 +1993,14 @@ router.put('/update-avatar', verifyToken, async (req, res) => {
       details: error.message 
     });
   }
+});
+
+// route اختبار للتأكد من أن المسارات تعمل
+router.get('/test-avatar-route', (req, res) => {
+  res.json({ 
+    message: 'route تحديث الصورة الشخصية متاح',
+    timestamp: new Date().toISOString()
+  });
 });
 
 module.exports = router; 
