@@ -217,23 +217,22 @@ function applyGenderColors(gender) {
 // عرض حالة الدرع
 function displayShieldStatus(shield) {
     const shieldStatus = document.getElementById('shield-status');
-    const shieldName = document.getElementById('shield-name');
     const shieldDuration = document.getElementById('shield-duration');
+    
+    if (!shieldStatus) return; // إذا لم يكن العنصر موجوداً
     
     if (!shield || !shield.active) {
         // الدرع غير فعال
         shieldStatus.className = 'shield-status inactive';
-        shieldName.textContent = 'غير مفعل';
-        shieldDuration.textContent = '-';
+        if (shieldDuration) shieldDuration.textContent = '-';
     } else {
         // الدرع فعال
         shieldStatus.className = 'shield-status active';
-        shieldName.textContent = shield.name || 'درع نشط';
         
-        if (shield.expiresAt) {
+        if (shield.expiresAt && shieldDuration) {
             const duration = formatDuration(shield.expiresAt);
             shieldDuration.textContent = duration;
-        } else {
+        } else if (shieldDuration) {
             shieldDuration.textContent = 'غير محدد';
         }
     }
