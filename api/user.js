@@ -1947,4 +1947,99 @@ router.get('/test-avatar-route', (req, res) => {
   });
 });
 
+// مسار لإضافة صديق بالبحث عن اسم المستخدم أو المعرف
+router.post('/friends/add', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'توكن مطلوب' });
+    }
+
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const currentUser = await User.findById(decoded._id);
+    
+    if (!currentUser) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    const { targetUsername } = req.body;
+    
+    if (!targetUsername) {
+      return res.status(400).json({ message: 'اسم المستخدم أو المعرف مطلوب' });
+    }
+
+    // البحث عن المستخدم الهدف (باسم المستخدم أو المعرف)
+    let targetUser;
+    const targetUserId = parseInt(targetUsername);
+    
+    if (!isNaN(targetUserId)) {
+      // البحث بالمعرف
+      targetUser = await User.findOne({ userId: targetUserId });
+    } else {
+      // البحث باسم المستخدم
+      targetUser = await User.findOne({ username: targetUsername });
+    }
+
+    if (!targetUser) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    // التحقق من عدم إضافة نفسك
+    if (targetUser._id.toString() === currentUser._id.toString()) {
+      return res.status(400).json({ message: 'لا يمكنك إضافة نفسك كصديق' });
+    }
+
+    // التحقق من وجود الصداقة بالفعل
+    const existingFriendship = currentUser.relationships.friends.find(
+      friend => friend.userId === targetUser.userId
+    );
+
+    if (existingFriendship) {
+      return res.status(400).json({ message: 'أنتما أصدقاء بالفعل' });
+    }
+
+    // إضافة الصديق للمستخدم الحالي
+    currentUser.relationships.friends.push({
+      userId: targetUser.userId,
+      username: targetUser.username,
+      displayName: targetUser.profile.displayName || targetUser.username,
+      avatar: targetUser.profile.avatar || 'default-avatar.png',
+      addedAt: new Date()
+    });
+
+    // إضافة المستخدم الحالي كصديق للمستخدم الهدف
+    targetUser.relationships.friends.push({
+      userId: currentUser.userId,
+      username: currentUser.username,
+      displayName: currentUser.profile.displayName || currentUser.username,
+      avatar: currentUser.profile.avatar || 'default-avatar.png',
+      addedAt: new Date()
+    });
+
+    await currentUser.save();
+    await targetUser.save();
+
+    console.log('✅ تم إضافة صديق:', {
+      from: currentUser.username,
+      to: targetUser.username,
+      fromUserId: currentUser.userId,
+      toUserId: targetUser.userId
+    });
+
+    res.json({
+      message: `تم إضافة ${targetUser.profile.displayName || targetUser.username} كصديق بنجاح!`,
+      friend: {
+        userId: targetUser.userId,
+        username: targetUser.username,
+        displayName: targetUser.profile.displayName || targetUser.username,
+        avatar: targetUser.profile.avatar || 'default-avatar.png'
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في إضافة الصديق:', error);
+    res.status(500).json({ message: 'خطأ داخلي في إضافة الصديق', error: error.message });
+  }
+});
+
 module.exports = router; 

@@ -1084,3 +1084,87 @@ async function claimDailyReward() {
         showAlert('خطأ في الحصول على الجائزة اليومية', 'error');
     }
 }
+
+// دالة عرض نافذة إضافة الأصدقاء
+function showAddFriendModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'addFriendModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="closeAddFriendModal()">&times;</span>
+            <h3>إضافة صديق جديد</h3>
+            <form id="addFriendForm" onsubmit="addFriend(event)">
+                <div class="form-group">
+                    <label for="friendUsername">اسم المستخدم أو معرف المستخدم:</label>
+                    <input type="text" id="friendUsername" placeholder="أدخل اسم المستخدم أو المعرف" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">➕ إضافة صديق</button>
+                    <button type="button" onclick="closeAddFriendModal()" class="btn secondary">❌ إلغاء</button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.style.display = 'block';
+    
+    // إغلاق النافذة عند النقر خارجها
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeAddFriendModal();
+        }
+    };
+}
+
+// دالة إغلاق نافذة إضافة الأصدقاء
+function closeAddFriendModal() {
+    const modal = document.getElementById('addFriendModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// دالة إضافة صديق
+async function addFriend(event) {
+    event.preventDefault();
+    
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showAlert('يجب تسجيل الدخول أولاً', 'error');
+            return;
+        }
+
+        const friendUsername = document.getElementById('friendUsername').value.trim();
+        if (!friendUsername) {
+            showAlert('يرجى إدخال اسم المستخدم أو المعرف', 'error');
+            return;
+        }
+
+        const response = await fetch(`${BACKEND_URL}/api/user/friends/add`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ targetUsername: friendUsername })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert(data.message, 'success');
+            closeAddFriendModal();
+            // إعادة تحميل قائمة الأصدقاء
+            loadUserProfile();
+        } else {
+            showAlert(data.message, 'error');
+        }
+
+    } catch (error) {
+        console.error('خطأ في إضافة الصديق:', error);
+        showAlert('خطأ في إضافة الصديق', 'error');
+    }
+}
