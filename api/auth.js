@@ -26,8 +26,19 @@ router.post('/register', async (req, res) => {
       'stats.score': 0 // إصلاح: استخدام stats.score بدلاً من score
     });
 
+    // حفظ المستخدم (سيتم توليد userId تلقائياً)
     await newUser.save();
-    res.status(201).json({ message: 'تم التسجيل بنجاح!' });
+    
+    console.log('✅ تم إنشاء مستخدم جديد:', {
+      username: newUser.username,
+      userId: newUser.userId,
+      email: newUser.email
+    });
+
+    res.status(201).json({ 
+      message: 'تم التسجيل بنجاح!',
+      userId: newUser.userId
+    });
 
   } catch (err) {
     // طباعة الخطأ كاملاً للتشخيص
@@ -142,11 +153,20 @@ router.post('/create-test-user', async (req, res) => {
       'stats.pearls': 5
     });
 
+    // حفظ المستخدم (سيتم توليد userId تلقائياً)
     await newUser.save();
+    
+    console.log('✅ تم إنشاء مستخدم تجريبي:', {
+      username: newUser.username,
+      userId: newUser.userId,
+      email: newUser.email
+    });
+
     res.status(201).json({ 
       message: 'تم إنشاء المستخدم التجريبي بنجاح!',
       username,
       email,
+      userId: newUser.userId,
       password: 'كلمة المرور المدخلة'
     });
 

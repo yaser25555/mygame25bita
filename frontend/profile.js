@@ -15,6 +15,14 @@ let typingTimeout = null;
 let messageSound = null;
 let soundEnabled = true;
 
+// إعداد الصوت للإشعارات
+let notificationSound;
+try {
+  notificationSound = new Audio('sounds/MSG.mp3');
+} catch (error) {
+  console.warn('لا يمكن تحميل ملف الصوت:', error);
+}
+
 // تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     loadUserProfile();

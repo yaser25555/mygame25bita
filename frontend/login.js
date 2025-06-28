@@ -2,15 +2,32 @@ const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
 
 // تسجيل Service Worker
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-                console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
-            })
-            .catch((error) => {
-                console.log('❌ فشل في تسجيل Service Worker:', error);
+    navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+            console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+            
+            // التحقق من وجود تحديث جديد
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        console.log('🔄 يوجد تحديث جديد للـ Service Worker');
+                        // إجبار التحديث
+                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        window.location.reload();
+                    }
+                });
             });
-    });
+            
+            // مراقبة التغييرات في Service Worker
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('🔄 تم تحديث Service Worker');
+                window.location.reload();
+            });
+        })
+        .catch((error) => {
+            console.log('❌ فشل في تسجيل Service Worker:', error);
+        });
 }
 
 document.addEventListener('DOMContentLoaded', () => {

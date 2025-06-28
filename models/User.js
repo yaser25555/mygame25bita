@@ -973,10 +973,10 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Middleware لتحديث الإحصائيات
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', async function(next) {
   // توليد معرف المستخدم إذا كان جديداً
   if (this.isNew && !this.userId) {
-    this.generateUserId();
+    await this.generateUserId();
   }
   
   // تحديث winRate
