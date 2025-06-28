@@ -9,7 +9,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123';
 // تسجيل مستخدم جديد
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password, userId } = req.body; // استلام userId من الطلب
+    const { username, email, password } = req.body;
 
     // التحقق من وجود المستخدم أو البريد الإلكتروني بالفعل
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
@@ -20,14 +20,13 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       username,
-      email, // إضافة البريد الإلكتروني للمستخدم الجديد
+      email,
       password: hashedPassword,
-      isAdmin: false, // المستخدمون الجدد ليسوا مشرفين بشكل افتراضي
-      'stats.score': 0, // إصلاح: استخدام stats.score بدلاً من score
-      userId: userId || undefined // استخدام userId من الطلب إذا كان موجوداً
+      isAdmin: false,
+      'stats.score': 0
     });
 
-    // حفظ المستخدم (سيتم توليد userId تلقائياً إذا لم يتم تمريره)
+    // حفظ المستخدم (سيتم توليد userId تلقائياً)
     await newUser.save();
     
     console.log('✅ تم إنشاء مستخدم جديد:', {
@@ -42,9 +41,7 @@ router.post('/register', async (req, res) => {
     });
 
   } catch (err) {
-    // طباعة الخطأ كاملاً للتشخيص
     console.error("خطأ أثناء التسجيل:", err);
-    // التعامل مع أخطاء التحقق (مثل حقل مطلوب مفقود)
     if (err.name === 'ValidationError') {
       return res.status(400).json({ message: err.message });
     }

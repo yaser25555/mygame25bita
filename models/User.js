@@ -974,52 +974,94 @@ const UserSchema = new mongoose.Schema({
 
 // Middleware لتحديث الإحصائيات
 UserSchema.pre('save', async function(next) {
-  // توليد معرف المستخدم إذا كان جديداً
-  if (this.isNew && !this.userId) {
-    await this.generateUserId();
+  try {
+    // توليد معرف المستخدم إذا كان جديداً ولم يتم تحديده
+    if (this.isNew && !this.userId) {
+      console.log('🔄 توليد userId تلقائياً للمستخدم الجديد:', this.username);
+      await this.generateUserId();
+      console.log('✅ تم توليد userId:', this.userId);
+    }
+    
+    // تحديث winRate
+    if (this.stats.gamesPlayed > 0) {
+      this.stats.winRate = Math.round((this.stats.gamesWon / this.stats.gamesPlayed) * 100);
+    }
+    
+    // تحديث averageScore
+    if (this.stats.gamesPlayed > 0) {
+      this.stats.averageScore = Math.round(this.stats.score / this.stats.gamesPlayed);
+    }
+    
+    // تحديث totalShots و accuracy
+    this.weapons.totalShots = this.weapons.singleShotsUsed + this.weapons.tripleShotsUsed + this.weapons.hammerShotsUsed;
+    if (this.weapons.totalShots > 0) {
+      this.weapons.accuracy = Math.round((this.batsHit / this.weapons.totalShots) * 100);
+    }
+    
+    // تحديث lastSeen
+    this.profile.lastSeen = new Date();
+    
+    next();
+  } catch (error) {
+    console.error('❌ خطأ في middleware:', error);
+    next(error);
   }
-  
-  // تحديث winRate
-  if (this.stats.gamesPlayed > 0) {
-    this.stats.winRate = Math.round((this.stats.gamesWon / this.stats.gamesPlayed) * 100);
-  }
-  
-  // تحديث averageScore
-  if (this.stats.gamesPlayed > 0) {
-    this.stats.averageScore = Math.round(this.stats.score / this.stats.gamesPlayed);
-  }
-  
-  // تحديث totalShots و accuracy
-  this.weapons.totalShots = this.weapons.singleShotsUsed + this.weapons.tripleShotsUsed + this.weapons.hammerShotsUsed;
-  if (this.weapons.totalShots > 0) {
-    this.weapons.accuracy = Math.round((this.batsHit / this.weapons.totalShots) * 100);
-  }
-  
-  // تحديث lastSeen
-  this.profile.lastSeen = new Date();
-  
-  next();
 });
 
 // دالة لتوليد معرف المستخدم
 UserSchema.methods.generateUserId = async function() {
   try {
+    console.log('🔍 البحث عن أعلى userId موجود...');
+    
     // البحث عن أعلى معرف موجود
     const lastUser = await this.constructor.findOne({}, { userId: 1 })
       .sort({ userId: -1 })
       .limit(1);
     
+    let newUserId;
+    
     // إذا لم يوجد مستخدمين، ابدأ من 1500
-    if (!lastUser) {
-      this.userId = 1500;
+    if (!lastUser || !lastUser.userId) {
+      newUserId = 1500;
+      console.log('📝 لا يوجد مستخدمين، البدء من:', newUserId);
     } else {
       // خذ المعرف التالي
-      this.userId = lastUser.userId + 1;
+      newUserId = lastUser.userId + 1;
+      console.log('📝 أعلى userId موجود:', lastUser.userId, '، المعرف الجديد:', newUserId);
     }
+    
+    // التحقق من عدم وجود تعارض
+    const existingUser = await this.constructor.findOne({ userId: newUserId });
+    if (existingUser) {
+      console.log('⚠️ يوجد تعارض في userId، البحث عن معرف متاح...');
+      // البحث عن معرف متاح
+      let counter = 1;
+      while (true) {
+        const testUserId = newUserId + counter;
+        const testUser = await this.constructor.findOne({ userId: testUserId });
+        if (!testUser) {
+          newUserId = testUserId;
+          console.log('✅ تم العثور على userId متاح:', newUserId);
+          break;
+        }
+        counter++;
+        if (counter > 100) {
+          // في حالة الطوارئ، استخدم timestamp
+          newUserId = Math.floor(Date.now() / 1000) + 1500;
+          console.log('🚨 استخدام timestamp كـ userId:', newUserId);
+          break;
+        }
+      }
+    }
+    
+    this.userId = newUserId;
+    console.log('✅ تم تعيين userId:', this.userId, 'للمستخدم:', this.username);
+    
   } catch (error) {
-    console.error('خطأ في توليد معرف المستخدم:', error);
+    console.error('❌ خطأ في توليد معرف المستخدم:', error);
     // في حالة الخطأ، استخدم timestamp كبديل
     this.userId = Math.floor(Date.now() / 1000) + 1500;
+    console.log('🔄 استخدام timestamp كبديل:', this.userId);
   }
 };
 

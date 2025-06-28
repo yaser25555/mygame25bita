@@ -494,21 +494,13 @@ async function handleRegister(event) {
     try {
         console.log('🚀 بدء طلب التسجيل...');
         
-        // إنشاء userId مؤقت (حل مؤقت حتى يتم تحديث الخادم)
-        const tempUserId = Math.floor(Math.random() * 10000) + 1500;
-        
         const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ 
-                username, 
-                email, 
-                password,
-                userId: tempUserId // إضافة userId مؤقت
-            })
+            body: JSON.stringify({ username, email, password })
         });
         
         console.log('📡 استجابة الخادم للتسجيل:', {
