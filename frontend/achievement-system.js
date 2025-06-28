@@ -147,12 +147,12 @@ class AchievementSystem {
     }
 
     loadUserAchievements() {
-        const saved = localStorage.getItem('userAchievements');
-        return saved ? JSON.parse(saved) : {};
+        // لا تحفظ الإنجازات في localStorage، يجب أن تُجلب من السيرفر أو تُحسب في كل مرة
+        return {};
     }
 
     saveUserAchievements() {
-        localStorage.setItem('userAchievements', JSON.stringify(this.userAchievements));
+        // لا تحفظ الإنجازات في localStorage
     }
 
     checkAchievements(userStats) {

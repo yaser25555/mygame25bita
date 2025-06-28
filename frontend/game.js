@@ -552,4 +552,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('✅ تم تحميل صفحة اللعبة بنجاح');
     setupMobileControls();
-}); 
+    fetchAndDisplayUserInfo();
+});
+
+async function fetchAndDisplayUserInfo() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const response = await fetch(`${CONFIG.BACKEND_URL}/api/users/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        // تحديث عناصر معلومات اللاعب
+        document.querySelectorAll('#username-display').forEach(e => e.textContent = data.username || '-');
+        document.querySelectorAll('#user-id-display').forEach(e => e.textContent = data.userId || '-');
+        document.querySelectorAll('#balance-display').forEach(e => e.textContent = (data.stats && data.stats.coins != null) ? data.stats.coins : '0');
+        document.querySelectorAll('#pearl-balance').forEach(e => e.textContent = (data.stats && data.stats.pearls != null) ? data.stats.pearls : '0');
+    } catch (e) {
+        console.log('فشل في جلب بيانات المستخدم:', e);
+    }
+} 

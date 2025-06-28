@@ -743,17 +743,12 @@ function renderPrivateChatMessages() {
 function setupSoundToggle() {
     const soundBtn = document.getElementById('soundToggleBtn');
     if (!soundBtn) return;
-    
-    // تحميل حالة الصوت المحفوظة
-    soundEnabled = localStorage.getItem('chatSoundEnabled') !== 'false';
+    // لا تحفظ حالة الصوت في localStorage، فقط متغير في الذاكرة
+    soundEnabled = true;
     updateSoundButton();
-    
     soundBtn.onclick = function() {
         soundEnabled = !soundEnabled;
-        localStorage.setItem('chatSoundEnabled', soundEnabled);
         updateSoundButton();
-        
-        // إشعار للمستخدم
         showAlert(soundEnabled ? 'تم تشغيل الصوت' : 'تم إيقاف الصوت', 'info');
     };
 }

@@ -58,12 +58,11 @@ class TradingSystem {
     
     async loadUserData() {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/users/profile`, {
+            const response = await fetch(`${BACKEND_URL}/api/users/me`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            
             if (response.ok) {
                 const userData = await response.json();
                 this.currentUser = userData;

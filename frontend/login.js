@@ -116,16 +116,12 @@ async function checkExistingToken() {
         } else {
             console.log('❌ token غير صالح، حذفه');
             localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            localStorage.removeItem('isAdmin');
             hideLogoutButton();
             hideGameButton();
         }
     } catch (error) {
         console.error('❌ خطأ في التحقق من التوكن:', error);
         localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        localStorage.removeItem('isAdmin');
         hideLogoutButton();
         hideGameButton();
     }
@@ -347,9 +343,6 @@ async function handleAdminLogin(event) {
             // التحقق من أن المستخدم مشرف
             if (data.isAdmin) {
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('username', data.username);
-                localStorage.setItem('isAdmin', 'true');
-                
                 showMessage(`مرحباً بك أيها المشرف ${data.username}!`);
                 console.log('👑 تم تسجيل دخول المشرف بنجاح:', data.username);
                 
@@ -436,12 +429,8 @@ async function handleLogin(event) {
         
         if (data.token) {
             localStorage.setItem('token', data.token);
-            localStorage.setItem('username', data.username);
-            localStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false');
-            
             showMessage(`مرحباً بك ${data.username}! تم تسجيل الدخول بنجاح.`);
             console.log('✅ تم تسجيل الدخول بنجاح:', data.username, 'مشرف:', data.isAdmin);
-            
             // إذا كان المستخدم مشرف، إظهار مودال الخيارات
             if (data.isAdmin) {
                 setTimeout(() => {
@@ -454,7 +443,6 @@ async function handleLogin(event) {
                     showLogoutButton(data.username);
                 }, 1000);
             }
-            
         } else {
             showMessage(data.message || 'فشل في تسجيل الدخول', true);
             console.log('❌ فشل في تسجيل الدخول:', data.message);
@@ -564,25 +552,13 @@ async function handleRegister(event) {
 // معالجة تسجيل الخروج
 function handleLogout() {
     localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('isAdmin');
-    
     showMessage('تم تسجيل الخروج بنجاح');
     console.log('✅ تم تسجيل الخروج');
-    
     // إخفاء الأزرار
     hideLogoutButton();
     hideGameButton();
-    
     // إغلاق مودال المشرف إذا كان مفتوحاً
     closeAdminModalFunction();
-    
-    // الانتقال إلى تبويب تسجيل الدخول
-    const loginTab = document.getElementById('login-tab');
-    const loginSection = document.getElementById('login-section');
-    if (loginTab && loginSection) {
-        switchTab(loginTab, loginSection);
-    }
 }
 
 // إعداد التحذير عند محاولة الخروج
