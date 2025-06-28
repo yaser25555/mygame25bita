@@ -45,25 +45,51 @@
         </div>
 
         <!-- حالة الدرع -->
-        <div class="shield-status" id="shield-status">
+        <div class="shield-status inactive" id="shield-status">
             <div class="shield-icon">🛡️</div>
             <div class="shield-info">
-                <div class="shield-name" id="shield-name">بدون درع</div>
+                <div class="shield-name" id="shield-name">غير مفعل</div>
                 <div class="shield-duration" id="shield-duration">-</div>
             </div>
         </div>
 
-        <!-- الإنجازات -->
-        <div class="achievements-section">
-            <h3>🏆 الإنجازات</h3>
-            <div class="achievements-grid" id="achievements-grid">
-                <div class="achievement-placeholder">لا توجد إنجازات بعد</div>
+        <!-- حاوية المعلومات الشاملة -->
+        <div class="info-container">
+            <!-- الإنجازات -->
+            <div class="achievements-section">
+                <h3>🏆 الإنجازات</h3>
+                <div class="achievements-grid" id="achievements-grid">
+                    <div class="achievement-placeholder">لا توجد إنجازات بعد</div>
+                </div>
             </div>
-        </div>
 
-        <!-- الإحصائيات السريعة -->
-        <div class="quick-stats">
-            <!-- تم حذف حاوية الأصدقاء -->
+            <!-- الإحصائيات -->
+            <div class="stats-section">
+                <h3>📊 الإحصائيات</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-score">0</div>
+                            <div class="stat-label">النقاط</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">💎</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="gems-count">0</div>
+                            <div class="stat-label">الجواهر</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="friends-count">0</div>
+                            <div class="stat-label">الأصدقاء</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- أزرار الإجراءات -->

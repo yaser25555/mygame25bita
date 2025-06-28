@@ -161,6 +161,22 @@ function displayUserProfile(user) {
         userLevel.textContent = user.profile.level || 1;
     }
 
+    // الإحصائيات
+    const totalScore = document.getElementById('total-score');
+    if (totalScore) {
+        totalScore.textContent = user.stats?.score || 0;
+    }
+
+    const gemsCount = document.getElementById('gems-count');
+    if (gemsCount) {
+        gemsCount.textContent = user.collectedGems || 0;
+    }
+
+    const friendsCount = document.getElementById('friends-count');
+    if (friendsCount) {
+        friendsCount.textContent = user.relationships?.friends?.length || 0;
+    }
+
     // حالة الدرع
     displayShieldStatus(user.shield);
 
@@ -194,20 +210,23 @@ function displayShieldStatus(shield) {
     const shieldStatus = document.getElementById('shield-status');
     const shieldName = document.getElementById('shield-name');
     const shieldDuration = document.getElementById('shield-duration');
-
-    if (!shieldStatus || !shieldName || !shieldDuration) {
-        console.warn('⚠️ عناصر الدرع غير موجودة في الصفحة');
-        return;
-    }
-
-    if (shield && shield.currentShield && shield.currentShield.isActive) {
-        shieldName.textContent = shield.currentShield.type || 'درع نشط';
-        shieldDuration.textContent = `متبقي: ${formatDuration(shield.currentShield.expiresAt)}`;
-        shieldStatus.style.display = 'flex';
-    } else {
-        shieldName.textContent = 'بدون درع';
+    
+    if (!shield || !shield.active) {
+        // الدرع غير فعال
+        shieldStatus.className = 'shield-status inactive';
+        shieldName.textContent = 'غير مفعل';
         shieldDuration.textContent = '-';
-        shieldStatus.style.display = 'flex';
+    } else {
+        // الدرع فعال
+        shieldStatus.className = 'shield-status active';
+        shieldName.textContent = shield.name || 'درع نشط';
+        
+        if (shield.expiresAt) {
+            const duration = formatDuration(shield.expiresAt);
+            shieldDuration.textContent = duration;
+        } else {
+            shieldDuration.textContent = 'غير محدد';
+        }
     }
 }
 
