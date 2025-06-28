@@ -133,6 +133,9 @@ function displayUserProfile(user) {
         stats: user.stats
     });
 
+    // تطبيق الألوان حسب الجنس
+    applyGenderColors(user.profile?.gender);
+
     // الصورة الشخصية
     const avatar = document.getElementById('user-avatar');
     if (avatar) {
@@ -179,6 +182,27 @@ function displayUserProfile(user) {
 
     // الإنجازات
     displayAchievements(user.achievements || []);
+}
+
+// تطبيق الألوان حسب الجنس
+function applyGenderColors(gender) {
+    const profileHeader = document.querySelector('.profile-header');
+    if (!profileHeader) return;
+
+    // إزالة الألوان السابقة
+    profileHeader.classList.remove('male', 'female', 'default');
+
+    // تطبيق الألوان حسب الجنس
+    if (gender === 'male') {
+        profileHeader.classList.add('male');
+        console.log('🎨 تطبيق ألوان الذكور');
+    } else if (gender === 'female') {
+        profileHeader.classList.add('female');
+        console.log('🎨 تطبيق ألوان الإناث');
+    } else {
+        profileHeader.classList.add('default');
+        console.log('🎨 تطبيق الألوان الافتراضية');
+    }
 }
 
 // عرض حالة الدرع
@@ -318,6 +342,7 @@ async function updateAvatar(event) {
 function openProfileModal() {
     document.getElementById('profileModal').style.display = 'block';
     document.getElementById('displayNameInput').value = currentUser.profile?.displayName || currentUser.username;
+    document.getElementById('genderSelect').value = currentUser.profile?.gender || 'prefer-not-to-say';
 }
 
 // إغلاق Modal تعديل البروفايل
@@ -331,6 +356,8 @@ async function updateProfile(event) {
     
     try {
         const displayName = document.getElementById('displayNameInput').value.trim();
+        const gender = document.getElementById('genderSelect').value;
+        
         if (!displayName) {
             showAlert('يرجى إدخال الاسم المعروض', 'error');
             return;
@@ -344,7 +371,8 @@ async function updateProfile(event) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                displayName: displayName
+                displayName: displayName,
+                gender: gender
             })
         });
 
@@ -355,11 +383,24 @@ async function updateProfile(event) {
         const result = await response.json();
         showAlert('تم تحديث البروفايل بنجاح', 'success');
         
-        // تحديث الاسم في الواجهة
-        document.getElementById('display-name').textContent = displayName;
+        // تحديث البيانات المحلية
+        if (currentUser.profile) {
+            currentUser.profile.displayName = displayName;
+            currentUser.profile.gender = gender;
+        } else {
+            currentUser.profile = {
+                displayName: displayName,
+                gender: gender
+            };
+        }
+        
+        // تطبيق الألوان الجديدة
+        applyGenderColors(gender);
+        
+        // تحديث العرض
+        displayUserProfile(currentUser);
         
         closeProfileModal();
-        loadUserProfile(); // إعادة تحميل البيانات
 
     } catch (error) {
         console.error('خطأ في تحديث البروفايل:', error);
