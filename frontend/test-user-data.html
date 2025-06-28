@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار بيانات المستخدم</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .success { color: #2ecc71; }
+        .error { color: #e74c3c; }
+        .warning { color: #f39c12; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 اختبار بيانات المستخدم</h1>
+        
+        <div class="test-section">
+            <h3>1. فحص التوكن</h3>
+            <button onclick="checkToken()">فحص التوكن</button>
+            <div id="token-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. جلب بيانات المستخدم</h3>
+            <button onclick="fetchUserData()">جلب البيانات</button>
+            <div id="user-data-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. فحص معرف المستخدم</h3>
+            <button onclick="checkUserId()">فحص المعرف</button>
+            <div id="user-id-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://mygame25bita-7eqw.onrender.com';
+        
+        function log(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        async function checkToken() {
+            const resultDiv = document.getElementById('token-result');
+            resultDiv.innerHTML = '🔍 فحص التوكن...';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    resultDiv.innerHTML = '❌ لا يوجد توكن في التخزين المحلي';
+                    return;
+                }
+                
+                // فك تشفير التوكن (JWT)
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                
+                resultDiv.innerHTML = `✅ التوكن موجود وصالح
+📅 تاريخ الانتهاء: ${new Date(payload.exp * 1000).toLocaleString('ar-SA')}
+👤 معرف المستخدم: ${payload.userId}
+🏷️ اسم المستخدم: ${payload.username}
+👑 مشرف: ${payload.isAdmin ? 'نعم' : 'لا'}`;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ خطأ في فحص التوكن: ${error.message}`;
+            }
+        }
+        
+        async function fetchUserData() {
+            const resultDiv = document.getElementById('user-data-result');
+            resultDiv.innerHTML = '🔍 جلب بيانات المستخدم...';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    resultDiv.innerHTML = '❌ لا يوجد توكن';
+                    return;
+                }
+                
+                const response = await fetch(`${BACKEND_URL}/api/users/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const userData = await response.json();
+                
+                resultDiv.innerHTML = `✅ تم جلب البيانات بنجاح
+📊 البيانات الكاملة:
+${JSON.stringify(userData, null, 2)}`;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ خطأ في جلب البيانات: ${error.message}`;
+            }
+        }
+        
+        async function checkUserId() {
+            const resultDiv = document.getElementById('user-id-result');
+            resultDiv.innerHTML = '🔍 فحص معرف المستخدم...';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    resultDiv.innerHTML = '❌ لا يوجد توكن';
+                    return;
+                }
+                
+                const response = await fetch(`${BACKEND_URL}/api/users/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const userData = await response.json();
+                
+                let result = '🔍 فحص معرفات المستخدم:\n\n';
+                
+                if (userData._id) {
+                    result += `✅ _id موجود: ${userData._id}\n`;
+                } else {
+                    result += `❌ _id مفقود\n`;
+                }
+                
+                if (userData.userId) {
+                    result += `✅ userId موجود: ${userData.userId}\n`;
+                } else {
+                    result += `❌ userId مفقود\n`;
+                }
+                
+                if (userData.username) {
+                    result += `✅ username موجود: ${userData.username}\n`;
+                } else {
+                    result += `❌ username مفقود\n`;
+                }
+                
+                result += `\n📊 جميع البيانات المتوفرة:\n`;
+                result += Object.keys(userData).join(', ');
+                
+                resultDiv.innerHTML = result;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ خطأ في فحص المعرف: ${error.message}`;
+            }
+        }
+        
+        // فحص تلقائي عند تحميل الصفحة
+        window.onload = function() {
+            log('صفحة الاختبار جاهزة');
+        };
+    </script>
+</body>
+</html> 
