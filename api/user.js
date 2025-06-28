@@ -144,7 +144,8 @@ router.get('/me', async (req, res) => {
     }
 
     const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await User.findById(decoded.userId);
+    // التعديل هنا: استخدم _id بدلاً من userId
+    const user = await User.findById(decoded._id);
 
     if (!user) {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
