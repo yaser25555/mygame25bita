@@ -9,7 +9,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123';
 // تسجيل مستخدم جديد
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password } = req.body; // استلام البريد الإلكتروني من الطلب
+    const { username, email, password, userId } = req.body; // استلام userId من الطلب
 
     // التحقق من وجود المستخدم أو البريد الإلكتروني بالفعل
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
@@ -23,10 +23,11 @@ router.post('/register', async (req, res) => {
       email, // إضافة البريد الإلكتروني للمستخدم الجديد
       password: hashedPassword,
       isAdmin: false, // المستخدمون الجدد ليسوا مشرفين بشكل افتراضي
-      'stats.score': 0 // إصلاح: استخدام stats.score بدلاً من score
+      'stats.score': 0, // إصلاح: استخدام stats.score بدلاً من score
+      userId: userId || undefined // استخدام userId من الطلب إذا كان موجوداً
     });
 
-    // حفظ المستخدم (سيتم توليد userId تلقائياً)
+    // حفظ المستخدم (سيتم توليد userId تلقائياً إذا لم يتم تمريره)
     await newUser.save();
     
     console.log('✅ تم إنشاء مستخدم جديد:', {
