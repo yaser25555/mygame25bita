@@ -476,13 +476,19 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
       userId: user.userId, 
       username: user.username,
       stats: user.stats,
-      hasStats: !!user.stats
+      hasStats: !!user.stats,
+      hasUserId: !!user.userId
     });
 
     // تهيئة stats إذا لم يكن موجوداً
     if (!user.stats) {
       console.log('📝 تهيئة stats للمستخدم:', username);
       user.stats = {};
+    }
+
+    // تهيئة userId إذا لم يكن موجوداً
+    if (!user.userId) {
+      console.log('📝 المستخدم لا يحتوي على userId رقمي، سيتم استخدام _id للتعريف');
     }
 
     // تحديث اسم المستخدم إذا تم توفيره

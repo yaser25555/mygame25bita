@@ -231,6 +231,13 @@ if (updateUserBtn) {
             return;
         }
         
+        // التحقق من وجود معرف المستخدم
+        const currentUserId = displayCurrentUserId.textContent;
+        if (currentUserId === 'غير محدد') {
+            console.log('⚠️ المستخدم لا يحتوي على userId رقمي، سيتم التحديث باستخدام اسم المستخدم');
+            showMessage('المستخدم لا يحتوي على معرف رقمي، سيتم التحديث باستخدام اسم المستخدم', 'info');
+        }
+        
         try {
             const requestBody = {
                 username: username,
@@ -807,7 +814,7 @@ function displayUserData(userData) {
             console.log('📋 جميع بيانات المستخدم:', JSON.stringify(user, null, 2));
             
             // إضافة زر لتعيين معرف للمستخدم
-            showMessage('المستخدم لا يحتوي على معرف رقمي. يمكنك تعيين معرف له.', 'warning');
+            showMessage('المستخدم لا يحتوي على معرف رقمي. يمكنك تعيين معرف له أو تحديث بياناته مباشرة.', 'warning');
             
             // إضافة زر لتعيين المعرف
             const assignIdBtn = document.createElement('button');
@@ -815,12 +822,29 @@ function displayUserData(userData) {
             assignIdBtn.className = 'btn btn-warning';
             assignIdBtn.onclick = () => assignUserIdToUser(user.username);
             
-            // إضافة الزر إلى الصفحة
+            // إضافة زر لتحديث البيانات مباشرة
+            const updateDataBtn = document.createElement('button');
+            updateDataBtn.textContent = '📝 تحديث البيانات مباشرة';
+            updateDataBtn.className = 'btn btn-info';
+            updateDataBtn.onclick = () => {
+                showMessage('يمكنك تحديث النقاط واللآلئ مباشرة من الحقول أدناه', 'info');
+            };
+            
+            // إضافة الأزرار إلى الصفحة
             if (userOperationsContainer) {
+                // إزالة الأقسام السابقة
+                const existingSections = userOperationsContainer.querySelectorAll('.operation-section');
+                existingSections.forEach(section => {
+                    if (section.querySelector('button[onclick*="assignUserIdToUser"]')) {
+                        section.remove();
+                    }
+                });
+                
                 const assignIdSection = document.createElement('div');
                 assignIdSection.className = 'operation-section';
-                assignIdSection.innerHTML = '<h5>🆔 تعيين معرف المستخدم</h5>';
+                assignIdSection.innerHTML = '<h5>🆔 إدارة معرف المستخدم</h5>';
                 assignIdSection.appendChild(assignIdBtn);
+                assignIdSection.appendChild(updateDataBtn);
                 userOperationsContainer.appendChild(assignIdSection);
             }
         }
