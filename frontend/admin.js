@@ -32,8 +32,7 @@ const suspiciousUsersList = document.getElementById('suspiciousUsersList');
 const totalSuspiciousUsers = document.getElementById('totalSuspiciousUsers');
 const highRiskUsers = document.getElementById('highRiskUsers');
 
-// عناصر DOM الجديدة لإدارة المعرفات والصور
-const showUserIdsManagement = document.getElementById('showUserIdsManagement');
+// عناصر DOM الجديدة لإدارة الصور
 const showUserImagesManagement = document.getElementById('showUserImagesManagement');
 
 // عناصر DOM الجديدة لإدارة المستخدمين المحسنة
@@ -73,7 +72,6 @@ if (!refreshSuspiciousActivityBtn) console.warn('refreshSuspiciousActivityBtn no
 if (!suspiciousUsersList) console.warn('suspiciousUsersList not found');
 if (!totalSuspiciousUsers) console.warn('totalSuspiciousUsers not found');
 if (!highRiskUsers) console.warn('highRiskUsers not found');
-if (!showUserIdsManagement) console.warn('showUserIdsManagement not found');
 if (!showUserImagesManagement) console.warn('showUserImagesManagement not found');
 if (!searchByUsername) console.warn('searchByUsername not found');
 if (!searchByUserId) console.warn('searchByUserId not found');
@@ -175,9 +173,6 @@ function hideAllSections() {
     if (gameManagementSection) gameManagementSection.classList.add('hidden');
     if (userManagementSection) userManagementSection.classList.add('hidden');
     if (suspiciousActivitySection) suspiciousActivitySection.classList.add('hidden');
-    
-    const userIdsSection = document.getElementById('userIdsManagementSection');
-    if (userIdsSection) userIdsSection.classList.add('hidden');
     
     const userImagesSection = document.getElementById('userImagesManagementSection');
     if (userImagesSection) userImagesSection.classList.add('hidden');
@@ -336,11 +331,15 @@ saveGameSettingsBtn.addEventListener('click', async function() {
 });
 
 // إضافة حدث للقسم الجديد
-showSuspiciousActivity.addEventListener('click', function() {
-    hideAllSections();
-    suspiciousActivitySection.classList.remove('hidden');
-    loadSuspiciousActivity();
-});
+if (showSuspiciousActivity) {
+    showSuspiciousActivity.addEventListener('click', function() {
+        hideAllSections();
+        if (suspiciousActivitySection) {
+            suspiciousActivitySection.classList.remove('hidden');
+        }
+        loadSuspiciousActivity();
+    });
+}
 
 // جلب النشاطات المشبوهة
 async function loadSuspiciousActivity() {
@@ -508,23 +507,15 @@ window.viewUserDetails = function(username) {
 refreshSuspiciousActivityBtn.addEventListener('click', loadSuspiciousActivity);
 
 // إضافة أحداث للأقسام الجديدة
-if (showUserIdsManagement) {
-    showUserIdsManagement.addEventListener('click', function() {
+if (showUserImagesManagement) {
+    showUserImagesManagement.addEventListener('click', function() {
+        // إخفاء جميع الأقسام
         hideAllSections();
-        const userIdsSection = document.getElementById('userIdsManagementSection');
-        if (userIdsSection) {
-            userIdsSection.classList.remove('hidden');
-        }
+        
+        // فتح صفحة إدارة الصور في نافذة جديدة
+        window.open('admin-user-images.html', '_blank');
     });
 }
-
-showUserImagesManagement.addEventListener('click', function() {
-    // إخفاء جميع الأقسام
-    hideAllSections();
-    
-    // فتح صفحة إدارة الصور في نافذة جديدة
-    window.open('admin-user-images.html', '_blank');
-});
 
 // البحث عن المستخدم لتغيير المعرف
 const searchUserBtn = document.getElementById('searchUserBtn');

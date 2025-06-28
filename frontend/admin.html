@@ -38,7 +38,6 @@
         <button id="showGameManagement">🎮 إدارة اللعبة</button>
         <button id="showUserManagement">👥 إدارة المستخدمين</button>
         <button id="showSuspiciousActivity">🔍 مراقبة النشاطات المشبوهة</button>
-        <button id="showUserIdsManagement">🆔 إدارة معرفات المستخدمين</button>
         <button id="showUserImagesManagement">🖼️ إدارة صور المستخدمين</button>
       </div>
 
@@ -160,51 +159,6 @@
             <div id="usersList" class="users-list">
               <!-- سيتم ملؤها بالجافاسكريبت -->
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- User IDs Management Section -->
-      <div id="userIdsManagementSection" class="section-content hidden">
-        <h3>🆔 إدارة معرفات المستخدمين</h3>
-        
-        <!-- البحث عن المستخدم -->
-        <div class="search-section">
-          <h4>البحث عن المستخدم</h4>
-          <div class="field">
-            <label for="searchUserIdUsername">اسم المستخدم:</label>
-            <input type="text" id="searchUserIdUsername" placeholder="أدخل اسم المستخدم">
-          </div>
-          <button id="searchUserBtn">🔍 البحث</button>
-        </div>
-
-        <!-- عرض بيانات المستخدم -->
-        <div id="userDataDisplay" class="hidden">
-          <h4>بيانات المستخدم</h4>
-          <div class="user-info">
-            <p><strong>اسم المستخدم:</strong> <span id="displayUsername"></span></p>
-            <p><strong>المعرف الحالي:</strong> <span id="displayCurrentUserId"></span></p>
-            <p><strong>البريد الإلكتروني:</strong> <span id="displayEmail"></span></p>
-          </div>
-          
-          <!-- تغيير المعرف -->
-          <div class="change-user-id-section">
-            <h4>تغيير معرف المستخدم</h4>
-            <div class="field">
-              <label for="newUserId">المعرف الجديد:</label>
-              <input type="number" id="newUserId" placeholder="أدخل المعرف الجديد" min="1">
-            </div>
-            <button id="updateUserIdBtn" style="background: #f59e0b;">🔄 تحديث المعرف</button>
-            <p id="updateUserIdMessage" style="margin-top: 10px;"></p>
-          </div>
-        </div>
-
-        <!-- قائمة المستخدمين -->
-        <div class="users-list-section">
-          <h4>قائمة المستخدمين</h4>
-          <button id="loadAllUsersBtn" style="background: #10b981;">📋 تحميل جميع المستخدمين</button>
-          <div id="usersList" style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
-            <!-- سيتم ملؤها بالجافاسكريبت -->
           </div>
         </div>
       </div>
