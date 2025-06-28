@@ -22,6 +22,7 @@ const ASSETS_TO_CACHE = [
   './sounds/single_shot.mp3',
   './sounds/triple_shot.mp3',
   './sounds/hammer_shot.mp3',
+  './sounds/MSG.mp3',
   './manifest.json'
 ];
 
@@ -67,6 +68,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // تجاهل الطلبات الخارجية (API calls)
+  if (event.request.url.includes('/api/') || event.request.url.includes('onrender.com/health')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -96,7 +102,7 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => {
         // إرجاع صفحة غير متصل إذا فشل كل شيء
-        if (event.request.headers.get('accept').includes('text/html')) {
+        if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
           return caches.match('./offline.html');
         }
       })
