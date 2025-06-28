@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#002A1B">
     <meta name="msapplication-TileColor" content="#002A1B">
     <meta name="msapplication-navbutton-color" content="#002A1B">
-    <title>Ø§Ù„Ø¨Ø±ÙˆÙØ§ÙŠÙ„ - INFINITY BOX VOICEBOOM</title>
+    <title>البروفايل - INFINITY BOX VOICEBOOM</title>
     <link rel="stylesheet" href="profile-styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="logo.png">
@@ -21,31 +21,31 @@
         <!-- Ø´Ø±ÙŠØ· Ø§Ù„ØªÙ†Ù‚Ù„ -->
         <nav class="navbar">
             <div class="nav-left">
-                <button class="nav-btn" data-action="goBack">â† Ø±Ø¬ÙˆØ¹</button>
+                <button class="nav-btn" data-action="goBack">â† رجوع</button>
             </div>
             <div class="nav-center">
-                <h1>Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ</h1>
+                <h1>الملف الشخصي</h1>
             </div>
             <div class="nav-right">
                 <button class="nav-btn" data-action="editProfile">âœï¸</button>
             </div>
         </nav>
 
-        <!-- Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø¨Ø±ÙˆÙØ§ÙŠÙ„ Ø§Ù„Ø£Ø³Ø§Ø³ÙŠØ© -->
+        <!-- Ù…Ø¹Ù„ÙˆÙ…Ø§Øª البروفايل Ø§Ù„Ø£Ø³Ø§Ø³ÙŠØ© -->
         <div class="profile-header">
             <div class="profile-avatar">
-                <img id="user-avatar" src="images/default-avatar.png" alt="Ø§Ù„ØµÙˆØ±Ø© Ø§Ù„Ø´Ø®ØµÙŠØ©">
+                <img id="user-avatar" src="images/default-avatar.png" alt="الصورة الشخصية">
                 <button class="edit-avatar-btn" data-action="editAvatar">ðŸ“·</button>
             </div>
             <div class="profile-info">
-                <h2 id="display-name">Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…</h2>
+                <h2 id="display-name">اسم المستخدم</h2>
                 <div class="user-id" id="user-id">ID: -</div>
-                <div class="user-time-online" id="user-time-online">0 ÙŠÙˆÙ… 0 Ø³Ø§Ø¹Ø©</div>
-                <div class="user-level">Ø§Ù„Ù…Ø³ØªÙˆÙ‰: <span id="user-level">1</span></div>
+                <div class="user-time-online" id="user-time-online">0 يوم 0 ساعة</div>
+                <div class="user-level">المستوى: <span id="user-level">1</span></div>
             </div>
         </div>
 
-        <!-- Ø­Ø§Ù„Ø© Ø§Ù„Ø¯Ø±Ø¹ -->
+        <!-- حالة الدرع -->
         <div class="shield-status inactive" id="shield-status">
             <div class="shield-icon">ðŸ›¡ï¸</div>
             <div class="shield-info">
@@ -53,45 +53,46 @@
             </div>
         </div>
 
-        <!-- Ø§Ù„Ø¬ÙˆØ§Ø¦Ø² Ø§Ù„ÙŠÙˆÙ…ÙŠØ© -->
+        <!-- الجوائز اليومية -->
         <div class="daily-reward-container" id="daily-reward-status">
-            <!-- Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø¬ÙˆØ§Ø¦Ø² Ø§Ù„ÙŠÙˆÙ…ÙŠØ© Ø³ÙŠØªÙ… Ø¥Ø¶Ø§ÙØªÙ‡ Ø¨ÙˆØ§Ø³Ø·Ø© JavaScript -->
+            <!-- محتوى الجوائز اليومية سيتم إضافته بواسطة JavaScript -->
         </div>
 
-        <!-- Ø­Ø§ÙˆÙŠØ© Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø´Ø§Ù…Ù„Ø© -->
+        <!-- حاوية المعلومات الشاملة -->
         <div class="info-container">
-            <!-- Ø§Ù„Ø¥Ù†Ø¬Ø§Ø²Ø§Øª -->
+            <!-- الإنجازات -->
             <div class="achievements-section">
-                <h3>ðŸ† Ø§Ù„Ø¥Ù†Ø¬Ø§Ø²Ø§Øª</h3>
+                <h3>ðŸ† الإنجازات</h3>
                 <div class="achievements-grid" id="achievements-grid">
-                    <div class="achievement-placeholder">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¥Ù†Ø¬Ø§Ø²Ø§Øª Ø¨Ø¹Ø¯</div>
+                    <div class="achievement-placeholder">لا توجد إنجازات بعد</div>
                 </div>
             </div>
 
-            <!-- Ø§Ù„Ø£ØµØ¯Ù‚Ø§Ø¡ -->
+            <!-- الأصدقاء -->
             <div class="friends-section">
-                <h3>ðŸ‘¥ Ø§Ù„Ø£ØµØ¯Ù‚Ø§Ø¡ <button class="add-friend-btn" onclick="showAddFriendModal()">âž•</button></h3>
+                <h3>ðŸ‘¥ الأصدقاء <button class="add-friend-btn" onclick="showAddFriendModal()">âž•</button></h3>
                 <div class="friends-grid" id="friends-grid">
-                    <div class="friends-placeholder">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø£ØµØ¯Ù‚Ø§Ø¡ Ø¨Ø¹Ø¯</div>
+                    <div class="friends-placeholder">لا توجد أصدقاء بعد</div>
                 </div>
             </div>
         </div>
 
-        <!-- Ø£Ø²Ø±Ø§Ø± Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª -->
+        <!-- أزرار الإجراءات -->
         <div class="action-buttons">
-            <button class="btn primary" data-action="playGame">ðŸŽ® Ø§Ù„Ø¹Ø¨ Ø§Ù„Ø¢Ù†</button>
-            <button class="btn secondary" data-action="privateChat">ðŸ’¬ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø© Ø§Ù„Ø®Ø§ØµØ©</button>
+            <button class="btn primary" data-action="playGame">ðŸŽ® اللعب الآن</button>
+            <button class="btn secondary" data-action="privateChat">ðŸ’¬ المحادثة الخاصة</button>
         </div>
     </div>
 
-    <!-- Modal Ù„ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„ØµÙˆØ±Ø© Ø§Ù„Ø´Ø®ØµÙŠØ© -->
+    <!-- Modal لتعديل الصورة الشخصية -->
+    <!-- Modal Ù„ØªØ¹Ø¯ÙŠÙ„ الصورة الشخصية -->
     <div id="avatarModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeAvatarModal()">&times;</span>
-            <h3>ØªØºÙŠÙŠØ± Ø§Ù„ØµÙˆØ±Ø© Ø§Ù„Ø´Ø®ØµÙŠØ©</h3>
+            <h3>ØªØºÙŠÙŠØ± الصورة الشخصية</h3>
             <form id="avatarForm" onsubmit="updateAvatar(event)">
                 <div class="form-group">
-                    <label for="avatarFile">Ø§Ø®ØªØ± ØµÙˆØ±Ø©:</label>
+                    <label for="avatarFile">اختر صورة:</label>
                     <input type="file" id="avatarFile" accept="image/*" onchange="previewAvatar(event)" required>
                 </div>
                 <div class="avatar-crop-container">
@@ -104,22 +105,22 @@
                     <div class="crop-controls" id="cropControls" style="display: none;">
                         <button type="button" onclick="adjustCrop('zoom-in')" class="btn secondary">ðŸ”+ ØªÙƒØ¨ÙŠØ±</button>
                         <button type="button" onclick="adjustCrop('zoom-out')" class="btn secondary">ðŸ”- ØªØµØºÙŠØ±</button>
-                        <button type="button" onclick="resetCrop()" class="btn secondary">ðŸ”„ Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ†</button>
+                        <button type="button" onclick="resetCrop()" class="btn secondary">ðŸ”„ إعادة تعيين</button>
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn primary">ðŸ’¾ Ø­ÙØ¸</button>
-                    <button type="button" onclick="closeAvatarModal()" class="btn secondary">âŒ Ø¥Ù„ØºØ§Ø¡</button>
+                    <button type="submit" class="btn primary">ðŸ’¾ حفظ</button>
+                    <button type="button" onclick="closeAvatarModal()" class="btn secondary">âŒ إلغاء</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Ù„ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ø¨Ø±ÙˆÙØ§ÙŠÙ„ -->
+    <!-- Modal Ù„ØªØ¹Ø¯ÙŠÙ„ البروفايل -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeProfileModal()">&times;</span>
-            <h3>ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ø¨Ø±ÙˆÙØ§ÙŠÙ„</h3>
+            <h3>ØªØ¹Ø¯ÙŠÙ„ البروفايل</h3>
             <form id="profileForm" onsubmit="updateProfile(event)">
                 <div class="form-group">
                     <label for="displayName">Ø§Ù„Ø§Ø³Ù… Ø§Ù„Ù…Ø¹Ø±ÙˆØ¶:</label>
@@ -128,20 +129,20 @@
                 <div class="form-group">
                     <label for="genderSelect">Ø§Ù„Ø¬Ù†Ø³:</label>
                     <select id="genderSelect">
-                        <option value="prefer-not-to-say">Ø£ÙØ¶Ù„ Ø¹Ø¯Ù… Ø§Ù„Ø¥ÙØµØ§Ø­</option>
-                        <option value="male">Ø°ÙƒØ±</option>
-                        <option value="female">Ø£Ù†Ø«Ù‰</option>
+                        <option value="prefer-not-to-say">أفضل عدم الإفصاح</option>
+                        <option value="male">ذكر</option>
+                        <option value="female">أنثى</option>
                     </select>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn primary">ðŸ’¾ Ø­ÙØ¸</button>
-                    <button type="button" onclick="closeProfileModal()" class="btn secondary">âŒ Ø¥Ù„ØºØ§Ø¡</button>
+                    <button type="submit" class="btn primary">ðŸ’¾ حفظ</button>
+                    <button type="button" onclick="closeProfileModal()" class="btn secondary">âŒ إلغاء</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Ù†Ø§ÙØ°Ø© Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø© Ø§Ù„Ø®Ø§ØµØ© -->
+    <!-- Ù†Ø§ÙØ°Ø© المحادثة الخاصة -->
     <div id="privateChatModal" class="modal">
         <div class="modal-content" style="max-width: 350px;">
             <span class="close" onclick="closePrivateChat()">&times;</span>
@@ -149,12 +150,12 @@
             <div id="privateChatMessages" class="private-chat-messages"></div>
             <form id="privateChatForm" onsubmit="sendPrivateMessage(event)">
                 <input type="text" id="privateChatInput" placeholder="Ø§ÙƒØªØ¨ Ø±Ø³Ø§Ù„ØªÙƒ..." autocomplete="off" required style="width: 100%; margin-top: 10px; padding: 8px; border-radius: 8px; border: 1px solid #ccc;">
-                <button type="submit" class="btn primary" style="width: 100%; margin-top: 8px;">Ø¥Ø±Ø³Ø§Ù„</button>
+                <button type="submit" class="btn primary" style="width: 100%; margin-top: 8px;">إرسال</button>
             </form>
         </div>
     </div>
 
-    <!-- ÙˆØ§Ø¬Ù‡Ø© Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø© Ø§Ù„Ø®Ø§ØµØ© Ø§Ù„Ø­Ø¯ÙŠØ«Ø© -->
+    <!-- ÙˆØ§Ø¬Ù‡Ø© المحادثة الخاصة Ø§Ù„Ø­Ø¯ÙŠØ«Ø© -->
     <div class="chat-container" id="chatContainer">
         <div class="chat-sidebar" id="chatSidebar">
             <div class="chat-sidebar-header">
@@ -166,7 +167,7 @@
         </div>
         <div class="chat-main" id="chatMain">
             <div class="chat-header" id="chatHeader">
-                <span id="chatWithName">Ø§Ø®ØªØ± ØµØ¯ÙŠÙ‚Ø§Ù‹ Ù„Ø¨Ø¯Ø¡ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø©</span>
+                <span id="chatWithName">اختر صديقاً لبدء المحادثة</span>
                 <span class="chat-status" id="chatStatus"></span>
                 <button class="sound-toggle-btn" id="soundToggleBtn" title="Ø¥ÙŠÙ‚Ø§Ù/ØªØ´ØºÙŠÙ„ Ø§Ù„ØµÙˆØª">ðŸ”Š</button>
             </div>
@@ -175,7 +176,7 @@
             </div>
             <form class="chat-input-form" id="chatInputForm" style="display: none;">
                 <input type="text" id="chatInput" placeholder="Ø§ÙƒØªØ¨ Ø±Ø³Ø§Ù„ØªÙƒ..." autocomplete="off" required />
-                <button type="submit" class="btn primary">Ø¥Ø±Ø³Ø§Ù„</button>
+                <button type="submit" class="btn primary">إرسال</button>
             </form>
         </div>
     </div>
