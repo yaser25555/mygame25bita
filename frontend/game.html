@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!-- ملف محفوظ بترميز UTF-8 بدون BOM -->
 <html lang="ar" dir="rtl">
 <head>
@@ -168,10 +168,10 @@
       </div>
       <div class="top-bar-right">
         <div class="player-info-bar">
-          <span>������ <span id="username-display">جاري التحميل...</span></span>
-          <span>| ������ <span id="user-id-display">-</span></span>
-          <span>| ������ <span id="balance-display">0</span></span>
-          <span>| ������ <span id="pearl-balance">0</span></span>
+          <span>������ <span id="username-display">جاري التحميل...</span></span>
+          <span>| ������ <span id="user-id-display">-</span></span>
+          <span>| ������ <span id="balance-display">0</span></span>
+          <span>| ������ <span id="pearl-balance">0</span></span>
         </div>
       </div>
     </div>
@@ -179,18 +179,39 @@
     <!-- منطقة اللعبة الرئيسية -->
     <div class="game-main-area">
       <div class="game-center">
-        <!-- شاشة البداية -->
-        <div id="startScreen" class="game-overlay">
-          <button id="startButton" class="start-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-        </div>
-        <!-- شاشة انتهاء اللعبة -->
-        <div id="gameOverScreen" class="game-overlay" style="display: none;">
-          <h2>انتهت اللعبة</h2>
-          <p>النتيجة: <span id="finalScore">0</span></p>
-          <button id="restartButton">أعد اللعب</button>
-          <button id="menuButton">القائمة الرئيسية</button>
+        <!-- عنوان الصفحة -->
+        <h1 class="game-title-main">INFINITY kingdom of luck</h1>
+        <!-- شبكة 9 حاويات بتصميم عصري تملأ الصفحة تقريباً -->
+        <div class="container-grid nine-boxes">
+          <!-- المربع 1: بروفايل -->
+          <div class="box" id="profileBox" title="الملف الشخصي" onclick="window.location.href='profile.html'">
+            <img src="images/default-avatar.png" alt="Profile" class="box-icon profile-avatar" style="width:48px;height:48px;border-radius:50%;margin-bottom:6px;">
+            <div class="box-label">بروفايلي</div>
+          </div>
+          <!-- المربع 2: المحادثة الصوتية -->
+          <div class="box" id="voiceChatBox" title="غرفة المحادثة الصوتية" onclick="window.location.href='voice-chat-room.html'">
+            <svg class="box-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" style="margin-bottom:6px;">
+              <circle cx="12" cy="12" r="10" fill="#facc15"/>
+              <path d="M9 9v6a3 3 0 0 0 6 0V9a3 3 0 0 0-6 0z" fill="#1e3a8a"/>
+              <rect x="10.5" y="17" width="3" height="2" rx="1" fill="#1e3a8a"/>
+            </svg>
+            <div class="box-label">صوتية</div>
+          </div>
+          <!-- المربع 3: بدء اللعبة -->
+          <div class="box" id="startGameBox" title="بدء اللعبة" onclick="startGame()">
+            <svg class="box-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" style="margin-bottom:6px;">
+              <circle cx="12" cy="12" r="10" fill="#7fbcff"/>
+              <polygon points="10,8 17,12 10,16" fill="#fff"/>
+            </svg>
+            <div class="box-label">ابدأ</div>
+          </div>
+          <!-- المربعات المتبقية فارغة أو للاستخدام لاحقاً -->
+          <div class="box"></div>
+          <div class="box"></div>
+          <div class="box"></div>
+          <div class="box"></div>
+          <div class="box"></div>
+          <div class="box"></div>
         </div>
         <!-- الكانفس -->
         <canvas id="gameCanvas" width="800" height="600" style="display: none;"></canvas>
@@ -219,7 +240,7 @@
     <div class="item-info-modal" id="itemInfoModal">
         <div class="item-info-content">
             <div class="item-info-header">
-                <h2 class="item-info-title">������ دليل العناصر</h2>
+                <h2 class="item-info-title">������ دليل العناصر</h2>
                 <button class="item-info-close" id="itemInfoClose">
                     <i class="fas fa-times"></i>
                 </button>

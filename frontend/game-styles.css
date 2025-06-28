@@ -1,4 +1,4 @@
-﻿/* تنسيقات أساسية */
+/* تنسيقات أساسية */
 * {
     margin: 0;
     padding: 0;
@@ -282,39 +282,90 @@ body::before {
 }
 
 /* شبكة الصناديق */
-.boxes-grid {
+.container-grid.nine-boxes {
+    width: 100vw;
+    height: calc(100vh - 130px); /* 130px تقريباً = شريط علوي + عنوان */
+    max-width: 100vw;
+    max-height: calc(100vh - 130px);
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-    max-width: 500px;
-    margin: 20px 0;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2vw;
+    padding: 0 2vw 2vw 2vw;
+    margin: 0 auto;
+    box-sizing: border-box;
+    align-items: stretch;
+    justify-items: stretch;
 }
 
-.box {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-    border-radius: 15px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 3px solid transparent;
-    position: relative;
-    overflow: hidden;
-    font-size: 2em;
-    min-height: 80px;
+.container-grid.nine-boxes .box {
+    font-size: 1.15em;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+    min-height: 0;
+    min-width: 0;
+    cursor: pointer;
+    padding: 10px 0 2px 0;
 }
 
-.box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+.box-icon {
+    display: block;
+    margin: 0 auto 6px auto;
+    box-shadow: 0 2px 8px #7fbcff33;
+    transition: transform 0.18s;
 }
 
-.box.opened {
-    background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
-    border-color: #00b894;
+#profileBox .profile-avatar {
+    border: 3px solid #7fbcff;
+    box-shadow: 0 2px 12px #7fbcff22;
+    background: #fff;
+}
+
+.box-label {
+    font-size: 1.08em;
+    font-weight: bold;
+    color: #1e3a8a;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-top: 2px;
+}
+
+#profileBox:hover .profile-avatar,
+#voiceChatBox:hover .box-icon,
+#startGameBox:hover .box-icon {
+    transform: scale(1.13) rotate(-4deg);
+    box-shadow: 0 6px 24px #facc1533;
+}
+
+#voiceChatBox .box-label {
+    color: #facc15;
+}
+#startGameBox .box-label {
+    color: #0077cc;
+}
+
+@media (max-width: 700px) {
+    .container-grid.nine-boxes .box {
+        font-size: 0.92em;
+        padding: 6px 0 0 0;
+    }
+    .box-label {
+        font-size: 0.98em;
+    }
+    .box-icon {
+        width: 34px !important;
+        height: 34px !important;
+    }
+    #profileBox .profile-avatar {
+        width: 38px !important;
+        height: 38px !important;
+    }
 }
 
 /* عمود معلومات المستخدم والمحادثة */
