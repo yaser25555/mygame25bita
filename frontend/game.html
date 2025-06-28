@@ -1,12 +1,137 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INFINITY kingdom of luck</title>
-    <style>
-        body {
-            min-height: 100vh;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INFINITY kingdom of luck</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Cairo', 'Noto Naskh Arabic', sans-serif;
+      background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+    .game-title {
+      text-align: center;
+      margin: 32px 0 18px 0;
+      font-size: 2.4em;
+      font-weight: bold;
+      color: #fff;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 16px #7c3aed77, 0 1px 2px #0001;
+      user-select: none;
+    }
+    .container-grid {
+      flex: 1 1 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 14px;
+      width: 96vw;
+      max-width: 500px;
+      height: 100%;
+      margin: 0 auto 24px auto;
+      align-items: stretch;
+      justify-items: stretch;
+      background: rgba(255,255,255,0.01);
+      border-radius: 18px;
+      box-shadow: 0 4px 32px 0 #7c3aed22;
+      padding: 8px;
+    }
+    .game-box {
+      background: linear-gradient(135deg, #14532d 90%, #166534 100%);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px 0 #14532d33, 0 1.5px 0.5px 0 #fff1 inset;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25em;
+      font-weight: 500;
+      color: #fff;
+      transition: box-shadow 0.18s, transform 0.18s;
+      border: 1.5px solid #166534;
+      min-height: 70px;
+      min-width: 70px;
+      cursor: pointer;
+    }
+    .game-box:active, .game-box:hover {
+      box-shadow: 0 6px 24px 0 #16653455, 0 2px 1px 0 #fff6 inset;
+      transform: scale(0.97);
+    }
+    /* لودو بخلفية داكنة */
+    .game-box.ludo {
+      background: linear-gradient(135deg, #21243a 85%, #2d3748 100%);
+      color: #fff;
+    }
+    @media (max-width: 700px) {
+      .container-grid { max-width: 99vw; gap: 7px; padding: 3vw; }
+      .game-title { font-size: 1.3em; margin-top: 18px; margin-bottom: 12px; }
+      .game-box { font-size: 1em; min-height: 54px; min-width: 54px; }
+    }
+    @media (max-width: 400px) {
+      .container-grid { padding: 1vw; }
+      .game-title { font-size: 1em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-title">INFINITY kingdom of luck</div>
+  <div class="container-grid">
+    <!-- 1: بروفايل -->
+    <div class="game-box" onclick="window.location.href='profile.html'" title="الملف الشخصي">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="22" cy="22" r="20" fill="#fff" stroke="#16a34a" stroke-width="2"/>
+        <circle cx="22" cy="18" r="7" fill="#39d98a"/>
+        <ellipse cx="22" cy="31" rx="11" ry="7" fill="#39d98a"/>
+      </svg>
+      <div style="font-size:1em;margin-top:6px;color:#fff;">بروفايلي</div>
+    </div>
+    <!-- 2: محادثة صوتية -->
+    <div class="game-box" onclick="window.location.href='voice-chat-room.html'" title="غرفة المحادثة الصوتية">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" fill="#fff" stroke="#16a34a" stroke-width="2"/>
+        <path d="M9 9v6a3 3 0 0 0 6 0V9a3 3 0 0 0-6 0z" fill="#16a34a"/>
+        <rect x="10.5" y="17" width="3" height="2" rx="1" fill="#16a34a"/>
+      </svg>
+      <div style="font-size:1em;margin-top:6px;color:#fff;">محادثة صوتية</div>
+    </div>
+    <!-- 3: فارغة -->
+    <div class="game-box"></div>
+    <!-- 4: لودو -->
+    <div class="game-box ludo" onclick="window.location.href='ludo.html'" title="لعبة لودو">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="8" width="48" height="48" rx="12" fill="#fff" stroke="#1e3a8a" stroke-width="3"/>
+        <circle cx="20" cy="20" r="6" fill="#e63946" stroke="#1e3a8a" stroke-width="2"/>
+        <circle cx="44" cy="20" r="6" fill="#f1c40f" stroke="#1e3a8a" stroke-width="2"/>
+        <circle cx="20" cy="44" r="6" fill="#2ecc71" stroke="#1e3a8a" stroke-width="2"/>
+        <circle cx="44" cy="44" r="6" fill="#3498db" stroke="#1e3a8a" stroke-width="2"/>
+        <rect x="30" y="30" width="4" height="4" rx="2" fill="#1e3a8a"/>
+      </svg>
+      <div style="font-size:1em;margin-top:6px;">لودو</div>
+    </div>
+    <!-- 5: فارغة -->
+    <div class="game-box"></div>
+    <!-- 6: فارغة -->
+    <div class="game-box"></div>
+    <!-- 7: فارغة -->
+    <div class="game-box"></div>
+    <!-- 8: فارغة -->
+    <div class="game-box"></div>
+    <!-- 9: فارغة -->
+    <div class="game-box"></div>
+  </div>
+</body>
+</html>
             margin: 0;
             padding: 0;
             box-sizing: border-box;
