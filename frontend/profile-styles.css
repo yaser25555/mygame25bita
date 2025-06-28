@@ -163,7 +163,7 @@ body {
 
 /* حالة الدرع */
 .shield-status {
-  background: white;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
@@ -176,7 +176,7 @@ body {
 
 /* الدرع غير الفعال */
 .shield-status.inactive {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border: 2px dashed #dee2e6;
   opacity: 0.7;
 }
@@ -230,11 +230,12 @@ body {
 
 /* حاوية المعلومات الشاملة */
 .info-container {
-  background: white;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
 }
 
 /* الإنجازات */
@@ -256,11 +257,11 @@ body {
 }
 
 .achievement-item {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-radius: 8px;
   padding: 12px;
   text-align: center;
-  border: 2px solid #e9ecef;
+  border: 2px solid #dee2e6;
   transition: all 0.3s ease;
 }
 
@@ -304,17 +305,18 @@ body {
 }
 
 .stat-item {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-radius: 8px;
   padding: 12px;
   text-align: center;
-  border: 2px solid #e9ecef;
+  border: 2px solid #dee2e6;
   transition: all 0.3s ease;
 }
 
 .stat-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #e9ecef, #dee2e6);
 }
 
 .stat-icon {
@@ -394,13 +396,13 @@ body {
 }
 
 .btn.secondary {
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   color: #333;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #dee2e6;
 }
 
 .btn.secondary:hover {
-  background: #e0e0e0;
+  background: linear-gradient(135deg, #e9ecef, #dee2e6);
   transform: translateY(-2px);
 }
 
@@ -418,7 +420,7 @@ body {
 }
 
 .modal-content {
-  background-color: white;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   margin: 5% auto;
   padding: 20px;
   border-radius: 16px;
@@ -426,6 +428,7 @@ body {
   max-width: 400px;
   position: relative;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid #dee2e6;
 }
 
 .close {
@@ -466,16 +469,18 @@ body {
 .form-group select {
   width: 100%;
   padding: 10px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #dee2e6;
   border-radius: 8px;
   font-size: 0.9rem;
   transition: border-color 0.3s ease;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
   border-color: #667eea;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
 }
 
 .avatar-preview {
