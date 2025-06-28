@@ -16,7 +16,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
 
         .container {
@@ -36,39 +36,40 @@
         }
 
         .header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
         }
 
         .header p {
             opacity: 0.9;
+            font-size: 0.9rem;
         }
 
         .content {
-            padding: 30px;
+            padding: 20px;
         }
 
         .search-section {
             background: #f8f9fa;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .search-row {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
         .search-input {
             flex: 1;
-            min-width: 200px;
-            padding: 12px;
+            min-width: 150px;
+            padding: 10px;
             border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .search-input:focus {
@@ -77,13 +78,14 @@
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 10px 16px;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .btn-primary {
@@ -125,97 +127,105 @@
 
         .users-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
         }
 
         .user-card {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border: 2px solid #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
             transition: all 0.3s ease;
         }
 
         .user-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
             border-color: #667eea;
         }
 
         .user-header {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f3f4;
         }
 
         .user-avatar {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #667eea;
+            border: 2px solid #667eea;
         }
 
         .user-info h3 {
             color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
+            font-size: 1rem;
         }
 
         .user-id {
             color: #667eea;
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 0.9rem;
         }
 
         .images-section {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .image-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding: 10px;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 8px;
             background: #f8f9fa;
-            border-radius: 8px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
         }
 
         .image-preview {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
             object-fit: cover;
-            border: 2px solid #ddd;
+            border: 1px solid #ddd;
         }
 
         .image-info {
             flex: 1;
+            min-width: 0;
         }
 
         .image-type {
             font-weight: bold;
             color: #333;
             margin-bottom: 2px;
+            font-size: 0.85rem;
         }
 
         .image-status {
-            font-size: 0.9em;
+            font-size: 0.75rem;
             color: #666;
         }
 
         .image-actions {
             display: flex;
-            gap: 8px;
+            gap: 5px;
+            flex-wrap: wrap;
         }
 
         .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
         }
 
         .modal {
@@ -231,19 +241,19 @@
 
         .modal-content {
             background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 12px;
             width: 90%;
-            max-width: 500px;
+            max-width: 400px;
             position: relative;
         }
 
         .close {
             position: absolute;
-            top: 15px;
-            left: 20px;
-            font-size: 28px;
+            top: 10px;
+            left: 15px;
+            font-size: 24px;
             font-weight: bold;
             cursor: pointer;
             color: #aaa;
@@ -254,23 +264,24 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: bold;
             color: #333;
+            font-size: 0.9rem;
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 6px;
+            font-size: 14px;
         }
 
         .form-group input:focus,
@@ -293,12 +304,13 @@
 
         .file-input-label {
             display: inline-block;
-            padding: 12px 20px;
+            padding: 10px 16px;
             background: #667eea;
             color: white;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: background 0.3s ease;
+            font-size: 0.9rem;
         }
 
         .file-input-label:hover {
@@ -307,16 +319,17 @@
 
         .image-preview-large {
             max-width: 100%;
-            max-height: 200px;
-            border-radius: 8px;
-            margin-top: 10px;
+            max-height: 150px;
+            border-radius: 6px;
+            margin-top: 8px;
             display: none;
         }
 
         .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
         }
 
         .alert-success {
@@ -333,13 +346,13 @@
 
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: #666;
         }
 
         .no-data {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: #666;
             font-style: italic;
         }
@@ -347,16 +360,18 @@
         .pagination {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-top: 30px;
+            gap: 8px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .pagination button {
-            padding: 8px 16px;
+            padding: 6px 12px;
             border: 1px solid #ddd;
             background: white;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 4px;
+            font-size: 0.9rem;
         }
 
         .pagination button.active {
@@ -369,17 +384,74 @@
             background: #f8f9fa;
         }
 
+        /* تحسينات للجوال */
         @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
             .search-row {
                 flex-direction: column;
             }
             
+            .search-input {
+                min-width: auto;
+            }
+            
             .users-grid {
                 grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .user-card {
+                padding: 12px;
             }
             
             .image-actions {
                 flex-direction: column;
+                gap: 3px;
+            }
+            
+            .btn-small {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .modal-content {
+                margin: 5% auto;
+                padding: 15px;
+                width: 95%;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+            
+            .image-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+            
+            .image-actions {
+                justify-content: center;
+                flex-direction: row;
             }
         }
     </style>
@@ -399,10 +471,6 @@
                     <button onclick="searchUsers()" class="btn btn-primary">🔍 بحث</button>
                     <button onclick="loadUsers()" class="btn btn-success">🔄 تحديث</button>
                 </div>
-                <div class="search-row">
-                    <input type="number" id="userIdSearch" class="search-input" placeholder="البحث برقم المعرف...">
-                    <button onclick="findUserById()" class="btn btn-primary">🔍 بحث بالمعرف</button>
-                </div>
             </div>
 
             <!-- رسائل التنبيه -->
@@ -410,52 +478,45 @@
 
             <!-- قائمة المستخدمين -->
             <div id="usersContainer">
-                <div class="loading">جاري تحميل المستخدمين...</div>
+                <div class="loading">جاري التحميل...</div>
             </div>
 
-            <!-- ترقيم الصفحات -->
-            <div id="pagination" class="pagination"></div>
+            <!-- التصفح -->
+            <div id="paginationContainer" class="pagination" style="display: none;"></div>
         </div>
     </div>
 
-    <!-- نافذة إدارة الصور -->
-    <div id="manageImagesModal" class="modal">
+    <!-- Modal لإدارة الصور -->
+    <div id="imageModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <h2>إدارة صور المستخدم</h2>
-            <div id="modalAlert"></div>
+            <h3 id="modalTitle">إدارة الصور</h3>
             
-            <div id="userImagesInfo">
-                <!-- معلومات صور المستخدم ستظهر هنا -->
-            </div>
-
-            <form id="manageImagesForm">
+            <form id="imageForm" onsubmit="handleImageManagement(event)">
                 <div class="form-group">
-                    <label>نوع الصورة:</label>
-                    <select id="imageType" required>
-                        <option value="">اختر نوع الصورة</option>
+                    <label for="imageAction">الإجراء:</label>
+                    <select id="imageAction" required>
+                        <option value="">اختر الإجراء</option>
+                        <option value="remove_avatar">حذف الصورة الشخصية</option>
+                        <option value="remove_profile_image">حذف صورة البروفايل</option>
+                        <option value="remove_cover_image">حذف صورة الغلاف</option>
                         <option value="change_avatar">تغيير الصورة الشخصية</option>
                         <option value="change_profile_image">تغيير صورة البروفايل</option>
                         <option value="change_cover_image">تغيير صورة الغلاف</option>
-                        <option value="remove_avatar">مسح الصورة الشخصية</option>
-                        <option value="remove_profile_image">مسح صورة البروفايل</option>
-                        <option value="remove_cover_image">مسح صورة الغلاف</option>
                     </select>
                 </div>
 
-                <div id="imageUploadSection" style="display: none;">
-                    <div class="form-group">
-                        <label>اختر الصورة الجديدة:</label>
-                        <div class="file-input">
-                            <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
-                            <label for="imageFile" class="file-input-label">📁 اختيار صورة</label>
-                        </div>
-                        <img id="imagePreview" class="image-preview-large" alt="معاينة الصورة">
+                <div id="fileInputGroup" class="form-group" style="display: none;">
+                    <label for="imageFile">اختر الصورة:</label>
+                    <div class="file-input">
+                        <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
+                        <label for="imageFile" class="file-input-label">📁 اختيار ملف</label>
                     </div>
+                    <img id="imagePreview" class="image-preview-large" alt="معاينة الصورة">
                 </div>
 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-success">💾 حفظ التغييرات</button>
+                    <button type="submit" class="btn btn-primary">💾 حفظ التغييرات</button>
                     <button type="button" onclick="closeModal()" class="btn btn-danger">❌ إلغاء</button>
                 </div>
             </form>
@@ -463,66 +524,52 @@
     </div>
 
     <script>
-        const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+        const BACKEND_URL = 'https://mygame25bita-7eqw.onrender.com';
         let currentPage = 1;
         let currentSearch = '';
-        let currentUser = null;
+        let selectedUserId = null;
 
-        // تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
+        // تحميل المستخدمين عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
             loadUsers();
-            setupEventListeners();
         });
 
-        // إعداد مستمعي الأحداث
-        function setupEventListeners() {
-            // مستمع لتغيير نوع الصورة
-            document.getElementById('imageType').addEventListener('change', function() {
-                const uploadSection = document.getElementById('imageUploadSection');
-                const isChangeAction = this.value.startsWith('change_');
-                uploadSection.style.display = isChangeAction ? 'block' : 'none';
-            });
-
-            // مستمع لنموذج إدارة الصور
-            document.getElementById('manageImagesForm').addEventListener('submit', handleImageManagement);
-        }
-
-        // التحقق من المصادقة
-        function checkAuth() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                showAlert('يجب تسجيل الدخول أولاً', 'error');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
-                return;
-            }
-        }
-
         // تحميل المستخدمين
-        async function loadUsers(page = 1) {
+        async function loadUsers(page = 1, search = '') {
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${BACKEND_URL}/api/users/admin/users-with-ids?page=${page}&limit=12&search=${currentSearch}`, {
+                const token = localStorage.getItem('adminToken');
+                if (!token) {
+                    showAlert('يجب تسجيل الدخول كمدير', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${BACKEND_URL}/api/users/admin/users-with-ids?page=${page}&limit=12&search=${search}`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
                 });
 
                 if (!response.ok) {
-                    throw new Error('فشل في تحميل المستخدمين');
+                    throw new Error('فشل في جلب المستخدمين');
                 }
 
                 const data = await response.json();
                 displayUsers(data.users);
-                displayPagination(data.page, data.totalPages);
-                currentPage = data.page;
-
+                displayPagination(data.pagination);
+                
             } catch (error) {
                 console.error('خطأ في تحميل المستخدمين:', error);
                 showAlert('خطأ في تحميل المستخدمين', 'error');
             }
+        }
+
+        // البحث عن المستخدمين
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            currentSearch = searchTerm;
+            currentPage = 1;
+            loadUsers(currentPage, searchTerm);
         }
 
         // عرض المستخدمين
@@ -537,48 +584,49 @@
             const usersHTML = users.map(user => `
                 <div class="user-card">
                     <div class="user-header">
-                        <img src="${user.profile?.avatar || 'images/default-avatar.png'}" alt="${user.username}" class="user-avatar">
+                        <img src="${user.avatar || 'images/default-avatar.png'}" alt="صورة المستخدم" class="user-avatar">
                         <div class="user-info">
-                            <h3>${user.profile?.displayName || user.username}</h3>
-                            <div class="user-id">المعرف: ${user.userId}</div>
+                            <h3>${user.displayName || user.username}</h3>
+                            <div class="user-id">ID: ${user.userId}</div>
                         </div>
                     </div>
                     
                     <div class="images-section">
-                        <h4>الصور الحالية:</h4>
-                        
                         <div class="image-item">
-                            <img src="${user.profile?.avatar || 'images/default-avatar.png'}" alt="الصورة الشخصية" class="image-preview">
+                            <img src="${user.avatar || 'images/default-avatar.png'}" alt="الصورة الشخصية" class="image-preview">
                             <div class="image-info">
                                 <div class="image-type">الصورة الشخصية</div>
-                                <div class="image-status">${user.profile?.avatar ? 'مُعيّنة' : 'افتراضية'}</div>
+                                <div class="image-status">${user.avatar ? 'موجودة' : 'غير موجودة'}</div>
                             </div>
                             <div class="image-actions">
-                                <button onclick="manageUserImages('${user._id}', '${user.username}', ${user.userId})" class="btn btn-primary btn-small">
-                                    🖼️ إدارة
-                                </button>
+                                <button onclick="manageImage(${user.userId}, 'remove_avatar')" class="btn btn-danger btn-small">🗑️ حذف</button>
+                                <button onclick="manageImage(${user.userId}, 'change_avatar')" class="btn btn-warning btn-small">✏️ تغيير</button>
                             </div>
                         </div>
                         
-                        ${user.profile?.profileImage ? `
                         <div class="image-item">
-                            <img src="${user.profile.profileImage}" alt="صورة البروفايل" class="image-preview">
+                            <img src="${user.profileImage || 'images/default-cover.jpg'}" alt="صورة البروفايل" class="image-preview">
                             <div class="image-info">
                                 <div class="image-type">صورة البروفايل</div>
-                                <div class="image-status">مُعيّنة</div>
+                                <div class="image-status">${user.profileImage ? 'موجودة' : 'غير موجودة'}</div>
+                            </div>
+                            <div class="image-actions">
+                                <button onclick="manageImage(${user.userId}, 'remove_profile_image')" class="btn btn-danger btn-small">🗑️ حذف</button>
+                                <button onclick="manageImage(${user.userId}, 'change_profile_image')" class="btn btn-warning btn-small">✏️ تغيير</button>
                             </div>
                         </div>
-                        ` : ''}
                         
-                        ${user.profile?.coverImage ? `
                         <div class="image-item">
-                            <img src="${user.profile.coverImage}" alt="صورة الغلاف" class="image-preview">
+                            <img src="${user.coverImage || 'images/default-cover.jpg'}" alt="صورة الغلاف" class="image-preview">
                             <div class="image-info">
                                 <div class="image-type">صورة الغلاف</div>
-                                <div class="image-status">مُعيّنة</div>
+                                <div class="image-status">${user.coverImage ? 'موجودة' : 'غير موجودة'}</div>
+                            </div>
+                            <div class="image-actions">
+                                <button onclick="manageImage(${user.userId}, 'remove_cover_image')" class="btn btn-danger btn-small">🗑️ حذف</button>
+                                <button onclick="manageImage(${user.userId}, 'change_cover_image')" class="btn btn-warning btn-small">✏️ تغيير</button>
                             </div>
                         </div>
-                        ` : ''}
                     </div>
                 </div>
             `).join('');
@@ -586,152 +634,61 @@
             container.innerHTML = usersHTML;
         }
 
-        // عرض ترقيم الصفحات
-        function displayPagination(currentPage, totalPages) {
-            const pagination = document.getElementById('pagination');
+        // عرض التصفح
+        function displayPagination(pagination) {
+            const container = document.getElementById('paginationContainer');
             
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
+            if (!pagination || pagination.totalPages <= 1) {
+                container.style.display = 'none';
                 return;
             }
 
-            let buttons = '';
+            let paginationHTML = '';
             
-            if (currentPage > 1) {
-                buttons += `<button onclick="loadUsers(${currentPage - 1})">السابق</button>`;
+            if (pagination.hasPrevPage) {
+                paginationHTML += `<button onclick="loadUsers(${pagination.currentPage - 1}, '${currentSearch}')">السابق</button>`;
             }
-
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === currentPage) {
-                    buttons += `<button class="active">${i}</button>`;
+            
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                if (i === pagination.currentPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
                 } else {
-                    buttons += `<button onclick="loadUsers(${i})">${i}</button>`;
+                    paginationHTML += `<button onclick="loadUsers(${i}, '${currentSearch}')">${i}</button>`;
                 }
             }
-
-            if (currentPage < totalPages) {
-                buttons += `<button onclick="loadUsers(${currentPage + 1})">التالي</button>`;
-            }
-
-            pagination.innerHTML = buttons;
-        }
-
-        // البحث عن المستخدمين
-        function searchUsers() {
-            currentSearch = document.getElementById('searchInput').value;
-            loadUsers(1);
-        }
-
-        // البحث عن مستخدم برقم المعرف
-        async function findUserById() {
-            const userId = document.getElementById('userIdSearch').value;
-            if (!userId) {
-                showAlert('يرجى إدخال رقم المعرف', 'error');
-                return;
-            }
-
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${BACKEND_URL}/api/users/admin/find-user-by-id/${userId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('المستخدم غير موجود');
-                }
-
-                const data = await response.json();
-                displayUsers([data.user]);
-
-            } catch (error) {
-                console.error('خطأ في البحث:', error);
-                showAlert('المستخدم غير موجود', 'error');
-            }
-        }
-
-        // إدارة صور المستخدم
-        async function manageUserImages(userId, username, userNumId) {
-            currentUser = { id: userId, username, userId: userNumId };
             
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${BACKEND_URL}/api/users/admin/user-images/${userNumId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('فشل في جلب معلومات الصور');
-                }
-
-                const data = await response.json();
-                displayUserImagesInfo(data.user);
-                openModal();
-
-            } catch (error) {
-                console.error('خطأ في جلب معلومات الصور:', error);
-                showAlert('خطأ في جلب معلومات الصور', 'error');
+            if (pagination.hasNextPage) {
+                paginationHTML += `<button onclick="loadUsers(${pagination.currentPage + 1}, '${currentSearch}')">التالي</button>`;
             }
-        }
-
-        // عرض معلومات صور المستخدم
-        function displayUserImagesInfo(user) {
-            const container = document.getElementById('userImagesInfo');
             
-            container.innerHTML = `
-                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                    <h3>المستخدم: ${user.username}</h3>
-                    <p>المعرف: ${user.userId}</p>
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <h4>الصور الحالية:</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 10px;">
-                        <div style="text-align: center;">
-                            <img src="${user.images.avatar || 'images/default-avatar.png'}" alt="الصورة الشخصية" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
-                            <p style="margin-top: 5px; font-size: 0.9em;">الصورة الشخصية</p>
-                        </div>
-                        ${user.images.profileImage ? `
-                        <div style="text-align: center;">
-                            <img src="${user.images.profileImage}" alt="صورة البروفايل" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid #ddd;">
-                            <p style="margin-top: 5px; font-size: 0.9em;">صورة البروفايل</p>
-                        </div>
-                        ` : ''}
-                        ${user.images.coverImage ? `
-                        <div style="text-align: center;">
-                            <img src="${user.images.coverImage}" alt="صورة الغلاف" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid #ddd;">
-                            <p style="margin-top: 5px; font-size: 0.9em;">صورة الغلاف</p>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
+            container.innerHTML = paginationHTML;
+            container.style.display = 'flex';
         }
 
-        // فتح النافذة المنبثقة
-        function openModal() {
-            document.getElementById('manageImagesModal').style.display = 'block';
-            document.getElementById('modalAlert').innerHTML = '';
-            document.getElementById('imageType').value = '';
-            document.getElementById('imageUploadSection').style.display = 'none';
-            document.getElementById('imagePreview').style.display = 'none';
-        }
-
-        // إغلاق النافذة المنبثقة
-        function closeModal() {
-            document.getElementById('manageImagesModal').style.display = 'none';
+        // إدارة الصور
+        function manageImage(userId, action) {
+            selectedUserId = userId;
+            document.getElementById('imageAction').value = action;
+            document.getElementById('modalTitle').textContent = `إدارة صور المستخدم ${userId}`;
+            
+            const fileInputGroup = document.getElementById('fileInputGroup');
+            if (action.startsWith('change_')) {
+                fileInputGroup.style.display = 'block';
+            } else {
+                fileInputGroup.style.display = 'none';
+            }
+            
+            document.getElementById('imageModal').style.display = 'block';
         }
 
         // معاينة الصورة
         function previewImage(event) {
             const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const preview = document.getElementById('imagePreview');
                     preview.src = e.target.result;
                     preview.style.display = 'block';
                 };
@@ -740,64 +697,49 @@
         }
 
         // معالجة إدارة الصور
-        async function handleImageManagement(e) {
-            e.preventDefault();
+        async function handleImageManagement(event) {
+            event.preventDefault();
             
-            const action = document.getElementById('imageType').value;
-            if (!action) {
-                showModalAlert('يرجى اختيار نوع الصورة', 'error');
-                return;
-            }
-
             try {
-                const token = localStorage.getItem('token');
-                let requestBody = {
-                    targetUserId: currentUser.id,
-                    action: action
-                };
-
-                // إذا كان الإجراء يتطلب صورة جديدة
-                if (action.startsWith('change_')) {
-                    const fileInput = document.getElementById('imageFile');
-                    if (!fileInput.files[0]) {
-                        showModalAlert('يرجى اختيار صورة', 'error');
-                        return;
-                    }
-
+                const action = document.getElementById('imageAction').value;
+                const fileInput = document.getElementById('imageFile');
+                
+                let imageData = null;
+                let imageType = null;
+                
+                if (action.startsWith('change_') && fileInput.files[0]) {
                     const file = fileInput.files[0];
-                    const imageData = await fileToBase64(file);
-                    const imageType = file.name.split('.').pop();
-
-                    requestBody.imageData = imageData;
-                    requestBody.imageType = imageType;
+                    imageData = await fileToBase64(file);
+                    imageType = file.type;
                 }
-
+                
+                const token = localStorage.getItem('adminToken');
                 const response = await fetch(`${BACKEND_URL}/api/users/admin/manage-user-image`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify({
+                        targetUserId: selectedUserId,
+                        action: action,
+                        imageData: imageData,
+                        imageType: imageType
+                    })
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'فشل في إدارة الصورة');
-                }
-
-                const data = await response.json();
-                showModalAlert(data.message, 'success');
                 
-                // إغلاق النافذة بعد ثانيتين
-                setTimeout(() => {
-                    closeModal();
-                    loadUsers(currentPage);
-                }, 2000);
-
+                if (!response.ok) {
+                    throw new Error('فشل في إدارة الصورة');
+                }
+                
+                const result = await response.json();
+                showAlert(result.message, 'success');
+                closeModal();
+                loadUsers(currentPage, currentSearch);
+                
             } catch (error) {
                 console.error('خطأ في إدارة الصورة:', error);
-                showModalAlert(error.message, 'error');
+                showAlert('خطأ في إدارة الصورة: ' + error.message, 'error');
             }
         }
 
@@ -811,32 +753,36 @@
             });
         }
 
-        // عرض رسالة في النافذة المنبثقة
-        function showModalAlert(message, type) {
-            const alertContainer = document.getElementById('modalAlert');
-            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        // إغلاق Modal
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.getElementById('imageForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+            selectedUserId = null;
         }
 
-        // عرض رسالة عامة
+        // عرض التنبيهات
         function showAlert(message, type) {
-            const alertContainer = document.getElementById('alertContainer');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            alertContainer.appendChild(alert);
-
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            container.appendChild(alertDiv);
+            
             setTimeout(() => {
-                alert.remove();
+                alertDiv.remove();
             }, 5000);
         }
 
-        // إغلاق النافذة عند النقر خارجها
+        // إغلاق Modal عند النقر خارجه
         window.onclick = function(event) {
-            const modal = document.getElementById('manageImagesModal');
+            const modal = document.getElementById('imageModal');
             if (event.target === modal) {
                 closeModal();
             }
         }
     </script>
 </body>
+</html> 
 </html> 
