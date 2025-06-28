@@ -114,7 +114,7 @@ function initGame() {
 function loadAssets() {
     // Load images
     backgroundImage = new Image();
-    backgroundImage.src = 'background_image.jpg';
+    backgroundImage.src = 'images/background11.jpg';
     
     playerImage = new Image();
     playerImage.src = 'hero.png';
@@ -380,12 +380,13 @@ function updateScore() {
 
 // Render Game
 function render() {
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     // Draw background
-    if (backgroundImage.complete) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = '#f5f6fa';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
     
     // Draw player
