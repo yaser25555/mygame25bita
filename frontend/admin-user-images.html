@@ -537,11 +537,18 @@
         // تحميل المستخدمين
         async function loadUsers(page = 1, search = '') {
             try {
-                const token = localStorage.getItem('adminToken');
+                // الحصول على التوكن - جرب adminToken أولاً، ثم token العادي
+                let token = localStorage.getItem('adminToken');
+                if (!token) {
+                    token = localStorage.getItem('token');
+                }
+                
                 if (!token) {
                     showAlert('يجب تسجيل الدخول كمدير', 'error');
                     return;
                 }
+
+                console.log('🔑 تحميل المستخدمين باستخدام التوكن:', token.substring(0, 20) + '...');
 
                 const response = await fetch(`${BACKEND_URL}/api/users/admin/users-with-ids?page=${page}&limit=12&search=${search}`, {
                     headers: {
@@ -550,17 +557,22 @@
                     }
                 });
 
+                console.log('📥 استجابة تحميل المستخدمين:', response.status, response.statusText);
+
                 if (!response.ok) {
-                    throw new Error('فشل في جلب المستخدمين');
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('❌ خطأ في تحميل المستخدمين:', errorData);
+                    throw new Error(errorData.error || `خطأ ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
+                console.log('✅ تم تحميل المستخدمين بنجاح:', data.users.length, 'مستخدم');
                 displayUsers(data.users);
                 displayPagination(data.pagination);
                 
             } catch (error) {
-                console.error('خطأ في تحميل المستخدمين:', error);
-                showAlert('خطأ في تحميل المستخدمين', 'error');
+                console.error('❌ خطأ في تحميل المستخدمين:', error);
+                showAlert('خطأ في تحميل المستخدمين: ' + error.message, 'error');
             }
         }
 
@@ -613,18 +625,6 @@
                             <div class="image-actions">
                                 <button onclick="manageImage(${user.userId}, 'remove_profile_image')" class="btn btn-danger btn-small">🗑️ حذف</button>
                                 <button onclick="manageImage(${user.userId}, 'change_profile_image')" class="btn btn-warning btn-small">✏️ تغيير</button>
-                            </div>
-                        </div>
-                        
-                        <div class="image-item">
-                            <img src="${user.coverImage || 'images/default-cover.jpg'}" alt="صورة الغلاف" class="image-preview">
-                            <div class="image-info">
-                                <div class="image-type">صورة الغلاف</div>
-                                <div class="image-status">${user.coverImage ? 'موجودة' : 'غير موجودة'}</div>
-                            </div>
-                            <div class="image-actions">
-                                <button onclick="manageImage(${user.userId}, 'remove_cover_image')" class="btn btn-danger btn-small">🗑️ حذف</button>
-                                <button onclick="manageImage(${user.userId}, 'change_cover_image')" class="btn btn-warning btn-small">✏️ تغيير</button>
                             </div>
                         </div>
                     </div>
@@ -704,41 +704,64 @@
                 const action = document.getElementById('imageAction').value;
                 const fileInput = document.getElementById('imageFile');
                 
+                console.log('🖼️ بدء إدارة الصورة:', { selectedUserId, action });
+                
                 let imageData = null;
                 let imageType = null;
                 
                 if (action.startsWith('change_') && fileInput.files[0]) {
                     const file = fileInput.files[0];
+                    console.log('📁 ملف محدد:', { name: file.name, type: file.type, size: file.size });
                     imageData = await fileToBase64(file);
                     imageType = file.type;
                 }
                 
-                const token = localStorage.getItem('adminToken');
+                const requestBody = {
+                    targetUserId: selectedUserId,
+                    action: action,
+                    imageData: imageData,
+                    imageType: imageType
+                };
+                
+                console.log('📤 إرسال البيانات:', requestBody);
+                
+                // الحصول على التوكن - جرب adminToken أولاً، ثم token العادي
+                let token = localStorage.getItem('adminToken');
+                if (!token) {
+                    token = localStorage.getItem('token');
+                }
+                
+                if (!token) {
+                    throw new Error('التوكن مفقود - يرجى تسجيل الدخول مرة أخرى');
+                }
+                
+                console.log('🔑 استخدام التوكن:', token.substring(0, 20) + '...');
+                
                 const response = await fetch(`${BACKEND_URL}/api/users/admin/manage-user-image`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        targetUserId: selectedUserId,
-                        action: action,
-                        imageData: imageData,
-                        imageType: imageType
-                    })
+                    body: JSON.stringify(requestBody)
                 });
                 
+                console.log('📥 استجابة الخادم:', response.status, response.statusText);
+                
                 if (!response.ok) {
-                    throw new Error('فشل في إدارة الصورة');
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('❌ خطأ في الخادم:', errorData);
+                    throw new Error(errorData.error || `خطأ ${response.status}: ${response.statusText}`);
                 }
                 
                 const result = await response.json();
+                console.log('✅ نجح الإجراء:', result);
                 showAlert(result.message, 'success');
                 closeModal();
                 loadUsers(currentPage, currentSearch);
                 
             } catch (error) {
-                console.error('خطأ في إدارة الصورة:', error);
+                console.error('❌ خطأ في إدارة الصورة:', error);
                 showAlert('خطأ في إدارة الصورة: ' + error.message, 'error');
             }
         }

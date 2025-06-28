@@ -1378,7 +1378,7 @@ router.get('/admin/users-with-ids', verifyToken, verifyAdmin, async (req, res) =
     }
 
     const users = await User.find(query)
-      .select('userId username email profile.displayName profile.level stats.score createdAt profile.avatar profile.profileImage profile.coverImage')
+      .select('userId username email profile.displayName profile.level stats.score createdAt profile.avatar profile.profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -1395,7 +1395,6 @@ router.get('/admin/users-with-ids', verifyToken, verifyAdmin, async (req, res) =
       score: user.stats?.score || 0,
       avatar: user.profile?.avatar || null,
       profileImage: user.profile?.profileImage || null,
-      coverImage: user.profile?.coverImage || null,
       createdAt: user.createdAt
     }));
 
@@ -1444,8 +1443,7 @@ router.get('/admin/user-images/:userId', verifyToken, verifyAdmin, async (req, r
         username: user.username,
         images: {
           avatar: user.profile?.avatar,
-          profileImage: user.profile?.profileImage,
-          coverImage: user.profile?.coverImage
+          profileImage: user.profile?.profileImage
         }
       }
     });
@@ -1461,19 +1459,38 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
   try {
     const { targetUserId, action, imageData, imageType } = req.body;
 
+    console.log('📝 طلب إدارة الصورة:', { targetUserId, action, imageType });
+
     if (!targetUserId || !action) {
+      console.log('❌ بيانات مفقودة:', { targetUserId, action });
       return res.status(400).json({ error: 'معرف المستخدم والإجراء مطلوبان' });
     }
 
-    // البحث عن المستخدم
-    let user = await User.findOne({ userId: parseInt(targetUserId) });
+    // البحث عن المستخدم - معالجة أنواع البيانات المختلفة
+    let user = null;
+    
+    // إذا كان targetUserId رقم، ابحث بالـ userId
+    if (!isNaN(targetUserId)) {
+      user = await User.findOne({ userId: parseInt(targetUserId) });
+      console.log('🔍 البحث بالـ userId:', parseInt(targetUserId), user ? 'تم العثور عليه' : 'غير موجود');
+    }
+    
+    // إذا لم يتم العثور عليه، جرب البحث بالـ ObjectId
     if (!user) {
-      user = await User.findById(targetUserId);
+      try {
+        user = await User.findById(targetUserId);
+        console.log('🔍 البحث بالـ ObjectId:', targetUserId, user ? 'تم العثور عليه' : 'غير موجود');
+      } catch (err) {
+        console.log('❌ خطأ في البحث بالـ ObjectId:', err.message);
+      }
     }
 
     if (!user) {
+      console.log('❌ المستخدم غير موجود:', targetUserId);
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
+
+    console.log('✅ تم العثور على المستخدم:', { userId: user.userId, username: user.username });
 
     // تهيئة profile إذا لم يكن موجوداً
     if (!user.profile) {
@@ -1493,13 +1510,9 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
         message = 'تم حذف صورة البروفايل بنجاح';
         break;
 
-      case 'remove_cover_image':
-        user.profile.coverImage = null;
-        message = 'تم حذف صورة الغلاف بنجاح';
-        break;
-
       case 'change_avatar':
-        if (!imageData || !imageType) {
+        if (!imageData) {
+          console.log('❌ بيانات الصورة مفقودة للـ change_avatar');
           return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
         }
         user.profile.avatar = imageData;
@@ -1507,26 +1520,21 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
         break;
 
       case 'change_profile_image':
-        if (!imageData || !imageType) {
+        if (!imageData) {
+          console.log('❌ بيانات الصورة مفقودة للـ change_profile_image');
           return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
         }
         user.profile.profileImage = imageData;
         message = 'تم تغيير صورة البروفايل بنجاح';
         break;
 
-      case 'change_cover_image':
-        if (!imageData || !imageType) {
-          return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
-        }
-        user.profile.coverImage = imageData;
-        message = 'تم تغيير صورة الغلاف بنجاح';
-        break;
-
       default:
+        console.log('❌ إجراء غير صالح:', action);
         return res.status(400).json({ error: 'إجراء غير صالح' });
     }
 
     await user.save();
+    console.log('💾 تم حفظ التغييرات بنجاح');
 
     console.log(`🖼️ المشرف ${req.user.username} ${action} للمستخدم ${user.username}`);
 
@@ -1538,8 +1546,7 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
         username: user.username,
         images: {
           avatar: user.profile.avatar,
-          profileImage: user.profile.profileImage,
-          coverImage: user.profile.coverImage
+          profileImage: user.profile.profileImage
         }
       }
     });
