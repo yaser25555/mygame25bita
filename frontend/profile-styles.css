@@ -993,6 +993,29 @@ body {
   margin-right: 8px;
 }
 
+.sound-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  margin-right: auto;
+}
+
+.sound-toggle-btn:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+.sound-toggle-btn.muted {
+  opacity: 0.5;
+}
+
+.sound-toggle-btn.muted::after {
+  content: '🔇';
+}
+
 .chat-messages {
   flex: 1;
   overflow-y: auto;

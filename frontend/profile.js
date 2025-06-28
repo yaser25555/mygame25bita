@@ -12,12 +12,16 @@ let chatUserId = null;
 let chatUserData = null;
 let chatMessages = [];
 let typingTimeout = null;
+let messageSound = null;
+let soundEnabled = true;
 
 // تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     loadUserProfile();
     setupEventListeners();
     initSocketChat();
+    initMessageSound();
+    setupSoundToggle();
 });
 
 // إعداد مستمعي الأحداث
@@ -690,6 +694,56 @@ function renderPrivateChatMessages() {
     box.scrollTop = box.scrollHeight;
 }
 
+// إعداد زر الصوت
+function setupSoundToggle() {
+    const soundBtn = document.getElementById('soundToggleBtn');
+    if (!soundBtn) return;
+    
+    // تحميل حالة الصوت المحفوظة
+    soundEnabled = localStorage.getItem('chatSoundEnabled') !== 'false';
+    updateSoundButton();
+    
+    soundBtn.onclick = function() {
+        soundEnabled = !soundEnabled;
+        localStorage.setItem('chatSoundEnabled', soundEnabled);
+        updateSoundButton();
+        
+        // إشعار للمستخدم
+        showAlert(soundEnabled ? 'تم تشغيل الصوت' : 'تم إيقاف الصوت', 'info');
+    };
+}
+
+// تحديث شكل زر الصوت
+function updateSoundButton() {
+    const soundBtn = document.getElementById('soundToggleBtn');
+    if (!soundBtn) return;
+    
+    if (soundEnabled) {
+        soundBtn.textContent = '🔊';
+        soundBtn.classList.remove('muted');
+        soundBtn.title = 'إيقاف الصوت';
+    } else {
+        soundBtn.textContent = '🔇';
+        soundBtn.classList.add('muted');
+        soundBtn.title = 'تشغيل الصوت';
+    }
+}
+
+// تهيئة صوت الرسائل
+function initMessageSound() {
+    messageSound = new Audio('sounds/MSG.mp3');
+    messageSound.volume = 0.6; // مستوى الصوت 60%
+    messageSound.preload = 'auto';
+}
+
+// تشغيل نغمة الرسالة
+function playMessageSound() {
+    if (messageSound && soundEnabled) {
+        messageSound.currentTime = 0; // إعادة تعيين الصوت
+        messageSound.play().catch(e => console.log('لا يمكن تشغيل الصوت:', e));
+    }
+}
+
 function initSocketChat() {
     const token = localStorage.getItem('token');
     if (!token || !currentUser) return;
@@ -708,10 +762,15 @@ function initSocketChat() {
         if (msg.senderId == chatUserId || msg.senderId == currentUser.userId) {
             chatMessages.push(msg);
             renderChatMessages();
-            if (msg.senderId != currentUser.userId) markMessagesAsRead(chatUserId);
+            if (msg.senderId != currentUser.userId) {
+                markMessagesAsRead(chatUserId);
+                // تشغيل نغمة التنبيه إذا كانت الرسالة من شخص آخر
+                playMessageSound();
+            }
         } else {
-            // إشعار في الشريط الجانبي
+            // إشعار في الشريط الجانبي + نغمة تنبيه
             showSidebarNotification(msg.senderId);
+            playMessageSound();
         }
     });
     // استقبال حالة الكتابة
