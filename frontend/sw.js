@@ -3,23 +3,26 @@ const CACHE_NAME = 'voiceboom-v1';
 
 // الملفات التي سيتم تخزينها مؤقتاً
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/game.html',
-  '/js/secureStorage.js',
-  '/js/soundManager.js',
-  '/game.js',
-  '/game-styles.css',
-  '/box-styles.css',
-  '/mobile-optimization.css',
-  '/logo.png',
-  '/sounds/click.mp3',
-  '/sounds/win.mp3',
-  '/sounds/lose.mp3',
-  '/sounds/single_shot.mp3',
-  '/sounds/triple_shot.mp3',
-  '/sounds/hammer_shot.mp3',
-  '/manifest.json'
+  './',
+  './index.html',
+  './profile.html',
+  './game.html',
+  './js/secureStorage.js',
+  './js/soundManager.js',
+  './game.js',
+  './profile.js',
+  './game-styles.css',
+  './profile-styles.css',
+  './box-styles.css',
+  './mobile-optimization.css',
+  './logo.png',
+  './sounds/click.mp3',
+  './sounds/win.mp3',
+  './sounds/lose.mp3',
+  './sounds/single_shot.mp3',
+  './sounds/triple_shot.mp3',
+  './sounds/hammer_shot.mp3',
+  './manifest.json'
 ];
 
 // تثبيت Service Worker
@@ -94,7 +97,7 @@ self.addEventListener('fetch', (event) => {
       .catch(() => {
         // إرجاع صفحة غير متصل إذا فشل كل شيء
         if (event.request.headers.get('accept').includes('text/html')) {
-          return caches.match('/offline.html');
+          return caches.match('./offline.html');
         }
       })
   );
@@ -105,4 +108,13 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+});
+
+// معالجة أخطاء الاتصال
+self.addEventListener('error', (event) => {
+  console.error('Service Worker error:', event.error);
+});
+
+self.addEventListener('unhandledrejection', (event) => {
+  console.error('Service Worker unhandled rejection:', event.reason);
 });

@@ -1917,7 +1917,7 @@ router.put('/update-avatar', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'الصورة الشخصية مطلوبة' });
     }
 
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
       console.log('❌ المستخدم غير موجود');
       return res.status(404).json({ error: 'المستخدم غير موجود' });
