@@ -60,6 +60,29 @@ let player = {
 let backgroundImage, playerImage, enemyImage, bulletImage, powerUpImage;
 let sounds = {};
 
+// عند تهيئة اللعبة، اضبط حجم الكانفس تلقائياً للجوال
+function resizeCanvasForMobile() {
+    if (window.innerWidth <= 700) {
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas) {
+            canvas.width = window.innerWidth;
+            canvas.height = Math.floor(window.innerHeight * 0.65); // 65% من ارتفاع الشاشة
+            canvas.style.width = '100vw';
+            canvas.style.height = (canvas.height) + 'px';
+        }
+    } else {
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas) {
+            canvas.width = GAME_CONFIG.canvas.width;
+            canvas.height = GAME_CONFIG.canvas.height;
+            canvas.style.width = '';
+            canvas.style.height = '';
+        }
+    }
+}
+
+window.addEventListener('resize', resizeCanvasForMobile);
+
 // Initialize Game
 function initGame() {
     console.log('🎮 تحميل صفحة اللعبة...');
@@ -69,8 +92,7 @@ function initGame() {
     ctx = canvas.getContext('2d');
     
     // Set canvas size
-    canvas.width = GAME_CONFIG.canvas.width;
-    canvas.height = GAME_CONFIG.canvas.height;
+    resizeCanvasForMobile();
     
     // Initialize player position
     player.x = canvas.width / 2 - player.width / 2;
