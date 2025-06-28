@@ -563,6 +563,9 @@ if (updateUserIdBtn) {
     updateUserIdBtn.addEventListener('click', async function() {
         const newUserIdValue = parseInt(newUserId.value);
         
+        console.log('🆔 المعرف الجديد المدخل:', newUserId.value, 'نوع البيانات:', typeof newUserId.value);
+        console.log('🆔 المعرف الجديد المحول:', newUserIdValue, 'نوع البيانات:', typeof newUserIdValue);
+        
         if (!newUserIdValue || newUserIdValue < 1) {
             showMessage('يرجى إدخال معرف صحيح', 'error');
             return;
@@ -571,13 +574,20 @@ if (updateUserIdBtn) {
         // التحقق من وجود معرف المستخدم الحالي
         const currentUserId = displayCurrentUserId.textContent;
         console.log('🔍 معرف المستخدم الحالي:', currentUserId, 'نوع البيانات:', typeof currentUserId);
+        console.log('🔍 طول النص:', currentUserId ? currentUserId.length : 0);
+        console.log('🔍 يحتوي على مسافات:', currentUserId ? currentUserId.includes(' ') : false);
+        console.log('🔍 يحتوي على أحرف خاصة:', currentUserId ? /[^\d]/.test(currentUserId) : false);
         
         if (!currentUserId || currentUserId === 'غير محدد' || currentUserId === '-') {
             showMessage('يرجى البحث عن مستخدم أولاً', 'error');
             return;
         }
         
-        const targetUserId = parseInt(currentUserId);
+        // تنظيف النص من المسافات والأحرف الخاصة
+        const cleanUserId = currentUserId.trim().replace(/[^\d]/g, '');
+        console.log('🧹 المعرف بعد التنظيف:', cleanUserId);
+        
+        const targetUserId = parseInt(cleanUserId);
         console.log('🔢 معرف المستخدم المحول:', targetUserId, 'نوع البيانات:', typeof targetUserId);
         
         if (!targetUserId || targetUserId < 1 || isNaN(targetUserId)) {

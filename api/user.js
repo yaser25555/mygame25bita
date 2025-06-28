@@ -1613,6 +1613,14 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
       newUserId: typeof newUserId 
     });
     console.log('📋 البيانات الخام:', req.body);
+    console.log('📋 طول البيانات:', {
+      targetUserId: targetUserId ? targetUserId.toString().length : 0,
+      newUserId: newUserId ? newUserId.toString().length : 0
+    });
+    console.log('📋 فحص الأرقام:', {
+      targetUserIdIsNumber: !isNaN(parseInt(targetUserId)),
+      newUserIdIsNumber: !isNaN(parseInt(newUserId))
+    });
 
     if (!targetUserId || !newUserId) {
       console.log('❌ بيانات مفقودة:', { targetUserId, newUserId });
