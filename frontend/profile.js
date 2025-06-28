@@ -161,17 +161,7 @@ function displayUserProfile(user) {
         userLevel.textContent = user.profile.level || 1;
     }
 
-    // الإحصائيات السريعة
-    const totalScore = document.getElementById('total-score');
-    if (totalScore) {
-        totalScore.textContent = user.stats.score || 0;
-    }
-
-    const gemsCount = document.getElementById('gems-count');
-    if (gemsCount) {
-        gemsCount.textContent = user.collectedGems || 0;
-    }
-
+    // عدد الأصدقاء فقط
     const friendsCount = document.getElementById('friends-count');
     if (friendsCount) {
         friendsCount.textContent = user.relationships?.friends?.length || 0;

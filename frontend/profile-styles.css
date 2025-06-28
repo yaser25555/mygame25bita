@@ -250,8 +250,8 @@ body {
 
 /* الإحصائيات السريعة */
 .quick-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  justify-content: center;
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -263,6 +263,7 @@ body {
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  min-width: 120px;
 }
 
 .stat-card:hover {
