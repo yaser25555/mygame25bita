@@ -1,4 +1,4 @@
-﻿// Game Configuration
+// Game Configuration
 const GAME_CONFIG = {
     canvas: {
         width: 800,
@@ -559,9 +559,18 @@ document.addEventListener('DOMContentLoaded', () => {
     initGame();
     
     // Setup button event listeners
-    document.getElementById('startButton').addEventListener('click', startGame);
-    document.getElementById('restartButton').addEventListener('click', restartGame);
-    document.getElementById('menuButton').addEventListener('click', backToMenu);
+    const startBtn = document.getElementById('startButton');
+if (startBtn) {
+    startBtn.addEventListener('click', startGame);
+}
+    const restartBtn = document.getElementById('restartButton');
+if (restartBtn) {
+    restartBtn.addEventListener('click', restartGame);
+}
+    const menuBtn = document.getElementById('menuButton');
+if (menuBtn) {
+    menuBtn.addEventListener('click', backToMenu);
+}
     
     // ربط زر الغرفة الصوتية
     const voiceBtn = document.getElementById('voiceChatRoomBtn');
