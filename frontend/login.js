@@ -563,7 +563,7 @@ function handleLogout() {
 function setupExitWarning() {
     console.log('⚠️ إعداد تحذير الخروج...');
     
-    // التحذير عند محاولة إغلاق التبويب/المتصفح
+    // التحذير عند محاولة إغلاق التبويب/المتصفح فقط
     window.addEventListener('beforeunload', function(e) {
         // التحقق من أن المستخدم مسجل دخول
         const token = localStorage.getItem('token');
@@ -575,37 +575,8 @@ function setupExitWarning() {
         }
     });
     
-    // التحذير عند محاولة العودة للصفحة السابقة
-    window.addEventListener('popstate', function(e) {
-        const token = localStorage.getItem('token');
-        if (token) {
-            e.preventDefault();
-            showExitConfirmation();
-        }
-    });
+    // إزالة التحذيرات من التنقل الداخلي (popstate)
+    // لا نضع أي event listeners للـ popstate لتجنب التحذيرات عند التنقل الداخلي
     
-    // منع استخدام زر العودة في المتصفح
-    history.pushState(null, null, location.href);
-    window.addEventListener('popstate', function() {
-        const token = localStorage.getItem('token');
-        if (token) {
-            history.pushState(null, null, location.href);
-            showExitConfirmation();
-        }
-    });
-    
-    console.log('✅ تم إعداد تحذير الخروج');
-}
-
-// عرض تأكيد الخروج
-function showExitConfirmation() {
-    const confirmed = confirm('هل تريد الخروج من الموقع؟\n\n✅ البقاء - للاستمرار في اللعبة\n❌ الخروج - للعودة للصفحة السابقة');
-    
-    if (confirmed) {
-        // إذا اختار الخروج، نسمح بالعودة
-        window.history.back();
-    } else {
-        // إذا اختار البقاء، نبقى في الصفحة الحالية
-        console.log('👤 المستخدم اختار البقاء في الموقع');
-    }
+    console.log('✅ تم إعداد تحذير الخروج (فقط عند مغادرة الموقع)');
 } 

@@ -685,7 +685,7 @@ class TradingSystem {
     setupExitWarning() {
         console.log('⚠️ إعداد تحذير الخروج...');
         
-        // Exit warning when closing the tab/browser
+        // التحذير عند محاولة إغلاق التبويب/المتصفح فقط
         window.addEventListener('beforeunload', function(e) {
             if (this.currentUser) {
                 const message = 'هل تريد الخروج من الموقع؟ سيتم فقدان تقدمك في اللعبة.';
@@ -695,36 +695,10 @@ class TradingSystem {
             }
         });
         
-        // Exit warning when going back to the previous page
-        window.addEventListener('popstate', function(e) {
-            if (this.currentUser) {
-                e.preventDefault();
-                this.showExitConfirmation();
-            }
-        });
+        // إزالة التحذيرات من التنقل الداخلي (popstate)
+        // لا نضع أي event listeners للـ popstate لتجنب التحذيرات عند التنقل الداخلي
         
-        // Prevent using the back button in the browser
-        history.pushState(null, null, location.href);
-        window.addEventListener('popstate', function() {
-            if (this.currentUser) {
-                history.pushState(null, null, location.href);
-                this.showExitConfirmation();
-            }
-        });
-        
-        console.log('✅ تم إعداد تحذير الخروج');
-    }
-    
-    showExitConfirmation() {
-        const confirmed = confirm('هل تريد الخروج من الموقع؟\n\n✅ البقاء - للاستمرار في اللعبة\n❌ الخروج - للعودة للصفحة السابقة');
-        
-        if (confirmed) {
-            // If choosing to exit, allow going back
-            window.history.back();
-        } else {
-            // If choosing to stay, stay on the current page
-            console.log('👤 المستخدم اختار البقاء في الموقع');
-        }
+        console.log('✅ تم إعداد تحذير الخروج (فقط عند مغادرة الموقع)');
     }
 }
 
