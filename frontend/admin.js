@@ -232,30 +232,39 @@ if (updateUserBtn) {
         }
         
         try {
+            const requestBody = {
+                username: username,
+                newScore: newCoins,
+                newPearls: newPearls
+            };
+            
+            console.log('📤 البيانات المرسلة لتحديث المستخدم:', requestBody);
+            
             const response = await fetch(`${BACKEND_URL}/api/users/update-user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 },
-                body: JSON.stringify({
-                    username: username,
-                    newScore: newCoins,
-                    newPearls: newPearls
-                })
+                body: JSON.stringify(requestBody)
             });
             
+            console.log('📥 استجابة تحديث المستخدم:', response.status, response.statusText);
+            
             if (response.ok) {
+                const result = await response.json();
+                console.log('✅ نجح تحديث المستخدم:', result);
                 showMessage('تم تحديث بيانات المستخدم بنجاح', 'success');
                 // تحديث العرض
                 if (displayCoins) displayCoins.textContent = newCoins;
                 if (displayPearls) displayPearls.textContent = newPearls;
             } else {
                 const errorData = await response.json();
-                showMessage(errorData.message || 'خطأ في تحديث بيانات المستخدم', 'error');
+                console.error('❌ خطأ في تحديث المستخدم:', errorData);
+                showMessage(errorData.message || errorData.error || 'خطأ في تحديث بيانات المستخدم', 'error');
             }
         } catch (error) {
-            console.error('Error updating user:', error);
+            console.error('❌ خطأ في تحديث المستخدم:', error);
             showMessage('خطأ في تحديث بيانات المستخدم', 'error');
         }
     });

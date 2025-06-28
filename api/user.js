@@ -448,10 +448,22 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
     const { username, newUsername, newPassword, newScore, newPearls } = req.body;
 
     console.log('🔧 طلب تحديث بيانات المستخدم:', { username, newUsername, newScore, newPearls });
+    console.log('📋 البيانات الكاملة المرسلة:', req.body);
 
     if (!username) {
       console.log('❌ اسم المستخدم مفقود');
       return res.status(400).json({ error: 'اسم المستخدم مطلوب' });
+    }
+
+    // التحقق من أن البيانات رقمية
+    if (newScore !== undefined && (isNaN(newScore) || newScore < 0)) {
+      console.log('❌ قيمة النقاط غير صحيحة:', newScore);
+      return res.status(400).json({ error: 'قيمة النقاط يجب أن تكون رقماً موجباً' });
+    }
+
+    if (newPearls !== undefined && (isNaN(newPearls) || newPearls < 0)) {
+      console.log('❌ قيمة اللآلئ غير صحيحة:', newPearls);
+      return res.status(400).json({ error: 'قيمة اللآلئ يجب أن تكون رقماً موجباً' });
     }
 
     const user = await User.findOne({ username });
@@ -460,7 +472,18 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    console.log('✅ تم العثور على المستخدم:', { userId: user.userId, username: user.username });
+    console.log('✅ تم العثور على المستخدم:', { 
+      userId: user.userId, 
+      username: user.username,
+      stats: user.stats,
+      hasStats: !!user.stats
+    });
+
+    // تهيئة stats إذا لم يكن موجوداً
+    if (!user.stats) {
+      console.log('📝 تهيئة stats للمستخدم:', username);
+      user.stats = {};
+    }
 
     // تحديث اسم المستخدم إذا تم توفيره
     if (newUsername && newUsername !== username) {
@@ -477,26 +500,31 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
     // تحديث كلمة المرور إذا تم توفيرها
     if (newPassword) {
       console.log('🔐 تحديث كلمة المرور للمستخدم:', username);
-      const bcrypt = require('bcryptjs');
       const saltRounds = 10;
       user.password = await bcrypt.hash(newPassword, saltRounds);
     }
 
     // تحديث النقاط إذا تم توفيرها
     if (newScore !== undefined) {
-      console.log('📊 تحديث النقاط من', user.stats?.score, 'إلى', newScore);
-      if (!user.stats) user.stats = {};
+      const oldScore = user.stats.score || 0;
+      console.log('📊 تحديث النقاط من', oldScore, 'إلى', newScore);
       user.stats.score = parseInt(newScore);
     }
 
     // تحديث اللآلئ إذا تم توفيرها
     if (newPearls !== undefined) {
-      console.log('💎 تحديث اللآلئ من', user.stats?.pearls, 'إلى', newPearls);
-      if (!user.stats) user.stats = {};
+      const oldPearls = user.stats.pearls || 0;
+      console.log('💎 تحديث اللآلئ من', oldPearls, 'إلى', newPearls);
       user.stats.pearls = parseInt(newPearls);
     }
 
     console.log('💾 محاولة حفظ التغييرات...');
+    console.log('📋 البيانات قبل الحفظ:', {
+      stats: user.stats,
+      score: user.stats.score,
+      pearls: user.stats.pearls
+    });
+    
     await user.save();
     console.log('💾 تم حفظ التغييرات بنجاح');
 
@@ -518,11 +546,23 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
     console.error('❌ تفاصيل الخطأ:', {
       name: error.name,
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
+      code: error.code
     });
+    
+    // إرجاع رسالة خطأ أكثر تفصيلاً
+    let errorMessage = 'حدث خطأ غير متوقع';
+    if (error.name === 'ValidationError') {
+      errorMessage = 'خطأ في التحقق من البيانات';
+    } else if (error.name === 'CastError') {
+      errorMessage = 'خطأ في نوع البيانات';
+    } else if (error.code === 11000) {
+      errorMessage = 'اسم المستخدم مستخدم بالفعل';
+    }
+    
     res.status(500).json({ 
       error: 'خطأ في تحديث بيانات المستخدم',
-      message: 'حدث خطأ غير متوقع',
+      message: errorMessage,
       details: error.message 
     });
   }
