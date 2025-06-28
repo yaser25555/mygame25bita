@@ -1599,31 +1599,49 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
     console.log('🆔 طلب تحديث معرف المستخدم:', { targetUserId, newUserId });
 
     if (!targetUserId || !newUserId) {
+      console.log('❌ بيانات مفقودة:', { targetUserId, newUserId });
       return res.status(400).json({ error: 'معرف المستخدم الحالي والجديد مطلوبان' });
     }
 
-    // البحث عن المستخدم
-    let user = await User.findOne({ userId: parseInt(targetUserId) });
-    if (!user) {
-      user = await User.findById(targetUserId);
+    // التحقق من أن المعرفات أرقام صحيحة
+    const targetUserIdNum = parseInt(targetUserId);
+    const newUserIdNum = parseInt(newUserId);
+
+    if (isNaN(targetUserIdNum) || isNaN(newUserIdNum)) {
+      console.log('❌ المعرفات ليست أرقام صحيحة:', { targetUserId, newUserId });
+      return res.status(400).json({ error: 'معرفات المستخدم يجب أن تكون أرقام صحيحة' });
     }
 
+    if (newUserIdNum < 1) {
+      console.log('❌ المعرف الجديد يجب أن يكون أكبر من صفر:', newUserIdNum);
+      return res.status(400).json({ error: 'المعرف الجديد يجب أن يكون أكبر من صفر' });
+    }
+
+    // البحث عن المستخدم
+    let user = await User.findOne({ userId: targetUserIdNum });
     if (!user) {
+      console.log('❌ المستخدم غير موجود بالمعرف:', targetUserIdNum);
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
+    console.log('✅ تم العثور على المستخدم:', { userId: user.userId, username: user.username });
+
     // التحقق من أن المعرف الجديد غير مستخدم
-    const existingUser = await User.findOne({ userId: parseInt(newUserId) });
+    const existingUser = await User.findOne({ userId: newUserIdNum });
     if (existingUser) {
+      console.log('❌ المعرف الجديد مستخدم بالفعل:', newUserIdNum, 'بواسطة:', existingUser.username);
       return res.status(400).json({ error: 'المعرف الجديد مستخدم بالفعل' });
     }
 
     // تحديث المعرف
     const oldUserId = user.userId;
-    user.userId = parseInt(newUserId);
+    user.userId = newUserIdNum;
+    
+    console.log('💾 محاولة حفظ التغييرات...');
     await user.save();
+    console.log('💾 تم حفظ التغييرات بنجاح');
 
-    console.log(`🆔 المشرف ${req.user.username} غير معرف المستخدم ${oldUserId} إلى ${newUserId}`);
+    console.log(`🆔 المشرف ${req.user.username} غير معرف المستخدم ${oldUserId} إلى ${newUserIdNum}`);
 
     res.json({
       message: 'تم تحديث معرف المستخدم بنجاح',
@@ -1635,8 +1653,17 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
     });
 
   } catch (error) {
-    console.error('خطأ في تحديث معرف المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
+    console.error('❌ خطأ في تحديث معرف المستخدم:', error);
+    console.error('❌ تفاصيل الخطأ:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'خطأ في الخادم',
+      message: 'حدث خطأ غير متوقع',
+      details: error.message 
+    });
   }
 });
 

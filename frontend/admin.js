@@ -561,18 +561,27 @@ function displayUserDataForIdChange(userData) {
 // تحديث معرف المستخدم
 if (updateUserIdBtn) {
     updateUserIdBtn.addEventListener('click', async function() {
-        const username = displayUsername.textContent;
-        const newUserIdValue = parseInt(document.getElementById('newUserId').value);
-        
-        if (!username || username === 'غير محدد') {
-            showMessage('يرجى البحث عن مستخدم أولاً', 'error');
-            return;
-        }
+        const newUserIdValue = parseInt(newUserId.value);
         
         if (!newUserIdValue || newUserIdValue < 1) {
             showMessage('يرجى إدخال معرف صحيح', 'error');
             return;
         }
+        
+        // التحقق من وجود معرف المستخدم الحالي
+        const currentUserId = displayCurrentUserId.textContent;
+        if (!currentUserId || currentUserId === 'غير محدد') {
+            showMessage('يرجى البحث عن مستخدم أولاً', 'error');
+            return;
+        }
+        
+        const targetUserId = parseInt(currentUserId);
+        if (!targetUserId || targetUserId < 1) {
+            showMessage('معرف المستخدم الحالي غير صحيح', 'error');
+            return;
+        }
+        
+        console.log('🆔 تحديث معرف المستخدم:', { targetUserId, newUserId: newUserIdValue });
         
         try {
             const response = await fetch(`${BACKEND_URL}/api/users/admin/update-user-id`, {
@@ -582,23 +591,27 @@ if (updateUserIdBtn) {
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 },
                 body: JSON.stringify({
-                    username: username,
+                    targetUserId: targetUserId,
                     newUserId: newUserIdValue
                 })
             });
             
+            console.log('📥 استجابة تحديث المعرف:', response.status, response.statusText);
+            
             if (response.ok) {
                 const result = await response.json();
+                console.log('✅ نجح تحديث المعرف:', result);
                 showMessage(result.message, 'success');
                 // تحديث العرض
                 if (displayCurrentUserId) displayCurrentUserId.textContent = newUserIdValue;
                 document.getElementById('newUserId').value = '';
             } else {
                 const errorData = await response.json();
+                console.error('❌ خطأ في تحديث المعرف:', errorData);
                 showMessage(errorData.error || 'خطأ في تحديث المعرف', 'error');
             }
         } catch (error) {
-            console.error('Error updating user ID:', error);
+            console.error('❌ خطأ في تحديث المعرف:', error);
             showMessage('خطأ في تحديث المعرف', 'error');
         }
     });
