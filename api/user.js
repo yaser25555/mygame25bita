@@ -101,9 +101,19 @@ router.get('/settings', async (req, res) => {
 // مسار جديد: جلب بيانات المستخدم الحالي (يتطلب توكن مصادقة)
 router.get('/me', verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select('-password');
+    console.log('🔍 طلب بيانات المستخدم:', { userId: req.user.userId, username: req.user.username });
+
+    // البحث عن المستخدم باستخدام userId أو _id
+    let user;
+    if (req.user.userId) {
+      user = await User.findById(req.user.userId).select('-password');
+    } else {
+      // إذا لم يكن هناك userId، نبحث باستخدام _id
+      user = await User.findById(req.user._id).select('-password');
+    }
 
     if (!user) {
+      console.log('❌ المستخدم غير موجود:', req.user);
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
 
@@ -143,7 +153,7 @@ router.get('/me', verifyToken, async (req, res) => {
     }
 
     // إرجاع البيانات التي تحتاجها الواجهة الأمامية
-    res.json({
+    const responseData = {
         _id: user._id,
         userId: user.userId,
         username: user.username,
@@ -166,10 +176,24 @@ router.get('/me', verifyToken, async (req, res) => {
         achievements: user.achievements || [],
         badges: user.badges || [],
         relationships: user.relationships || { friends: [] }
+    };
+
+    console.log('📤 إرسال البيانات:', {
+        userId: responseData.userId,
+        username: responseData.username,
+        hasProfile: !!responseData.profile,
+        hasStats: !!responseData.stats
     });
+
+    res.json(responseData);
 
   } catch (error) {
     console.error("خطأ في جلب بيانات المستخدم:", error);
+    console.error("تفاصيل الخطأ:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+    });
     res.status(500).json({ message: 'خطأ في الخادم أثناء جلب بيانات المستخدم' });
   }
 });

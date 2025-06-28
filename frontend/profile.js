@@ -79,8 +79,11 @@ async function loadUserProfile() {
         }
 
         const data = await response.json();
-        currentUser = data.user;
-        displayUserProfile(data.user);
+        console.log('📥 البيانات المستلمة من الخادم:', data);
+        
+        // البيانات تأتي مباشرة وليس في user object
+        currentUser = data;
+        displayUserProfile(data);
 
     } catch (error) {
         console.error('خطأ في تحميل البروفايل:', error);
@@ -91,6 +94,13 @@ async function loadUserProfile() {
 // عرض بروفايل المستخدم
 function displayUserProfile(user) {
     console.log('📋 بيانات المستخدم المستلمة:', user);
+    console.log('🔍 تفاصيل البيانات:', {
+        hasUser: !!user,
+        userType: typeof user,
+        hasProfile: user ? !!user.profile : false,
+        hasStats: user ? !!user.stats : false,
+        username: user ? user.username : 'غير محدد'
+    });
     
     // التحقق من وجود البيانات المطلوبة
     if (!user) {
@@ -117,24 +127,52 @@ function displayUserProfile(user) {
         };
     }
 
+    console.log('✅ البيانات جاهزة للعرض:', {
+        username: user.username,
+        profile: user.profile,
+        stats: user.stats
+    });
+
     // الصورة الشخصية
     const avatar = document.getElementById('user-avatar');
-    avatar.src = user.profile.avatar || 'images/default-avatar.png';
-    avatar.alt = user.username;
+    if (avatar) {
+        avatar.src = user.profile.avatar || 'images/default-avatar.png';
+        avatar.alt = user.username;
+    }
 
     // الاسم المعروض
-    document.getElementById('display-name').textContent = user.profile.displayName || user.username;
+    const displayName = document.getElementById('display-name');
+    if (displayName) {
+        displayName.textContent = user.profile.displayName || user.username;
+    }
 
     // معرف المستخدم
-    document.getElementById('user-id').textContent = `ID: ${user.userId || 'غير محدد'}`;
+    const userId = document.getElementById('user-id');
+    if (userId) {
+        userId.textContent = `ID: ${user.userId || 'غير محدد'}`;
+    }
 
     // المستوى
-    document.getElementById('user-level').textContent = user.profile.level || 1;
+    const userLevel = document.getElementById('user-level');
+    if (userLevel) {
+        userLevel.textContent = user.profile.level || 1;
+    }
 
     // الإحصائيات السريعة
-    document.getElementById('total-score').textContent = user.stats.score || 0;
-    document.getElementById('gems-count').textContent = user.collectedGems || 0;
-    document.getElementById('friends-count').textContent = user.relationships?.friends?.length || 0;
+    const totalScore = document.getElementById('total-score');
+    if (totalScore) {
+        totalScore.textContent = user.stats.score || 0;
+    }
+
+    const gemsCount = document.getElementById('gems-count');
+    if (gemsCount) {
+        gemsCount.textContent = user.collectedGems || 0;
+    }
+
+    const friendsCount = document.getElementById('friends-count');
+    if (friendsCount) {
+        friendsCount.textContent = user.relationships?.friends?.length || 0;
+    }
 
     // حالة الدرع
     displayShieldStatus(user.shield);
