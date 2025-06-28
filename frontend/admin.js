@@ -776,6 +776,14 @@ function displayUserData(userData) {
         _id: user._id,
         id: user.id
     });
+    console.log('🔍 تفاصيل المعرفات:', {
+        userIdType: typeof user.userId,
+        userIdExists: user.userId !== undefined,
+        userIdNull: user.userId === null,
+        userIdEmpty: user.userId === '',
+        _idType: typeof user._id,
+        _idExists: user._id !== undefined
+    });
     
     if (displayUsername) displayUsername.textContent = user.username || 'غير محدد';
     if (displayCurrentUserId) {
@@ -783,6 +791,30 @@ function displayUserData(userData) {
         const userId = user.userId || 'غير محدد';
         displayCurrentUserId.textContent = userId;
         console.log('🆔 تم تعيين معرف المستخدم:', userId, 'نوع البيانات:', typeof userId);
+        
+        // تحقق إضافي
+        if (userId === 'غير محدد') {
+            console.log('⚠️ تحذير: المستخدم لا يحتوي على userId رقمي');
+            console.log('📋 جميع بيانات المستخدم:', JSON.stringify(user, null, 2));
+            
+            // إضافة زر لتعيين معرف للمستخدم
+            showMessage('المستخدم لا يحتوي على معرف رقمي. يمكنك تعيين معرف له.', 'warning');
+            
+            // إضافة زر لتعيين المعرف
+            const assignIdBtn = document.createElement('button');
+            assignIdBtn.textContent = '🆔 تعيين معرف للمستخدم';
+            assignIdBtn.className = 'btn btn-warning';
+            assignIdBtn.onclick = () => assignUserIdToUser(user.username);
+            
+            // إضافة الزر إلى الصفحة
+            if (userOperationsContainer) {
+                const assignIdSection = document.createElement('div');
+                assignIdSection.className = 'operation-section';
+                assignIdSection.innerHTML = '<h5>🆔 تعيين معرف المستخدم</h5>';
+                assignIdSection.appendChild(assignIdBtn);
+                userOperationsContainer.appendChild(assignIdSection);
+            }
+        }
     }
     if (displayEmail) displayEmail.textContent = user.email || 'غير محدد';
     if (displayCoins) displayCoins.textContent = user.score || user.stats?.score || 0;
@@ -943,4 +975,47 @@ function showMessage(message, type = 'info') {
     
     // تمرير إلى الرسالة
     messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// تعيين معرف للمستخدم
+async function assignUserIdToUser(username) {
+    try {
+        console.log('🆔 محاولة تعيين معرف للمستخدم:', username);
+        
+        const response = await fetch(`${BACKEND_URL}/api/users/admin/assign-user-id`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify({ username })
+        });
+        
+        console.log('📥 استجابة تعيين المعرف:', response.status, response.statusText);
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ نجح تعيين المعرف:', result);
+            showMessage(result.message, 'success');
+            
+            // تحديث العرض
+            if (displayCurrentUserId) {
+                displayCurrentUserId.textContent = result.user.userId;
+            }
+            
+            // إزالة زر تعيين المعرف
+            const assignIdSection = document.querySelector('.operation-section:has(button[onclick*="assignUserIdToUser"])');
+            if (assignIdSection) {
+                assignIdSection.remove();
+            }
+            
+        } else {
+            const errorData = await response.json();
+            console.error('❌ خطأ في تعيين المعرف:', errorData);
+            showMessage(errorData.error || 'خطأ في تعيين المعرف', 'error');
+        }
+    } catch (error) {
+        console.error('❌ خطأ في تعيين المعرف:', error);
+        showMessage('خطأ في تعيين المعرف', 'error');
+    }
 } 

@@ -430,6 +430,9 @@ router.get('/by-username/:username', verifyToken, verifyAdmin, async (req, res) 
     // التحقق من وجود userId
     if (!user.userId) {
       console.log('⚠️ تحذير: المستخدم لا يحتوي على userId:', user.username);
+      console.log('📋 جميع بيانات المستخدم:', JSON.stringify(user, null, 2));
+    } else {
+      console.log('✅ المستخدم يحتوي على userId صحيح:', user.userId);
     }
 
     res.json(user);
@@ -1698,6 +1701,67 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
       message: error.message,
       stack: error.stack
     });
+    res.status(500).json({ 
+      error: 'خطأ في الخادم',
+      message: 'حدث خطأ غير متوقع',
+      details: error.message 
+    });
+  }
+});
+
+// تعيين معرف للمستخدمين الذين لا يحتويون على userId (للمشرفين فقط)
+router.post('/admin/assign-user-id', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    console.log('🆔 طلب تعيين معرف للمستخدم:', username);
+
+    if (!username) {
+      return res.status(400).json({ error: 'اسم المستخدم مطلوب' });
+    }
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    console.log('✅ تم العثور على المستخدم:', {
+      userId: user.userId,
+      username: user.username,
+      _id: user._id
+    });
+
+    // إذا كان المستخدم يحتوي على userId، لا نحتاج لتعيينه
+    if (user.userId) {
+      return res.status(400).json({ 
+        error: 'المستخدم يحتوي على معرف بالفعل',
+        userId: user.userId 
+      });
+    }
+
+    // البحث عن أعلى معرف موجود
+    const highestUser = await User.findOne({}, {}, { sort: { 'userId': -1 } });
+    const nextUserId = highestUser ? highestUser.userId + 1 : 1500;
+
+    console.log('🆔 تعيين المعرف الجديد:', nextUserId);
+
+    // تعيين المعرف الجديد
+    user.userId = nextUserId;
+    await user.save();
+
+    console.log(`🆔 تم تعيين المعرف ${nextUserId} للمستخدم ${username}`);
+
+    res.json({
+      message: 'تم تعيين معرف المستخدم بنجاح',
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ خطأ في تعيين معرف المستخدم:', error);
     res.status(500).json({ 
       error: 'خطأ في الخادم',
       message: 'حدث خطأ غير متوقع',
