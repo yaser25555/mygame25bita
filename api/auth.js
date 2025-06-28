@@ -18,7 +18,37 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // توليد userId يدوياً
+    const lastUser = await User.findOne({}, { userId: 1 }).sort({ userId: -1 }).limit(1);
+    let newUserId = 1500; // البدء من 1500
+    if (lastUser && lastUser.userId) {
+      newUserId = lastUser.userId + 1;
+    }
+    
+    // التحقق من عدم وجود تعارض
+    const existingUserId = await User.findOne({ userId: newUserId });
+    if (existingUserId) {
+      // البحث عن معرف متاح
+      let counter = 1;
+      while (true) {
+        const testUserId = newUserId + counter;
+        const testUser = await User.findOne({ userId: testUserId });
+        if (!testUser) {
+          newUserId = testUserId;
+          break;
+        }
+        counter++;
+        if (counter > 100) {
+          // في حالة الطوارئ، استخدم timestamp
+          newUserId = Math.floor(Date.now() / 1000) + 1500;
+          break;
+        }
+      }
+    }
+
     const newUser = new User({
+      userId: newUserId,
       username,
       email,
       password: hashedPassword,
@@ -26,7 +56,7 @@ router.post('/register', async (req, res) => {
       'stats.score': 0
     });
 
-    // حفظ المستخدم (سيتم توليد userId تلقائياً)
+    // حفظ المستخدم
     await newUser.save();
     
     console.log('✅ تم إنشاء مستخدم جديد:', {
@@ -145,7 +175,37 @@ router.post('/create-test-user', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // توليد userId يدوياً
+    const lastUser = await User.findOne({}, { userId: 1 }).sort({ userId: -1 }).limit(1);
+    let newUserId = 1500; // البدء من 1500
+    if (lastUser && lastUser.userId) {
+      newUserId = lastUser.userId + 1;
+    }
+    
+    // التحقق من عدم وجود تعارض
+    const existingUserId = await User.findOne({ userId: newUserId });
+    if (existingUserId) {
+      // البحث عن معرف متاح
+      let counter = 1;
+      while (true) {
+        const testUserId = newUserId + counter;
+        const testUser = await User.findOne({ userId: testUserId });
+        if (!testUser) {
+          newUserId = testUserId;
+          break;
+        }
+        counter++;
+        if (counter > 100) {
+          // في حالة الطوارئ، استخدم timestamp
+          newUserId = Math.floor(Date.now() / 1000) + 1500;
+          break;
+        }
+      }
+    }
+
     const newUser = new User({
+      userId: newUserId,
       username,
       email,
       password: hashedPassword,
@@ -155,7 +215,7 @@ router.post('/create-test-user', async (req, res) => {
       'stats.coins': 100000 // هدية ترحيب
     });
 
-    // حفظ المستخدم (سيتم توليد userId تلقائياً)
+    // حفظ المستخدم
     await newUser.save();
     
     console.log('✅ تم إنشاء مستخدم تجريبي:', {
