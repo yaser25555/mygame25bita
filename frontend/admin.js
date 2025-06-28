@@ -36,6 +36,21 @@ const highRiskUsers = document.getElementById('highRiskUsers');
 const showUserIdsManagement = document.getElementById('showUserIdsManagement');
 const showUserImagesManagement = document.getElementById('showUserImagesManagement');
 
+// عناصر DOM الجديدة لإدارة المستخدمين المحسنة
+const searchByUsername = document.getElementById('searchByUsername');
+const searchByUserId = document.getElementById('searchByUserId');
+const searchByUsernameBtn = document.getElementById('searchByUsernameBtn');
+const searchByUserIdBtn = document.getElementById('searchByUserIdBtn');
+const userDataDisplay = document.getElementById('userDataDisplay');
+const userOperationsContainer = document.getElementById('userOperationsContainer');
+const displayUsername = document.getElementById('displayUsername');
+const displayCurrentUserId = document.getElementById('displayCurrentUserId');
+const displayEmail = document.getElementById('displayEmail');
+const displayCoins = document.getElementById('displayCoins');
+const displayPearls = document.getElementById('displayPearls');
+const displayRole = document.getElementById('displayRole');
+const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+
 // التحقق من وجود العناصر قبل إضافة الأحداث
 if (!adminLoginForm) console.warn('adminLoginForm not found');
 if (!adminPanel) console.warn('adminPanel not found');
@@ -65,6 +80,19 @@ if (!totalSuspiciousUsers) console.warn('totalSuspiciousUsers not found');
 if (!highRiskUsers) console.warn('highRiskUsers not found');
 if (!showUserIdsManagement) console.warn('showUserIdsManagement not found');
 if (!showUserImagesManagement) console.warn('showUserImagesManagement not found');
+if (!searchByUsername) console.warn('searchByUsername not found');
+if (!searchByUserId) console.warn('searchByUserId not found');
+if (!searchByUsernameBtn) console.warn('searchByUsernameBtn not found');
+if (!searchByUserIdBtn) console.warn('searchByUserIdBtn not found');
+if (!userDataDisplay) console.warn('userDataDisplay not found');
+if (!userOperationsContainer) console.warn('userOperationsContainer not found');
+if (!displayUsername) console.warn('displayUsername not found');
+if (!displayCurrentUserId) console.warn('displayCurrentUserId not found');
+if (!displayEmail) console.warn('displayEmail not found');
+if (!displayCoins) console.warn('displayCoins not found');
+if (!displayPearls) console.warn('displayPearls not found');
+if (!displayRole) console.warn('displayRole not found');
+if (!updatePasswordBtn) console.warn('updatePasswordBtn not found');
 
 // التحقق من وجود token عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
@@ -155,137 +183,120 @@ function hideAllSections() {
 }
 
 // جلب بيانات المستخدم
-if (fetchUserDataBtn) {
-    fetchUserDataBtn.addEventListener('click', async function() {
-        const username = searchUsername.value.trim();
-        if (!username) {
-            alert('يرجى إدخال اسم المستخدم');
+// if (fetchUserDataBtn) {
+//     fetchUserDataBtn.addEventListener('click', async function() {
+//         const username = searchUsername.value.trim();
+//         if (!username) {
+//             alert('يرجى إدخال اسم المستخدم');
+//             return;
+//         }
+//         
+//         try {
+//             const response = await fetch(`${BACKEND_URL}/api/users/by-username/${username}`, {
+//                 headers: {
+//                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+//                 }
+//             });
+//             
+//             if (response.ok) {
+//                 const userData = await response.json();
+//                 populateUserForm(userData);
+//                 if (editUserForm) {
+//                     editUserForm.classList.remove('hidden');
+//                 }
+//             } else {
+//                 alert('المستخدم غير موجود');
+//             }
+//         } catch (error) {
+//             console.error('Error fetching user data:', error);
+//             alert('خطأ في جلب بيانات المستخدم');
+//         }
+//     });
+// }
+
+// ملء نموذج تعديل المستخدم
+// function populateUserForm(userData) {
+//     currentUsername.value = userData.username;
+//     editUsername.value = userData.username;
+//     manageCoins.value = userData.score || 0;
+//     managePearls.value = userData.pearls || 0;
+//     adminRoleUsername.value = userData.username;
+// }
+
+// تحديث بيانات المستخدم (النسخة المحسنة)
+if (updateUserBtn) {
+    updateUserBtn.addEventListener('click', async function() {
+        const username = displayUsername.textContent;
+        const newCoins = parseInt(manageCoins.value) || 0;
+        const newPearls = parseInt(managePearls.value) || 0;
+        
+        if (!username || username === 'غير محدد') {
+            showMessage('يرجى البحث عن مستخدم أولاً', 'error');
             return;
         }
         
         try {
-            const response = await fetch(`${BACKEND_URL}/api/users/by-username/${username}`, {
+            const response = await fetch(`${BACKEND_URL}/api/users/update-user`, {
+                method: 'PUT',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                }
+                },
+                body: JSON.stringify({
+                    username: username,
+                    score: newCoins,
+                    pearls: newPearls
+                })
             });
             
             if (response.ok) {
-                const userData = await response.json();
-                populateUserForm(userData);
-                if (editUserForm) {
-                    editUserForm.classList.remove('hidden');
-                }
+                showMessage('تم تحديث بيانات المستخدم بنجاح', 'success');
+                // تحديث العرض
+                if (displayCoins) displayCoins.textContent = newCoins;
+                if (displayPearls) displayPearls.textContent = newPearls;
             } else {
-                alert('المستخدم غير موجود');
+                const errorData = await response.json();
+                showMessage(errorData.message || 'خطأ في تحديث بيانات المستخدم', 'error');
             }
         } catch (error) {
-            console.error('Error fetching user data:', error);
-            alert('خطأ في جلب بيانات المستخدم');
+            console.error('Error updating user:', error);
+            showMessage('خطأ في تحديث بيانات المستخدم', 'error');
         }
     });
 }
 
-// ملء نموذج تعديل المستخدم
-function populateUserForm(userData) {
-    currentUsername.value = userData.username;
-    editUsername.value = userData.username;
-    manageCoins.value = userData.score || 0;
-    managePearls.value = userData.pearls || 0;
-    adminRoleUsername.value = userData.username;
-}
-
-// تحديث بيانات المستخدم
-if (editUserForm) {
-    editUserForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = {
-            currentUsername: currentUsername.value,
-            newUsername: editUsername.value,
-            newPassword: editPassword.value || undefined,
-            newScore: parseInt(manageCoins.value) || 0
-        };
+// تعيين مستخدم كمشرف (النسخة المحسنة)
+if (assignAdminRoleBtn) {
+    assignAdminRoleBtn.addEventListener('click', async function() {
+        const username = adminRoleUsername.value.trim();
+        if (!username) {
+            showMessage('يرجى البحث عن مستخدم أولاً', 'error');
+            return;
+        }
         
         try {
-            const response = await fetch(`${BACKEND_URL}/api/users/update-user`, {
+            const response = await fetch(`${BACKEND_URL}/api/users/update-role`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ username, role: 'admin' })
             });
             
             if (response.ok) {
-                alert('تم تحديث بيانات المستخدم بنجاح!');
-                
-                // إضافة اللؤلؤ إذا تم تحديد قيمة
-                const pearlsToAdd = parseInt(managePearls.value) || 0;
-                if (pearlsToAdd > 0) {
-                    await addPearlsToUser(editUsername.value, pearlsToAdd);
-                }
+                showMessage(`تم تعيين ${username} كمشرف بنجاح`, 'success');
+                // تحديث العرض
+                if (displayRole) displayRole.textContent = 'مسؤول';
             } else {
-                alert('خطأ في تحديث بيانات المستخدم');
+                showMessage('خطأ في تعيين المشرف', 'error');
             }
         } catch (error) {
-            console.error('Error updating user:', error);
-            alert('خطأ في الاتصال بالخادم');
+            console.error('Error assigning admin role:', error);
+            showMessage('خطأ في تعيين المشرف', 'error');
         }
     });
 }
-
-// إضافة لؤلؤ للمستخدم
-async function addPearlsToUser(username, amount) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/users/add-pearls`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-            },
-            body: JSON.stringify({ username, amount })
-        });
-        
-        if (response.ok) {
-            alert(`تم إضافة ${amount} لؤلؤة للمستخدم ${username} بنجاح!`);
-        } else {
-            alert('خطأ في إضافة اللؤلؤ');
-        }
-    } catch (error) {
-        console.error('Error adding pearls:', error);
-        alert('خطأ في الاتصال بالخادم');
-    }
-}
-
-// تعيين مستخدم كمشرف
-assignAdminRoleBtn.addEventListener('click', async function() {
-    const username = adminRoleUsername.value.trim();
-    if (!username) {
-        alert('يرجى إدخال اسم المستخدم');
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/users/update-role`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-            },
-            body: JSON.stringify({ username, role: 'admin' })
-        });
-        
-        if (response.ok) {
-            alert(`تم تعيين ${username} كمشرف بنجاح!`);
-        } else {
-            alert('خطأ في تعيين المشرف');
-        }
-    } catch (error) {
-        console.error('Error assigning admin role:', error);
-        alert('خطأ في الاتصال بالخادم');
-    }
-});
 
 // حفظ إعدادات اللعبة
 saveGameSettingsBtn.addEventListener('click', async function() {
@@ -559,19 +570,16 @@ function displayUserDataForIdChange(userData) {
 const updateUserIdBtn = document.getElementById('updateUserIdBtn');
 if (updateUserIdBtn) {
     updateUserIdBtn.addEventListener('click', async function() {
-        const username = document.getElementById('searchUserIdUsername').value.trim();
+        const username = displayUsername.textContent;
         const newUserId = parseInt(document.getElementById('newUserId').value);
-        const messageElement = document.getElementById('updateUserIdMessage');
         
-        if (!username) {
-            messageElement.textContent = 'يرجى البحث عن مستخدم أولاً';
-            messageElement.style.color = 'red';
+        if (!username || username === 'غير محدد') {
+            showMessage('يرجى البحث عن مستخدم أولاً', 'error');
             return;
         }
         
         if (!newUserId || newUserId < 1) {
-            messageElement.textContent = 'يرجى إدخال معرف صحيح';
-            messageElement.style.color = 'red';
+            showMessage('يرجى إدخال معرف صحيح', 'error');
             return;
         }
         
@@ -582,31 +590,25 @@ if (updateUserIdBtn) {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     username: username,
-                    newUserId: newUserId 
+                    newUserId: newUserId
                 })
             });
             
             if (response.ok) {
                 const result = await response.json();
-                messageElement.textContent = `✅ تم تحديث معرف المستخدم ${username} إلى ${newUserId} بنجاح!`;
-                messageElement.style.color = 'green';
-                
+                showMessage(result.message, 'success');
                 // تحديث العرض
-                const currentUserIdElement = document.getElementById('displayCurrentUserId');
-                if (currentUserIdElement) {
-                    currentUserIdElement.textContent = newUserId;
-                }
+                if (displayCurrentUserId) displayCurrentUserId.textContent = newUserId;
+                document.getElementById('newUserId').value = '';
             } else {
-                const error = await response.json();
-                messageElement.textContent = `❌ خطأ: ${error.error || 'فشل في تحديث المعرف'}`;
-                messageElement.style.color = 'red';
+                const errorData = await response.json();
+                showMessage(errorData.error || 'خطأ في تحديث المعرف', 'error');
             }
         } catch (error) {
             console.error('Error updating user ID:', error);
-            messageElement.textContent = '❌ خطأ في الاتصال بالخادم';
-            messageElement.style.color = 'red';
+            showMessage('خطأ في تحديث المعرف', 'error');
         }
     });
 }
@@ -616,7 +618,7 @@ const loadAllUsersBtn = document.getElementById('loadAllUsersBtn');
 if (loadAllUsersBtn) {
     loadAllUsersBtn.addEventListener('click', async function() {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/users/admin/all`, {
+            const response = await fetch(`${BACKEND_URL}/api/users/admin/users-with-ids`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 }
@@ -626,46 +628,280 @@ if (loadAllUsersBtn) {
                 const data = await response.json();
                 displayUsersList(data.users);
             } else {
-                alert('خطأ في تحميل قائمة المستخدمين');
+                showMessage('خطأ في تحميل قائمة المستخدمين', 'error');
             }
         } catch (error) {
             console.error('Error loading users:', error);
-            alert('خطأ في الاتصال بالخادم');
+            showMessage('خطأ في تحميل قائمة المستخدمين', 'error');
         }
     });
 }
 
 // عرض قائمة المستخدمين
 function displayUsersList(users) {
-    const usersListContainer = document.getElementById('usersList');
+    const usersList = document.getElementById('usersList');
+    if (!usersList) return;
     
     if (users.length === 0) {
-        usersListContainer.innerHTML = '<p>لا يوجد مستخدمين</p>';
+        usersList.innerHTML = '<p style="text-align: center; color: var(--text-color-light);">لا يوجد مستخدمين</p>';
         return;
     }
     
     const usersHTML = users.map(user => `
-        <div class="user-item" style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 5px; background: #f9f9f9;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong>${user.username}</strong> 
-                    <span style="color: #666;">(ID: ${user.userId || 'غير محدد'})</span>
+        <div class="user-list-item" onclick="selectUserFromList('${user.username}')">
+            <div class="user-list-info">
+                <div class="user-list-avatar">
+                    ${user.avatar ? `<img src="${user.avatar}" alt="Avatar" onerror="this.style.display='none'">` : '👤'}
                 </div>
-                <button onclick="searchUserById('${user.username}')" style="background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                    تعديل المعرف
-                </button>
+                <div class="user-list-details">
+                    <div class="user-list-name">${user.username}</div>
+                    <div class="user-list-id">المعرف: ${user.userId}</div>
+                    <div class="user-list-score">النقاط: ${user.score || 0}</div>
+                </div>
             </div>
-            <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
-                البريد: ${user.email || 'غير محدد'} | النقاط: ${user.score || 0}
+            <div class="user-list-actions">
+                <button onclick="event.stopPropagation(); selectUserFromList('${user.username}')" class="select-user-btn">
+                    🔍 اختيار
+                </button>
             </div>
         </div>
     `).join('');
     
-    usersListContainer.innerHTML = usersHTML;
+    usersList.innerHTML = usersHTML;
 }
 
-// دالة مساعدة للبحث عن مستخدم من القائمة
-window.searchUserById = function(username) {
-    document.getElementById('searchUserIdUsername').value = username;
-    document.getElementById('searchUserBtn').click();
-}; 
+// اختيار مستخدم من القائمة
+window.selectUserFromList = function(username) {
+    if (searchByUsername) {
+        searchByUsername.value = username;
+        if (searchByUsernameBtn) {
+            searchByUsernameBtn.click();
+        }
+    }
+};
+
+// البحث بالاسم
+if (searchByUsernameBtn) {
+    searchByUsernameBtn.addEventListener('click', async function() {
+        const username = searchByUsername.value.trim();
+        if (!username) {
+            showMessage('يرجى إدخال اسم المستخدم', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/users/by-username/${username}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            });
+            
+            if (response.ok) {
+                const userData = await response.json();
+                displayUserData(userData);
+            } else {
+                showMessage('المستخدم غير موجود', 'error');
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            showMessage('خطأ في جلب بيانات المستخدم', 'error');
+        }
+    });
+}
+
+// البحث بالمعرف
+if (searchByUserIdBtn) {
+    searchByUserIdBtn.addEventListener('click', async function() {
+        const userId = searchByUserId.value.trim();
+        if (!userId) {
+            showMessage('يرجى إدخال معرف المستخدم', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/users/admin/find-user-by-id/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            });
+            
+            if (response.ok) {
+                const userData = await response.json();
+                displayUserData(userData);
+            } else {
+                showMessage('المستخدم غير موجود', 'error');
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            showMessage('خطأ في جلب بيانات المستخدم', 'error');
+        }
+    });
+}
+
+// عرض بيانات المستخدم
+function displayUserData(userData) {
+    // التعامل مع البيانات التي تأتي من مسار البحث بالمعرف
+    const user = userData.user || userData;
+    
+    if (displayUsername) displayUsername.textContent = user.username || 'غير محدد';
+    if (displayCurrentUserId) displayCurrentUserId.textContent = user.userId || 'غير محدد';
+    if (displayEmail) displayEmail.textContent = user.email || 'غير محدد';
+    if (displayCoins) displayCoins.textContent = user.score || 0;
+    if (displayPearls) displayPearls.textContent = user.pearls || 0;
+    if (displayRole) displayRole.textContent = user.isAdmin ? 'مسؤول' : 'مستخدم عادي';
+    
+    // ملء حقول العمليات
+    if (manageCoins) manageCoins.value = user.score || 0;
+    if (managePearls) managePearls.value = user.pearls || 0;
+    if (adminRoleUsername) adminRoleUsername.value = user.username || '';
+    if (newUserId) newUserId.value = '';
+    if (editPassword) editPassword.value = '';
+    
+    // إظهار أقسام البيانات والعمليات
+    if (userDataDisplay) userDataDisplay.classList.remove('hidden');
+    if (userOperationsContainer) userOperationsContainer.classList.remove('hidden');
+    
+    showMessage('تم جلب بيانات المستخدم بنجاح', 'success');
+}
+
+// تحديث كلمة المرور
+if (updatePasswordBtn) {
+    updatePasswordBtn.addEventListener('click', async function() {
+        const username = displayUsername.textContent;
+        const newPassword = editPassword.value.trim();
+        
+        if (!username || username === 'غير محدد') {
+            showMessage('يرجى البحث عن مستخدم أولاً', 'error');
+            return;
+        }
+        
+        if (!newPassword) {
+            showMessage('يرجى إدخال كلمة المرور الجديدة', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/users/update-user`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: newPassword
+                })
+            });
+            
+            if (response.ok) {
+                showMessage('تم تحديث كلمة المرور بنجاح', 'success');
+                editPassword.value = '';
+            } else {
+                const errorData = await response.json();
+                showMessage(errorData.message || 'خطأ في تحديث كلمة المرور', 'error');
+            }
+        } catch (error) {
+            console.error('Error updating password:', error);
+            showMessage('خطأ في تحديث كلمة المرور', 'error');
+        }
+    });
+}
+
+// تحسينات للجوال والتفاعل مع اللمس
+document.addEventListener('DOMContentLoaded', function() {
+    // منع التكبير على الجوال
+    document.addEventListener('touchstart', function(event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    }, { passive: false });
+    
+    // تحسين التفاعل مع الأزرار على الجوال
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.98)';
+            this.style.opacity = '0.8';
+        });
+        
+        button.addEventListener('touchend', function() {
+            this.style.transform = '';
+            this.style.opacity = '';
+        });
+    });
+    
+    // تحسين التفاعل مع حقول الإدخال
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            // تأخير بسيط لضمان ظهور لوحة المفاتيح
+            setTimeout(() => {
+                this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        });
+    });
+    
+    // تحسين التمرير في قائمة المستخدمين
+    const usersList = document.getElementById('usersList');
+    if (usersList) {
+        usersList.addEventListener('touchstart', function(e) {
+            this.style.overflow = 'hidden';
+        });
+        
+        usersList.addEventListener('touchend', function(e) {
+            this.style.overflow = 'auto';
+        });
+    }
+});
+
+// تحسين عرض الرسائل على الجوال
+function showMessage(message, type = 'info') {
+    // إزالة الرسائل السابقة
+    const existingMessages = document.querySelectorAll('.message');
+    existingMessages.forEach(msg => msg.remove());
+    
+    // إنشاء رسالة جديدة
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${type}`;
+    messageElement.textContent = message;
+    
+    // إضافة زر إغلاق للرسائل
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    closeBtn.onclick = () => messageElement.remove();
+    
+    messageElement.style.position = 'relative';
+    messageElement.appendChild(closeBtn);
+    
+    // إضافة الرسالة إلى الصفحة
+    const container = document.querySelector('.user-management-container');
+    if (container) {
+        container.insertBefore(messageElement, container.firstChild);
+    }
+    
+    // إزالة الرسالة بعد 8 ثوان (أطول قليلاً للجوال)
+    setTimeout(() => {
+        if (messageElement.parentNode) {
+            messageElement.remove();
+        }
+    }, 8000);
+    
+    // تمرير إلى الرسالة
+    messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+} 
