@@ -615,18 +615,6 @@
                                 <button onclick="manageImage(${user.userId}, 'change_avatar')" class="btn btn-warning btn-small">✏️ تغيير</button>
                             </div>
                         </div>
-                        
-                        <div class="image-item">
-                            <img src="${user.profileImage || 'images/default-cover.jpg'}" alt="صورة البروفايل" class="image-preview">
-                            <div class="image-info">
-                                <div class="image-type">صورة البروفايل</div>
-                                <div class="image-status">${user.profileImage ? 'موجودة' : 'غير موجودة'}</div>
-                            </div>
-                            <div class="image-actions">
-                                <button onclick="manageImage(${user.userId}, 'remove_profile_image')" class="btn btn-danger btn-small">🗑️ حذف</button>
-                                <button onclick="manageImage(${user.userId}, 'change_profile_image')" class="btn btn-warning btn-small">✏️ تغيير</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             `).join('');

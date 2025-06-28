@@ -427,20 +427,28 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { username, newUsername, newPassword, newScore, newPearls } = req.body;
 
+    console.log('🔧 طلب تحديث بيانات المستخدم:', { username, newUsername, newScore, newPearls });
+
     if (!username) {
+      console.log('❌ اسم المستخدم مفقود');
       return res.status(400).json({ error: 'اسم المستخدم مطلوب' });
     }
 
     const user = await User.findOne({ username });
     if (!user) {
+      console.log('❌ المستخدم غير موجود:', username);
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
+    console.log('✅ تم العثور على المستخدم:', { userId: user.userId, username: user.username });
+
     // تحديث اسم المستخدم إذا تم توفيره
     if (newUsername && newUsername !== username) {
+      console.log('🔄 تحديث اسم المستخدم من', username, 'إلى', newUsername);
       // التحقق من أن الاسم الجديد غير مستخدم
       const existingUser = await User.findOne({ username: newUsername });
       if (existingUser) {
+        console.log('❌ اسم المستخدم الجديد مستخدم بالفعل:', newUsername);
         return res.status(400).json({ error: 'اسم المستخدم الجديد مستخدم بالفعل' });
       }
       user.username = newUsername;
@@ -448,6 +456,7 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
 
     // تحديث كلمة المرور إذا تم توفيرها
     if (newPassword) {
+      console.log('🔐 تحديث كلمة المرور للمستخدم:', username);
       const bcrypt = require('bcryptjs');
       const saltRounds = 10;
       user.password = await bcrypt.hash(newPassword, saltRounds);
@@ -455,17 +464,21 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
 
     // تحديث النقاط إذا تم توفيرها
     if (newScore !== undefined) {
+      console.log('📊 تحديث النقاط من', user.stats?.score, 'إلى', newScore);
       if (!user.stats) user.stats = {};
       user.stats.score = parseInt(newScore);
     }
 
     // تحديث اللآلئ إذا تم توفيرها
     if (newPearls !== undefined) {
+      console.log('💎 تحديث اللآلئ من', user.stats?.pearls, 'إلى', newPearls);
       if (!user.stats) user.stats = {};
       user.stats.pearls = parseInt(newPearls);
     }
 
+    console.log('💾 محاولة حفظ التغييرات...');
     await user.save();
+    console.log('💾 تم حفظ التغييرات بنجاح');
 
     console.log(`🔧 المشرف ${req.user.username} حدث بيانات المستخدم ${username}`);
 
@@ -481,8 +494,17 @@ router.post('/update-user', verifyToken, verifyAdmin, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('خطأ في تحديث بيانات المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في تحديث بيانات المستخدم' });
+    console.error('❌ خطأ في تحديث بيانات المستخدم:', error);
+    console.error('❌ تفاصيل الخطأ:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'خطأ في تحديث بيانات المستخدم',
+      message: 'حدث خطأ غير متوقع',
+      details: error.message 
+    });
   }
 });
 
@@ -1378,7 +1400,7 @@ router.get('/admin/users-with-ids', verifyToken, verifyAdmin, async (req, res) =
     }
 
     const users = await User.find(query)
-      .select('userId username email profile.displayName profile.level stats.score createdAt profile.avatar profile.profileImage')
+      .select('userId username email profile.displayName profile.level stats.score createdAt profile.avatar')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -1394,7 +1416,6 @@ router.get('/admin/users-with-ids', verifyToken, verifyAdmin, async (req, res) =
       level: user.profile?.level || 1,
       score: user.stats?.score || 0,
       avatar: user.profile?.avatar || null,
-      profileImage: user.profile?.profileImage || null,
       createdAt: user.createdAt
     }));
 
@@ -1442,8 +1463,7 @@ router.get('/admin/user-images/:userId', verifyToken, verifyAdmin, async (req, r
         userId: user.userId,
         username: user.username,
         images: {
-          avatar: user.profile?.avatar,
-          profileImage: user.profile?.profileImage
+          avatar: user.profile?.avatar
         }
       }
     });
@@ -1512,12 +1532,6 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
         message = 'تم حذف الصورة الشخصية بنجاح';
         break;
 
-      case 'remove_profile_image':
-        console.log('🗑️ حذف صورة البروفايل للمستخدم:', user.username);
-        user.profile.profileImage = null;
-        message = 'تم حذف صورة البروفايل بنجاح';
-        break;
-
       case 'change_avatar':
         if (!imageData) {
           console.log('❌ بيانات الصورة مفقودة للـ change_avatar');
@@ -1534,23 +1548,6 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
         console.log('🖼️ تغيير الصورة الشخصية للمستخدم:', user.username, 'حجم البيانات:', imageData.length);
         user.profile.avatar = imageData;
         message = 'تم تغيير الصورة الشخصية بنجاح';
-        break;
-
-      case 'change_profile_image':
-        if (!imageData) {
-          console.log('❌ بيانات الصورة مفقودة للـ change_profile_image');
-          return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
-        }
-        
-        // تحقق من حجم البيانات (الحد الأقصى 3MB)
-        if (imageData.length > maxDataSize) {
-          console.log('❌ حجم البيانات كبير جداً:', imageData.length, 'bytes');
-          return res.status(400).json({ error: 'حجم الصورة كبير جداً. الحد الأقصى 3MB' });
-        }
-        
-        console.log('🖼️ تغيير صورة البروفايل للمستخدم:', user.username, 'حجم البيانات:', imageData.length);
-        user.profile.profileImage = imageData;
-        message = 'تم تغيير صورة البروفايل بنجاح';
         break;
 
       default:
@@ -1571,8 +1568,7 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
         userId: user.userId,
         username: user.username,
         images: {
-          avatar: user.profile.avatar,
-          profileImage: user.profile.profileImage
+          avatar: user.profile.avatar
         }
       }
     };
@@ -1592,6 +1588,55 @@ router.put('/admin/manage-user-image', verifyToken, verifyAdmin, async (req, res
       message: 'حدث خطأ غير متوقع',
       details: error.message 
     });
+  }
+});
+
+// تحديث معرف المستخدم (للمشرفين فقط)
+router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { targetUserId, newUserId } = req.body;
+
+    console.log('🆔 طلب تحديث معرف المستخدم:', { targetUserId, newUserId });
+
+    if (!targetUserId || !newUserId) {
+      return res.status(400).json({ error: 'معرف المستخدم الحالي والجديد مطلوبان' });
+    }
+
+    // البحث عن المستخدم
+    let user = await User.findOne({ userId: parseInt(targetUserId) });
+    if (!user) {
+      user = await User.findById(targetUserId);
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // التحقق من أن المعرف الجديد غير مستخدم
+    const existingUser = await User.findOne({ userId: parseInt(newUserId) });
+    if (existingUser) {
+      return res.status(400).json({ error: 'المعرف الجديد مستخدم بالفعل' });
+    }
+
+    // تحديث المعرف
+    const oldUserId = user.userId;
+    user.userId = parseInt(newUserId);
+    await user.save();
+
+    console.log(`🆔 المشرف ${req.user.username} غير معرف المستخدم ${oldUserId} إلى ${newUserId}`);
+
+    res.json({
+      message: 'تم تحديث معرف المستخدم بنجاح',
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في تحديث معرف المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في الخادم' });
   }
 });
 
