@@ -1043,15 +1043,20 @@ router.post('/admin/add-boxes', verifyToken, verifyAdmin, async (req, res) => {
 // تحديث معرف المستخدم (للمشرفين)
 router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { targetUserId, newUserId } = req.body;
+    const { username, newUserId } = req.body;
+
+    if (!username || !newUserId) {
+      return res.status(400).json({ error: 'اسم المستخدم والمعرف الجديد مطلوبان' });
+    }
 
     // التحقق من أن المعرف الجديد غير مستخدم
     const existingUser = await User.findOne({ userId: newUserId });
-    if (existingUser) {
-      return res.status(400).json({ error: 'معرف المستخدم الجديد مستخدم بالفعل' });
+    if (existingUser && existingUser.username !== username) {
+      return res.status(400).json({ error: 'المعرف الجديد مستخدم بالفعل من قبل مستخدم آخر' });
     }
 
-    const targetUser = await User.findById(targetUserId);
+    // البحث عن المستخدم المراد تحديثه
+    const targetUser = await User.findOne({ username });
     if (!targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
@@ -1063,7 +1068,7 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
     console.log(`🔧 المشرف ${req.user.username} غير معرف المستخدم ${targetUser.username} من ${oldUserId} إلى ${newUserId}`);
 
     res.json({
-      message: `تم تحديث معرف المستخدم من ${oldUserId} إلى ${newUserId} بنجاح`,
+      message: `تم تحديث معرف المستخدم ${username} من ${oldUserId} إلى ${newUserId} بنجاح`,
       user: {
         id: targetUser._id,
         userId: targetUser.userId,
@@ -1073,7 +1078,7 @@ router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) =
 
   } catch (error) {
     console.error('خطأ في تحديث معرف المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في تحديث معرف المستخدم' });
+    res.status(500).json({ error: 'خطأ في الخادم' });
   }
 });
 

@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://mygame25bita-1-4ue6.onrender.com wss: ws:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://mygame25bita-7eqw.onrender.com https://mygame25bita-1-4ue6.onrender.com wss: ws:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;">
   <title>لوحة تحكم المسؤول - Voice Boom</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin-styles.css">
@@ -82,6 +82,51 @@
             <input type="text" id="adminRoleUsername" readonly>
           </div>
           <button id="assignAdminRoleBtn">تعيين مشرف</button>
+      </div>
+
+      <!-- User IDs Management Section -->
+      <div id="userIdsManagementSection" class="section-content hidden">
+        <h3>🆔 إدارة معرفات المستخدمين</h3>
+        
+        <!-- البحث عن المستخدم -->
+        <div class="search-section">
+          <h4>البحث عن المستخدم</h4>
+          <div class="field">
+            <label for="searchUserIdUsername">اسم المستخدم:</label>
+            <input type="text" id="searchUserIdUsername" placeholder="أدخل اسم المستخدم">
+          </div>
+          <button id="searchUserBtn">🔍 البحث</button>
+        </div>
+
+        <!-- عرض بيانات المستخدم -->
+        <div id="userDataDisplay" class="hidden">
+          <h4>بيانات المستخدم</h4>
+          <div class="user-info">
+            <p><strong>اسم المستخدم:</strong> <span id="displayUsername"></span></p>
+            <p><strong>المعرف الحالي:</strong> <span id="displayCurrentUserId"></span></p>
+            <p><strong>البريد الإلكتروني:</strong> <span id="displayEmail"></span></p>
+          </div>
+          
+          <!-- تغيير المعرف -->
+          <div class="change-user-id-section">
+            <h4>تغيير معرف المستخدم</h4>
+            <div class="field">
+              <label for="newUserId">المعرف الجديد:</label>
+              <input type="number" id="newUserId" placeholder="أدخل المعرف الجديد" min="1">
+            </div>
+            <button id="updateUserIdBtn" style="background: #f59e0b;">🔄 تحديث المعرف</button>
+            <p id="updateUserIdMessage" style="margin-top: 10px;"></p>
+          </div>
+        </div>
+
+        <!-- قائمة المستخدمين -->
+        <div class="users-list-section">
+          <h4>قائمة المستخدمين</h4>
+          <button id="loadAllUsersBtn" style="background: #10b981;">📋 تحميل جميع المستخدمين</button>
+          <div id="usersList" style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
+            <!-- سيتم ملؤها بالجافاسكريبت -->
+          </div>
+        </div>
       </div>
 
       <!-- Suspicious Activity Monitoring Section -->
