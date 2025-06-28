@@ -657,7 +657,7 @@
             
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${BACKEND_URL}/api/users/admin/user-images/${userId}`, {
+                const response = await fetch(`${BACKEND_URL}/api/users/admin/user-images/${userNumId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

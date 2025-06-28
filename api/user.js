@@ -1190,8 +1190,17 @@ router.get('/admin/user-images/:userId', verifyToken, verifyAdmin, async (req, r
   try {
     const { userId } = req.params;
 
-    const user = await User.findById(userId)
-      .select('userId username profile.avatar profile.profileImage profile.coverImage');
+    if (!userId) {
+      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    }
+
+    // البحث بالمعرف الرقمي أولاً
+    let user = await User.findOne({ userId: parseInt(userId) });
+    
+    // إذا لم يتم العثور عليه، جرب البحث بالـ ObjectId
+    if (!user) {
+      user = await User.findById(userId);
+    }
 
     if (!user) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -1203,9 +1212,9 @@ router.get('/admin/user-images/:userId', verifyToken, verifyAdmin, async (req, r
         userId: user.userId,
         username: user.username,
         images: {
-          avatar: user.profile.avatar,
-          profileImage: user.profile.profileImage,
-          coverImage: user.profile.coverImage
+          avatar: user.profile?.avatar,
+          profileImage: user.profile?.profileImage,
+          coverImage: user.profile?.coverImage
         }
       }
     });
