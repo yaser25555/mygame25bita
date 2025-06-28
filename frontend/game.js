@@ -1,6 +1,7 @@
 ﻿// ملف محفوظ بترميز UTF-8 بدون BOM
 // ملف اللعبة الرئيسي
-// BACKEND_URL معرف في navigation.js
+// استخدام ملف التكوين المركزي
+const BACKEND_URL = CONFIG.BACKEND_URL;
 
 // متغيرات اللعبة
 let gameState = {
