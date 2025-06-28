@@ -243,7 +243,7 @@ router.post('/score', verifyToken, async (req, res) => {
     // إعادة استخدام نفس منطق /save-game-data
     try {
         const { score, highScore, roundNumber, itemsCollected, collectedGems, totalGemsCollected, batsHit, totalSpent } = req.body;
-        const user = await User.findById(req.user.userId);
+        const user = await User.findById(req.user._id);
 
         if (!user) {
             return res.status(404).json({ message: 'المستخدم غير موجود' });
