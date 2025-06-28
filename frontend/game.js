@@ -1,0 +1,524 @@
+// Game Configuration
+const GAME_CONFIG = {
+    canvas: {
+        width: 800,
+        height: 600
+    },
+    player: {
+        width: 50,
+        height: 50,
+        speed: 5,
+        health: 100,
+        maxHealth: 100
+    },
+    enemy: {
+        width: 40,
+        height: 40,
+        speed: 2,
+        health: 50,
+        maxHealth: 50
+    },
+    bullet: {
+        width: 5,
+        height: 10,
+        speed: 10
+    },
+    powerUp: {
+        width: 30,
+        height: 30,
+        duration: 10000
+    }
+};
+
+// Game State
+let gameState = {
+    isRunning: false,
+    score: 0,
+    level: 1,
+    enemies: [],
+    bullets: [],
+    powerUps: [],
+    keys: {},
+    lastShot: 0,
+    shotCooldown: 200,
+    tripleShotActive: false,
+    tripleShotEndTime: 0
+};
+
+// Canvas and Context
+let canvas, ctx;
+let player = {
+    x: 0,
+    y: 0,
+    width: GAME_CONFIG.player.width,
+    height: GAME_CONFIG.player.height,
+    health: GAME_CONFIG.player.health,
+    maxHealth: GAME_CONFIG.player.maxHealth
+};
+
+// Assets
+let backgroundImage, playerImage, enemyImage, bulletImage, powerUpImage;
+let sounds = {};
+
+// Initialize Game
+function initGame() {
+    console.log('🚀 تهيئة اللعبة...');
+    
+    // Setup canvas
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    canvas.width = GAME_CONFIG.canvas.width;
+    canvas.height = GAME_CONFIG.canvas.height;
+    
+    // Initialize player position
+    player.x = canvas.width / 2 - player.width / 2;
+    player.y = canvas.height - player.height - 20;
+    
+    // Load assets
+    loadAssets();
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Start game loop
+    gameLoop();
+    
+    console.log('✅ تم تهيئة اللعبة بنجاح');
+}
+
+// Load Game Assets
+function loadAssets() {
+    // Load images
+    backgroundImage = new Image();
+    backgroundImage.src = 'background_image.jpg';
+    
+    playerImage = new Image();
+    playerImage.src = 'hero.png';
+    
+    enemyImage = new Image();
+    enemyImage.src = 'box_closed.png';
+    
+    bulletImage = new Image();
+    bulletImage.src = 'coin.png';
+    
+    powerUpImage = new Image();
+    powerUpImage.src = 'coin.png';
+    
+    // Load sounds
+    sounds.singleShot = new Audio('sounds/single_shot.mp3');
+    sounds.tripleShot = new Audio('sounds/triple_shot.mp3');
+    sounds.hammerShot = new Audio('sounds/hammer_shot.mp3');
+    
+    // Preload sounds
+    Object.values(sounds).forEach(sound => {
+        sound.load();
+        sound.volume = 0.3;
+    });
+}
+
+// Setup Event Listeners
+function setupEventListeners() {
+    // Keyboard events
+    document.addEventListener('keydown', (e) => {
+        gameState.keys[e.code] = true;
+        
+        // Prevent default for game keys
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('keyup', (e) => {
+        gameState.keys[e.code] = false;
+    });
+    
+    // Mouse events for shooting
+    canvas.addEventListener('click', (e) => {
+        if (gameState.isRunning) {
+            shoot();
+        }
+    });
+    
+    // Touch events for mobile
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (gameState.isRunning) {
+            shoot();
+        }
+    });
+}
+
+// Game Loop
+function gameLoop() {
+    if (gameState.isRunning) {
+        update();
+        render();
+    }
+    
+    requestAnimationFrame(gameLoop);
+}
+
+// Update Game State
+function update() {
+    updatePlayer();
+    updateBullets();
+    updateEnemies();
+    updatePowerUps();
+    checkCollisions();
+    updateScore();
+}
+
+// Update Player
+function updatePlayer() {
+    // Movement
+    if (gameState.keys['ArrowLeft'] || gameState.keys['KeyA']) {
+        player.x -= GAME_CONFIG.player.speed;
+    }
+    if (gameState.keys['ArrowRight'] || gameState.keys['KeyD']) {
+        player.x += GAME_CONFIG.player.speed;
+    }
+    if (gameState.keys['ArrowUp'] || gameState.keys['KeyW']) {
+        player.y -= GAME_CONFIG.player.speed;
+    }
+    if (gameState.keys['ArrowDown'] || gameState.keys['KeyS']) {
+        player.y += GAME_CONFIG.player.speed;
+    }
+    
+    // Keep player in bounds
+    player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+    player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+    
+    // Auto-shooting
+    if (gameState.keys['Space']) {
+        shoot();
+    }
+}
+
+// Shoot Function
+function shoot() {
+    const now = Date.now();
+    if (now - gameState.lastShot < gameState.shotCooldown) return;
+    
+    gameState.lastShot = now;
+    
+    if (gameState.tripleShotActive && now < gameState.tripleShotEndTime) {
+        // Triple shot
+        for (let i = -1; i <= 1; i++) {
+            const bullet = {
+                x: player.x + player.width / 2 - GAME_CONFIG.bullet.width / 2 + (i * 10),
+                y: player.y,
+                width: GAME_CONFIG.bullet.width,
+                height: GAME_CONFIG.bullet.height,
+                speed: GAME_CONFIG.bullet.speed,
+                angle: i * 0.2
+            };
+            gameState.bullets.push(bullet);
+        }
+        sounds.tripleShot.play().catch(e => console.log('Sound play failed:', e));
+    } else {
+        // Single shot
+        const bullet = {
+            x: player.x + player.width / 2 - GAME_CONFIG.bullet.width / 2,
+            y: player.y,
+            width: GAME_CONFIG.bullet.width,
+            height: GAME_CONFIG.bullet.height,
+            speed: GAME_CONFIG.bullet.speed,
+            angle: 0
+        };
+        gameState.bullets.push(bullet);
+        sounds.singleShot.play().catch(e => console.log('Sound play failed:', e));
+    }
+}
+
+// Update Bullets
+function updateBullets() {
+    gameState.bullets = gameState.bullets.filter(bullet => {
+        bullet.y -= bullet.speed;
+        return bullet.y > -bullet.height;
+    });
+}
+
+// Update Enemies
+function updateEnemies() {
+    // Spawn new enemies
+    if (Math.random() < 0.02 + (gameState.level * 0.005)) {
+        spawnEnemy();
+    }
+    
+    // Update existing enemies
+    gameState.enemies = gameState.enemies.filter(enemy => {
+        enemy.y += enemy.speed;
+        return enemy.y < canvas.height + enemy.height;
+    });
+}
+
+// Spawn Enemy
+function spawnEnemy() {
+    const enemy = {
+        x: Math.random() * (canvas.width - GAME_CONFIG.enemy.width),
+        y: -GAME_CONFIG.enemy.height,
+        width: GAME_CONFIG.enemy.width,
+        height: GAME_CONFIG.enemy.height,
+        health: GAME_CONFIG.enemy.health,
+        maxHealth: GAME_CONFIG.enemy.maxHealth,
+        speed: GAME_CONFIG.enemy.speed + (gameState.level * 0.5)
+    };
+    gameState.enemies.push(enemy);
+}
+
+// Update Power-ups
+function updatePowerUps() {
+    // Spawn power-ups
+    if (Math.random() < 0.005) {
+        spawnPowerUp();
+    }
+    
+    // Update existing power-ups
+    gameState.powerUps = gameState.powerUps.filter(powerUp => {
+        powerUp.y += 1;
+        return powerUp.y < canvas.height + powerUp.height;
+    });
+}
+
+// Spawn Power-up
+function spawnPowerUp() {
+    const powerUp = {
+        x: Math.random() * (canvas.width - GAME_CONFIG.powerUp.width),
+        y: -GAME_CONFIG.powerUp.height,
+        width: GAME_CONFIG.powerUp.width,
+        height: GAME_CONFIG.powerUp.height,
+        type: Math.random() < 0.5 ? 'tripleShot' : 'health'
+    };
+    gameState.powerUps.push(powerUp);
+}
+
+// Check Collisions
+function checkCollisions() {
+    // Bullet-Enemy collisions
+    gameState.bullets.forEach((bullet, bulletIndex) => {
+        gameState.enemies.forEach((enemy, enemyIndex) => {
+            if (isColliding(bullet, enemy)) {
+                enemy.health -= 25;
+                gameState.bullets.splice(bulletIndex, 1);
+                
+                if (enemy.health <= 0) {
+                    gameState.enemies.splice(enemyIndex, 1);
+                    gameState.score += 100;
+                }
+            }
+        });
+    });
+    
+    // Player-Enemy collisions
+    gameState.enemies.forEach((enemy, index) => {
+        if (isColliding(player, enemy)) {
+            player.health -= 20;
+            gameState.enemies.splice(index, 1);
+            
+            if (player.health <= 0) {
+                gameOver();
+            }
+        }
+    });
+    
+    // Player-PowerUp collisions
+    gameState.powerUps.forEach((powerUp, index) => {
+        if (isColliding(player, powerUp)) {
+            if (powerUp.type === 'tripleShot') {
+                gameState.tripleShotActive = true;
+                gameState.tripleShotEndTime = Date.now() + GAME_CONFIG.powerUp.duration;
+            } else if (powerUp.type === 'health') {
+                player.health = Math.min(player.maxHealth, player.health + 30);
+            }
+            gameState.powerUps.splice(index, 1);
+        }
+    });
+}
+
+// Collision Detection
+function isColliding(rect1, rect2) {
+    return rect1.x < rect2.x + rect2.width &&
+           rect1.x + rect1.width > rect2.x &&
+           rect1.y < rect2.y + rect2.height &&
+           rect1.y + rect1.height > rect2.y;
+}
+
+// Update Score
+function updateScore() {
+    gameState.score += 1;
+    
+    // Level up every 1000 points
+    if (gameState.score % 1000 === 0) {
+        gameState.level++;
+        console.log(`🎉 Level up! Level ${gameState.level}`);
+    }
+}
+
+// Render Game
+function render() {
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw background
+    if (backgroundImage.complete) {
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    }
+    
+    // Draw player
+    if (playerImage.complete) {
+        ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
+    }
+    
+    // Draw enemies
+    gameState.enemies.forEach(enemy => {
+        if (enemyImage.complete) {
+            ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
+        }
+        
+        // Draw enemy health bar
+        drawHealthBar(enemy, enemy.x, enemy.y - 10);
+    });
+    
+    // Draw bullets
+    gameState.bullets.forEach(bullet => {
+        if (bulletImage.complete) {
+            ctx.save();
+            ctx.translate(bullet.x + bullet.width / 2, bullet.y + bullet.height / 2);
+            ctx.rotate(bullet.angle);
+            ctx.drawImage(bulletImage, -bullet.width / 2, -bullet.height / 2, bullet.width, bullet.height);
+            ctx.restore();
+        }
+    });
+    
+    // Draw power-ups
+    gameState.powerUps.forEach(powerUp => {
+        if (powerUpImage.complete) {
+            ctx.drawImage(powerUpImage, powerUp.x, powerUp.y, powerUp.width, powerUp.height);
+        }
+    });
+    
+    // Draw UI
+    drawUI();
+}
+
+// Draw Health Bar
+function drawHealthBar(entity, x, y) {
+    const barWidth = entity.width;
+    const barHeight = 5;
+    const healthPercent = entity.health / entity.maxHealth;
+    
+    // Background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(x, y, barWidth, barHeight);
+    
+    // Health
+    ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : healthPercent > 0.25 ? '#ffff00' : '#ff0000';
+    ctx.fillRect(x, y, barWidth * healthPercent, barHeight);
+}
+
+// Draw UI
+function drawUI() {
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'left';
+    
+    // Score
+    ctx.fillText(`Score: ${gameState.score}`, 10, 30);
+    
+    // Level
+    ctx.fillText(`Level: ${gameState.level}`, 10, 60);
+    
+    // Player health
+    ctx.fillText(`Health: ${player.health}`, 10, 90);
+    
+    // Triple shot indicator
+    if (gameState.tripleShotActive && Date.now() < gameState.tripleShotEndTime) {
+        ctx.fillStyle = '#ffff00';
+        ctx.fillText('TRIPLE SHOT ACTIVE!', 10, 120);
+    }
+}
+
+// Start Game
+function startGame() {
+    console.log('🎮 بدء اللعبة...');
+    gameState.isRunning = true;
+    gameState.score = 0;
+    gameState.level = 1;
+    gameState.enemies = [];
+    gameState.bullets = [];
+    gameState.powerUps = [];
+    player.health = player.maxHealth;
+    
+    // Hide start screen
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('gameCanvas').style.display = 'block';
+}
+
+// Game Over
+function gameOver() {
+    console.log('💀 انتهت اللعبة');
+    gameState.isRunning = false;
+    
+    // Show game over screen
+    document.getElementById('gameOverScreen').style.display = 'block';
+    document.getElementById('finalScore').textContent = gameState.score;
+    
+    // Save score to backend
+    saveScore(gameState.score);
+}
+
+// Save Score
+async function saveScore(score) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.log('❌ لا يوجد token لحفظ النتيجة');
+            return;
+        }
+        
+        const response = await fetch(`${BACKEND_URL}/api/users/score`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ score })
+        });
+        
+        if (response.ok) {
+            console.log('✅ تم حفظ النتيجة بنجاح');
+        } else {
+            console.log('❌ فشل في حفظ النتيجة');
+        }
+    } catch (error) {
+        console.log('❌ خطأ في حفظ النتيجة:', error);
+    }
+}
+
+// Restart Game
+function restartGame() {
+    document.getElementById('gameOverScreen').style.display = 'none';
+    startGame();
+}
+
+// Back to Menu
+function backToMenu() {
+    document.getElementById('gameOverScreen').style.display = 'none';
+    document.getElementById('startScreen').style.display = 'block';
+    document.getElementById('gameCanvas').style.display = 'none';
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎮 تحميل صفحة اللعبة...');
+    initGame();
+    
+    // Setup button event listeners
+    document.getElementById('startButton').addEventListener('click', startGame);
+    document.getElementById('restartButton').addEventListener('click', restartGame);
+    document.getElementById('menuButton').addEventListener('click', backToMenu);
+    
+    console.log('✅ تم تحميل صفحة اللعبة بنجاح');
+}); 
