@@ -161,12 +161,6 @@ function displayUserProfile(user) {
         userLevel.textContent = user.profile.level || 1;
     }
 
-    // عدد الأصدقاء فقط
-    const friendsCount = document.getElementById('friends-count');
-    if (friendsCount) {
-        friendsCount.textContent = user.relationships?.friends?.length || 0;
-    }
-
     // حالة الدرع
     displayShieldStatus(user.shield);
 

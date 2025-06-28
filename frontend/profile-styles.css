@@ -256,6 +256,11 @@ body {
   margin-bottom: 16px;
 }
 
+/* إخفاء حاوية الإحصائيات عندما تكون فارغة */
+.quick-stats:empty {
+  display: none;
+}
+
 .stat-card {
   background: white;
   border-radius: 12px;
