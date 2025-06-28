@@ -10,6 +10,42 @@ const auth = require('./auth');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123';
 
+// دالة تنظيف البيانات القديمة
+async function cleanupOldData() {
+  try {
+    console.log('🧹 بدء تنظيف البيانات القديمة...');
+    
+    // تنظيف friendRequests التي تحتوي على from: undefined
+    const result1 = await User.updateMany(
+      { 'relationships.friendRequests.from': { $exists: false } },
+      { $pull: { 'relationships.friendRequests': { from: { $exists: false } } } }
+    );
+    
+    // تنظيف friends التي تحتوي على userId: undefined
+    const result2 = await User.updateMany(
+      { 'relationships.friends.userId': { $exists: false } },
+      { $pull: { 'relationships.friends': { userId: { $exists: false } } } }
+    );
+    
+    // تنظيف blockedUsers التي تحتوي على userId: undefined
+    const result3 = await User.updateMany(
+      { 'relationships.blockedUsers.userId': { $exists: false } },
+      { $pull: { 'relationships.blockedUsers': { userId: { $exists: false } } } }
+    );
+    
+    console.log('✅ تم تنظيف البيانات القديمة:', {
+      friendRequests: result1.modifiedCount,
+      friends: result2.modifiedCount,
+      blockedUsers: result3.modifiedCount
+    });
+  } catch (error) {
+    console.error('❌ خطأ في تنظيف البيانات القديمة:', error);
+  }
+}
+
+// تشغيل تنظيف البيانات عند بدء الخادم
+cleanupOldData();
+
 // دالة Middleware للتحقق من التوكن
 function verifyToken(req, res, next) {
   console.log('🔐 محاولة التحقق من التوكن...');
@@ -102,22 +138,59 @@ router.get('/settings', async (req, res) => {
 router.get('/me', async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
+    
     if (!token) {
-      return res.status(401).json({ message: 'توكن مطلوب' });
+      return res.status(401).json({ message: 'التوكن مطلوب' });
     }
 
     const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await User.findById(decoded._id);
-    
+    const user = await User.findById(decoded.userId);
+
     if (!user) {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
 
-    // تحديث آخر ظهور
-    await user.updateLastSeen();
+    // تنظيف البيانات القديمة تلقائياً إذا كانت موجودة
+    if (user.relationships) {
+      let needsUpdate = false;
+      
+      // تنظيف friendRequests
+      if (user.relationships.friendRequests) {
+        const originalLength = user.relationships.friendRequests.length;
+        user.relationships.friendRequests = user.relationships.friendRequests.filter(req => req.from !== undefined);
+        if (user.relationships.friendRequests.length !== originalLength) {
+          needsUpdate = true;
+        }
+      }
+      
+      // تنظيف friends
+      if (user.relationships.friends) {
+        const originalLength = user.relationships.friends.length;
+        user.relationships.friends = user.relationships.friends.filter(friend => friend.userId !== undefined);
+        if (user.relationships.friends.length !== originalLength) {
+          needsUpdate = true;
+        }
+      }
+      
+      // تنظيف blockedUsers
+      if (user.relationships.blockedUsers) {
+        const originalLength = user.relationships.blockedUsers.length;
+        user.relationships.blockedUsers = user.relationships.blockedUsers.filter(blocked => blocked.userId !== undefined);
+        if (user.relationships.blockedUsers.length !== originalLength) {
+          needsUpdate = true;
+        }
+      }
+      
+      // حفظ التغييرات إذا لزم الأمر
+      if (needsUpdate) {
+        await user.save();
+        console.log('🧹 تم تنظيف البيانات القديمة للمستخدم:', user.username);
+      }
+    }
 
-    // حساب مدة التواجد
-    const timeOnline = user.getTimeOnline();
+    // حساب الوقت المتصل
+    const timeOnline = user.profile?.lastSeen ? 
+      Math.floor((new Date() - new Date(user.profile.lastSeen)) / (1000 * 60 * 60 * 24)) : 0;
 
     res.json({
       _id: user._id,

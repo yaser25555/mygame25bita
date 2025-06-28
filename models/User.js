@@ -302,8 +302,7 @@ const UserSchema = new mongoose.Schema({
   relationships: {
     friends: [{
       userId: {
-        type: Number,
-        required: true
+        type: Number
       },
       username: String,
       displayName: String,
@@ -320,8 +319,7 @@ const UserSchema = new mongoose.Schema({
     }],
     friendRequests: [{
       from: {
-        type: Number,
-        required: true
+        type: Number
       },
       fromUsername: String,
       sentAt: {
@@ -335,8 +333,7 @@ const UserSchema = new mongoose.Schema({
     }],
     blockedUsers: [{
       userId: {
-        type: Number,
-        required: true
+        type: Number
       },
       username: String,
       blockedAt: {
@@ -467,8 +464,7 @@ const UserSchema = new mongoose.Schema({
         unique: true
       },
       toUserId: {
-        type: Number,
-        required: true
+        type: Number
       },
       toUsername: String,
       offeredItems: {
@@ -517,8 +513,7 @@ const UserSchema = new mongoose.Schema({
         unique: true
       },
       fromUserId: {
-        type: Number,
-        required: true
+        type: Number
       },
       fromUsername: String,
       offeredItems: {
@@ -564,8 +559,7 @@ const UserSchema = new mongoose.Schema({
     tradeHistory: [{
       tradeId: String,
       partnerId: {
-        type: Number,
-        required: true
+        type: Number
       },
       partnerUsername: String,
       type: {
@@ -668,8 +662,7 @@ const UserSchema = new mongoose.Schema({
         unique: true
       },
       toUserId: {
-        type: Number,
-        required: true
+        type: Number
       },
       toUsername: String,
       giftType: {
@@ -725,8 +718,7 @@ const UserSchema = new mongoose.Schema({
         unique: true
       },
       fromUserId: {
-        type: Number,
-        required: true
+        type: Number
       },
       fromUsername: String,
       giftType: {
@@ -779,8 +771,7 @@ const UserSchema = new mongoose.Schema({
     giftHistory: [{
       giftId: String,
       partnerId: {
-        type: Number,
-        required: true
+        type: Number
       },
       partnerUsername: String,
       type: {
