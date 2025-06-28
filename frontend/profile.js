@@ -1,5 +1,5 @@
 // إعدادات عامة
-const BACKEND_URL = 'https://mygame25bita-1-4ue6.onrender.com';
+const BACKEND_URL = 'https://mygame25bita-7eqw.onrender.com';
 let currentUser = null;
 
 // متغير لتخزين اسم المستخدم الجاري الدردشة معه
