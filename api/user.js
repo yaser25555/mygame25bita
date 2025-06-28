@@ -408,12 +408,23 @@ router.post('/upload-avatar', verifyToken, upload.single('avatar'), async (req, 
 router.get('/by-username/:username', verifyToken, verifyAdmin, async (req, res) => {
   const { username } = req.params;
 
+  console.log('🔍 طلب البحث عن المستخدم بالاسم:', username);
+
   try {
     const user = await User.findOne({ username }).select('-password');
     
     if (!user) {
+      console.log('❌ المستخدم غير موجود:', username);
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
+
+    console.log('✅ تم العثور على المستخدم:', {
+      userId: user.userId,
+      username: user.username,
+      email: user.email,
+      score: user.stats?.score,
+      pearls: user.stats?.pearls
+    });
 
     res.json(user);
   } catch (error) {

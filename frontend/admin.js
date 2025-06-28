@@ -570,30 +570,44 @@ if (updateUserIdBtn) {
         
         // التحقق من وجود معرف المستخدم الحالي
         const currentUserId = displayCurrentUserId.textContent;
-        if (!currentUserId || currentUserId === 'غير محدد') {
+        console.log('🔍 معرف المستخدم الحالي:', currentUserId, 'نوع البيانات:', typeof currentUserId);
+        
+        if (!currentUserId || currentUserId === 'غير محدد' || currentUserId === '-') {
             showMessage('يرجى البحث عن مستخدم أولاً', 'error');
             return;
         }
         
         const targetUserId = parseInt(currentUserId);
-        if (!targetUserId || targetUserId < 1) {
+        console.log('🔢 معرف المستخدم المحول:', targetUserId, 'نوع البيانات:', typeof targetUserId);
+        
+        if (!targetUserId || targetUserId < 1 || isNaN(targetUserId)) {
             showMessage('معرف المستخدم الحالي غير صحيح', 'error');
             return;
         }
         
         console.log('🆔 تحديث معرف المستخدم:', { targetUserId, newUserId: newUserIdValue });
         
+        // التحقق من أن المعرف الجديد مختلف عن الحالي
+        if (targetUserId === newUserIdValue) {
+            showMessage('المعرف الجديد يجب أن يكون مختلفاً عن المعرف الحالي', 'error');
+            return;
+        }
+        
         try {
+            const requestBody = {
+                targetUserId: targetUserId,
+                newUserId: newUserIdValue
+            };
+            
+            console.log('📤 البيانات المرسلة:', requestBody);
+            
             const response = await fetch(`${BACKEND_URL}/api/users/admin/update-user-id`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 },
-                body: JSON.stringify({
-                    targetUserId: targetUserId,
-                    newUserId: newUserIdValue
-                })
+                body: JSON.stringify(requestBody)
             });
             
             console.log('📥 استجابة تحديث المعرف:', response.status, response.statusText);
@@ -746,16 +760,22 @@ function displayUserData(userData) {
     // التعامل مع البيانات التي تأتي من مسار البحث بالمعرف
     const user = userData.user || userData;
     
+    console.log('📋 بيانات المستخدم المستلمة:', user);
+    
     if (displayUsername) displayUsername.textContent = user.username || 'غير محدد';
-    if (displayCurrentUserId) displayCurrentUserId.textContent = user.userId || 'غير محدد';
+    if (displayCurrentUserId) {
+        const userId = user.userId || user._id || 'غير محدد';
+        displayCurrentUserId.textContent = userId;
+        console.log('🆔 تم تعيين معرف المستخدم:', userId);
+    }
     if (displayEmail) displayEmail.textContent = user.email || 'غير محدد';
-    if (displayCoins) displayCoins.textContent = user.score || 0;
-    if (displayPearls) displayPearls.textContent = user.pearls || 0;
+    if (displayCoins) displayCoins.textContent = user.score || user.stats?.score || 0;
+    if (displayPearls) displayPearls.textContent = user.pearls || user.stats?.pearls || 0;
     if (displayRole) displayRole.textContent = user.isAdmin ? 'مسؤول' : 'مستخدم عادي';
     
     // ملء حقول العمليات
-    if (manageCoins) manageCoins.value = user.score || 0;
-    if (managePearls) managePearls.value = user.pearls || 0;
+    if (manageCoins) manageCoins.value = user.score || user.stats?.score || 0;
+    if (managePearls) managePearls.value = user.pearls || user.stats?.pearls || 0;
     if (adminRoleUsername) adminRoleUsername.value = user.username || '';
     if (newUserId) newUserId.value = '';
     if (editPassword) editPassword.value = '';
