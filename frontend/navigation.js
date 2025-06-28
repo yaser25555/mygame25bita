@@ -1,6 +1,6 @@
 ﻿// ملف محفوظ بترميز UTF-8 بدون BOM
 // ملف التنقل - يتعامل مع أزرار التنقل بين الصفحات
-const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+const BACKEND_URL = CONFIG.BACKEND_URL;
 
 // دالة تشغيل الصوت (مؤقتة لحل مشكلة ReferenceError)
 function playSound(soundName) {

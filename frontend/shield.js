@@ -1,4 +1,5 @@
-const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+// استخدام ملف التكوين المركزي
+const BACKEND_URL = CONFIG.BACKEND_URL;
 
 // متغيرات عامة
 let currentUser = null;

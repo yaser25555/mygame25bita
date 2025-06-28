@@ -33,7 +33,8 @@ const audioSettings = {
 
 console.log('username:', username, 'roomName:', roomName);
 
-const BACKEND_URL = "https://mygame25bita-7eqw.onrender.com";
+// استخدام ملف التكوين المركزي
+const BACKEND_URL = CONFIG.BACKEND_URL;
 
 // إنشاء أو إعادة استخدام WebSocket
 function getWebSocket() {
