@@ -69,8 +69,23 @@ function updateUserDataInGame() {
         
         // تحديث معرف المستخدم
         const userIdElement = document.getElementById('user-id-display');
-        if (userIdElement && userData.userId) {
-            userIdElement.textContent = `ID: ${userData.userId}`;
+        if (userIdElement) {
+            console.log('🎮 البحث عن معرف المستخدم في اللعبة:', userData);
+            console.log('🎮 userData.userId:', userData.userId);
+            console.log('🎮 userData._id:', userData._id);
+            
+            if (userData.userId) {
+                userIdElement.textContent = `ID: ${userData.userId}`;
+                console.log('✅ تم تحديث معرف المستخدم في اللعبة:', userData.userId);
+            } else if (userData._id) {
+                userIdElement.textContent = `ID: ${userData._id}`;
+                console.log('✅ تم تحديث معرف المستخدم في اللعبة (من _id):', userData._id);
+            } else {
+                userIdElement.textContent = 'ID: غير محدد';
+                console.log('⚠️ معرف المستخدم غير متوفر في بيانات اللعبة');
+            }
+        } else {
+            console.log('❌ عنصر user-id-display غير موجود في صفحة اللعبة');
         }
         
         // تحديث الرصيد

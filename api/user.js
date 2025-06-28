@@ -106,8 +106,16 @@ router.get('/me', verifyToken, async (req, res) => {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
 
+    console.log('🔍 بيانات المستخدم من قاعدة البيانات:', {
+      _id: user._id,
+      userId: user.userId,
+      username: user.username
+    });
+
     // إرجاع البيانات التي تحتاجها الواجهة الأمامية، بما في ذلك بيانات اللعبة الجديدة
     res.json({
+        _id: user._id,
+        userId: user.userId,
         username: user.username,
         score: user.stats.score,
         isAdmin: user.isAdmin,
@@ -286,6 +294,8 @@ router.get('/:username', verifyToken, async (req, res) => {
     }
 
     res.json({
+        _id: user._id,
+        userId: user.userId,
         username: user.username,
         score: user.stats.score,
         boxesOpened: user.stats.boxesOpened,
@@ -452,7 +462,7 @@ router.put('/update', verifyToken, async (req, res) => {
     res.json({ 
       message: 'تم تحديث بيانات المستخدم بنجاح',
       user: {
-        username: user.username,
+        userId: user.userId,`n        _id: user._id,`n        userId: user.userId,`n        _id: user._id,`n        username: user.username,
         score: user.stats.score,
         totalSpent: user.totalSpent,
         itemsCollected: user.itemsCollected,
@@ -977,6 +987,7 @@ router.get('/search-users', verifyToken, async (req, res) => {
 
       return {
         id: user._id,
+        userId: user.userId,
         username: user.username,
         displayName: user.profile.displayName,
         avatar: user.profile.avatar,
@@ -1110,6 +1121,7 @@ router.get('/search', verifyToken, async (req, res) => {
 
       return {
         _id: user._id,
+        userId: user.userId,
         username: user.username,
         displayName: user.profile.displayName,
         bio: user.profile.bio,
@@ -1853,7 +1865,7 @@ router.get('/admin/user-images/:userId', verifyToken, async (req, res) => {
       user: {
         id: user._id,
         userId: user.userId,
-        username: user.username,
+        userId: user.userId,`n        _id: user._id,`n        userId: user.userId,`n        _id: user._id,`n        username: user.username,
         images: {
           avatar: user.profile.avatar,
           profileImage: user.profile.profileImage,

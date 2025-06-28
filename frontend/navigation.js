@@ -156,8 +156,23 @@ function displayUserData(userData) {
     
     // عرض معرف المستخدم إذا كان متوفراً
     const userIdDisplay = document.getElementById('user-id-display');
-    if (userIdDisplay && userData.userId) {
-        userIdDisplay.textContent = `ID: ${userData.userId}`;
+    if (userIdDisplay) {
+        console.log('🔍 البحث عن معرف المستخدم في البيانات:', userData);
+        console.log('🔍 userData.userId:', userData.userId);
+        console.log('🔍 userData._id:', userData._id);
+        
+        if (userData.userId) {
+            userIdDisplay.textContent = `ID: ${userData.userId}`;
+            console.log('✅ تم عرض معرف المستخدم:', userData.userId);
+        } else if (userData._id) {
+            userIdDisplay.textContent = `ID: ${userData._id}`;
+            console.log('✅ تم عرض معرف المستخدم (من _id):', userData._id);
+        } else {
+            userIdDisplay.textContent = 'ID: غير محدد';
+            console.log('⚠️ معرف المستخدم غير متوفر في البيانات');
+        }
+    } else {
+        console.log('❌ عنصر user-id-display غير موجود في الصفحة');
     }
     
     console.log('✅ تم عرض جميع بيانات المستخدم بنجاح');
