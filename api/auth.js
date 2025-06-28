@@ -86,7 +86,7 @@ router.post('/login', async (req, res) => {
 
     // إنشاء التوكن
     const token = jwt.sign(
-      { userId: user._id, username: user.username, isAdmin: user.isAdmin },
+      { _id: user._id, userId: user.userId, username: user.username, isAdmin: user.isAdmin },
       SECRET_KEY,
       { expiresIn: '6h' }
     );

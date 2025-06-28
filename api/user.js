@@ -34,7 +34,7 @@ function verifyToken(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    console.log('✅ تم فك تشفير التوكن بنجاح:', { userId: decoded.userId, username: decoded.username });
+    console.log('✅ تم فك تشفير التوكن بنجاح:', { _id: decoded._id, userId: decoded.userId, username: decoded.username });
     req.user = decoded;
     next();
   } catch (err) {
@@ -101,16 +101,10 @@ router.get('/settings', async (req, res) => {
 // مسار جديد: جلب بيانات المستخدم الحالي (يتطلب توكن مصادقة)
 router.get('/me', verifyToken, async (req, res) => {
   try {
-    console.log('🔍 طلب بيانات المستخدم:', { userId: req.user.userId, username: req.user.username });
+    console.log('🔍 طلب بيانات المستخدم:', { _id: req.user._id, userId: req.user.userId, username: req.user.username });
 
-    // البحث عن المستخدم باستخدام userId أو _id
-    let user;
-    if (req.user.userId) {
-      user = await User.findById(req.user.userId).select('-password');
-    } else {
-      // إذا لم يكن هناك userId، نبحث باستخدام _id
-      user = await User.findById(req.user._id).select('-password');
-    }
+    // البحث عن المستخدم باستخدام _id
+    const user = await User.findById(req.user._id).select('-password');
 
     if (!user) {
       console.log('❌ المستخدم غير موجود:', req.user);
