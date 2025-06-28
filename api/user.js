@@ -1,17 +1,18 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // تصحيح المسار
+const User = require('../models/User');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const auth = require('./auth');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123'; // تصحيح ||
+const SECRET_KEY = process.env.JWT_SECRET || 'supersecretkey123';
 
-// دالة Middleware للتحقق من التوكن (يمكن أن تكون في ملف منفصل لسهولة إعادة الاستخدام)
+// دالة Middleware للتحقق من التوكن
 function verifyToken(req, res, next) {
   console.log('🔐 محاولة التحقق من التوكن...');
   let token;
+  
   // 1. Check for token in Authorization header
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -32,7 +33,7 @@ function verifyToken(req, res, next) {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     console.log('✅ تم فك تشفير التوكن بنجاح:', { userId: decoded.userId, username: decoded.username });
-    req.user = decoded; // تخزين معلومات المستخدم (userId, username, isAdmin) في req.user
+    req.user = decoded;
     next();
   } catch (err) {
     console.log('❌ خطأ في فك تشفير التوكن:', err.message);
@@ -40,9 +41,9 @@ function verifyToken(req, res, next) {
   }
 }
 
-// دالة Middleware للتحقق من صلاحية المشرف (إذا كنت تحتاجها بشكل منفصل)
+// دالة Middleware للتحقق من صلاحية المشرف
 function verifyAdmin(req, res, next) {
-  if (!req.user || !req.user.isAdmin) { // req.user تم تعيينه بواسطة verifyToken
+  if (!req.user || !req.user.isAdmin) {
     return res.status(403).json({ message: 'غير مصرح لك (تحتاج صلاحية مشرف)' });
   }
   next();
@@ -75,7 +76,7 @@ router.get('/test-auth', verifyToken, (req, res) => {
   });
 });
 
-// مسار جديد: جلب إعدادات اللعبة (للجميع) - *** يجب وضعه هنا قبل المسارات الأخرى ***
+// مسار جديد: جلب إعدادات اللعبة (للجميع)
 router.get('/settings', async (req, res) => {
   try {
     const admin = await User.findOne({ isAdmin: true });
@@ -95,12 +96,10 @@ router.get('/settings', async (req, res) => {
   }
 });
 
-
 // مسار جديد: جلب بيانات المستخدم الحالي (يتطلب توكن مصادقة)
 router.get('/me', verifyToken, async (req, res) => {
   try {
-    // req.user.userId تم تعيينه من التوكن بواسطة verifyToken
-    const user = await User.findById(req.user.userId).select('-password'); // لا ترجع كلمة المرور
+    const user = await User.findById(req.user.userId).select('-password');
 
     if (!user) {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
@@ -112,7 +111,7 @@ router.get('/me', verifyToken, async (req, res) => {
       username: user.username
     });
 
-    // إرجاع البيانات التي تحتاجها الواجهة الأمامية، بما في ذلك بيانات اللعبة الجديدة
+    // إرجاع البيانات التي تحتاجها الواجهة الأمامية
     res.json({
         _id: user._id,
         userId: user.userId,
@@ -192,7 +191,7 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
         
         // Check for unrealistic score increase
         const scoreDiff = score - user.stats.score;
-        if (scoreDiff > 10000) { // أكثر من 10,000 نقطة دفعة واحدة
+        if (scoreDiff > 10000) {
             suspiciousActivity.push(`زيادة غير طبيعية في النقاط: ${scoreDiff}`);
         }
         
@@ -202,14 +201,14 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
         }
         
         // Check for unrealistic high score
-        if (highScore > 1000000) { // أكثر من مليون نقطة
+        if (highScore > 1000000) {
             suspiciousActivity.push(`نتيجة عالية غير طبيعية: ${highScore}`);
         }
         
         // Check for unrealistic items collected
         if (itemsCollected) {
             Object.entries(itemsCollected).forEach(([item, count]) => {
-                if (count > 1000) { // أكثر من 1000 عنصر من نوع واحد
+                if (count > 1000) {
                     suspiciousActivity.push(`عدد كبير من العناصر: ${item} = ${count}`);
                 }
             });
@@ -233,245 +232,71 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
                 ip: req.ip
             });
             
-            // If multiple suspicious activities, consider blocking
-            if (user.suspiciousActivity.length > 3) {
-                return res.status(403).json({ 
-                    message: 'تم اكتشاف نشاط مشبوه. تم حظر الحفظ مؤقتاً.',
-                    suspiciousActivity: suspiciousActivity
-                });
-            }
+            // For now, we'll allow the save but log the activity
+            // In production, you might want to block suspicious saves
         }
 
         // Update user data
         user.stats.score = score;
-        user.stats.highScore = highScore;
+        if (highScore > user.stats.highScore) {
+            user.stats.highScore = highScore;
+        }
         user.stats.roundNumber = roundNumber;
-        if (itemsCollected) user.itemsCollected = itemsCollected;
+        if (itemsCollected) {
+            user.itemsCollected = { ...user.itemsCollected, ...itemsCollected };
+        }
         if (collectedGems !== undefined) user.collectedGems = collectedGems;
         if (totalGemsCollected !== undefined) user.totalGemsCollected = totalGemsCollected;
         if (batsHit !== undefined) user.batsHit = batsHit;
-        if (totalSpent !== undefined) user.totalSpent = totalSpent;
+        if (totalSpent !== undefined) user.totalSpent = (user.totalSpent || 0) + totalSpent;
 
         await user.save();
 
         res.json({ 
-            message: 'تم حفظ بيانات اللعبة بنجاح', 
-            score: user.stats.score, 
-            highScore: user.stats.highScore, 
-            roundNumber: user.stats.roundNumber,
-            suspiciousActivity: suspiciousActivity.length > 0 ? suspiciousActivity : null
+            message: 'تم حفظ بيانات اللعبة بنجاح',
+            user: {
+                userId: user.userId,
+                _id: user._id,
+                username: user.username,
+                score: user.stats.score,
+                highScore: user.stats.highScore,
+                roundNumber: user.stats.roundNumber,
+                itemsCollected: user.itemsCollected,
+                collectedGems: user.collectedGems,
+                totalGemsCollected: user.totalGemsCollected,
+                batsHit: user.batsHit,
+                totalSpent: user.totalSpent
+            }
         });
+
     } catch (error) {
-        console.error('Error saving game data:', error);
+        console.error('خطأ في حفظ بيانات اللعبة:', error);
         res.status(500).json({ message: 'خطأ في الخادم أثناء حفظ بيانات اللعبة' });
     }
 });
 
-// تعديل نقاط المستخدم (فقط للمشرف)
-router.post('/update-score', verifyToken, verifyAdmin, async (req, res) => { // إضافة verifyToken هنا
-  const { username, newScore } = req.body;
-
+// مسار تحديث بيانات المستخدم
+router.put('/update-profile', verifyToken, async (req, res) => {
   try {
-    const user = await User.findOneAndUpdate({ username }, { 'stats.score': newScore }, { new: true }); // إصلاح: استخدام stats.score
-    if (!user) return res.status(404).json({ message: 'المستخدم غير موجود' });
-
-    res.json({ message: 'تم تحديث النقاط بنجاح', user });
-
-  } catch (err) {
-    console.error("خطأ في تحديث النقاط:", err); // إضافة console.error
-    res.status(500).json({ message: 'خطأ في الخادم أثناء تحديث النقاط' });
-  }
-});
-
-// مسار جديد: جلب بيانات المستخدم بواسطة اسم المستخدم (لصفحة المشرف)
-router.get('/:username', verifyToken, async (req, res) => {
-  try {
-    const username = req.params.username;
-    const user = await User.findOne({ username }).select('-password'); // لا ترجع كلمة المرور
-
-    if (!user) {
-      return res.status(404).json({ message: 'المستخدم غير موجود' });
-    }
-
-    res.json({
-        _id: user._id,
-        userId: user.userId,
-        username: user.username,
-        score: user.stats.score,
-        boxesOpened: user.stats.boxesOpened,
-        settings: user.settings, // Include the entire settings object
-        isAdmin: user.isAdmin,
-        personalScore: user.stats.personalScore,
-        highScore: user.stats.highScore,
-        roundNumber: user.stats.roundNumber,
-        singleShotsUsed: user.weapons.singleShotsUsed,
-        tripleShotsUsed: user.weapons.tripleShotsUsed,
-        hammerShotsUsed: user.weapons.hammerShotsUsed,
-        boxValues: user.boxValues // إضافة قيم الصناديق الحالية
-    });
-
-  } catch (error) {
-    console.error("خطأ في جلب بيانات المستخدم بواسطة اسم المستخدم:", error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء جلب بيانات المستخدم' });
-  }
-});
-
-// مسار جديد: تعيين مستخدم كمشرف (للتطوير فقط - يجب تأمينه بشكل أفضل في الإنتاج)
-router.post('/set-admin', verifyToken, async (req, res) => {
-  const { username } = req.body;
-
-  try {
-    const user = await User.findOneAndUpdate({ username }, { isAdmin: true }, { new: true });
-
-    if (!user) {
-      return res.status(404).json({ message: 'المستخدم غير موجود' });
-    }
-
-    res.json({ message: `تم تعيين ${username} كمشرف بنجاح!`, user });
-  } catch (error) {
-    console.error("خطأ في تعيين المشرف:", error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء تعيين المشرف' });
-  }
-});
-
-// مسار جديد: تحديث دور المستخدم (فقط للمشرف)
-router.post('/update-role', verifyToken, verifyAdmin, async (req, res) => {
-  const { username, role } = req.body;
-
-  if (!['user', 'admin'].includes(role)) {
-    return res.status(400).json({ message: 'الدور غير صالح. يجب أن يكون "user" أو "admin".' });
-  }
-
-  try {
-    const user = await User.findOneAndUpdate({ username }, { isAdmin: (role === 'admin') }, { new: true });
-
-    if (!user) {
-      return res.status(404).json({ message: 'المستخدم غير موجود' });
-    }
-
-    res.json({ message: `تم تحديث دور ${username} إلى ${role} بنجاح!`, user });
-  } catch (error) {
-    console.error("خطأ في تحديث دور المستخدم:", error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء تحديث دور المستخدم' });
-  }
-});
-
-// مسار جديد: حذف المستخدم (فقط للمشرف)
-router.post('/delete', verifyToken, verifyAdmin, async (req, res) => {
-  const { username } = req.body;
-
-  try {
-    console.log(`Attempting to delete user: ${username}`); // Add this line for debugging
-    const user = await User.findOneAndDelete({ username });
-
-    if (!user) {
-      return res.status(404).json({ message: 'المستخدم غير موجود' });
-    }
-
-    res.json({ message: `تم حذف المستخدم ${username} بنجاح!` });
-  } catch (error) {
-    console.error("خطأ في حذف المستخدم:", error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء حذف المستخدم' });
-  }
-});
-
-// مسار جديد: إضافة صناديق للمستخدم (فقط للمشرف)
-router.post('/add-boxes', verifyToken, verifyAdmin, async (req, res) => {
-  const { username, count, value } = req.body;
-
-  if (typeof count !== 'number' || count <= 0) {
-    return res.status(400).json({ message: 'العدد غير صالح. يجب أن يكون رقمًا موجبًا.' });
-  }
-  if (typeof value !== 'number' || value <= 0) {
-    return res.status(400).json({ message: 'القيمة غير صالحة. يجب أن تكون رقمًا موجبًا.' });
-  }
-
-  try {
-    const user = await User.findOneAndUpdate(
-      { username },
-      { $inc: { 'stats.boxesOpened': count }, $push: { boxValues: { $each: Array(count).fill(value) } } },
-      { new: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: 'المستخدم غير موجود' });
-    }
-
-    res.json({ message: `تم إضافة ${count} صندوق للمستخدم ${username} بنجاح!`, user });
-  } catch (error) {
-    console.error("خطأ في إضافة الصناديق:", error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء إضافة الصناديق' });
-  }
-});
-
-// مسار جديد: حفظ إعدادات اللعبة (فقط للمشرف)
-router.post('/settings', verifyToken, verifyAdmin, async (req, res) => {
-  const { gameSettings } = req.body;
-
-  try {
-    // Find the admin user (assuming settings are global or tied to an admin user)
-    // A more robust solution might involve a dedicated Settings model
-    const adminUser = await User.findOne({ isAdmin: true });
-
-    if (!adminUser) {
-      return res.status(404).json({ message: 'لم يتم العثور على مستخدم مشرف لحفظ الإعدادات.' });
-    }
-
-    adminUser.settings.gameSettings = gameSettings;
-    await adminUser.save();
-
-    res.json({ message: 'تم حفظ إعدادات اللعبة بنجاح!', settings: adminUser.settings.gameSettings });
-  } catch (error) {
-    console.error("خطأ في حفظ إعدادات اللعبة:", error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء حفظ إعدادات اللعبة' });
-  }
-});
-
-// مسار جديد: تحديث بيانات المستخدم (للمشرف)
-router.put('/update', verifyToken, async (req, res) => {
-  try {
-    const { score, totalSpent, itemsCollected, stats, weapons, profile, achievements, badges, relationships } = req.body;
     const user = await User.findById(req.user.userId);
-
     if (!user) {
       return res.status(404).json({ message: 'المستخدم غير موجود' });
     }
 
-    // تهيئة الحقول المطلوبة تلقائياً لمنع أخطاء المزامنة
-    if (!user.stats) user.stats = { score: 0, pearls: 0, highScore: 0, roundNumber: 0, personalScore: 50, boxesOpened: 0, gamesPlayed: 0, gamesWon: 0, winRate: 0, totalPlayTime: 0, averageScore: 0 };
-    if (!user.itemsCollected) user.itemsCollected = { gems: 0, keys: 0, coins: 0, pearls: 0, bombs: 0, stars: 0, bat: 0 };
-    if (!user.weapons) user.weapons = { singleShotsUsed: 0, tripleShotsUsed: 0, hammerShotsUsed: 0, totalShots: 0, accuracy: 0 };
-    if (!user.profile) user.profile = { displayName: user.username, bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮', avatar: 'default-avatar.png', level: 1, experience: 0, joinDate: new Date(), lastSeen: new Date(), status: 'offline' };
-    if (!user.achievements) user.achievements = [];
-    if (!user.badges) user.badges = [];
-    if (!user.relationships) user.relationships = { friends: [], friendRequests: [], blockedUsers: [], followers: [], following: [] };
-
-    // تحديث البيانات المرسلة
-    if (score !== undefined) user.stats.score = score;
-    if (totalSpent !== undefined) user.totalSpent = totalSpent;
-    if (itemsCollected) user.itemsCollected = { ...user.itemsCollected, ...itemsCollected };
-    if (stats) user.stats = { ...user.stats, ...stats };
-    if (weapons) user.weapons = { ...user.weapons, ...weapons };
-    if (profile) user.profile = { ...user.profile, ...profile };
-    if (achievements) user.achievements = achievements;
-    if (badges) user.badges = badges;
-    if (relationships) user.relationships = { ...user.relationships, ...relationships };
+    // تحديث البيانات المطلوبة
+    if (req.body.displayName) user.profile.displayName = req.body.displayName;
+    if (req.body.bio) user.profile.bio = req.body.bio;
+    if (req.body.status) user.profile.status = req.body.status;
 
     await user.save();
 
     res.json({ 
       message: 'تم تحديث بيانات المستخدم بنجاح',
       user: {
-        userId: user.userId,`n        _id: user._id,`n        userId: user.userId,`n        _id: user._id,`n        username: user.username,
-        score: user.stats.score,
-        totalSpent: user.totalSpent,
-        itemsCollected: user.itemsCollected,
-        stats: user.stats,
-        weapons: user.weapons,
-        profile: user.profile,
-        achievements: user.achievements,
-        badges: user.badges,
-        relationships: user.relationships
+        userId: user.userId,
+        _id: user._id,
+        username: user.username,
+        profile: user.profile
       }
     });
 
@@ -492,7 +317,7 @@ router.post('/add-coins', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
       { username },
-      { $inc: { score: amount } }, // زيادة حقل النقاط (score) بالمبلغ المحدد
+      { $inc: { score: amount } },
       { new: true }
     );
 
@@ -688,55 +513,102 @@ router.get('/blocked-users', verifyToken, async (req, res) => {
   }
 });
 
-// إرسال طلب صداقة
-router.post('/friend-request', verifyToken, async (req, res) => {
+// البحث عن المستخدمين
+router.get('/search', verifyToken, async (req, res) => {
   try {
-    const { toUserId, message = '' } = req.body;
-    const fromUserId = req.user.userId;
+    const { query } = req.query;
+    const currentUserId = req.user.userId;
 
-    if (!toUserId) {
-      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
+    if (!query || query.length < 2) {
+      return res.status(400).json({ error: 'يجب أن يكون البحث من حرفين على الأقل' });
     }
 
-    if (fromUserId === toUserId) {
+    const users = await User.find({
+      $and: [
+        { _id: { $ne: currentUserId } },
+        {
+          $or: [
+            { username: { $regex: query, $options: 'i' } },
+            { 'profile.displayName': { $regex: query, $options: 'i' } }
+          ]
+        }
+      ]
+    })
+    .select('username profile.displayName profile.avatar stats.score relationships.friends relationships.friendRequests relationships.blockedUsers')
+    .limit(20);
+
+    const results = users.map(user => ({
+      id: user._id,
+      username: user.username,
+      displayName: user.profile.displayName,
+      avatar: user.profile.avatar,
+      score: user.stats.score,
+      isFriend: user.relationships.friends.some(friend => friend.userId.toString() === currentUserId),
+      hasSentRequest: user.relationships.friendRequests.some(request => request.fromUserId.toString() === currentUserId),
+      hasReceivedRequest: user.relationships.friendRequests.some(request => request.fromUserId.toString() === currentUserId),
+      isBlocked: user.relationships.blockedUsers.some(blocked => blocked.userId.toString() === currentUserId)
+    }));
+
+    res.json({
+      users: results,
+      totalResults: results.length
+    });
+
+  } catch (error) {
+    console.error('خطأ في البحث عن المستخدمين:', error);
+    res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
+  }
+});
+
+// إرسال طلب صداقة
+router.post('/send-friend-request', verifyToken, async (req, res) => {
+  try {
+    const { targetUserId, message } = req.body;
+    const currentUserId = req.user.userId;
+
+    if (currentUserId === targetUserId) {
       return res.status(400).json({ error: 'لا يمكنك إرسال طلب صداقة لنفسك' });
     }
 
-    const toUser = await User.findById(toUserId);
-    if (!toUser) {
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    // التحقق من عدم وجود طلب سابق
-    const existingRequest = toUser.relationships.friendRequests.find(
-      req => req.fromUserId.toString() === fromUserId
+    // التحقق من أن الطلب لم يتم إرساله من قبل
+    const existingRequest = targetUser.relationships.friendRequests.find(
+      request => request.fromUserId.toString() === currentUserId
     );
 
     if (existingRequest) {
-      return res.status(400).json({ error: 'تم إرسال طلب صداقة بالفعل' });
+      return res.status(400).json({ error: 'تم إرسال طلب صداقة من قبل' });
     }
 
-    // التحقق من عدم وجود صداقة
-    const existingFriendship = toUser.relationships.friends.find(
-      friend => friend.userId.toString() === fromUserId
+    // التحقق من أنهم ليسوا أصدقاء بالفعل
+    const isAlreadyFriend = targetUser.relationships.friends.some(
+      friend => friend.userId.toString() === currentUserId
     );
 
-    if (existingFriendship) {
-      return res.status(400).json({ error: 'أنتما أصدقاء بالفعل' });
+    if (isAlreadyFriend) {
+      return res.status(400).json({ error: 'أنتم أصدقاء بالفعل' });
     }
 
     // إضافة طلب الصداقة
-    toUser.relationships.friendRequests.push({
-      fromUserId: fromUserId,
-      sentAt: new Date(),
-      message: message
+    targetUser.relationships.friendRequests.push({
+      fromUserId: currentUserId,
+      message: message || '',
+      sentAt: new Date()
     });
 
-    await toUser.save();
+    await targetUser.save();
 
-    res.json({
-      success: true,
-      message: 'تم إرسال طلب الصداقة بنجاح'
+    res.json({ 
+      message: 'تم إرسال طلب الصداقة بنجاح',
+      request: {
+        toUserId: targetUserId,
+        message: message || '',
+        sentAt: new Date()
+      }
     });
 
   } catch (error) {
@@ -749,50 +621,53 @@ router.post('/friend-request', verifyToken, async (req, res) => {
 router.post('/accept-friend-request', verifyToken, async (req, res) => {
   try {
     const { fromUserId } = req.body;
-    const toUserId = req.user.userId;
+    const currentUserId = req.user.userId;
 
-    if (!fromUserId) {
-      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
-    }
-
-    const toUser = await User.findById(toUserId);
-    const fromUser = await User.findById(fromUserId);
-
-    if (!toUser || !fromUser) {
+    const currentUser = await User.findById(currentUserId);
+    if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
     // البحث عن طلب الصداقة
-    const requestIndex = toUser.relationships.friendRequests.findIndex(
-      req => req.fromUserId.toString() === fromUserId
+    const friendRequest = currentUser.relationships.friendRequests.find(
+      request => request.fromUserId.toString() === fromUserId
     );
 
-    if (requestIndex === -1) {
+    if (!friendRequest) {
       return res.status(404).json({ error: 'طلب الصداقة غير موجود' });
     }
 
     // إزالة طلب الصداقة
-    const request = toUser.relationships.friendRequests.splice(requestIndex, 1)[0];
+    currentUser.relationships.friendRequests = currentUser.relationships.friendRequests.filter(
+      request => request.fromUserId.toString() !== fromUserId
+    );
 
-    // إضافة الصداقة لكلا المستخدمين
-    toUser.relationships.friends.push({
+    // إضافة كصديق
+    currentUser.relationships.friends.push({
       userId: fromUserId,
       addedAt: new Date(),
       status: 'active'
     });
 
-    fromUser.relationships.friends.push({
-      userId: toUserId,
-      addedAt: new Date(),
-      status: 'active'
-    });
+    // إضافة المستخدم الحالي كصديق للمستخدم الآخر
+    const fromUser = await User.findById(fromUserId);
+    if (fromUser) {
+      fromUser.relationships.friends.push({
+        userId: currentUserId,
+        addedAt: new Date(),
+        status: 'active'
+      });
+      await fromUser.save();
+    }
 
-    await toUser.save();
-    await fromUser.save();
+    await currentUser.save();
 
-    res.json({
-      success: true,
-      message: 'تم قبول طلب الصداقة بنجاح'
+    res.json({ 
+      message: 'تم قبول طلب الصداقة بنجاح',
+      friend: {
+        userId: fromUserId,
+        addedAt: new Date()
+      }
     });
 
   } catch (error) {
@@ -805,36 +680,21 @@ router.post('/accept-friend-request', verifyToken, async (req, res) => {
 router.post('/reject-friend-request', verifyToken, async (req, res) => {
   try {
     const { fromUserId } = req.body;
-    const toUserId = req.user.userId;
+    const currentUserId = req.user.userId;
 
-    if (!fromUserId) {
-      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
-    }
-
-    const toUser = await User.findById(toUserId);
-
-    if (!toUser) {
+    const currentUser = await User.findById(currentUserId);
+    if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    // البحث عن طلب الصداقة
-    const requestIndex = toUser.relationships.friendRequests.findIndex(
-      req => req.fromUserId.toString() === fromUserId
+    // إزالة طلب الصداقة
+    currentUser.relationships.friendRequests = currentUser.relationships.friendRequests.filter(
+      request => request.fromUserId.toString() !== fromUserId
     );
 
-    if (requestIndex === -1) {
-      return res.status(404).json({ error: 'طلب الصداقة غير موجود' });
-    }
+    await currentUser.save();
 
-    // إزالة طلب الصداقة
-    toUser.relationships.friendRequests.splice(requestIndex, 1);
-
-    await toUser.save();
-
-    res.json({
-      success: true,
-      message: 'تم رفض طلب الصداقة'
-    });
+    res.json({ message: 'تم رفض طلب الصداقة بنجاح' });
 
   } catch (error) {
     console.error('خطأ في رفض طلب الصداقة:', error);
@@ -842,66 +702,91 @@ router.post('/reject-friend-request', verifyToken, async (req, res) => {
   }
 });
 
-// حظر مستخدم
-router.post('/block-user', verifyToken, async (req, res) => {
+// إزالة صديق
+router.post('/remove-friend', verifyToken, async (req, res) => {
   try {
-    const { userId: userToBlock, reason = '' } = req.body;
+    const { friendUserId } = req.body;
     const currentUserId = req.user.userId;
 
-    if (!userToBlock) {
-      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
-    }
-
-    if (currentUserId === userToBlock) {
-      return res.status(400).json({ error: 'لا يمكنك حظر نفسك' });
-    }
-
     const currentUser = await User.findById(currentUserId);
-    const userToBlockData = await User.findById(userToBlock);
-
-    if (!currentUser || !userToBlockData) {
+    if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    // التحقق من عدم وجود حظر سابق
-    const existingBlock = currentUser.relationships.blockedUsers.find(
-      block => block.userId.toString() === userToBlock
+    // إزالة من قائمة الأصدقاء
+    currentUser.relationships.friends = currentUser.relationships.friends.filter(
+      friend => friend.userId.toString() !== friendUserId
     );
 
-    if (existingBlock) {
-      return res.status(400).json({ error: 'المستخدم محظور بالفعل' });
-    }
-
-    // إضافة الحظر
-    currentUser.relationships.blockedUsers.push({
-      userId: userToBlock,
-      blockedAt: new Date(),
-      reason: reason
-    });
-
-    // إزالة الصداقة إذا كانت موجودة
-    const friendshipIndex = currentUser.relationships.friends.findIndex(
-      friend => friend.userId.toString() === userToBlock
-    );
-
-    if (friendshipIndex !== -1) {
-      currentUser.relationships.friends.splice(friendshipIndex, 1);
-    }
-
-    // إزالة طلبات الصداقة
-    const requestIndex = currentUser.relationships.friendRequests.findIndex(
-      req => req.fromUserId.toString() === userToBlock
-    );
-
-    if (requestIndex !== -1) {
-      currentUser.relationships.friendRequests.splice(requestIndex, 1);
+    // إزالة المستخدم الحالي من قائمة أصدقاء المستخدم الآخر
+    const friendUser = await User.findById(friendUserId);
+    if (friendUser) {
+      friendUser.relationships.friends = friendUser.relationships.friends.filter(
+        friend => friend.userId.toString() !== currentUserId
+      );
+      await friendUser.save();
     }
 
     await currentUser.save();
 
-    res.json({
-      success: true,
-      message: 'تم حظر المستخدم بنجاح'
+    res.json({ message: 'تم إزالة الصديق بنجاح' });
+
+  } catch (error) {
+    console.error('خطأ في إزالة الصديق:', error);
+    res.status(500).json({ error: 'خطأ في إزالة الصديق' });
+  }
+});
+
+// حظر مستخدم
+router.post('/block-user', verifyToken, async (req, res) => {
+  try {
+    const { targetUserId, reason } = req.body;
+    const currentUserId = req.user.userId;
+
+    if (currentUserId === targetUserId) {
+      return res.status(400).json({ error: 'لا يمكنك حظر نفسك' });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+    if (!currentUser) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // التحقق من أن المستخدم لم يتم حظره من قبل
+    const isAlreadyBlocked = currentUser.relationships.blockedUsers.some(
+      blocked => blocked.userId.toString() === targetUserId
+    );
+
+    if (isAlreadyBlocked) {
+      return res.status(400).json({ error: 'تم حظر هذا المستخدم من قبل' });
+    }
+
+    // إضافة إلى قائمة المستخدمين المحظورين
+    currentUser.relationships.blockedUsers.push({
+      userId: targetUserId,
+      blockedAt: new Date(),
+      reason: reason || ''
+    });
+
+    // إزالة من قائمة الأصدقاء إذا كانوا أصدقاء
+    currentUser.relationships.friends = currentUser.relationships.friends.filter(
+      friend => friend.userId.toString() !== targetUserId
+    );
+
+    // إزالة طلبات الصداقة
+    currentUser.relationships.friendRequests = currentUser.relationships.friendRequests.filter(
+      request => request.fromUserId.toString() !== targetUserId
+    );
+
+    await currentUser.save();
+
+    res.json({ 
+      message: 'تم حظر المستخدم بنجاح',
+      blockedUser: {
+        userId: targetUserId,
+        blockedAt: new Date(),
+        reason: reason || ''
+      }
     });
 
   } catch (error) {
@@ -913,37 +798,22 @@ router.post('/block-user', verifyToken, async (req, res) => {
 // إلغاء حظر مستخدم
 router.post('/unblock-user', verifyToken, async (req, res) => {
   try {
-    const { userId: userToUnblock } = req.body;
+    const { targetUserId } = req.body;
     const currentUserId = req.user.userId;
 
-    if (!userToUnblock) {
-      return res.status(400).json({ error: 'معرف المستخدم مطلوب' });
-    }
-
     const currentUser = await User.findById(currentUserId);
-
     if (!currentUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    // البحث عن الحظر
-    const blockIndex = currentUser.relationships.blockedUsers.findIndex(
-      block => block.userId.toString() === userToUnblock
+    // إزالة من قائمة المستخدمين المحظورين
+    currentUser.relationships.blockedUsers = currentUser.relationships.blockedUsers.filter(
+      blocked => blocked.userId.toString() !== targetUserId
     );
-
-    if (blockIndex === -1) {
-      return res.status(404).json({ error: 'المستخدم غير محظور' });
-    }
-
-    // إزالة الحظر
-    currentUser.relationships.blockedUsers.splice(blockIndex, 1);
 
     await currentUser.save();
 
-    res.json({
-      success: true,
-      message: 'تم إلغاء حظر المستخدم بنجاح'
-    });
+    res.json({ message: 'تم إلغاء حظر المستخدم بنجاح' });
 
   } catch (error) {
     console.error('خطأ في إلغاء حظر المستخدم:', error);
@@ -951,907 +821,304 @@ router.post('/unblock-user', verifyToken, async (req, res) => {
   }
 });
 
-// البحث عن مستخدمين
-router.get('/search-users', verifyToken, async (req, res) => {
-  try {
-    const { query, limit = 10 } = req.query;
-    const currentUserId = req.user.userId;
-
-    if (!query || query.length < 2) {
-      return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
-    }
-
-    const users = await User.find({
-      $and: [
-        {
-          $or: [
-            { username: { $regex: query, $options: 'i' } },
-            { 'profile.displayName': { $regex: query, $options: 'i' } }
-          ]
-        },
-        { _id: { $ne: currentUserId } }
-      ]
-    })
-    .select('username profile.displayName profile.avatar stats.score relationships.friends relationships.friendRequests relationships.blockedUsers')
-    .limit(parseInt(limit));
-
-    const currentUser = await User.findById(currentUserId);
-    const currentUserFriends = currentUser.relationships.friends.map(f => f.userId.toString());
-    const currentUserRequests = currentUser.relationships.friendRequests.map(r => r.fromUserId.toString());
-    const currentUserBlocked = currentUser.relationships.blockedUsers.map(b => b.userId.toString());
-
-    const searchResults = users.map(user => {
-      const isFriend = currentUserFriends.includes(user._id.toString());
-      const hasRequest = currentUserRequests.includes(user._id.toString());
-      const isBlocked = currentUserBlocked.includes(user._id.toString());
-
-      return {
-        id: user._id,
-        userId: user.userId,
-        username: user.username,
-        displayName: user.profile.displayName,
-        avatar: user.profile.avatar,
-        score: user.stats.score,
-        relationship: isFriend ? 'friend' : hasRequest ? 'request_sent' : isBlocked ? 'blocked' : 'none'
-      };
-    });
-
-    res.json({
-      users: searchResults,
-      total: searchResults.length
-    });
-
-  } catch (error) {
-    console.error('خطأ في البحث عن المستخدمين:', error);
-    res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
-  }
-});
-
-// الحصول على بروفايل المستخدم
+// جلب ملف شخصي للمستخدم
 router.get('/profile/:username', async (req, res) => {
   try {
     const { username } = req.params;
     const user = await User.findOne({ username }).select('-password -suspiciousActivity');
-    
+
     if (!user) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
-    
-    // التحقق من إعدادات الخصوصية
-    if (!user.settings.privacy.showProfile) {
-      return res.status(403).json({ error: 'هذا البروفايل خاص' });
-    }
-    
-    res.json({
-      profile: user.profile,
-      stats: user.settings.privacy.showStats ? user.stats : null,
+
+    // إعداد البيانات العامة للملف الشخصي
+    const profileData = {
+      id: user._id,
+      userId: user.userId,
+      username: user.username,
+      displayName: user.profile.displayName,
+      bio: user.profile.bio,
+      avatar: user.profile.avatar,
+      level: user.profile.level,
+      status: user.profile.status,
+      joinDate: user.profile.joinDate,
+      lastSeen: user.profile.lastSeen,
+      stats: {
+        score: user.stats.score,
+        highScore: user.stats.highScore,
+        gamesPlayed: user.stats.gamesPlayed,
+        gamesWon: user.stats.gamesWon,
+        winRate: user.stats.winRate,
+        totalPlayTime: user.stats.totalPlayTime,
+        averageScore: user.stats.averageScore
+      },
       achievements: user.achievements,
-      badges: user.badges,
-      relationships: {
-        friendsCount: user.relationships.friends.filter(f => f.status === 'accepted').length,
-        followersCount: user.relationships.followers.length,
-        followingCount: user.relationships.following.length
-      }
-    });
+      badges: user.badges
+    };
+
+    res.json(profileData);
+
   } catch (error) {
-    console.error('خطأ في الحصول على البروفايل:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
+    console.error('خطأ في جلب الملف الشخصي:', error);
+    res.status(500).json({ error: 'خطأ في جلب الملف الشخصي' });
   }
 });
 
-// تحديث بروفايل المستخدم
-router.put('/profile', verifyToken, async (req, res) => {
+// البحث عن المستخدمين للمشرفين
+router.get('/admin/search', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { displayName, bio, avatar, country, timezone } = req.body;
-    const userId = req.user.userId;
-    
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-    
-    // تحديث البيانات المسموح بها
-    if (displayName) user.profile.displayName = displayName;
-    if (bio) user.profile.bio = bio;
-    if (avatar) user.profile.avatar = avatar;
-    if (country) user.profile.country = country;
-    if (timezone) user.profile.timezone = timezone;
-    
-    await user.save();
-    
-    res.json({ 
-      message: 'تم تحديث البروفايل بنجاح',
-      profile: user.profile 
-    });
-  } catch (error) {
-    console.error('خطأ في تحديث البروفايل:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
-  }
-});
+    const { search } = req.query;
+    const searchRegex = new RegExp(search, 'i');
 
-// البحث عن المستخدمين
-router.get('/search', verifyToken, async (req, res) => {
-  try {
-    const { q, limit = 20, page = 1 } = req.query;
-    const userId = req.user.userId;
-
-    if (!q || q.trim().length < 2) {
-      return res.status(400).json({ error: 'يجب إدخال نص بحث مكون من حرفين على الأقل' });
-    }
-
-    const skip = (page - 1) * limit;
-    const searchRegex = new RegExp(q.trim(), 'i');
-
-    // البحث في المستخدمين الذين يسمحون بالبحث عنهم
     const users = await User.find({
-      $and: [
-        {
-          $or: [
-            { username: searchRegex },
-            { 'profile.displayName': searchRegex },
-            { 'profile.bio': searchRegex }
-          ]
-        },
-        { _id: { $ne: userId } },
-        { 'profile.searchable': true },
-        { 'profile.showInSearch': true },
-        { isBanned: false }
+      $or: [
+        { username: searchRegex },
+        { email: searchRegex },
+        { 'profile.displayName': searchRegex }
       ]
     })
-    .select('username profile.displayName profile.bio profile.avatar profile.level profile.status profile.joinDate')
-    .limit(parseInt(limit))
-    .skip(skip)
-    .sort({ 'profile.level': -1, username: 1 });
+    .select('userId username email profile.displayName profile.bio profile.avatar profile.level profile.status profile.joinDate')
+    .sort({ 'profile.level': -1, username: 1 })
+    .limit(50);
 
-    // التحقق من حالة الصداقة لكل مستخدم
-    const currentUser = await User.findById(userId);
-    const usersWithStatus = users.map(user => {
-      const isFriend = currentUser.relationships.friends.some(friend => 
-        friend.userId.toString() === user._id.toString() && friend.status === 'accepted'
-      );
-      const hasPendingRequest = currentUser.relationships.friendRequests.some(request => 
-        request.from.toString() === user._id.toString()
-      );
-      const hasSentRequest = currentUser.relationships.friends.some(friend => 
-        friend.userId.toString() === user._id.toString() && friend.status === 'pending'
-      );
-      const isBlocked = currentUser.relationships.blockedUsers.some(blocked => 
-        blocked.userId.toString() === user._id.toString()
-      );
-
-      return {
-        _id: user._id,
-        userId: user.userId,
-        username: user.username,
-        displayName: user.profile.displayName,
-        bio: user.profile.bio,
-        avatar: user.profile.avatar,
-        level: user.profile.level,
-        status: user.profile.status,
-        joinDate: user.profile.joinDate,
-        isFriend,
-        hasPendingRequest,
-        hasSentRequest,
-        isBlocked
-      };
-    });
+    const results = users.map(user => ({
+      id: user._id,
+      userId: user.userId,
+      username: user.username,
+      email: user.email,
+      displayName: user.profile.displayName,
+      bio: user.profile.bio,
+      avatar: user.profile.avatar,
+      level: user.profile.level,
+      status: user.profile.status,
+      joinDate: user.profile.joinDate
+    }));
 
     res.json({
-      users: usersWithStatus,
-      total: users.length,
-      page: parseInt(page),
-      limit: parseInt(limit)
+      users: results,
+      totalResults: results.length
     });
+
   } catch (error) {
     console.error('خطأ في البحث عن المستخدمين:', error);
     res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
   }
 });
 
-// رفع صورة البروفايل
-router.post('/upload-profile-image', verifyToken, async (req, res) => {
+// جلب جميع المستخدمين للمشرفين
+router.get('/admin/all', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { imageData, imageType } = req.body;
-    const userId = req.user.userId;
-
-    console.log('🖼️ طلب رفع صورة:', { imageType, userId, dataLength: imageData?.length });
-
-    if (!imageData || !imageType) {
-      return res.status(400).json({ error: 'بيانات الصورة مطلوبة' });
-    }
-
-    // التحقق من حجم البيانات (10MB كحد أقصى)
-    if (imageData.length > 10 * 1024 * 1024) {
-      return res.status(413).json({ error: 'حجم الصورة كبير جداً. الحد الأقصى 10MB' });
-    }
-
-    // التحقق من نوع الصورة
-    if (!['profileImage', 'coverImage'].includes(imageType)) {
-      return res.status(400).json({ error: 'نوع صورة غير صحيح' });
-    }
-
-    // التحقق من أن البيانات صحيحة
-    if (!imageData.startsWith('data:image/') && !/^[A-Za-z0-9+/]*={0,2}$/.test(imageData)) {
-      return res.status(400).json({ error: 'بيانات الصورة غير صحيحة' });
-    }
-
-    // التحقق من نوع الملف المسموح
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    const detectedType = detectImageType(imageData);
-    
-    if (!allowedTypes.includes(detectedType)) {
-      return res.status(400).json({ 
-        error: 'نوع الصورة غير مسموح. الأنواع المسموحة: JPG, JPEG, PNG فقط' 
-      });
-    }
-
-    // التحقق من المحتوى الإباحي
-    const isInappropriate = await checkInappropriateContent(imageData);
-    if (isInappropriate) {
-      console.log('🚫 تم رفض صورة لاحتوائها على محتوى غير لائق');
-      logRejectedImage(userId, 'محتوى غير لائق', imageData);
-      return res.status(400).json({ 
-        error: 'الصورة تحتوي على محتوى غير لائق. يرجى اختيار صورة مناسبة' 
-      });
-    }
-
-    // في التطبيق الحقيقي، ستقوم بحفظ الصورة في خدمة تخزين مثل AWS S3
-    // هنا سنقوم بحفظ البيانات كـ base64 (للتطوير فقط)
-    const imageUrl = imageData.startsWith('data:') ? imageData : `data:image/jpeg;base64,${imageData}`;
-
-    // تحديث البروفايل
-    const updateField = `profile.${imageType}`;
-    await User.findByIdAndUpdate(userId, {
-      [updateField]: imageUrl
-    });
-
-    console.log('✅ تم رفع الصورة بنجاح');
-
-    res.json({ 
-      success: true, 
-      message: 'تم رفع الصورة بنجاح',
-      imageUrl 
-    });
-  } catch (error) {
-    console.error('❌ خطأ في رفع الصورة:', error);
-    res.status(500).json({ error: 'خطأ في رفع الصورة' });
-  }
-});
-
-// دالة للتحقق من نوع الصورة
-function detectImageType(imageData) {
-  try {
-    // إذا كانت البيانات تحتوي على MIME type
-    if (imageData.startsWith('data:image/')) {
-      const mimeType = imageData.split(';')[0].split(':')[1];
-      return mimeType;
-    }
-    
-    // التحقق من توقيعات الملفات (File Signatures)
-    const base64Data = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
-    
-    // توقيعات الملفات المعروفة
-    const signatures = {
-      'image/jpeg': [0xFF, 0xD8, 0xFF],
-      'image/png': [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
-    };
-    
-    for (const [mimeType, signature] of Object.entries(signatures)) {
-      if (signature.every((byte, index) => buffer[index] === byte)) {
-        return mimeType;
-      }
-    }
-    
-    return 'unknown';
-  } catch (error) {
-    console.error('خطأ في تحديد نوع الصورة:', error);
-    return 'unknown';
-  }
-}
-
-// دالة للتحقق من المحتوى الإباحي
-async function checkInappropriateContent(imageData) {
-  try {
-    // قائمة الكلمات المفتاحية المحظورة (يمكن توسيعها)
-    const inappropriateKeywords = [
-      'nude', 'naked', 'porn', 'sex', 'adult', 'explicit', 'xxx', 'nsfw',
-      'عري', 'إباحي', 'جنس', 'كبار', 'صريح', 'ممنوع', 'محظور'
-    ];
-    
-    // التحقق من البيانات المشفرة (base64)
-    const base64Data = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
-    
-    // التحقق من حجم الصورة (الصور الإباحية عادة تكون كبيرة)
-    if (base64Data.length > 5 * 1024 * 1024) { // 5MB
-      console.log('⚠️ صورة كبيرة - قد تحتاج مراجعة يدوية');
-    }
-    
-    // التحقق من نسبة الألوان (الصور الإباحية عادة تحتوي على ألوان معينة)
-    try {
-      const buffer = Buffer.from(base64Data, 'base64');
-      const colorAnalysis = analyzeImageColors(buffer);
-      
-      // إذا كانت الصورة تحتوي على نسبة عالية من الألوان الجلدية
-      if (colorAnalysis.skinToneRatio > 0.7) {
-        console.log('⚠️ نسبة عالية من الألوان الجلدية - قد تحتاج مراجعة');
-        // يمكن إضافة تحقق إضافي هنا
-      }
-    } catch (colorError) {
-      console.log('⚠️ لا يمكن تحليل ألوان الصورة:', colorError.message);
-    }
-    
-    // التحقق من وجود كلمات محظورة في البيانات (إذا كانت الصورة تحتوي على نص)
-    try {
-      const decodedData = Buffer.from(base64Data, 'base64').toString('utf8');
-      for (const keyword of inappropriateKeywords) {
-        if (decodedData.toLowerCase().includes(keyword.toLowerCase())) {
-          console.log('🚫 تم العثور على كلمة محظورة:', keyword);
-          return true;
-        }
-      }
-    } catch (decodeError) {
-      // البيانات ليست نصية، وهذا طبيعي للصور
-    }
-    
-    // في التطبيق الحقيقي، يمكن استخدام خدمات AI مثل:
-    // - Google Cloud Vision API
-    // - AWS Rekognition
-    // - Azure Computer Vision
-    // - Cloudinary Moderation
-    
-    return false;
-  } catch (error) {
-    console.error('خطأ في التحقق من المحتوى:', error);
-    // في حالة الخطأ، نرفض الصورة من باب الأمان
-    return true;
-  }
-}
-
-// دالة لتحليل ألوان الصورة
-function analyzeImageColors(buffer) {
-  try {
-    // هذا تحليل بسيط للألوان
-    // في التطبيق الحقيقي، يمكن استخدام مكتبات مثل Sharp أو Jimp
-    
-    const data = new Uint8Array(buffer);
-    let skinTonePixels = 0;
-    let totalPixels = 0;
-    
-    // تحليل كل 10 بكسل (للسرعة)
-    for (let i = 0; i < data.length; i += 30) {
-      if (i + 2 < data.length) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        
-        // التحقق من الألوان الجلدية (تقريب بسيط)
-        if (r > 200 && g > 150 && g < 220 && b > 100 && b < 180) {
-          skinTonePixels++;
-        }
-        
-        totalPixels++;
-      }
-    }
-    
-    return {
-      skinToneRatio: totalPixels > 0 ? skinTonePixels / totalPixels : 0
-    };
-  } catch (error) {
-    console.error('خطأ في تحليل الألوان:', error);
-    return { skinToneRatio: 0 };
-  }
-}
-
-// حذف صورة البروفايل
-router.delete('/delete-profile-image', verifyToken, async (req, res) => {
-  try {
-    const { imageType } = req.body;
-    const userId = req.user.userId;
-
-    if (!imageType || !['profileImage', 'coverImage'].includes(imageType)) {
-      return res.status(400).json({ error: 'نوع صورة غير صحيح' });
-    }
-
-    const updateField = `profile.${imageType}`;
-    await User.findByIdAndUpdate(userId, {
-      [updateField]: null
-    });
-
-    res.json({ 
-      success: true, 
-      message: 'تم حذف الصورة بنجاح' 
-    });
-  } catch (error) {
-    console.error('خطأ في حذف الصورة:', error);
-    res.status(500).json({ error: 'خطأ في حذف الصورة' });
-  }
-});
-
-// تحديث السيرة الذاتية
-router.post('/update-bio', verifyToken, async (req, res) => {
-  console.log('🔧 تم استلام طلب تحديث السيرة الذاتية:', req.body);
-  try {
-    const { bio } = req.body;
-    const userId = req.user.userId;
-
-    console.log('👤 معرف المستخدم:', userId);
-
-    if (!bio || bio.length > 500) {
-      return res.status(400).json({ error: 'السيرة الذاتية يجب أن تكون أقل من 500 حرف' });
-    }
-
-    await User.findByIdAndUpdate(userId, {
-      'profile.bio': bio
-    });
-
-    console.log('✅ تم تحديث السيرة الذاتية بنجاح');
-
-    res.json({ 
-      success: true, 
-      message: 'تم تحديث السيرة الذاتية بنجاح',
-      bio 
-    });
-  } catch (error) {
-    console.error('❌ خطأ في تحديث السيرة الذاتية:', error);
-    res.status(500).json({ error: 'خطأ في تحديث السيرة الذاتية' });
-  }
-});
-
-// تحديث معلومات البروفايل الإضافية
-router.post('/update-profile-info', verifyToken, async (req, res) => {
-  console.log('🔧 تم استلام طلب تحديث معلومات البروفايل:', req.body);
-  try {
-    const { 
-      displayName, 
-      age, 
-      gender, 
-      interests, 
-      favoriteGames,
-      socialLinks,
-      country,
-      timezone 
-    } = req.body;
-    const userId = req.user.userId;
-
-    console.log('👤 معرف المستخدم:', userId);
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    // تهيئة حقل profile إذا لم يكن موجوداً
-    if (!user.profile) {
-      user.profile = {
-        displayName: user.username,
-        bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
-        avatar: 'default-avatar.png',
-        profileImage: null,
-        coverImage: null,
-        age: null,
-        gender: 'prefer-not-to-say',
-        interests: [],
-        favoriteGames: [],
-        socialLinks: {},
-        level: 1,
-        experience: 0,
-        joinDate: new Date(),
-        lastSeen: new Date(),
-        status: 'offline',
-        country: '',
-        timezone: '',
-        searchable: true,
-        showInSearch: true,
-        allowFriendRequests: true,
-        allowMessages: true
-      };
-      await user.save();
-    }
-
-    const updateData = {};
-
-    if (displayName && displayName.length <= 50) {
-      updateData['profile.displayName'] = displayName;
-    }
-
-    if (age && age >= 13 && age <= 100) {
-      updateData['profile.age'] = age;
-    }
-
-    if (gender && ['male', 'female', 'other', 'prefer-not-to-say'].includes(gender)) {
-      updateData['profile.gender'] = gender;
-    }
-
-    if (interests && Array.isArray(interests)) {
-      updateData['profile.interests'] = interests.slice(0, 10); // حد أقصى 10 اهتمامات
-    }
-
-    if (favoriteGames && Array.isArray(favoriteGames)) {
-      updateData['profile.favoriteGames'] = favoriteGames.slice(0, 5); // حد أقصى 5 ألعاب
-    }
-
-    if (socialLinks && typeof socialLinks === 'object') {
-      updateData['profile.socialLinks'] = socialLinks;
-    }
-
-    if (country) {
-      updateData['profile.country'] = country;
-    }
-
-    if (timezone) {
-      updateData['profile.timezone'] = timezone;
-    }
-
-    await User.findByIdAndUpdate(userId, updateData);
-
-    console.log('✅ تم تحديث معلومات البروفايل بنجاح');
-
-    res.json({ 
-      success: true, 
-      message: 'تم تحديث معلومات البروفايل بنجاح' 
-    });
-  } catch (error) {
-    console.error('❌ خطأ في تحديث معلومات البروفايل:', error);
-    res.status(500).json({ error: 'خطأ في تحديث معلومات البروفايل' });
-  }
-});
-
-// تحديث إعدادات البحث والخصوصية
-router.post('/update-search-settings', verifyToken, async (req, res) => {
-  console.log('🔧 تم استلام طلب تحديث إعدادات البحث:', req.body);
-  try {
-    const { 
-      searchable, 
-      showInSearch, 
-      allowFriendRequests, 
-      allowMessages 
-    } = req.body;
-    const userId = req.user.userId;
-
-    console.log('👤 معرف المستخدم:', userId);
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    // تهيئة حقل profile إذا لم يكن موجوداً
-    if (!user.profile) {
-      user.profile = {
-        displayName: user.username,
-        bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
-        avatar: 'default-avatar.png',
-        profileImage: null,
-        coverImage: null,
-        age: null,
-        gender: 'prefer-not-to-say',
-        interests: [],
-        favoriteGames: [],
-        socialLinks: {},
-        level: 1,
-        experience: 0,
-        joinDate: new Date(),
-        lastSeen: new Date(),
-        status: 'offline',
-        country: '',
-        timezone: '',
-        searchable: true,
-        showInSearch: true,
-        allowFriendRequests: true,
-        allowMessages: true
-      };
-      await user.save();
-    }
-
-    const updateData = {};
-
-    if (typeof searchable === 'boolean') {
-      updateData['profile.searchable'] = searchable;
-    }
-
-    if (typeof showInSearch === 'boolean') {
-      updateData['profile.showInSearch'] = showInSearch;
-    }
-
-    if (typeof allowFriendRequests === 'boolean') {
-      updateData['profile.allowFriendRequests'] = allowFriendRequests;
-    }
-
-    if (typeof allowMessages === 'boolean') {
-      updateData['profile.allowMessages'] = allowMessages;
-    }
-
-    await User.findByIdAndUpdate(userId, updateData);
-
-    console.log('✅ تم تحديث إعدادات البحث بنجاح');
-
-    res.json({ 
-      success: true, 
-      message: 'تم تحديث إعدادات البحث بنجاح' 
-    });
-  } catch (error) {
-    console.error('❌ خطأ في تحديث إعدادات البحث:', error);
-    res.status(500).json({ error: 'خطأ في تحديث إعدادات البحث' });
-  }
-});
-
-// الحصول على معرف المستخدم
-router.get('/my-id', verifyToken, async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId).select('userId username');
-    
-    if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-    
-    res.json({
-      userId: user.userId,
-      username: user.username
-    });
-  } catch (error) {
-    console.error('خطأ في الحصول على معرف المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
-  }
-});
-
-// تغيير معرف المستخدم (للمشرفين فقط)
-router.put('/admin/change-user-id', verifyToken, async (req, res) => {
-  try {
-    // التحقق من أن المستخدم مشرف
-    const currentUser = await User.findById(req.user.userId);
-    if (!currentUser || !currentUser.isAdmin) {
-      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
-    }
-
-    const { targetUserId, newUserId } = req.body;
-
-    if (!targetUserId || newUserId === undefined) {
-      return res.status(400).json({ error: 'معرف المستخدم الهدف والمعرف الجديد مطلوبان' });
-    }
-
-    // التحقق من أن المعرف الجديد رقم موجب
-    if (newUserId < 1) {
-      return res.status(400).json({ error: 'المعرف الجديد يجب أن يكون رقم موجب' });
-    }
-
-    // البحث عن المستخدم الهدف
-    const targetUser = await User.findById(targetUserId);
-    if (!targetUser) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
-    }
-
-    // التحقق من أن المعرف الجديد غير مستخدم
-    const existingUser = await User.findOne({ userId: newUserId });
-    if (existingUser && existingUser._id.toString() !== targetUserId) {
-      return res.status(400).json({ error: 'المعرف الجديد مستخدم بالفعل' });
-    }
-
-    // حفظ المعرف القديم للتوثيق
-    const oldUserId = targetUser.userId;
-
-    // تحديث معرف المستخدم
-    targetUser.userId = newUserId;
-    await targetUser.save();
-
-    // تسجيل العملية
-    console.log(`🔧 المشرف ${currentUser.username} غير معرف المستخدم ${targetUser.username} من ${oldUserId} إلى ${newUserId}`);
-
-    res.json({
-      success: true,
-      message: `تم تغيير معرف المستخدم من ${oldUserId} إلى ${newUserId}`,
-      user: {
-        id: targetUser._id,
-        username: targetUser.username,
-        oldUserId: oldUserId,
-        newUserId: newUserId
-      }
-    });
-
-  } catch (error) {
-    console.error('خطأ في تغيير معرف المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
-  }
-});
-
-// الحصول على قائمة المستخدمين مع معرفاتهم (للمشرفين فقط)
-router.get('/admin/users-with-ids', verifyToken, async (req, res) => {
-  try {
-    // التحقق من أن المستخدم مشرف
-    const currentUser = await User.findById(req.user.userId);
-    if (!currentUser || !currentUser.isAdmin) {
-      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
-    }
-
-    const { page = 1, limit = 20, search = '' } = req.query;
+    const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
     const skip = (page - 1) * limit;
 
-    // بناء query البحث
-    let query = {};
-    if (search) {
-      query = {
-        $or: [
-          { username: { $regex: search, $options: 'i' } },
-          { 'profile.displayName': { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } }
-        ]
-      };
-    }
+    const sortOptions = {};
+    sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-    // البحث عن المستخدمين
-    const users = await User.find(query)
+    const users = await User.find()
       .select('userId username email profile.displayName profile.level stats.score createdAt')
-      .sort({ userId: 1 })
+      .sort(sortOptions)
       .skip(skip)
       .limit(parseInt(limit));
 
-    // إجمالي عدد المستخدمين
-    const total = await User.countDocuments(query);
+    const totalUsers = await User.countDocuments();
+
+    const results = users.map(user => ({
+      id: user._id,
+      userId: user.userId,
+      username: user.username,
+      email: user.email,
+      displayName: user.profile.displayName,
+      level: user.profile.level,
+      score: user.stats.score,
+      createdAt: user.createdAt
+    }));
 
     res.json({
-      users,
-      total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages: Math.ceil(total / limit)
+      users: results,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalUsers / limit),
+        totalUsers,
+        hasNextPage: page * limit < totalUsers,
+        hasPrevPage: page > 1
+      }
     });
 
   } catch (error) {
-    console.error('خطأ في جلب قائمة المستخدمين:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
+    console.error('خطأ في جلب المستخدمين:', error);
+    res.status(500).json({ error: 'خطأ في جلب المستخدمين' });
   }
 });
 
-// البحث عن معرف مستخدم (للمشرفين فقط)
-router.get('/admin/find-user-by-id/:userId', verifyToken, async (req, res) => {
+// تحديث دور المستخدم (للمشرفين)
+router.put('/admin/update-role', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    // التحقق من أن المستخدم مشرف
-    const currentUser = await User.findById(req.user.userId);
-    if (!currentUser || !currentUser.isAdmin) {
-      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    const { userId, role } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    const { userId } = req.params;
+    user.isAdmin = role === 'admin';
+    await user.save();
 
-    const user = await User.findOne({ userId: parseInt(userId) })
-      .select('userId username email profile.displayName profile.level stats.score createdAt');
+    res.json({
+      message: `تم تحديث دور المستخدم ${user.username} إلى ${role} بنجاح`,
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username,
+        isAdmin: user.isAdmin
+      }
+    });
+
+  } catch (error) {
+    console.error('خطأ في تحديث دور المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في تحديث دور المستخدم' });
+  }
+});
+
+// حذف مستخدم (للمشرفين)
+router.delete('/admin/delete-user', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    res.json({
+      message: `تم حذف المستخدم ${user.username} بنجاح`
+    });
+
+  } catch (error) {
+    console.error('خطأ في حذف المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في حذف المستخدم' });
+  }
+});
+
+// إضافة صناديق للمستخدم (للمشرفين)
+router.post('/admin/add-boxes', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { username, count, value } = req.body;
+
+    if (!username || !count || !value) {
+      return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { username },
+      { 
+        $push: { 
+          boxValues: { 
+            $each: Array(parseInt(count)).fill(parseInt(value)) 
+          } 
+        } 
+      },
+      { new: true }
+    );
 
     if (!user) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    res.json({ user });
+    res.json({
+      message: `تم إضافة ${count} صندوق للمستخدم ${username} بنجاح`,
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username,
+        boxCount: user.boxValues.length
+      }
+    });
 
   } catch (error) {
-    console.error('خطأ في البحث عن المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
+    console.error('خطأ في إضافة الصناديق:', error);
+    res.status(500).json({ error: 'خطأ في إضافة الصناديق' });
   }
 });
 
-// إدارة صور المستخدم (للمشرفين فقط)
-router.put('/admin/manage-user-image', verifyToken, async (req, res) => {
+// تحديث معرف المستخدم (للمشرفين)
+router.put('/admin/update-user-id', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    // التحقق من أن المستخدم مشرف
-    const currentUser = await User.findById(req.user.userId);
-    if (!currentUser || !currentUser.isAdmin) {
-      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    const { targetUserId, newUserId } = req.body;
+
+    // التحقق من أن المعرف الجديد غير مستخدم
+    const existingUser = await User.findOne({ userId: newUserId });
+    if (existingUser) {
+      return res.status(400).json({ error: 'معرف المستخدم الجديد مستخدم بالفعل' });
     }
 
-    const { targetUserId, action, imageData, imageType } = req.body;
-
-    if (!targetUserId || !action) {
-      return res.status(400).json({ error: 'معرف المستخدم والإجراء مطلوبان' });
-    }
-
-    // البحث عن المستخدم الهدف
     const targetUser = await User.findById(targetUserId);
     if (!targetUser) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
-    let result = {};
-
-    switch (action) {
-      case 'change_avatar':
-        if (!imageData || !imageType) {
-          return res.status(400).json({ error: 'بيانات الصورة ونوعها مطلوبان' });
-        }
-        
-        // حفظ الصورة الجديدة
-        const avatarUrl = await saveImage(imageData, imageType, `avatar_${targetUserId}`);
-        targetUser.profile.avatar = avatarUrl;
-        result = { avatar: avatarUrl };
-        break;
-
-      case 'change_profile_image':
-        if (!imageData || !imageType) {
-          return res.status(400).json({ error: 'بيانات الصورة ونوعها مطلوبان' });
-        }
-        
-        // حفظ الصورة الجديدة
-        const profileImageUrl = await saveImage(imageData, imageType, `profile_${targetUserId}`);
-        targetUser.profile.profileImage = profileImageUrl;
-        result = { profileImage: profileImageUrl };
-        break;
-
-      case 'change_cover_image':
-        if (!imageData || !imageType) {
-          return res.status(400).json({ error: 'بيانات الصورة ونوعها مطلوبان' });
-        }
-        
-        // حفظ الصورة الجديدة
-        const coverImageUrl = await saveImage(imageData, imageType, `cover_${targetUserId}`);
-        targetUser.profile.coverImage = coverImageUrl;
-        result = { coverImage: coverImageUrl };
-        break;
-
-      case 'remove_avatar':
-        targetUser.profile.avatar = 'default-avatar.png';
-        result = { avatar: 'default-avatar.png' };
-        break;
-
-      case 'remove_profile_image':
-        targetUser.profile.profileImage = null;
-        result = { profileImage: null };
-        break;
-
-      case 'remove_cover_image':
-        targetUser.profile.coverImage = null;
-        result = { coverImage: null };
-        break;
-
-      default:
-        return res.status(400).json({ error: 'إجراء غير صحيح' });
-    }
-
+    const oldUserId = targetUser.userId;
+    targetUser.userId = newUserId;
     await targetUser.save();
 
-    // تسجيل العملية
-    console.log(`🖼️ المشرف ${currentUser.username} ${action} للمستخدم ${targetUser.username}`);
+    console.log(`🔧 المشرف ${req.user.username} غير معرف المستخدم ${targetUser.username} من ${oldUserId} إلى ${newUserId}`);
 
     res.json({
-      success: true,
-      message: `تم ${action} بنجاح`,
+      message: `تم تحديث معرف المستخدم من ${oldUserId} إلى ${newUserId} بنجاح`,
       user: {
         id: targetUser._id,
-        username: targetUser.username,
-        userId: targetUser.userId
-      },
-      result
+        userId: targetUser.userId,
+        username: targetUser.username
+      }
     });
 
   } catch (error) {
-    console.error('خطأ في إدارة صورة المستخدم:', error);
-    res.status(500).json({ error: 'خطأ في الخادم' });
+    console.error('خطأ في تحديث معرف المستخدم:', error);
+    res.status(500).json({ error: 'خطأ في تحديث معرف المستخدم' });
   }
 });
 
-// دالة لحفظ الصورة
-async function saveImage(imageData, imageType, filename) {
+// البحث عن المستخدمين بالمعرف (للمشرفين)
+router.get('/admin/search-by-id', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    // هنا يمكن إضافة منطق حفظ الصورة
-    // يمكن استخدام خدمات مثل Cloudinary أو حفظ محلي
-    const timestamp = Date.now();
-    const imageUrl = `https://example.com/images/${filename}_${timestamp}.${imageType}`;
-    
-    // في الوقت الحالي، نعيد URL مؤقت
-    return imageUrl;
-  } catch (error) {
-    console.error('خطأ في حفظ الصورة:', error);
-    throw new Error('فشل في حفظ الصورة');
-  }
-}
+    const { search } = req.query;
 
-// الحصول على معلومات صور المستخدم (للمشرفين فقط)
-router.get('/admin/user-images/:userId', verifyToken, async (req, res) => {
-  try {
-    // التحقق من أن المستخدم مشرف
-    const currentUser = await User.findById(req.user.userId);
-    if (!currentUser || !currentUser.isAdmin) {
-      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    if (!search) {
+      return res.status(400).json({ error: 'معرف البحث مطلوب' });
     }
 
+    const users = await User.find({
+      $or: [
+        { userId: parseInt(search) || 0 },
+        { username: { $regex: search, $options: 'i' } }
+      ]
+    })
+    .select('userId username email profile.displayName profile.level stats.score createdAt');
+
+    const results = users.map(user => ({
+      id: user._id,
+      userId: user.userId,
+      username: user.username,
+      email: user.email,
+      displayName: user.profile.displayName,
+      level: user.profile.level,
+      score: user.stats.score,
+      createdAt: user.createdAt
+    }));
+
+    res.json({
+      users: results,
+      totalResults: results.length
+    });
+
+  } catch (error) {
+    console.error('خطأ في البحث عن المستخدمين:', error);
+    res.status(500).json({ error: 'خطأ في البحث عن المستخدمين' });
+  }
+});
+
+// جلب معلومات صور المستخدم (للمشرفين فقط)
+router.get('/admin/user-images/:userId', verifyToken, verifyAdmin, async (req, res) => {
+  try {
     const { userId } = req.params;
 
     const user = await User.findById(userId)
@@ -1865,7 +1132,7 @@ router.get('/admin/user-images/:userId', verifyToken, async (req, res) => {
       user: {
         id: user._id,
         userId: user.userId,
-        userId: user.userId,`n        _id: user._id,`n        userId: user.userId,`n        _id: user._id,`n        username: user.username,
+        username: user.username,
         images: {
           avatar: user.profile.avatar,
           profileImage: user.profile.profileImage,
@@ -1880,34 +1147,4 @@ router.get('/admin/user-images/:userId', verifyToken, async (req, res) => {
   }
 });
 
-// نظام تسجيل الصور المرفوضة
-const rejectedImages = new Map();
-
-// دالة لتسجيل الصورة المرفوضة
-function logRejectedImage(userId, reason, imageData) {
-  const logEntry = {
-    userId,
-    reason,
-    timestamp: new Date(),
-    imageHash: generateImageHash(imageData),
-    // لا نحفظ الصورة نفسها لأسباب أمنية
-  };
-  
-  rejectedImages.set(logEntry.imageHash, logEntry);
-  
-  // حفظ في قاعدة البيانات (اختياري)
-  console.log('🚫 صورة مرفوضة:', {
-    userId,
-    reason,
-    timestamp: logEntry.timestamp
-  });
-}
-
-// دالة لتوليد هاش للصورة
-function generateImageHash(imageData) {
-  const crypto = require('crypto');
-  const base64Data = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
-  return crypto.createHash('md5').update(base64Data).digest('hex');
-}
-
-module.exports = router;
+module.exports = router; 
