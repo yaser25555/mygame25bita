@@ -309,31 +309,66 @@ router.post('/save-game-data', verifyToken, async (req, res) => {
 // مسار تحديث بيانات المستخدم
 router.put('/update-profile', verifyToken, async (req, res) => {
   try {
+    const { displayName, bio, status } = req.body;
+
+    console.log('📝 طلب تحديث بيانات البروفايل للمستخدم:', req.user.username);
+    console.log('📋 البيانات المرسلة:', { displayName, bio, status });
+
     const user = await User.findById(req.user.userId);
     if (!user) {
-      return res.status(404).json({ message: 'المستخدم غير موجود' });
+      console.log('❌ المستخدم غير موجود');
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    console.log('✅ تم العثور على المستخدم:', { userId: user.userId, username: user.username });
+
+    // تهيئة profile إذا لم يكن موجوداً
+    if (!user.profile) {
+      console.log('📝 تهيئة profile للمستخدم:', user.username);
+      user.profile = {
+        bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
+        avatar: 'default-avatar.png',
+        level: 1,
+        experience: 0,
+        status: 'offline',
+        joinDate: new Date(),
+        lastSeen: new Date()
+      };
     }
 
     // تحديث البيانات المطلوبة
-    if (req.body.displayName) user.profile.displayName = req.body.displayName;
-    if (req.body.bio) user.profile.bio = req.body.bio;
-    if (req.body.status) user.profile.status = req.body.status;
+    if (displayName) user.profile.displayName = displayName;
+    if (bio) user.profile.bio = bio;
+    if (status) user.profile.status = status;
 
+    console.log('💾 محاولة حفظ التغييرات...');
     await user.save();
+    console.log('💾 تم حفظ التغييرات بنجاح');
 
-    res.json({ 
-      message: 'تم تحديث بيانات المستخدم بنجاح',
+    console.log(`📝 تم تحديث بيانات البروفايل للمستخدم ${user.username}`);
+
+    res.json({
+      message: 'تم تحديث بيانات البروفايل بنجاح',
       user: {
+        id: user._id,
         userId: user.userId,
-        _id: user._id,
         username: user.username,
         profile: user.profile
       }
     });
 
   } catch (error) {
-    console.error('خطأ في تحديث بيانات المستخدم:', error);
-    res.status(500).json({ message: 'خطأ في الخادم أثناء تحديث بيانات المستخدم' });
+    console.error('❌ خطأ في تحديث بيانات البروفايل:', error);
+    console.error('❌ تفاصيل الخطأ:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'خطأ في تحديث بيانات البروفايل',
+      message: 'حدث خطأ غير متوقع',
+      details: error.message 
+    });
   }
 });
 
@@ -1839,6 +1874,75 @@ router.post('/admin/assign-user-id', verifyToken, verifyAdmin, async (req, res) 
     console.error('❌ خطأ في تعيين معرف المستخدم:', error);
     res.status(500).json({ 
       error: 'خطأ في الخادم',
+      message: 'حدث خطأ غير متوقع',
+      details: error.message 
+    });
+  }
+});
+
+// تحديث الصورة الشخصية للمستخدم
+router.put('/update-avatar', verifyToken, async (req, res) => {
+  try {
+    const { avatar } = req.body;
+
+    console.log('🖼️ طلب تحديث الصورة الشخصية للمستخدم:', req.user.username);
+    console.log('📋 البيانات المرسلة:', { hasAvatar: !!avatar, avatarLength: avatar ? avatar.length : 0 });
+
+    if (!avatar) {
+      console.log('❌ الصورة الشخصية مفقودة');
+      return res.status(400).json({ error: 'الصورة الشخصية مطلوبة' });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      console.log('❌ المستخدم غير موجود');
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    console.log('✅ تم العثور على المستخدم:', { userId: user.userId, username: user.username });
+
+    // تهيئة profile إذا لم يكن موجوداً
+    if (!user.profile) {
+      console.log('📝 تهيئة profile للمستخدم:', user.username);
+      user.profile = {
+        bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
+        displayName: user.username,
+        level: 1,
+        experience: 0,
+        status: 'offline',
+        joinDate: new Date(),
+        lastSeen: new Date()
+      };
+    }
+
+    // تحديث الصورة الشخصية
+    user.profile.avatar = avatar;
+    
+    console.log('💾 محاولة حفظ التغييرات...');
+    await user.save();
+    console.log('💾 تم حفظ التغييرات بنجاح');
+
+    console.log(`🖼️ تم تحديث الصورة الشخصية للمستخدم ${user.username}`);
+
+    res.json({
+      message: 'تم تحديث الصورة الشخصية بنجاح',
+      user: {
+        id: user._id,
+        userId: user.userId,
+        username: user.username,
+        avatar: user.profile.avatar
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ خطأ في تحديث الصورة الشخصية:', error);
+    console.error('❌ تفاصيل الخطأ:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'خطأ في تحديث الصورة الشخصية',
       message: 'حدث خطأ غير متوقع',
       details: error.message 
     });
