@@ -149,6 +149,31 @@
         </div>
     </div>
 
+    <!-- واجهة المحادثة الخاصة الحديثة -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-sidebar" id="chatSidebar">
+            <div class="chat-sidebar-header">
+                <span>المحادثات الخاصة</span>
+            </div>
+            <div class="chat-list" id="chatList">
+                <!-- قائمة المحادثات تظهر هنا -->
+            </div>
+        </div>
+        <div class="chat-main" id="chatMain">
+            <div class="chat-header" id="chatHeader">
+                <span id="chatWithName">اختر صديقاً لبدء المحادثة</span>
+                <span class="chat-status" id="chatStatus"></span>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- الرسائل تظهر هنا -->
+            </div>
+            <form class="chat-input-form" id="chatInputForm" style="display: none;">
+                <input type="text" id="chatInput" placeholder="اكتب رسالتك..." autocomplete="off" required />
+                <button type="submit" class="btn primary">إرسال</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // تسجيل Service Worker
         if ('serviceWorker' in navigator) {
@@ -163,6 +188,7 @@
             });
         }
     </script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script src="profile.js"></script>
 </body>
 </html> 

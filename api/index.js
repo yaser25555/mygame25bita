@@ -89,6 +89,25 @@ const voiceRooms = new Map(); // roomName => Set of usernames
 // إعداد خادم HTTP
 const httpServer = http.createServer(app);
 
+// --- Socket.IO Chat ---
+const { Server } = require('socket.io');
+const chat = require('./chat');
+const io = new Server(httpServer, {
+  cors: {
+    origin: [
+      'https://mygame25bita-7eqw.onrender.com',
+      'https://mygame25bita-1-4ue6.onrender.com',
+      'http://localhost:3000',
+      'http://localhost:5000',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5000'
+    ],
+    credentials: true
+  }
+});
+
+chat.setupSocketHandlers(io);
+chat.setupChatRoutes(app);
 
 // معالجة طلبات WebSocket
 httpServer.on('upgrade', (request, socket, head) => {

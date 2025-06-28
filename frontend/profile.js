@@ -6,10 +6,18 @@ let currentUser = null;
 let privateChatUser = null;
 let privateChatMessages = [];
 
+// ========== نظام المحادثة الخاصة الحديثة ========== //
+let socket = null;
+let chatUserId = null;
+let chatUserData = null;
+let chatMessages = [];
+let typingTimeout = null;
+
 // تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     loadUserProfile();
     setupEventListeners();
+    initSocketChat();
 });
 
 // إعداد مستمعي الأحداث
@@ -680,4 +688,212 @@ function renderPrivateChatMessages() {
         </div>
     `).join('');
     box.scrollTop = box.scrollHeight;
+}
+
+function initSocketChat() {
+    const token = localStorage.getItem('token');
+    if (!token || !currentUser) return;
+    // الاتصال بالسيرفر
+    socket = io(BACKEND_URL, {
+        transports: ['websocket'],
+        withCredentials: true
+    });
+    // الانضمام باسم المستخدم
+    socket.on('connect', () => {
+        socket.emit('join', currentUser.userId);
+        loadRecentChats();
+    });
+    // استقبال رسالة جديدة
+    socket.on('new_message', (msg) => {
+        if (msg.senderId == chatUserId || msg.senderId == currentUser.userId) {
+            chatMessages.push(msg);
+            renderChatMessages();
+            if (msg.senderId != currentUser.userId) markMessagesAsRead(chatUserId);
+        } else {
+            // إشعار في الشريط الجانبي
+            showSidebarNotification(msg.senderId);
+        }
+    });
+    // استقبال حالة الكتابة
+    socket.on('user_typing', ({ userId }) => {
+        if (userId == chatUserId) showTypingIndicator();
+    });
+    socket.on('user_stopped_typing', ({ userId }) => {
+        if (userId == chatUserId) hideTypingIndicator();
+    });
+    // استقبال حالة القراءة
+    socket.on('messages_read', ({ readerId }) => {
+        if (readerId == chatUserId) markAllAsReadLocally();
+    });
+}
+
+// تحميل المحادثات الأخيرة
+async function loadRecentChats() {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${BACKEND_URL}/api/chat/recent`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    renderChatSidebar(data.chats || []);
+}
+
+// عرض الشريط الجانبي للمحادثات
+function renderChatSidebar(chats) {
+    const chatList = document.getElementById('chatList');
+    if (!chatList) return;
+    if (!chats.length) {
+        chatList.innerHTML = '<div style="padding:16px;color:#888;">لا توجد محادثات بعد</div>';
+        return;
+    }
+    chatList.innerHTML = chats.map(chat => `
+        <div class="chat-list-item${chat.userId == chatUserId ? ' active' : ''}" data-userid="${chat.userId}">
+            <img class="chat-list-avatar" src="${chat.avatar || 'images/default-avatar.png'}" alt="${chat.username}">
+            <div class="chat-list-info">
+                <div class="chat-list-username">${chat.username}</div>
+                <div class="chat-list-last">${chat.lastMessage ? chat.lastMessage.message : ''}</div>
+            </div>
+            ${chat.unreadCount > 0 ? `<span class="chat-list-unread">${chat.unreadCount}</span>` : ''}
+        </div>
+    `).join('');
+    // إضافة مستمعي النقر
+    document.querySelectorAll('.chat-list-item').forEach(item => {
+        item.onclick = () => openChatWithUser(item.dataset.userid);
+    });
+}
+
+// فتح محادثة مع مستخدم
+async function openChatWithUser(userId) {
+    chatUserId = userId;
+    chatMessages = [];
+    document.getElementById('chatInputForm').style.display = 'flex';
+    // جلب بيانات المستخدم
+    const chat = await getUserData(userId);
+    chatUserData = chat;
+    document.getElementById('chatWithName').textContent = chat.username;
+    document.getElementById('chatStatus').textContent = chat.online ? '🟢 متصل' : '🔴 غير متصل';
+    // جلب الرسائل
+    await loadChatMessages(userId);
+    // إبلاغ السيرفر أن الرسائل تمت قراءتها
+    markMessagesAsRead(userId);
+}
+
+// جلب بيانات مستخدم
+async function getUserData(userId) {
+    // من الشريط الجانبي أو API المستخدمين
+    // هنا نستخدم الشريط الجانبي أولاً
+    const sidebarItem = document.querySelector(`.chat-list-item[data-userid="${userId}"]`);
+    if (sidebarItem) {
+        return {
+            userId,
+            username: sidebarItem.querySelector('.chat-list-username').textContent,
+            avatar: sidebarItem.querySelector('.chat-list-avatar').src,
+            online: sidebarItem.querySelector('.chat-list-unread') ? true : false
+        };
+    }
+    // أو جلب من API
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${BACKEND_URL}/api/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return await res.json();
+}
+
+// جلب رسائل المحادثة
+async function loadChatMessages(otherUserId) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${BACKEND_URL}/api/chat/messages/${otherUserId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    chatMessages = data.messages || [];
+    renderChatMessages();
+}
+
+// عرض الرسائل
+function renderChatMessages() {
+    const box = document.getElementById('chatMessages');
+    if (!box) return;
+    box.innerHTML = chatMessages.map(msg => `
+        <div class="chat-bubble${msg.senderId == currentUser.userId ? ' me' : ' other'}">
+            <img class="avatar" src="${msg.senderId == currentUser.userId ? currentUser.profile.avatar : chatUserData?.avatar || 'images/default-avatar.png'}" alt="avatar">
+            <div>
+                <div>${msg.message}</div>
+                <div class="meta">${formatTime(msg.timestamp)}${msg.senderId == currentUser.userId ? renderReadStatus(msg) : ''}</div>
+            </div>
+        </div>
+    `).join('');
+    box.scrollTop = box.scrollHeight;
+}
+
+function formatTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return `${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
+}
+
+function renderReadStatus(msg) {
+    return `<span class="read-status${msg.read ? '' : ' unread'}">${msg.read ? '✓✓' : '✓'}</span>`;
+}
+
+// إرسال رسالة
+const chatInputForm = document.getElementById('chatInputForm');
+if (chatInputForm) {
+    chatInputForm.onsubmit = function(e) {
+        e.preventDefault();
+        sendChatMessage();
+    };
+    document.getElementById('chatInput').oninput = function() {
+        if (socket && chatUserId) {
+            socket.emit('typing_start', { receiverId: chatUserId });
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing_stop', { receiverId: chatUserId });
+            }, 1200);
+        }
+    };
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg || !socket || !chatUserId) return;
+    socket.emit('send_message', {
+        receiverId: chatUserId,
+        message: msg
+    });
+    input.value = '';
+}
+
+// حالة الكتابة
+function showTypingIndicator() {
+    let el = document.getElementById('typingIndicator');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'typingIndicator';
+        el.className = 'typing-indicator';
+        el.textContent = 'يكتب...';
+        document.getElementById('chatMessages').appendChild(el);
+    }
+}
+function hideTypingIndicator() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+}
+
+// حالة القراءة
+function markMessagesAsRead(otherUserId) {
+    if (!socket || !otherUserId) return;
+    socket.emit('mark_read', { otherUserId });
+}
+function markAllAsReadLocally() {
+    chatMessages.forEach(msg => {
+        if (msg.receiverId == currentUser.userId) msg.read = true;
+    });
+    renderChatMessages();
+}
+
+// إشعار في الشريط الجانبي
+function showSidebarNotification(userId) {
+    const item = document.querySelector(`.chat-list-item[data-userid="${userId}"]`);
+    if (item) item.classList.add('active');
 }
