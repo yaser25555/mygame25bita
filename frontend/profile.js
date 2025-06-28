@@ -266,21 +266,233 @@ function openAvatarModal() {
 // إغلاق Modal تعديل الصورة الشخصية
 function closeAvatarModal() {
     document.getElementById('avatarModal').style.display = 'none';
+    
+    // إعادة تعيين حالة تحديد مساحة الظهور
+    const cropOverlay = document.getElementById('cropOverlay');
+    const cropControls = document.getElementById('cropControls');
+    const preview = document.getElementById('avatarPreview');
+    
+    if (cropOverlay) cropOverlay.style.display = 'none';
+    if (cropControls) cropControls.style.display = 'none';
+    if (preview) preview.style.display = 'none';
+    
+    // إعادة تعيين البيانات
+    cropData = {
+        scale: 1,
+        x: 0,
+        y: 0,
+        isDragging: false,
+        startX: 0,
+        startY: 0
+    };
 }
 
 // معاينة الصورة الشخصية
 function previewAvatar(event) {
     const file = event.target.files[0];
     const preview = document.getElementById('avatarPreview');
+    const cropOverlay = document.getElementById('cropOverlay');
+    const cropControls = document.getElementById('cropControls');
     
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
             preview.style.display = 'block';
+            cropOverlay.style.display = 'block';
+            cropControls.style.display = 'flex';
+            
+            // تهيئة تحديد مساحة الظهور
+            initCrop();
         };
         reader.readAsDataURL(file);
     }
+}
+
+// متغيرات لتحديد مساحة الظهور
+let cropData = {
+    scale: 1,
+    x: 0,
+    y: 0,
+    isDragging: false,
+    startX: 0,
+    startY: 0
+};
+
+// تهيئة تحديد مساحة الظهور
+function initCrop() {
+    const cropFrame = document.getElementById('cropFrame');
+    const cropOverlay = document.getElementById('cropOverlay');
+    
+    // إضافة مستمعي الأحداث للسحب
+    cropFrame.addEventListener('mousedown', startDrag);
+    cropOverlay.addEventListener('mousemove', drag);
+    cropOverlay.addEventListener('mouseup', stopDrag);
+    
+    // إضافة مستمعي الأحداث للمس (للأجهزة المحمولة)
+    cropFrame.addEventListener('touchstart', startDrag);
+    cropOverlay.addEventListener('touchmove', drag);
+    cropOverlay.addEventListener('touchend', stopDrag);
+}
+
+// بدء السحب
+function startDrag(e) {
+    e.preventDefault();
+    cropData.isDragging = true;
+    const rect = e.target.getBoundingClientRect();
+    cropData.startX = (e.clientX || e.touches[0].clientX) - rect.left;
+    cropData.startY = (e.clientY || e.touches[0].clientY) - rect.top;
+}
+
+// السحب
+function drag(e) {
+    if (!cropData.isDragging) return;
+    e.preventDefault();
+    
+    const cropFrame = document.getElementById('cropFrame');
+    const cropOverlay = document.getElementById('cropOverlay');
+    const rect = cropOverlay.getBoundingClientRect();
+    
+    const x = (e.clientX || e.touches[0].clientX) - rect.left - cropData.startX;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top - cropData.startY;
+    
+    // حدود المنطقة
+    const maxX = rect.width - cropFrame.offsetWidth;
+    const maxY = rect.height - cropFrame.offsetHeight;
+    
+    cropData.x = Math.max(0, Math.min(x, maxX));
+    cropData.y = Math.max(0, Math.min(y, maxY));
+    
+    cropFrame.style.left = cropData.x + 'px';
+    cropFrame.style.top = cropData.y + 'px';
+    cropFrame.style.transform = 'none';
+}
+
+// إيقاف السحب
+function stopDrag() {
+    cropData.isDragging = false;
+}
+
+// تعديل التكبير/التصغير
+function adjustCrop(action) {
+    const cropFrame = document.getElementById('cropFrame');
+    const preview = document.getElementById('avatarPreview');
+    
+    if (action === 'zoom-in') {
+        cropData.scale = Math.min(cropData.scale * 1.1, 3);
+    } else if (action === 'zoom-out') {
+        cropData.scale = Math.max(cropData.scale * 0.9, 0.5);
+    }
+    
+    preview.style.transform = `scale(${cropData.scale})`;
+}
+
+// إعادة تعيين تحديد مساحة الظهور
+function resetCrop() {
+    const cropFrame = document.getElementById('cropFrame');
+    const preview = document.getElementById('avatarPreview');
+    
+    cropData = {
+        scale: 1,
+        x: 0,
+        y: 0,
+        isDragging: false,
+        startX: 0,
+        startY: 0
+    };
+    
+    cropFrame.style.left = '50%';
+    cropFrame.style.top = '50%';
+    cropFrame.style.transform = 'translate(-50%, -50%)';
+    preview.style.transform = 'scale(1)';
+}
+
+// تحويل الصورة المحددة إلى Base64
+function cropImageToBase64() {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const preview = document.getElementById('avatarPreview');
+        const cropFrame = document.getElementById('cropFrame');
+        
+        // حجم الصورة النهائية
+        const size = 150;
+        canvas.width = size;
+        canvas.height = size;
+        
+        // حساب إحداثيات القطع
+        const rect = cropFrame.getBoundingClientRect();
+        const previewRect = preview.getBoundingClientRect();
+        
+        const scaleX = preview.naturalWidth / previewRect.width;
+        const scaleY = preview.naturalHeight / previewRect.height;
+        
+        const sourceX = (rect.left - previewRect.left) * scaleX;
+        const sourceY = (rect.top - previewRect.top) * scaleY;
+        const sourceSize = rect.width * scaleX;
+        
+        // رسم الصورة المقطوعة
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+        ctx.clip();
+        
+        ctx.drawImage(
+            preview,
+            sourceX, sourceY, sourceSize, sourceSize,
+            0, 0, size, size
+        );
+        
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+    });
+}
+
+// تحويل الملف إلى Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// عرض التنبيهات
+function showAlert(message, type) {
+    // إنشاء عنصر التنبيه
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        z-index: 10000;
+        max-width: 300px;
+        word-wrap: break-word;
+    `;
+
+    // تحديد لون الخلفية حسب النوع
+    if (type === 'success') {
+        alertDiv.style.backgroundColor = '#28a745';
+    } else if (type === 'error') {
+        alertDiv.style.backgroundColor = '#dc3545';
+    } else {
+        alertDiv.style.backgroundColor = '#007bff';
+    }
+
+    // إضافة التنبيه للصفحة
+    document.body.appendChild(alertDiv);
+
+    // إزالة التنبيه بعد 5 ثوانٍ
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, 5000);
 }
 
 // تحديث الصورة الشخصية
@@ -294,8 +506,8 @@ async function updateAvatar(event) {
             return;
         }
 
-        const file = fileInput.files[0];
-        const imageData = await fileToBase64(file);
+        // تحويل الصورة المحددة إلى Base64
+        const imageData = await cropImageToBase64();
         
         const token = localStorage.getItem('token');
         const response = await fetch(`${BACKEND_URL}/api/users/update-avatar`, {
@@ -310,7 +522,8 @@ async function updateAvatar(event) {
         });
 
         if (!response.ok) {
-            throw new Error('فشل في تحديث الصورة الشخصية');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'فشل في تحديث الصورة الشخصية');
         }
 
         const result = await response.json();
@@ -324,7 +537,7 @@ async function updateAvatar(event) {
 
     } catch (error) {
         console.error('خطأ في تحديث الصورة الشخصية:', error);
-        showAlert('خطأ في تحديث الصورة الشخصية', 'error');
+        showAlert(`خطأ في تحديث الصورة الشخصية: ${error.message}`, 'error');
     }
 }
 
@@ -396,53 +609,4 @@ async function updateProfile(event) {
         console.error('خطأ في تحديث البروفايل:', error);
         showAlert('خطأ في تحديث البروفايل', 'error');
     }
-}
-
-// تحويل الملف إلى Base64
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
-
-// عرض التنبيهات
-function showAlert(message, type) {
-    // إنشاء عنصر التنبيه
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type}`;
-    alertDiv.textContent = message;
-    alertDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        z-index: 10000;
-        max-width: 300px;
-        word-wrap: break-word;
-    `;
-
-    // تحديد لون الخلفية حسب النوع
-    if (type === 'success') {
-        alertDiv.style.backgroundColor = '#28a745';
-    } else if (type === 'error') {
-        alertDiv.style.backgroundColor = '#dc3545';
-    } else {
-        alertDiv.style.backgroundColor = '#007bff';
-    }
-
-    // إضافة التنبيه للصفحة
-    document.body.appendChild(alertDiv);
-
-    // إزالة التنبيه بعد 5 ثوانٍ
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.parentNode.removeChild(alertDiv);
-        }
-    }, 5000);
 }

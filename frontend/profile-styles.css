@@ -416,6 +416,72 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* ميزة تحديد مساحة الظهور */
+.avatar-crop-container {
+  margin: 16px 0;
+}
+
+.crop-area {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.crop-area img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  transition: transform 0.3s ease;
+}
+
+.crop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.crop-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  height: 150px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  cursor: move;
+  resize: both;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.crop-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.crop-controls .btn {
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  min-width: auto;
+}
+
 .form-actions {
   display: flex;
   gap: 12px;
@@ -546,6 +612,25 @@ body {
     margin: 10% auto;
     width: 95%;
     padding: 16px;
+  }
+
+  .crop-area {
+    height: 250px;
+  }
+  
+  .crop-frame {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .crop-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .crop-controls .btn {
+    width: 100%;
+    max-width: 200px;
   }
 }
 

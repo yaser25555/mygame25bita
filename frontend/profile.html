@@ -90,8 +90,18 @@
                     <label for="avatarFile">اختر صورة:</label>
                     <input type="file" id="avatarFile" accept="image/*" onchange="previewAvatar(event)" required>
                 </div>
-                <div class="avatar-preview">
-                    <img id="avatarPreview" src="" alt="معاينة" style="display: none;">
+                <div class="avatar-crop-container">
+                    <div class="crop-area">
+                        <img id="avatarPreview" src="" alt="معاينة" style="display: none;">
+                        <div class="crop-overlay" id="cropOverlay" style="display: none;">
+                            <div class="crop-frame" id="cropFrame"></div>
+                        </div>
+                    </div>
+                    <div class="crop-controls" id="cropControls" style="display: none;">
+                        <button type="button" onclick="adjustCrop('zoom-in')" class="btn secondary">🔍+ تكبير</button>
+                        <button type="button" onclick="adjustCrop('zoom-out')" class="btn secondary">🔍- تصغير</button>
+                        <button type="button" onclick="resetCrop()" class="btn secondary">🔄 إعادة تعيين</button>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn primary">💾 حفظ</button>
