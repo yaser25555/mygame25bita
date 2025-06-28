@@ -90,24 +90,51 @@ async function loadUserProfile() {
 
 // عرض بروفايل المستخدم
 function displayUserProfile(user) {
+    console.log('📋 بيانات المستخدم المستلمة:', user);
+    
+    // التحقق من وجود البيانات المطلوبة
+    if (!user) {
+        console.error('❌ بيانات المستخدم مفقودة');
+        showAlert('خطأ في تحميل بيانات المستخدم', 'error');
+        return;
+    }
+
+    // تهيئة profile إذا لم يكن موجوداً
+    if (!user.profile) {
+        console.log('⚠️ المستخدم لا يحتوي على profile، سيتم إنشاء واحد افتراضي');
+        user.profile = {
+            avatar: 'images/default-avatar.png',
+            displayName: user.username,
+            level: 1
+        };
+    }
+
+    // تهيئة stats إذا لم يكن موجوداً
+    if (!user.stats) {
+        console.log('⚠️ المستخدم لا يحتوي على stats، سيتم إنشاء واحد افتراضي');
+        user.stats = {
+            score: 0
+        };
+    }
+
     // الصورة الشخصية
     const avatar = document.getElementById('user-avatar');
-    avatar.src = user.profile?.avatar || 'images/default-avatar.png';
+    avatar.src = user.profile.avatar || 'images/default-avatar.png';
     avatar.alt = user.username;
 
     // الاسم المعروض
-    document.getElementById('display-name').textContent = user.profile?.displayName || user.username;
+    document.getElementById('display-name').textContent = user.profile.displayName || user.username;
 
     // معرف المستخدم
-    document.getElementById('user-id').textContent = `ID: ${user.userId}`;
+    document.getElementById('user-id').textContent = `ID: ${user.userId || 'غير محدد'}`;
 
     // المستوى
-    document.getElementById('user-level').textContent = user.profile?.level || 1;
+    document.getElementById('user-level').textContent = user.profile.level || 1;
 
     // الإحصائيات السريعة
-    document.getElementById('total-score').textContent = user.stats?.score || 0;
+    document.getElementById('total-score').textContent = user.stats.score || 0;
     document.getElementById('gems-count').textContent = user.collectedGems || 0;
-    document.getElementById('friends-count').textContent = user.friends?.length || 0;
+    document.getElementById('friends-count').textContent = user.relationships?.friends?.length || 0;
 
     // حالة الدرع
     displayShieldStatus(user.shield);
@@ -122,9 +149,14 @@ function displayShieldStatus(shield) {
     const shieldName = document.getElementById('shield-name');
     const shieldDuration = document.getElementById('shield-duration');
 
-    if (shield && shield.active) {
-        shieldName.textContent = shield.name || 'درع نشط';
-        shieldDuration.textContent = `متبقي: ${formatDuration(shield.expiresAt)}`;
+    if (!shieldStatus || !shieldName || !shieldDuration) {
+        console.warn('⚠️ عناصر الدرع غير موجودة في الصفحة');
+        return;
+    }
+
+    if (shield && shield.currentShield && shield.currentShield.isActive) {
+        shieldName.textContent = shield.currentShield.type || 'درع نشط';
+        shieldDuration.textContent = `متبقي: ${formatDuration(shield.currentShield.expiresAt)}`;
         shieldStatus.style.display = 'flex';
     } else {
         shieldName.textContent = 'بدون درع';

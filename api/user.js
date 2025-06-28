@@ -110,33 +110,62 @@ router.get('/me', verifyToken, async (req, res) => {
     console.log('🔍 بيانات المستخدم من قاعدة البيانات:', {
       _id: user._id,
       userId: user.userId,
-      username: user.username
+      username: user.username,
+      hasProfile: !!user.profile,
+      hasStats: !!user.stats
     });
+
+    // تهيئة profile إذا لم يكن موجوداً
+    if (!user.profile) {
+      console.log('📝 تهيئة profile للمستخدم:', user.username);
+      user.profile = {
+        bio: 'مرحباً! أنا لاعب في VoiceBoom 🎮',
+        avatar: 'default-avatar.png',
+        displayName: user.username,
+        level: 1,
+        experience: 0,
+        status: 'offline',
+        joinDate: new Date(),
+        lastSeen: new Date()
+      };
+    }
+
+    // تهيئة stats إذا لم يكن موجوداً
+    if (!user.stats) {
+      console.log('📝 تهيئة stats للمستخدم:', user.username);
+      user.stats = {
+        score: 0,
+        pearls: 0,
+        highScore: 0,
+        roundNumber: 0,
+        personalScore: 50
+      };
+    }
 
     // إرجاع البيانات التي تحتاجها الواجهة الأمامية
     res.json({
         _id: user._id,
         userId: user.userId,
         username: user.username,
-        score: user.stats.score,
+        score: user.stats.score || 0,
         isAdmin: user.isAdmin,
-        personalScore: user.stats.personalScore,
-        highScore: user.stats.highScore,
-        roundNumber: user.stats.roundNumber,
-        singleShotsUsed: user.weapons.singleShotsUsed,
-        tripleShotsUsed: user.weapons.tripleShotsUsed,
-        hammerShotsUsed: user.weapons.hammerShotsUsed,
-        boxValues: user.boxValues,
-        itemsCollected: user.itemsCollected,
-        collectedGems: user.collectedGems,
-        totalGemsCollected: user.totalGemsCollected,
-        batsHit: user.batsHit,
+        personalScore: user.stats.personalScore || 50,
+        highScore: user.stats.highScore || 0,
+        roundNumber: user.stats.roundNumber || 0,
+        singleShotsUsed: user.weapons?.singleShotsUsed || 0,
+        tripleShotsUsed: user.weapons?.tripleShotsUsed || 0,
+        hammerShotsUsed: user.weapons?.hammerShotsUsed || 0,
+        boxValues: user.boxValues || [],
+        itemsCollected: user.itemsCollected || {},
+        collectedGems: user.collectedGems || 0,
+        totalGemsCollected: user.totalGemsCollected || 0,
+        batsHit: user.batsHit || 0,
         profile: user.profile,
         stats: user.stats,
-        weapons: user.weapons,
-        achievements: user.achievements,
-        badges: user.badges,
-        relationships: user.relationships
+        weapons: user.weapons || {},
+        achievements: user.achievements || [],
+        badges: user.badges || [],
+        relationships: user.relationships || { friends: [] }
     });
 
   } catch (error) {
