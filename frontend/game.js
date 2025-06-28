@@ -62,7 +62,7 @@ let sounds = {};
 
 // Initialize Game
 function initGame() {
-    console.log('ðŸš€ ØªÙ‡ÙŠØ¦Ø© Ø§Ù„Ù„Ø¹Ø¨Ø©...');
+    console.log('🎮 تحميل صفحة اللعبة...');
     
     // Setup canvas
     canvas = document.getElementById('gameCanvas');
@@ -85,7 +85,7 @@ function initGame() {
     // Start game loop
     gameLoop();
     
-    console.log('âœ… ØªÙ… ØªÙ‡ÙŠØ¦Ø© Ø§Ù„Ù„Ø¹Ø¨Ø© Ø¨Ù†Ø¬Ø§Ø­');
+    console.log('✅ تم تحميل صفحة اللعبة بنجاح');
 }
 
 // Load Game Assets
@@ -352,7 +352,7 @@ function updateScore() {
     // Level up every 1000 points
     if (gameState.score % 1000 === 0) {
         gameState.level++;
-        console.log(`ðŸŽ‰ Level up! Level ${gameState.level}`);
+        console.log(`🎉 Level up! Level ${gameState.level}`);
     }
 }
 
@@ -442,7 +442,7 @@ function drawUI() {
 
 // Start Game
 function startGame() {
-    console.log('ðŸŽ® Ø¨Ø¯Ø¡ Ø§Ù„Ù„Ø¹Ø¨Ø©...');
+    console.log('🎉 تبدأ اللعبة...');
     gameState.isRunning = true;
     gameState.score = 0;
     gameState.level = 1;
@@ -458,7 +458,7 @@ function startGame() {
 
 // Game Over
 function gameOver() {
-    console.log('ðŸ'€ Ø§Ù†ØªÙ‡Øª Ø§Ù„Ù„Ø¹Ø¨Ø©');
+    console.log('🎉 اللعبة إنهاء');
     gameState.isRunning = false;
     
     // Show game over screen
@@ -474,7 +474,7 @@ async function saveScore(score) {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            console.log('âŒ Ù„Ø§ ÙŠÙˆØ¬Ø¯ token Ù„Ø­ÙØ¸ Ø§Ù„Ù†ØªÙŠØ¬Ø©');
+            console.log('🚨 لم يتم العثور على token');
             return;
         }
         
@@ -488,12 +488,12 @@ async function saveScore(score) {
         });
         
         if (response.ok) {
-            console.log('âœ… ØªÙ… Ø­ÙØ¸ Ø§Ù„Ù†ØªÙŠØ¬Ø© Ø¨Ù†Ø¬Ø§Ø­');
+            console.log('✅ تم حفظ النقاط');
         } else {
-            console.log('âŒ ÙØ´Ù„ ÙÙŠ Ø­ÙØ¸ Ø§Ù„Ù†ØªÙŠØ¬Ø©');
+            console.log('🚨 خطأ في حفظ النقاط');
         }
     } catch (error) {
-        console.log('âŒ Ø®Ø·Ø£ ÙÙŠ Ø­ÙØ¸ Ø§Ù„Ù†ØªÙŠØ¬Ø©:', error);
+        console.log('🚨 خطأ في حفظ النقاط:', error);
     }
 }
 
@@ -532,7 +532,7 @@ function setupMobileControls() {
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('ðŸŽ® ØªØ­Ù…ÙŠÙ„ ØµÙØ­Ø© Ø§Ù„Ù„Ø¹Ø¨Ø©...');
+    console.log('🎮 تحميل صفحة اللعبة...');
     initGame();
     
     // Setup button event listeners
@@ -540,6 +540,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('restartButton').addEventListener('click', restartGame);
     document.getElementById('menuButton').addEventListener('click', backToMenu);
     
-    console.log('âœ… ØªÙ… ØªØ­Ù…ÙŠÙ„ ØµÙØ­Ø© Ø§Ù„Ù„Ø¹Ø¨Ø© Ø¨Ù†Ø¬Ø§Ø­');
+    // ربط زر الغرفة الصوتية
+    const voiceBtn = document.getElementById('voiceChatRoomBtn');
+    if (voiceBtn) {
+        voiceBtn.addEventListener('click', function() {
+            // إظهار مودال المحادثة الصوتية
+            const modal = document.getElementById('voiceModal');
+            if (modal) modal.style.display = 'block';
+        });
+    }
+    
+    console.log('✅ تم تحميل صفحة اللعبة بنجاح');
     setupMobileControls();
 }); 
