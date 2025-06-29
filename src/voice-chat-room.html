@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>غرفة المحادثة الصوتية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      font-family: 'Cairo', sans-serif;
+      color: #fff;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .voice-room-container {
+      margin-top: 40px;
+      background: rgba(30,32,34,0.95);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      padding: 32px 24px 48px 24px;
+      max-width: 600px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h2 {
+      margin-bottom: 16px;
+      color: #7fbcff;
+      letter-spacing: 1px;
+    }
+    .users-circle {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 32px;
+      margin: 32px 0 40px 0;
+      min-height: 180px;
+      min-width: 320px;
+      background: rgba(60, 60, 80, 0.15);
+      border-radius: 24px;
+      padding: 32px 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    }
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7em;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      border: 3px solid #232526;
+      position: relative;
+      transition: transform 0.2s;
+    }
+    .user-avatar.speaking {
+      box-shadow: 0 0 0 4px #7fbcff, 0 2px 8px rgba(0,0,0,0.18);
+      transform: scale(1.08);
+    }
+    .user-avatar.you {
+      border: 3px solid #facc15;
+    }
+    .mic-btn {
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(79,70,229,0.18);
+      cursor: pointer;
+      margin: 0 auto 10px auto;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .mic-btn.active {
+      background: linear-gradient(135deg, #f43f5e 0%, #facc15 100%);
+      color: #fff;
+      transform: scale(1.08);
+    }
+    .instructions {
+      color: #b3b3b3;
+      font-size: 1em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    /* تصميم المحادثة الكتابية */
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(30,32,34,0.95);
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    /* تصميم حاوية المايكروفون */
+    .mic-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .mic-btn {
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      color: white;
+      box-shadow: 0 4px 16px rgba(79,70,229,0.18);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .mic-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 24px rgba(79,70,229,0.25);
+    }
+    
+    .mic-btn.active {
+      background: linear-gradient(135deg, #f43f5e 0%, #facc15 100%);
+      color: white;
+      transform: scale(1.1);
+    }
+    
+    .mic-container .instructions {
+      color: #b3b3b3;
+      font-size: 1em;
+      text-align: center;
+      opacity: 0.8;
+    }
+    .chat-header {
+      padding: 15px 20px;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-header h3 {
+      margin: 0;
+      color: #7fbcff;
+      font-size: 1.2em;
+    }
+    .chat-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .chat-control-btn {
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .chat-control-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+    }
+    .chat-control-btn.muted {
+      background: linear-gradient(135deg, #f43f5e 0%, #facc15 100%);
+    }
+    .chat-messages {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 15px;
+      background: rgba(40,44,52,0.95);
+    }
+    .chat-message {
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 10px;
+      max-width: 80%;
+      position: relative;
+    }
+    .chat-message::before {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      top: 12px;
+    }
+    .own {
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      margin-left: auto;
+      color: white;
+    }
+    .own::before {
+      background: #7fbcff;
+      right: -4px;
+    }
+    .other {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .other::before {
+      background: rgba(255,255,255,0.2);
+      left: -4px;
+    }
+    .system-message {
+      background: rgba(127,188,255,0.1);
+      text-align: center;
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 8px;
+    }
+    .message-sender {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .message-text {
+      margin: 5px 0;
+    }
+    .message-time {
+      font-size: 0.8em;
+      color: rgba(255,255,255,0.6);
+      display: block;
+    }
+    .chat-input-container {
+      padding: 15px;
+      background: rgba(40,44,52,0.95);
+      border-top: 2px solid rgba(255,255,255,0.1);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 12px 20px;
+      color: #fff;
+      font-size: 1em;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    .chat-input:focus {
+      background: rgba(255,255,255,0.15);
+      border-color: #7fbcff;
+    }
+    .send-btn {
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .send-btn:hover {
+      background: linear-gradient(135deg, #63b3ed 0%, #4299e1 100%);
+      transform: scale(1.1);
+    }
+    .emoji-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .emoji-btn:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.1);
+    }
+    .emoji-picker {
+      position: absolute;
+      bottom: 60px;
+      right: 15px;
+      background: rgba(30,32,34,0.95);
+      border-radius: 15px;
+      padding: 10px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .emoji-picker.show {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+    .emoji-item {
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+    .emoji-item:hover {
+      background: rgba(255,255,255,0.1);
+      transform: scale(1.1);
+    }
+    .sound-keys {
+      position: absolute;
+      bottom: 60px;
+      left: 15px;
+      background: rgba(30,32,34,0.95);
+      border-radius: 15px;
+      padding: 10px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .sound-keys.show {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .sound-key {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sound-key:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+    .chat-toggle-btn {
+      background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .chat-toggle-btn:hover {
+      background: linear-gradient(135deg, #63b3ed 0%, #4299e1 100%);
+      transform: scale(1.1);
+    }
+    .chat-container.collapsed {
+      height: 50px;
+      overflow: hidden;
+    }
+    .chat-container.collapsed .chat-messages {
+      display: none;
+    }
+    .chat-container.collapsed .chat-input-container {
+      display: none;
+    }
+    .chat-container.collapsed .chat-header {
+      padding: 10px 15px;
+    }
+    @media (max-width: 700px) {
+      .voice-room-container {
+        padding: 10px 2px 18px 2px;
+        max-width: 99vw;
+      }
+      .users-circle {
+        gap: 16px;
+        min-width: 0;
+        padding: 12px 2px;
+      }
+      .user-avatar {
+        width: 48px;
+        height: 48px;
+        font-size: 1em;
+      }
+      .mic-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1em;
+      }
+      .chat-container {
+        max-width: 99vw;
+      }
+      .chat-messages {
+        max-height: 300px;
+      }
+      .chat-input {
+        font-size: 0.9em;
+      }
+      .send-btn {
+        width: 35px;
+        height: 35px;
+      }
+    }
+  </style>
+  <script>
+    // التأكد من وجود اسم مستخدم حقيقي من تسجيل الدخول
+    window.username = localStorage.getItem('username') || 'لاعب مجهول';
+    if (!window.username || window.username === 'لاعب مجهول') {
+      window.location.href = '/index.html';
+    }
+  </script>
+</head>
+<body>
+  <div class="user-name"></div>
+  <div class="voice-room-container">
+    <h2>غرفة المحادثة الصوتية</h2>
+    <div class="users-circle" id="usersCircle">
+      <!-- سيتم إضافة المستخدمين هنا -->
+    </div>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h3>الدردشة الكتابية</h3>
+        <div class="chat-controls">
+          <button class="chat-control-btn" id="mute-btn">
+            <i class="fas fa-volume-up"></i>
+          </button>
+          <button class="chat-control-btn" id="collapse-btn">
+            <i class="fas fa-chevron-down"></i>
+          </button>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <!-- سيتم إضافة الرسائل هنا -->
+      </div>
+      <div class="chat-input-container">
+        <button class="emoji-btn" id="emoji-btn">
+          <i class="fas fa-smile"></i>
+        </button>
+        <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا..." class="chat-input">
+        <button class="send-btn" id="send-btn">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+      <div class="emoji-picker">
+        <!-- سيتم إضافة الرموز التعبيرية هنا -->
+      </div>
+      <div class="sound-keys">
+        <!-- سيتم إضافة مفاتيح الصوت هنا -->
+      </div>
+    </div>
+    <script>
+      // Set username and room name before loading voice-chat.js
+      window.currentUsername = localStorage.getItem('username') || '';
+      window.currentRoomName = 'game-room';
+    </script>
+    <script src="voice-chat.js"></script>
+    <div class="mic-container">
+      <button class="mic-btn" id="voiceChatBtn" onclick="toggleMic()">
+        <i class="fas fa-microphone"></i>
+      </button>
+      <div class="instructions">
+        اضغط على زر المايكروفون للتحدث
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+  <script>
+    // ملاحظة: يجب عدم تعريف ws أو username هنا، بل استخدامهما من voice-chat.js فقط
+    // قائمة المستخدمين المتصلين بالصوت
+    let voiceUsers = [];
+    let myUsername = window.username || '';
+
+    // تحديث قائمة المستخدمين
+    function updateVoiceUsers(users) {
+      voiceUsers = users;
+      renderVoiceUsersCircle();
+    }
+
+    // رسم الدوائر للمستخدمين
+    function renderVoiceUsersCircle() {
+      const container = document.getElementById('usersCircle');
+      container.innerHTML = '';
+      voiceUsers.forEach(username => {
+        const div = document.createElement('div');
+        div.className = 'user-avatar' + (username === myUsername ? ' you' : '');
+        div.textContent = username[0] ? username[0].toUpperCase() : '?';
+        div.title = username + (username === myUsername ? ' (أنت)' : '');
+        container.appendChild(div);
+      });
+    }
+
+    // استقبال تحديثات المستخدمين من WebSocket
+    function handleVoiceRoomUsers(users) {
+      updateVoiceUsers(users);
+    }
+
+    // ربط مع WebSocket في voice-chat.js
+    const origHandleWSMessage = window.handleWSMessage;
+    window.handleWSMessage = function(event) {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'voice_room_users') {
+          handleVoiceRoomUsers(data.users);
+        } else if (data.type === 'player_joined') {
+          addMessageToChat('النظام', `انضم اللاعب ${data.username} إلى المحادثة`, 'system-message');
+        } else if (data.type === 'player_left') {
+          addMessageToChat('النظام', `غادر اللاعب ${data.username} إلى المحادثة`, 'system-message');
+        } else if (data.type === 'chat_message') {
+          // عرض رسائل الدردشة الكتابية
+          const messageType = data.sender === myUsername ? 'own' : 'other';
+          addMessageToChat(data.sender, data.text, messageType);
+        }
+      } catch (e) { console.error('Chat parse error', e); }
+    };
+
+    // عند الانضمام أو مغادرة الغرفة، أطلب تحديث القائمة
+    const origJoin = window.joinVoiceChannel;
+    window.joinVoiceChannel = async function() {
+      if (origJoin) await origJoin();
+      getWebSocket().send(JSON.stringify({ type: 'get_voice_room_users', roomName: window.currentRoomName || 'game-room' }));
+    };
+    const origLeave = window.leaveVoiceChannel;
+    window.leaveVoiceChannel = function() {
+      if (origLeave) origLeave();
+      updateVoiceUsers([]);
+    };
+
+    let isChatMuted = false;
+    let chatNotification = new Audio('sounds/click.mp3');
+    let isChatCollapsed = false;
+    
+    function getWebSocket() {
+      if (ws && ws.readyState === WebSocket.OPEN) return ws;
+      
+      const wsUrl = 'wss://mygame25bita.onrender.com';
+      console.log('Attempting to connect to WebSocket:', wsUrl);
+      
+      ws = new WebSocket(wsUrl);
+      ws.onopen = () => {
+        console.log('WebSocket connected successfully');
+        console.log('WebSocket state:', ws.readyState);
+      };
+      
+      ws.onmessage = handleWSMessage;
+      
+      ws.onclose = (event) => {
+        console.log('WebSocket closed');
+        console.log('Close event:', event);
+        console.log('Close code:', event.code);
+        console.log('Close reason:', event.reason);
+        joined = false;
+        
+        // إعادة الاتصال تلقائياً بعد 5 ثواني
+        setTimeout(() => {
+          console.log('Attempting to reconnect...');
+          connectWebSocket();
+        }, 5000);
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        // إعادة الاتصال تلقائياً بعد 5 ثواني
+        setTimeout(() => {
+          console.log('Attempting to reconnect...');
+          connectWebSocket();
+        }, 5000);
+      };
+      
+      return ws;
+    }
+    
+    function addMessageToChat(sender, text, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chat-message ${type}`;
+      messageDiv.innerHTML = `
+        <div class="message-sender">${sender}</div>
+        <div class="message-text">${text}</div>
+        <div class="message-time">${new Date().toLocaleTimeString()}</div>
+      `;
+      const messagesContainer = document.querySelector('.chat-messages');
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      console.log('Trying to send chat message:', text);
+
+      if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        window.ws.send(JSON.stringify({
+          type: 'chat_message',
+          text: text,
+          sender: window.username
+        }));
+        input.value = '';
+        console.log('Chat message sent:', text);
+      } else {
+        console.warn('WebSocket not open, cannot send message');
+      }
+    }
+    
+    function toggleMic() {
+      const micBtn = document.querySelector('.mic-btn');
+      const isActive = micBtn.classList.contains('active');
+      
+      // تغيير حالة المايكروفون
+      micBtn.classList.toggle('active');
+      
+      // تغيير أيقونة المايكروفون
+      micBtn.innerHTML = isActive ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
+      
+      // إضافة تأثيرات بصرية
+      micBtn.style.transform = 'scale(1.2)';
+      setTimeout(() => {
+        micBtn.style.transform = 'scale(1)';
+      }, 200);
+    }
+    
+    function toggleChatMute() {
+      isChatMuted = !isChatMuted;
+      const muteBtn = document.querySelector('.chat-control-btn');
+      muteBtn.classList.toggle('muted');
+      muteBtn.textContent = isChatMuted ? 'تشغيل الصوت 🔊' : 'إيقاف الصوت 🔇';
+    }
+    
+    function toggleChatCollapse() {
+      isChatCollapsed = !isChatCollapsed;
+      const chatContainer = document.querySelector('.chat-container');
+      chatContainer.classList.toggle('collapsed');
+    }
+    
+    function initChat() {
+      const chatInput = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-btn');
+      const emojiBtn = document.getElementById('emoji-btn');
+      const muteBtn = document.getElementById('mute-btn');
+      const collapseBtn = document.getElementById('collapse-btn');
+      const emojiPicker = document.querySelector('.emoji-picker');
+
+      // تأكد من إزالة أي مستمعات سابقة لتفادي التكرار
+      sendBtn.onclick = sendMessage;
+      chatInput.onkeypress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          sendMessage();
+        }
+      };
+      muteBtn.onclick = toggleChatMute;
+      collapseBtn.onclick = toggleChatCollapse;
+
+      // معالج الرموز التعبيرية
+      emojiBtn.onclick = (e) => {
+        e.stopPropagation();
+        emojiPicker.classList.toggle('show');
+      };
+      // إغلاق القائمة عند النقر خارجها
+      document.addEventListener('click', (e) => {
+        if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
+          emojiPicker.classList.remove('show');
+        }
+      });
+      // إضافة معالج لاختيار الرموز التعبيرية
+      emojiPicker.querySelectorAll('.emoji-item').forEach(item => {
+        item.onclick = () => {
+          chatInput.value += item.textContent;
+          chatInput.focus();
+        };
+      });
+    }
+    
+    // الاتصال بـ WebSocket عند تحميل الصفحة
+    window.addEventListener('load', () => {
+      const userNameDiv = document.querySelector('.user-name');
+      if (userNameDiv) userNameDiv.textContent = window.username;
+      
+      // إنشاء مفاتيح الأصوات
+      const soundKeys = document.querySelector('.sound-keys');
+      const sounds = [
+        { icon: '🎵', sound: 'music.mp3' },
+        { icon: '🔥', sound: 'fire.mp3' },
+        { icon: '🎉', sound: 'celebrate.mp3' },
+        { icon: '🏆', sound: 'victory.mp3' }
+      ];
+      
+      sounds.forEach(sound => {
+        const key = document.createElement('div');
+        key.className = 'sound-key';
+        key.innerHTML = `<span>${sound.icon}</span>`;
+        key.setAttribute('data-sound', sound.sound);
+        soundKeys.appendChild(key);
+      });
+      
+      // إنشاء قائمة الرموز التعبيرية
+      const emojiPicker = document.querySelector('.emoji-picker');
+      const emojis = ['😊', '😂', '❤️', '🎉', '🔥', '🏆', '🎵', '🎮', '⚡', '✨'];
+      
+      emojis.forEach(emoji => {
+        const item = document.createElement('div');
+        item.className = 'emoji-item';
+        item.textContent = emoji;
+        emojiPicker.appendChild(item);
+      });
+      
+      initChat();
+      connectWebSocket();
+    });
+
+    function connectWebSocket() {
+      getWebSocket();
+    }
+  </script>
+</body>
+</html>
