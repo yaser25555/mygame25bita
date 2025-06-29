@@ -1,138 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://mygame25bita-7eqw.onrender.com wss: ws:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Voice Boom">
-    <meta name="theme-color" content="#002A1B">
-    <meta name="msapplication-TileColor" content="#002A1B">
-    <meta name="msapplication-navbutton-color" content="#002A1B">
-    <title>INFINITY - KIGDOM of LUCK</title>
-    <link rel="stylesheet" href="login-styles.css?v=2">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="logo.png">
-</head>
-<body>
-    <div class="game-logo">
-      <span class="logo-infinity">infinity</span>
-      <span class="logo-kingdom">Kingdom of Luck</span>
-    </div>
-    <div class="container">
-        <!-- تم حذف الشعار والعنوان البصري، الخلفية الآن بيضاء فقط -->
-        <div id="admin-choice-modal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <button class="modal-close" id="close-admin-modal">×</button>
-                <h3>أهلاً بك أيها المشرف</h3>
-                <p>إلى أين تريد الذهاب؟</p>
-                <div class="admin-buttons">
-                    <button id="go-to-game-btn" class="btn">🎮 الدخول للعبة</button>
-                    <button id="go-to-admin-btn" class="btn">⚙️ الدخول للوحة التحكم</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="tabs">
-            <button class="tab-button active" id="login-tab">تسجيل الدخول</button>
-            <button class="tab-button" id="register-tab">تسجيل</button>
-            <button class="tab-button" id="admin-login-tab">🔐 تسجيل دخول المشرف</button>
-            <button class="tab-button" id="contact-tab">للاستفسار وشحن العملات</button>
-            <button class="tab-button admin-only" id="admin-tab" style="display: none;">لوحة التحكم</button>
-            <button class="tab-button game-btn" id="game-tab" style="display: none;">🎮 الدخول للعبة</button>
-            <button class="tab-button logout-btn" id="logout-tab" style="display: none;">تسجيل الخروج</button>
-        </div>
-
-        <div id="message-box" class="message-box"></div>
-
-        <!-- قسم تسجيل الدخول -->
-        <div id="login-section" class="content-section active">
-            <form id="login-form" method="POST" action="javascript:void(0)" autocomplete="on">
-                <div class="form-group">
-                    <label for="login-username">اسم المستخدم / البريد الإلكتروني:</label>
-                    <input type="text" id="login-username" placeholder="أدخل اسم المستخدم أو البريد الإلكتروني" required>
-                </div>
-                <div class="form-group">
-                    <label for="login-password">كلمة المرور:</label>
-                    <input type="password" id="login-password" placeholder="أدخل كلمة المرور" required>
-                </div>
-                <button id="login-button" class="btn" type="submit">
-                    <span class="loading-spinner"></span>
-                    <span class="btn-text">تسجيل الدخول</span>
-                </button>
-            </form>
-        </div>
-
-        <!-- قسم التسجيل -->
-        <div id="register-section" class="content-section">
-            <form id="register-form" method="POST" action="javascript:void(0)" autocomplete="on">
-                <div class="form-group">
-                    <label for="register-username">اسم المستخدم:</label>
-                    <input type="text" id="register-username" placeholder="اختر اسم مستخدم" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-email">البريد الإلكتروني:</label>
-                    <input type="email" id="register-email" placeholder="أدخل بريدك الإلكتروني" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-password">كلمة المرور:</label>
-                    <input type="password" id="register-password" placeholder="اختر كلمة مرور" required>
-                </div>
-                <button id="register-button" class="btn" type="submit">
-                    <span class="loading-spinner"></span>
-                    <span class="btn-text">تسجيل</span>
-                </button>
-            </form>
-        </div>
-
-        <!-- قسم تسجيل دخول المشرف -->
-        <div id="admin-login-section" class="content-section">
-            <div class="admin-login-header">
-                <h3>🔐 تسجيل دخول المشرف</h3>
-                <p>أدخل بيانات المشرف للوصول إلى لوحة التحكم</p>
-            </div>
-            <form id="admin-login-form" method="POST" action="javascript:void(0)" autocomplete="on">
-                <div class="form-group">
-                    <label for="admin-login-username">اسم المستخدم:</label>
-                    <input type="text" id="admin-login-username" placeholder="أدخل اسم مستخدم المشرف" required>
-                </div>
-                <div class="form-group">
-                    <label for="admin-login-password">كلمة المرور:</label>
-                    <input type="password" id="admin-login-password" placeholder="أدخل كلمة مرور المشرف" required>
-                </div>
-                <button id="admin-login-button" class="btn admin-btn" type="submit">
-                    <span class="loading-spinner"></span>
-                    <span class="btn-text">🔐 تسجيل دخول المشرف</span>
-                </button>
-            </form>
-        </div>
-
-        <!-- قسم التواصل -->
-        <div id="contact-section-content" class="content-section">
-            <h3>للاستفسار وشحن العملات</h3>
-            <p>يسعدنا تلقي استفساراتكم ومساعدتكم في شحن العملات. لا تترددوا في الاتصال بنا.</p>
-            <div class="contact-info-item">
-                <i class="fas fa-envelope"></i> البريد الإلكتروني: <a href="mailto:YASER.HAROON79@GMAIL.COM">YASER.HAROON79@GMAIL.COM</a>
-            </div>
-            <div class="contact-info-item">
-                <i class="fab fa-whatsapp"></i> رقم واتساب: <a href="https://wa.me/966554593007">00966554593007</a>
-            </div>
-        </div>
-
-        <!-- قسم لوحة التحكم -->
-        <div id="admin-section" class="content-section">
-            <h3>لوحة التحكم</h3>
-            <p>مرحباً بك في لوحة التحكم. اختر الإجراء المطلوب:</p>
-            <div class="admin-actions">
-                <button id="go-to-game-btn" class="btn">الدخول للعبة</button>
-                <button id="go-to-admin-btn" class="btn">إدارة النظام</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="config.js?v=2"></script>
-    <script src="login.js?v=2"></script>
-</body>
-</html>

@@ -1,244 +1,0 @@
-﻿<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://mygame25bita-7eqw.onrender.com wss: ws:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
-    <title>نظام الهدايا - لعبة الصندوق السحري</title>
-    <link rel="stylesheet" href="gifts-styles.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-</head>
-<body>
-    <div class="container">
-        <!-- شريط التنقل -->
-        <nav class="navbar">
-            <div class="nav-brand">
-                <img src="logo.png" alt="شعار اللعبة" class="logo">
-                <span>نظام الهدايا</span>
-            </div>
-            <div class="nav-actions">
-                <button class="btn btn-secondary" onclick="window.location.href='game.html'">العودة للعبة</button>
-                <button class="btn btn-primary" onclick="logout()">تسجيل الخروج</button>
-            </div>
-        </nav>
-
-        <!-- المحتوى الرئيسي -->
-        <main class="main-content">
-            <!-- شريط التبويبات -->
-            <div class="tabs-container">
-                <button class="tab-btn active" data-tab="send">إرسال هدية</button>
-                <button class="tab-btn" data-tab="received">الهدايا المستلمة</button>
-                <button class="tab-btn" data-tab="sent">الهدايا المرسلة</button>
-                <button class="tab-btn" data-tab="settings">الإعدادات</button>
-            </div>
-
-            <!-- تبويب إرسال هدية -->
-            <div class="tab-content active" id="send-tab">
-                <div class="gift-form">
-                    <h2>إرسال هدية جديدة</h2>
-                    
-                    <div class="form-group">
-                        <label for="recipient">اسم المستلم:</label>
-                        <input type="text" id="recipient" placeholder="أدخل اسم المستخدم">
-                    </div>
-
-                    <div class="form-group">
-                        <label>نوع الهدية:</label>
-                        <div class="gift-types">
-                            <!-- هدايا إيجابية -->
-                            <div class="gift-category">
-                                <h3>هدايا إيجابية (تتطلب موافقة)</h3>
-                                <div class="gift-grid">
-                                    <div class="gift-item positive" data-gift="pearls">
-                                        <div class="gift-icon">💎</div>
-                                        <div class="gift-name">لآلئ</div>
-                                        <div class="gift-value">+100 نقطة</div>
-                                    </div>
-                                    <div class="gift-item positive" data-gift="gems">
-                                        <div class="gift-icon">💎</div>
-                                        <div class="gift-name">جواهر</div>
-                                        <div class="gift-value">+50 نقطة</div>
-                                    </div>
-                                    <div class="gift-item positive" data-gift="coins">
-                                        <div class="gift-icon">🪙</div>
-                                        <div class="gift-name">عملات</div>
-                                        <div class="gift-value">+10 نقطة</div>
-                                    </div>
-                                    <div class="gift-item positive" data-gift="keys">
-                                        <div class="gift-icon">🔑</div>
-                                        <div class="gift-name">مفاتيح</div>
-                                        <div class="gift-value">+25 نقطة</div>
-                                    </div>
-                                    <div class="gift-item positive" data-gift="stars">
-                                        <div class="gift-icon">⭐</div>
-                                        <div class="gift-name">نجوم</div>
-                                        <div class="gift-value">+30 نقطة</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- هدايا سلبية -->
-                            <div class="gift-category">
-                                <h3>هدايا سلبية (تنفذ تلقائياً)</h3>
-                                <div class="gift-grid">
-                                    <div class="gift-item negative" data-gift="bomb">
-                                        <div class="gift-icon">💣</div>
-                                        <div class="gift-name">قنبلة</div>
-                                        <div class="gift-value">-50 نقطة</div>
-                                    </div>
-                                    <div class="gift-item negative" data-gift="bat">
-                                        <div class="gift-icon">🦇</div>
-                                        <div class="gift-name">خفاش</div>
-                                        <div class="gift-value">-30 نقطة</div>
-                                    </div>
-                                    <div class="gift-item negative" data-gift="curse">
-                                        <div class="gift-icon">👻</div>
-                                        <div class="gift-name">لعنة</div>
-                                        <div class="gift-value">-20 نقطة</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- هدايا محايدة -->
-                            <div class="gift-category">
-                                <h3>هدايا محايدة</h3>
-                                <div class="gift-grid">
-                                    <div class="gift-item neutral" data-gift="mystery_box">
-                                        <div class="gift-icon">🎁</div>
-                                        <div class="gift-name">صندوق غامض</div>
-                                        <div class="gift-value">؟؟؟</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="gift-count">الكمية:</label>
-                        <input type="number" id="gift-count" min="1" max="10" value="1">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="gift-message">رسالة (اختياري):</label>
-                        <textarea id="gift-message" placeholder="اكتب رسالة مع الهدية..."></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn btn-primary" onclick="sendGift()">إرسال الهدية</button>
-                        <button class="btn btn-secondary" onclick="clearForm()">مسح النموذج</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- تبويب الهدايا المستلمة -->
-            <div class="tab-content" id="received-tab">
-                <div class="gifts-container">
-                    <h2>الهدايا المستلمة</h2>
-                    
-                    <div class="gifts-filter">
-                        <button class="filter-btn active" data-filter="pending">في الانتظار</button>
-                        <button class="filter-btn" data-filter="accepted">مقبولة</button>
-                        <button class="filter-btn" data-filter="rejected">مرفوضة</button>
-                    </div>
-
-                    <div class="gifts-list" id="received-gifts-list">
-                        <!-- سيتم ملؤها بواسطة JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- تبويب الهدايا المرسلة -->
-            <div class="tab-content" id="sent-tab">
-                <div class="gifts-container">
-                    <h2>الهدايا المرسلة</h2>
-                    
-                    <div class="gifts-list" id="sent-gifts-list">
-                        <!-- سيتم ملؤها بواسطة JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- تبويب الإعدادات -->
-            <div class="tab-content" id="settings-tab">
-                <div class="settings-container">
-                    <h2>إعدادات الهدايا</h2>
-                    
-                    <div class="settings-group">
-                        <h3>إعدادات عامة</h3>
-                        <div class="setting-item">
-                            <label>
-                                <input type="checkbox" id="allow-gifts" checked>
-                                السماح باستقبال الهدايا
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <label>
-                                <input type="checkbox" id="allow-negative-gifts" checked>
-                                السماح بالهدايا السلبية
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <label>
-                                <input type="checkbox" id="allow-bombs-bats" checked>
-                                السماح بالقنابل والخفافيش
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <label>
-                                <input type="checkbox" id="auto-accept-positive">
-                                قبول الهدايا الإيجابية تلقائياً
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <h3>الحدود</h3>
-                        <div class="setting-item">
-                            <label for="max-gift-value">الحد الأقصى لقيمة الهدية:</label>
-                            <input type="number" id="max-gift-value" value="5000" min="100" max="10000">
-                        </div>
-                        <div class="setting-item">
-                            <label for="daily-gift-limit">الحد اليومي للهدايا:</label>
-                            <input type="number" id="daily-gift-limit" value="10" min="1" max="50">
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn btn-primary" onclick="saveSettings()">حفظ الإعدادات</button>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- إشعارات -->
-        <div id="notifications" class="notifications"></div>
-    </div>
-
-    <!-- Modal للهدية المحددة -->
-    <div id="gift-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="modal-content">
-                <!-- سيتم ملؤها بواسطة JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // تسجيل Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                        console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('❌ فشل في تسجيل Service Worker:', error);
-                    });
-            });
-        }
-    </script>
-    <script src="config.js"></script>
-    <script src="gifts.js"></script>
-</body>
-</html> 
