@@ -10,7 +10,8 @@
     "update-user-ids": "node api/update-user-ids.js",
     "test-user-id-system": "node api/test-user-id-system.js",
     "test-admin-user-ids": "node api/test-admin-user-ids.js",
-    "test-admin-user-images": "node api/test-admin-user-images.js"
+    "test-admin-user-images": "node api/test-admin-user-images.js",
+    "build": "echo 'no build needed'"
   },
   "dependencies": {
     "agora-access-token": "^2.0.0",
