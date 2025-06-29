@@ -565,7 +565,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileBtn = document.getElementById('profileBtn');
     if (profileBtn) {
         profileBtn.addEventListener('click', function() {
-            window.location.href = 'profile.html';
+            console.log('تم الضغط على زر الملف الشخصي');
+            // يمكنك تنفيذ أي كود محلي هنا بدلاً من النقل
         });
     }
 
@@ -573,21 +574,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const voiceBtn = document.getElementById('voiceChatRoomBtn');
     if (voiceBtn) {
         voiceBtn.addEventListener('click', function() {
-            window.location.href = 'voice-chat-room.html';
+            console.log('تم الضغط على زر غرفة المحادثة الصوتية');
+            // يمكنك تنفيذ أي كود محلي هنا بدلاً من النقل
         });
     }
 
     // ربط زر ابدأ اللعبة
     const startBtn = document.getElementById('startButton');
     if (startBtn) {
-        startBtn.addEventListener('click', startGame);
+        startBtn.addEventListener('click', function() {
+            console.log('تم الضغط على زر ابدأ اللعبة');
+            // يمكنك تنفيذ أي كود محلي هنا بدلاً من النقل
+        });
     }
 
     // ربط زر الخروج (voiceRoomPageBtn)
     const exitBtn = document.getElementById('voiceRoomPageBtn');
     if (exitBtn) {
         exitBtn.addEventListener('click', function() {
-            window.location.href = 'index.html';
+            console.log('تم الضغط على زر الخروج');
+            // يمكنك تنفيذ أي كود محلي هنا بدلاً من النقل
         });
     }
 
@@ -598,6 +604,36 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ تم تحميل صفحة اللعبة بنجاح');
     setupMobileControls();
     fetchAndDisplayUserInfo();
+
+    const startDemoGameBtn = document.getElementById('startDemoGameBtn');
+    const demoGameArea = document.getElementById('demoGameArea');
+    const demoScore = document.getElementById('demoScore');
+    const demoAddPointBtn = document.getElementById('demoAddPointBtn');
+    const demoEndGameBtn = document.getElementById('demoEndGameBtn');
+    let score = 0;
+
+    if (startDemoGameBtn) {
+        startDemoGameBtn.onclick = function() {
+            score = 0;
+            demoScore.textContent = score;
+            demoGameArea.style.display = 'block';
+            startDemoGameBtn.style.display = 'none';
+        };
+    }
+    if (demoAddPointBtn) {
+        demoAddPointBtn.onclick = function() {
+            score++;
+            demoScore.textContent = score;
+        };
+    }
+    if (demoEndGameBtn) {
+        demoEndGameBtn.onclick = function() {
+            demoGameArea.style.display = 'none';
+            startDemoGameBtn.style.display = 'inline-block';
+            score = 0;
+            demoScore.textContent = score;
+        };
+    }
 });
 
 async function fetchAndDisplayUserInfo() {

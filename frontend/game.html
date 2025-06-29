@@ -16,18 +16,29 @@
     </div>
     <div class="game-grid">
       <div class="grid-cell icons-cell">
-        <button id="voiceChatRoomBtn" class="voice-chat-btn" title="غرفة المحادثة الصوتية">
+        <button id="voiceChatRoomBtn" class="voice-chat-btn" title="غرفة المحادثة الصوتية" onclick="window.location.href='voice-chat-room.html'">
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M12 15c1.654 0 3-1.346 3-3V6c0-1.654-1.346-3-3-3s-3 1.346-3 3v6c0 1.654 1.346 3 3 3zm5-3c0 2.757-2.243 5-5 5s-5-2.243-5-5H5c0 3.519 2.613 6.432 6 6.92V22h2v-2.08c3.387-.488 6-3.401 6-6.92h-2z"></path></svg>
         </button>
-        <button id="profileBtn" class="profile-btn" title="الملف الشخصي">
+        <button id="profileBtn" class="profile-btn" title="الملف الشخصي" onclick="window.location.href='profile.html'">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
         </button>
-        <button id="startButton" class="start-btn" title="ابدأ اللعبة">
+        <button id="startButton" class="start-btn" title="ابدأ اللعبة" onclick="window.location.href='OLD/frontend/game1.html'">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </button>
         <button id="voiceRoomPageBtn" class="voice-room-page-btn" title="غرفة المحادثة الصوتية (صفحة مستقلة)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 16a7 7 0 1 1 0-14 7 7 0 0 1 0 14zm-1-7h2v5h-2zm0-8h2v2h-2z"/></svg>
         </button>
+      </div>
+      <div class="grid-cell game-demo-cell">
+        <div id="demoGameContainer">
+          <h3>لعبة النقاط السريعة</h3>
+          <button id="startDemoGameBtn">ابدأ اللعبة</button>
+          <div id="demoGameArea" style="display:none; margin-top:10px;">
+            <p>النقاط: <span id="demoScore">0</span></p>
+            <button id="demoAddPointBtn">+1 نقطة</button>
+            <button id="demoEndGameBtn">إنهاء</button>
+          </div>
+        </div>
       </div>
       <div class="grid-cell">2</div>
       <div class="grid-cell">3</div>
