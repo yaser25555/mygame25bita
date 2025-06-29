@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "infinity-box",
   "private": true,
   "version": "1.0.0",
@@ -31,3 +32,43 @@
     "vite": "^5.4.2"
   }
 }
+=======
+  "name": "voiceboom-backend",
+  "version": "1.0.0",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/server-listen.js",
+    "dev": "nodemon api/server-listen.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-test-users": "node api/create-test-users.js",
+    "update-user-ids": "node api/update-user-ids.js",
+    "test-user-id-system": "node api/test-user-id-system.js",
+    "test-admin-user-ids": "node api/test-admin-user-ids.js",
+    "test-admin-user-images": "node api/test-admin-user-images.js",
+    "build": "echo 'no build needed'"
+  },
+  "dependencies": {
+    "agora-access-token": "^2.0.0",
+    "axios": "^1.6.0",
+    "bcrypt": "^5.1.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.0.4",
+    "multer": "^2.0.1",
+    "path": "^0.12.7",
+    "serverless-http": "^3.2.0",
+    "socket.io": "^4.8.1",
+    "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
+>>>>>>> dcc32f47032798a33801cd63babc48f6b98fd36a

@@ -1,0 +1,837 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://mygame25bita-7eqw.onrender.com wss: ws:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    <title>إدارة صور المستخدمين - لوحة المشرف</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .search-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #667eea;
+        }
+
+        .user-info h3 {
+            color: #333;
+            margin-bottom: 3px;
+            font-size: 1rem;
+        }
+
+        .user-id {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .images-section {
+            margin-bottom: 15px;
+        }
+
+        .image-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .image-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+
+        .image-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .image-type {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 2px;
+            font-size: 0.85rem;
+        }
+
+        .image-status {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-input {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .file-input input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 16px;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .file-input-label:hover {
+            background: #5a6fd8;
+        }
+
+        .image-preview-large {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 6px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination button:hover:not(.active) {
+            background: #f8f9fa;
+        }
+
+        /* تحسينات للجوال */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .search-row {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: auto;
+            }
+            
+            .users-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .user-card {
+                padding: 12px;
+            }
+            
+            .image-actions {
+                flex-direction: column;
+                gap: 3px;
+            }
+            
+            .btn-small {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .modal-content {
+                margin: 5% auto;
+                padding: 15px;
+                width: 95%;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+            
+            .image-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+            
+            .image-actions {
+                justify-content: center;
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ إدارة صور المستخدمين</h1>
+            <p>لوحة تحكم المشرف لإدارة صور المستخدمين</p>
+        </div>
+
+        <div class="content">
+            <!-- قسم البحث -->
+            <div class="search-section">
+                <div class="search-row">
+                    <input type="text" id="searchInput" class="search-input" placeholder="البحث عن مستخدم...">
+                    <button onclick="searchUsers()" class="btn btn-primary">🔍 بحث</button>
+                    <button onclick="loadUsers()" class="btn btn-success">🔄 تحديث</button>
+                </div>
+            </div>
+
+            <!-- رسائل التنبيه -->
+            <div id="alertContainer"></div>
+
+            <!-- قائمة المستخدمين -->
+            <div id="usersContainer">
+                <div class="loading">جاري التحميل...</div>
+            </div>
+
+            <!-- التصفح -->
+            <div id="paginationContainer" class="pagination" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Modal لإدارة الصور -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle">إدارة الصور</h3>
+            
+            <form id="imageForm" onsubmit="handleImageManagement(event)">
+                <div class="form-group">
+                    <label for="imageAction">الإجراء:</label>
+                    <select id="imageAction" required>
+                        <option value="">اختر الإجراء</option>
+                        <option value="remove_avatar">حذف الصورة الشخصية</option>
+                        <option value="remove_profile_image">حذف صورة البروفايل</option>
+                        <option value="remove_cover_image">حذف صورة الغلاف</option>
+                        <option value="change_avatar">تغيير الصورة الشخصية</option>
+                        <option value="change_profile_image">تغيير صورة البروفايل</option>
+                        <option value="change_cover_image">تغيير صورة الغلاف</option>
+                    </select>
+                </div>
+
+                <div id="fileInputGroup" class="form-group" style="display: none;">
+                    <label for="imageFile">اختر الصورة:</label>
+                    <div class="file-input">
+                        <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
+                        <label for="imageFile" class="file-input-label">📁 اختيار ملف</label>
+                    </div>
+                    <img id="imagePreview" class="image-preview-large" alt="معاينة الصورة">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">💾 حفظ التغييرات</button>
+                    <button type="button" onclick="closeModal()" class="btn btn-danger">❌ إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://mygame25bita-7eqw.onrender.com';
+        let currentPage = 1;
+        let currentSearch = '';
+        let selectedUserId = null;
+
+        // تحميل المستخدمين عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+        });
+
+        // تحميل المستخدمين
+        async function loadUsers(page = 1, search = '') {
+            try {
+                // الحصول على التوكن - جرب adminToken أولاً، ثم token العادي
+                let token = localStorage.getItem('adminToken');
+                if (!token) {
+                    token = localStorage.getItem('token');
+                }
+                
+                if (!token) {
+                    showAlert('يجب تسجيل الدخول كمدير', 'error');
+                    return;
+                }
+
+                console.log('🔑 تحميل المستخدمين باستخدام التوكن:', token.substring(0, 20) + '...');
+
+                const response = await fetch(`${BACKEND_URL}/api/users/admin/users-with-ids?page=${page}&limit=12&search=${search}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('📥 استجابة تحميل المستخدمين:', response.status, response.statusText);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('❌ خطأ في تحميل المستخدمين:', errorData);
+                    throw new Error(errorData.error || `خطأ ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ تم تحميل المستخدمين بنجاح:', data.users.length, 'مستخدم');
+                displayUsers(data.users);
+                displayPagination(data.pagination);
+                
+            } catch (error) {
+                console.error('❌ خطأ في تحميل المستخدمين:', error);
+                showAlert('خطأ في تحميل المستخدمين: ' + error.message, 'error');
+            }
+        }
+
+        // البحث عن المستخدمين
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            currentSearch = searchTerm;
+            currentPage = 1;
+            loadUsers(currentPage, searchTerm);
+        }
+
+        // عرض المستخدمين
+        function displayUsers(users) {
+            const container = document.getElementById('usersContainer');
+            
+            if (!users || users.length === 0) {
+                container.innerHTML = '<div class="no-data">لا توجد مستخدمين</div>';
+                return;
+            }
+
+            const usersHTML = users.map(user => `
+                <div class="user-card">
+                    <div class="user-header">
+                        <img src="${user.avatar || 'images/default-avatar.png'}" alt="صورة المستخدم" class="user-avatar">
+                        <div class="user-info">
+                            <h3>${user.displayName || user.username}</h3>
+                            <div class="user-id">ID: ${user.userId}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="images-section">
+                        <div class="image-item">
+                            <img src="${user.avatar || 'images/default-avatar.png'}" alt="الصورة الشخصية" class="image-preview">
+                            <div class="image-info">
+                                <div class="image-type">الصورة الشخصية</div>
+                                <div class="image-status">${user.avatar ? 'موجودة' : 'غير موجودة'}</div>
+                            </div>
+                            <div class="image-actions">
+                                <button onclick="manageImage(${user.userId}, 'remove_avatar')" class="btn btn-danger btn-small">🗑️ حذف</button>
+                                <button onclick="manageImage(${user.userId}, 'change_avatar')" class="btn btn-warning btn-small">✏️ تغيير</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = usersHTML;
+        }
+
+        // عرض التصفح
+        function displayPagination(pagination) {
+            const container = document.getElementById('paginationContainer');
+            
+            if (!pagination || pagination.totalPages <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+
+            let paginationHTML = '';
+            
+            if (pagination.hasPrevPage) {
+                paginationHTML += `<button onclick="loadUsers(${pagination.currentPage - 1}, '${currentSearch}')">السابق</button>`;
+            }
+            
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                if (i === pagination.currentPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else {
+                    paginationHTML += `<button onclick="loadUsers(${i}, '${currentSearch}')">${i}</button>`;
+                }
+            }
+            
+            if (pagination.hasNextPage) {
+                paginationHTML += `<button onclick="loadUsers(${pagination.currentPage + 1}, '${currentSearch}')">التالي</button>`;
+            }
+            
+            container.innerHTML = paginationHTML;
+            container.style.display = 'flex';
+        }
+
+        // إدارة الصور
+        function manageImage(userId, action) {
+            selectedUserId = userId;
+            document.getElementById('imageAction').value = action;
+            document.getElementById('modalTitle').textContent = `إدارة صور المستخدم ${userId}`;
+            
+            const fileInputGroup = document.getElementById('fileInputGroup');
+            if (action.startsWith('change_')) {
+                fileInputGroup.style.display = 'block';
+            } else {
+                fileInputGroup.style.display = 'none';
+            }
+            
+            document.getElementById('imageModal').style.display = 'block';
+        }
+
+        // معاينة الصورة
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // معالجة إدارة الصور
+        async function handleImageManagement(event) {
+            event.preventDefault();
+            
+            try {
+                const action = document.getElementById('imageAction').value;
+                const fileInput = document.getElementById('imageFile');
+                
+                console.log('🖼️ بدء إدارة الصورة:', { selectedUserId, action });
+                
+                let imageData = null;
+                let imageType = null;
+                
+                if (action.startsWith('change_') && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    console.log('📁 ملف محدد:', { name: file.name, type: file.type, size: file.size });
+                    
+                    // تحقق من حجم الملف (الحد الأقصى 2MB)
+                    const maxSize = 2 * 1024 * 1024; // 2MB
+                    if (file.size > maxSize) {
+                        throw new Error('حجم الصورة كبير جداً. الحد الأقصى 2MB');
+                    }
+                    
+                    // تحقق من نوع الملف
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(file.type)) {
+                        throw new Error('نوع الملف غير مدعوم. يرجى اختيار صورة بصيغة JPG, PNG, أو GIF');
+                    }
+                    
+                    try {
+                        imageData = await fileToBase64(file);
+                        imageType = file.type;
+                        console.log('✅ تم تحويل الصورة إلى Base64 بنجاح، الحجم:', imageData.length);
+                    } catch (error) {
+                        console.error('❌ خطأ في تحويل الصورة:', error);
+                        throw new Error('خطأ في معالجة الصورة');
+                    }
+                }
+                
+                const requestBody = {
+                    targetUserId: selectedUserId,
+                    action: action,
+                    imageData: imageData,
+                    imageType: imageType
+                };
+                
+                console.log('📤 إرسال البيانات:', { 
+                    targetUserId: requestBody.targetUserId,
+                    action: requestBody.action,
+                    imageType: requestBody.imageType,
+                    imageDataLength: requestBody.imageData ? requestBody.imageData.length : 0
+                });
+                
+                // الحصول على التوكن - جرب adminToken أولاً، ثم token العادي
+                let token = localStorage.getItem('adminToken');
+                if (!token) {
+                    token = localStorage.getItem('token');
+                }
+                
+                if (!token) {
+                    throw new Error('التوكن مفقود - يرجى تسجيل الدخول مرة أخرى');
+                }
+                
+                console.log('🔑 استخدام التوكن:', token.substring(0, 20) + '...');
+                
+                const response = await fetch(`${BACKEND_URL}/api/users/admin/manage-user-image`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                console.log('📥 استجابة الخادم:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('❌ خطأ في الخادم:', errorData);
+                    throw new Error(errorData.error || errorData.message || `خطأ ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ نجح الإجراء:', result);
+                showAlert(result.message, 'success');
+                closeModal();
+                loadUsers(currentPage, currentSearch);
+                
+            } catch (error) {
+                console.error('❌ خطأ في إدارة الصورة:', error);
+                showAlert('خطأ في إدارة الصورة: ' + error.message, 'error');
+            }
+        }
+
+        // تحويل الملف إلى Base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // إغلاق Modal
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.getElementById('imageForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+            selectedUserId = null;
+        }
+
+        // عرض التنبيهات
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            container.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // إغلاق Modal عند النقر خارجه
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+    
+    <script>
+        // تسجيل Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('❌ فشل في تسجيل Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html> 

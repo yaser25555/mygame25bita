@@ -1,0 +1,902 @@
+﻿/* === Mobile Optimization CSS === */
+
+/* إضافة أزرار الطي والفتح */
+.collapse-btn {
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 25px !important;
+    height: 25px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    z-index: 1000 !important;
+    transition: all 0.3s ease !important;
+}
+
+.collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1) !important;
+}
+
+/* حالة الطي - طريقة بسيطة باستخدام display */
+.collapsed {
+    display: none !important;
+}
+
+/* زر إعادة الظهور للعناصر المطوية */
+.collapse-restore-btn {
+    position: fixed !important;
+    top: 10px !important;
+    right: 10px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 30px !important;
+    height: 30px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    z-index: 1001 !important;
+    transition: all 0.3s ease !important;
+}
+
+.collapse-restore-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1) !important;
+}
+
+/* تحسينات عامة للموبايل */
+@media (max-width: 900px) {
+    body {
+        padding: 10px;
+        font-size: 14px;
+        background: linear-gradient(135deg, #001a00 0%, #002600 100%);
+    }
+    
+    .main-content {
+        flex-direction: column;
+        padding-right: 0;
+        margin-top: 10px;
+    }
+    
+    .right-panel {
+        position: static;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 15px;
+        order: -1;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .game-container {
+        max-width: 100%;
+        min-height: 400px;
+        padding: 15px;
+        border-radius: 20px;
+        background: rgba(0, 34, 0, 0.95);
+        border: 2px solid rgba(0, 255, 0, 0.1);
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 8px;
+        padding: 10px;
+    }
+    
+    .box {
+        width: 80px;
+        height: 80px;
+        font-size: 0.9em;
+        background: rgba(0, 34, 0, 0.9);
+        border: 1px solid rgba(0, 255, 0, 0.1);
+    }
+    
+    .controls {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .bet-button {
+        padding: 12px 8px;
+        font-size: 0.9em;
+        min-height: 45px;
+        background: linear-gradient(135deg, #00FF00 0%, #00CC00 100%);
+        color: #FFFFFF;
+    }
+    
+    .message-area {
+        font-size: 1.1em;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .header-container {
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .logo {
+        width: 60px;
+        height: 60px;
+        filter: drop-shadow(0 0 20px rgba(0, 255, 0, 0.5));
+    }
+    
+    .game-title {
+        font-size: 1.5em;
+        text-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4);
+    }
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 600px) {
+    body {
+        padding: 5px;
+        font-size: 13px;
+    }
+    
+    .player-info {
+        flex-direction: row;
+        justify-content: space-between;
+        min-width: 0;
+        padding: 12px 15px;
+        gap: 10px;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .player-details p {
+        font-size: 0.9em;
+    }
+    
+    .player-details p:first-child {
+        font-size: 1.1em;
+    }
+    
+    .player-actions button {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1em;
+    }
+    
+    .game-container {
+        padding: 10px;
+        min-height: 350px;
+        border-radius: 15px;
+        background: rgba(0, 34, 0, 0.95);
+        border: 2px solid rgba(0, 255, 0, 0.1);
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+        gap: 6px;
+        padding: 8px;
+    }
+    
+    .box {
+        width: 65px;
+        height: 65px;
+        font-size: 0.8em;
+    }
+    
+    .controls {
+        gap: 6px;
+    }
+    
+    .bet-button {
+        padding: 10px 6px;
+        font-size: 0.8em;
+        min-height: 40px;
+        background: linear-gradient(135deg, #00FF00 0%, #00CC00 100%);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        color: #FFFFFF;
+    }
+    
+    .bet-button:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .message-area {
+        font-size: 1em;
+        padding: 8px;
+        margin-bottom: 12px;
+    }
+    
+    .logo {
+        width: 50px;
+        height: 50px;
+        filter: drop-shadow(0 0 20px rgba(0, 255, 0, 0.5));
+    }
+    
+    .game-title {
+        font-size: 1.3em;
+        text-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4);
+    }
+    
+    .item-collection-display {
+        padding: 10px;
+        margin: 10px 0;
+    }
+    
+    .item-collection-title {
+        font-size: 1em;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 8px;
+    }
+}
+
+/* تحسينات للشاشات الصغيرة جداً */
+@media (max-width: 480px) {
+    body {
+        padding: 3px;
+        font-size: 12px;
+    }
+    
+    .main-content {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .game-container {
+        padding: 8px;
+        min-height: 300px;
+        border-radius: 12px;
+        margin: 0;
+    }
+    
+    .right-panel {
+        margin-bottom: 8px;
+    }
+    
+    .player-info {
+        padding: 10px 12px;
+        gap: 8px;
+        border-radius: 15px;
+    }
+    
+    .player-details p {
+        font-size: 0.85em;
+    }
+    
+    .player-details p:first-child {
+        font-size: 1em;
+    }
+    
+    .player-actions button {
+        width: 35px;
+        height: 35px;
+        font-size: 1em;
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+        gap: 4px;
+        padding: 6px;
+    }
+    
+    .box {
+        width: 55px;
+        height: 55px;
+        font-size: 0.75em;
+    }
+    
+    .controls {
+        gap: 4px;
+    }
+    
+    .bet-button {
+        padding: 8px 4px;
+        font-size: 0.75em;
+        min-height: 35px;
+    }
+    
+    .message-area {
+        font-size: 0.9em;
+        padding: 6px;
+        margin-bottom: 8px;
+    }
+    
+    .logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .game-title {
+        font-size: 1.1em;
+    }
+    
+    .item-collection-display {
+        padding: 8px;
+        margin: 8px 0;
+    }
+    
+    .item-collection-title {
+        font-size: 0.9em;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 6px;
+    }
+}
+
+/* تحسينات للشاشات الصغيرة جداً جداً */
+@media (max-width: 360px) {
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 3px;
+        padding: 4px;
+    }
+    
+    .box {
+        width: 50px;
+        height: 50px;
+        font-size: 0.7em;
+    }
+    
+    .bet-button {
+        padding: 6px 3px;
+        font-size: 0.7em;
+        min-height: 30px;
+    }
+    
+    .player-info {
+        padding: 8px 10px;
+        gap: 6px;
+    }
+    
+    .player-actions button {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9em;
+    }
+}
+
+/* === تحسينات الشاشة العرضية للموبايل === */
+@media (max-width: 900px) and (orientation: landscape) {
+    body {
+        padding: 5px;
+    }
+    
+    .main-content {
+        flex-direction: row;
+        gap: 10px;
+        margin-top: 5px;
+    }
+    
+    .right-panel {
+        position: static;
+        width: auto;
+        min-width: 200px;
+        max-width: 250px;
+        margin-bottom: 0;
+        order: 0;
+    }
+    
+    .game-container {
+        flex: 1;
+        min-height: 250px;
+        padding: 10px;
+    }
+    
+    .header-container {
+        margin-bottom: 8px;
+    }
+    
+    .logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .game-title {
+        font-size: 1.2em;
+    }
+    
+    .message-area {
+        font-size: 0.9em;
+        padding: 6px;
+        margin-bottom: 8px;
+    }
+    
+    .controls {
+        flex-direction: row;
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+    
+    .bet-button {
+        padding: 6px 4px;
+        font-size: 0.8em;
+        min-height: 35px;
+        flex: 1;
+    }
+    
+    .item-collection-display {
+        padding: 6px;
+        margin: 6px 0;
+    }
+    
+    .item-collection-title {
+        font-size: 0.9em;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+        gap: 4px;
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 4px;
+        padding: 6px;
+    }
+    
+    .box {
+        width: 60px;
+        height: 60px;
+        font-size: 0.8em;
+    }
+    
+    .player-info {
+        padding: 8px 10px;
+        gap: 6px;
+        border-radius: 15px;
+    }
+    
+    .player-details p {
+        font-size: 0.8em;
+    }
+    
+    .player-details p:first-child {
+        font-size: 0.9em;
+    }
+    
+    .player-actions button {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9em;
+    }
+}
+
+/* تحسينات الشاشة العرضية للشاشات الصغيرة */
+@media (max-width: 600px) and (orientation: landscape) {
+    .right-panel {
+        min-width: 180px;
+        max-width: 200px;
+    }
+    
+    .game-container {
+        min-height: 200px;
+        padding: 6px;
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 3px;
+        padding: 4px;
+    }
+    
+    .box {
+        width: 50px;
+        height: 50px;
+        font-size: 0.7em;
+    }
+    
+    .controls {
+        gap: 3px;
+        margin-bottom: 6px;
+    }
+    
+    .bet-button {
+        padding: 4px 3px;
+        font-size: 0.7em;
+        min-height: 30px;
+    }
+    
+    .message-area {
+        font-size: 0.8em;
+        padding: 4px;
+        margin-bottom: 6px;
+    }
+    
+    .logo {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .game-title {
+        font-size: 1em;
+    }
+    
+    .player-info {
+        padding: 6px 8px;
+        gap: 4px;
+    }
+    
+    .player-details p {
+        font-size: 0.75em;
+    }
+    
+    .player-details p:first-child {
+        font-size: 0.8em;
+    }
+    
+    .player-actions button {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8em;
+    }
+    
+    .item-collection-display {
+        padding: 4px;
+        margin: 4px 0;
+    }
+    
+    .item-collection-title {
+        font-size: 0.8em;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+        gap: 3px;
+    }
+}
+
+/* تحسينات الشاشة العرضية للشاشات الصغيرة جداً */
+@media (max-width: 480px) and (orientation: landscape) {
+    .right-panel {
+        min-width: 150px;
+        max-width: 170px;
+    }
+    
+    .game-container {
+        min-height: 180px;
+        padding: 4px;
+    }
+    
+    .boxes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+        gap: 2px;
+        padding: 3px;
+    }
+    
+    .box {
+        width: 45px;
+        height: 45px;
+        font-size: 0.65em;
+    }
+    
+    .controls {
+        gap: 2px;
+        margin-bottom: 4px;
+    }
+    
+    .bet-button {
+        padding: 3px 2px;
+        font-size: 0.65em;
+        min-height: 25px;
+    }
+    
+    .message-area {
+        font-size: 0.75em;
+        padding: 3px;
+        margin-bottom: 4px;
+    }
+    
+    .logo {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .game-title {
+        font-size: 0.9em;
+    }
+    
+    .player-info {
+        padding: 4px 6px;
+        gap: 3px;
+    }
+    
+    .player-details p {
+        font-size: 0.7em;
+    }
+    
+    .player-details p:first-child {
+        font-size: 0.75em;
+    }
+    
+    .player-actions button {
+        width: 22px;
+        height: 22px;
+        font-size: 0.7em;
+    }
+    
+    .item-collection-display {
+        padding: 3px;
+        margin: 3px 0;
+    }
+    
+    .item-collection-title {
+        font-size: 0.75em;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+        gap: 2px;
+    }
+}
+
+/* تحسين مؤثرات الفوز والخسارة للموبايل */
+@media (max-width: 768px) {
+    #win-gif-container,
+    #sadcat-gif-container {
+        width: 250px;
+        height: 150px;
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    #win-amount-display,
+    #lose-amount-display {
+        font-size: 1.4em;
+        padding: 8px 16px;
+        top: -40px;
+    }
+}
+
+@media (max-width: 480px) {
+    #win-gif-container,
+    #sadcat-gif-container {
+        width: 200px;
+        height: 120px;
+        top: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    #win-amount-display,
+    #lose-amount-display {
+        font-size: 1.2em;
+        padding: 6px 12px;
+        top: -35px;
+    }
+}
+
+@media (max-width: 360px) {
+    #win-gif-container,
+    #sadcat-gif-container {
+        width: 180px;
+        height: 100px;
+        top: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    #win-amount-display,
+    #lose-amount-display {
+        font-size: 1.1em;
+        padding: 5px 10px;
+        top: -30px;
+    }
+}
+
+/* تحسين مؤثرات الفوز والخسارة للشاشة العرضية */
+@media (max-width: 900px) and (orientation: landscape) {
+    #win-gif-container,
+    #sadcat-gif-container {
+        width: 200px;
+        height: 120px;
+        top: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    #win-amount-display,
+    #lose-amount-display {
+        font-size: 1.2em;
+        padding: 6px 12px;
+        top: -30px;
+    }
+}
+
+/* تحسين المحادثة للموبايل */
+@media (max-width: 768px) {
+    .chat-container {
+        max-height: 200px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .chat-messages {
+        max-height: 150px;
+    }
+    
+    .chat-header {
+        padding: 8px 12px;
+    }
+    
+    .chat-header h3 {
+        font-size: 1em;
+    }
+    
+    .chat-control-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8em;
+    }
+}
+
+/* تحسين المحادثة للشاشة العرضية */
+@media (max-width: 900px) and (orientation: landscape) {
+    .chat-container {
+        max-height: 150px;
+    }
+    
+    .chat-messages {
+        max-height: 100px;
+    }
+    
+    .chat-header {
+        padding: 6px 8px;
+    }
+    
+    .chat-header h3 {
+        font-size: 0.9em;
+    }
+    
+    .chat-control-btn {
+        width: 25px;
+        height: 25px;
+        font-size: 0.7em;
+    }
+}
+
+/* تحسين النوافذ المنبثقة للموبايل */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: 400px;
+        margin: 10% auto;
+        padding: 20px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.3em;
+    }
+    
+    .modal-body {
+        font-size: 0.9em;
+    }
+}
+
+/* تحسين التمرير للموبايل */
+@media (max-width: 768px) {
+    body {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    .game-container {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* تحسين التفاعل باللمس */
+@media (max-width: 768px) {
+    .box,
+    .bet-button,
+    .player-actions button,
+    .chat-control-btn {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    
+    .box:active,
+    .bet-button:active,
+    .player-actions button:active {
+        transform: scale(0.95);
+    }
+}
+
+/* تحسين الأداء للموبايل */
+@media (max-width: 768px) {
+    * {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    
+    .game-container,
+    .player-info,
+    .box {
+        will-change: transform;
+    }
+}
+
+/* تحسين الخطوط للموبايل */
+@media (max-width: 768px) {
+    body {
+        font-family: 'Noto Naskh Arabic', 'Arial', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* تحسين الألوان للموبايل */
+@media (max-width: 768px) {
+    .game-container {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+    }
+    
+    .player-info {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    }
+}
+
+/* تحسين المسافات للموبايل */
+@media (max-width: 768px) {
+    .main-content {
+        gap: 10px;
+    }
+    
+    .game-container > * {
+        margin-bottom: 10px;
+    }
+    
+    .game-container > *:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* تأكد من أن العناصر القابلة للطي لها position relative */
+.right-panel,
+.header-container,
+.chat-container {
+    position: relative !important;
+    transition: all 0.3s ease !important;
+    overflow: hidden !important;
+}
+
+/* إضافة زر إعادة الظهور للعناصر المطوية */
+.collapsed::after {
+    content: '▼';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.collapsed:hover::after {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+} 

@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>????? ?????? ?????????? - VoiceBoom</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://mygame25bita-7eqw.onrender.com wss: ws:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-left">
+                <button class="nav-btn" onclick="window.history.back()">← رجوع</button>
+            </div>
+            <div class="nav-center">
+                <h1>إدارة معرفات المستخدمين</h1>
+            </div>
+            <div class="nav-right">
+                <button class="nav-btn" onclick="refreshUserIds()">🔄 تحديث</button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="search-section">
+                <input type="text" id="search-input" placeholder="البحث عن مستخدم..." class="search-input">
+                <button onclick="searchUsers()" class="btn primary">🔍 بحث</button>
+            </div>
+
+            <div class="stats-section">
+                <div class="stat-card">
+                    <h3>إجمالي المستخدمين</h3>
+                    <span id="total-users">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>آخر معرف</h3>
+                    <span id="last-user-id">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>المعرف التالي</h3>
+                    <span id="next-user-id">0</span>
+                </div>
+            </div>
+
+            <div class="users-section">
+                <h2>قائمة المستخدمين</h2>
+                <div id="users-list" class="users-grid">
+                    <!-- سيتم ملء هذا القسم ديناميكياً -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://voiceboom-backend.onrender.com';
+        let users = [];
+
+        // تحميل معرفات المستخدمين
+        async function loadUserIds() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/users/all`);
+                if (response.ok) {
+                    users = await response.json();
+                    displayUsers(users);
+                    updateStats();
+                } else {
+                    throw new Error('فشل في تحميل بيانات المستخدمين');
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل معرفات المستخدمين:', error);
+                showMessage('خطأ في تحميل بيانات المستخدمين', true);
+            }
+        }
+
+        // عرض المستخدمين
+        function displayUsers(usersToShow) {
+            const usersList = document.getElementById('users-list');
+            usersList.innerHTML = '';
+
+            usersToShow.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <img src="${user.profile?.profileImage || user.profile?.avatar || 'images/default-avatar.png'}" 
+                                 alt="صورة المستخدم" onerror="this.src='images/default-avatar.png'">
+                        </div>
+                        <div class="user-details">
+                            <h3>${user.profile?.displayName || user.username}</h3>
+                            <p class="username">@${user.username}</p>
+                            <p class="user-id">معرف المستخدم: <strong>${user.userId || user._id}</strong></p>
+                            <p class="join-date">تاريخ الانضمام: ${formatDate(user.createdAt || user.profile?.joinDate)}</p>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <button onclick="copyUserId('${user.userId || user._id}')" class="btn secondary">📋 نسخ المعرف</button>
+                        <button onclick="viewUserProfile('${user.userId || user._id}')" class="btn primary">👁️ عرض</button>
+                    </div>
+                `;
+                usersList.appendChild(userCard);
+            });
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            document.getElementById('total-users').textContent = users.length;
+            
+            const userIds = users.map(u => u.userId).filter(id => id && !isNaN(id));
+            if (userIds.length > 0) {
+                const maxId = Math.max(...userIds);
+                document.getElementById('last-user-id').textContent = maxId;
+                document.getElementById('next-user-id').textContent = maxId + 1;
+            }
+        }
+
+        // البحث عن المستخدمين
+        function searchUsers() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const filteredUsers = users.filter(user => 
+                user.username.toLowerCase().includes(searchTerm) ||
+                (user.profile?.displayName && user.profile.displayName.toLowerCase().includes(searchTerm)) ||
+                (user.userId && user.userId.toString().includes(searchTerm))
+            );
+            displayUsers(filteredUsers);
+        }
+
+        // نسخ معرف المستخدم
+        function copyUserId(userId) {
+            navigator.clipboard.writeText(userId.toString()).then(() => {
+                showMessage('تم نسخ معرف المستخدم بنجاح!', false);
+            }).catch(() => {
+                showMessage('فشل في نسخ معرف المستخدم', true);
+            });
+        }
+
+        // عرض بروفايل المستخدم
+        function viewUserProfile(userId) {
+            // يمكن إضافة رابط لصفحة البروفايل هنا
+            showMessage(`عرض بروفايل المستخدم: ${userId}`, false);
+        }
+
+        // تحديث البيانات
+        function refreshUserIds() {
+            loadUserIds();
+        }
+
+        // تنسيق التاريخ
+        function formatDate(dateString) {
+            if (!dateString) return 'غير متاح';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ar-SA');
+        }
+
+        // عرض الرسائل
+        function showMessage(message, isError = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isError ? 'error' : 'success'}`;
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                background: ${isError ? '#f44336' : '#4CAF50'};
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        // تحميل البيانات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', loadUserIds);
+
+        // البحث عند الكتابة
+        document.getElementById('search-input').addEventListener('input', searchUsers);
+    </script>
+</body>
+</html> 

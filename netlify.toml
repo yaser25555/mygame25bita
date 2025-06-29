@@ -1,4 +1,5 @@
 [build]
+<<<<<<< HEAD
   publish = "dist"
   command = "npm run build"
 
@@ -13,3 +14,7 @@
 [context.production.environment]
   VITE_API_URL = "https://mygame25bita-7eqw.onrender.com"
   VITE_WS_URL = "wss://mygame25bita-7eqw.onrender.com"
+=======
+  command = ""
+  publish = "frontend"  
+>>>>>>> dcc32f47032798a33801cd63babc48f6b98fd36a

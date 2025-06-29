@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://mygame25bita-7eqw.onrender.com wss: ws:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    <title>نظام الدرع - لعبة الصندوق السحري</title>
+    <link rel="stylesheet" href="shield-styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="container">
+        <!-- شريط التنقل -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="logo.png" alt="شعار اللعبة" class="logo">
+                <span>نظام الدرع</span>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-secondary" onclick="window.location.href='game.html'">العودة للعبة</button>
+                <button class="btn btn-primary" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </nav>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="main-content">
+            <!-- شريط التبويبات -->
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="status">حالة الدرع</button>
+                <button class="tab-btn" data-tab="activate">تفعيل درع</button>
+                <button class="tab-btn" data-tab="history">السجل</button>
+                <button class="tab-btn" data-tab="settings">الإعدادات</button>
+            </div>
+
+            <!-- تبويب حالة الدرع -->
+            <div class="tab-content active" id="status-tab">
+                <div class="shield-status-container">
+                    <h2>حالة الدرع الحالية</h2>
+                    
+                    <div class="shield-status-card" id="shield-status-card">
+                        <!-- سيتم ملؤها بواسطة JavaScript -->
+                    </div>
+
+                    <div class="shield-stats">
+                        <h3>إحصائيات الدرع</h3>
+                        <div class="stats-grid" id="shield-stats">
+                            <!-- سيتم ملؤها بواسطة JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تبويب تفعيل الدرع -->
+            <div class="tab-content" id="activate-tab">
+                <div class="shield-activation-container">
+                    <h2>تفعيل درع جديد</h2>
+                    
+                    <div class="shield-types">
+                        <div class="shield-type-card" data-type="basic">
+                            <div class="shield-icon">🛡️</div>
+                            <h3>الدرع الأساسي</h3>
+                            <div class="shield-cost">50,000 عملة</div>
+                            <div class="shield-duration">24 ساعة</div>
+                            <div class="shield-protection">
+                                <h4>الحماية:</h4>
+                                <ul>
+                                    <li>✅ يحمي من القنابل</li>
+                                    <li>✅ يحمي من الخفافيش</li>
+                                    <li>❌ لا يحمي من اللعنات</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary activate-shield-btn" data-type="basic">
+                                تفعيل الدرع الأساسي
+                            </button>
+                        </div>
+
+                        <div class="shield-type-card" data-type="premium">
+                            <div class="shield-icon">🛡️✨</div>
+                            <h3>الدرع المميز</h3>
+                            <div class="shield-cost">100,000 عملة</div>
+                            <div class="shield-duration">48 ساعة</div>
+                            <div class="shield-protection">
+                                <h4>الحماية:</h4>
+                                <ul>
+                                    <li>✅ يحمي من القنابل</li>
+                                    <li>✅ يحمي من الخفافيش</li>
+                                    <li>✅ يحمي من اللعنات</li>
+                                    <li>❌ لا يحمي من الهدايا الإيجابية</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary activate-shield-btn" data-type="premium">
+                                تفعيل الدرع المميز
+                            </button>
+                        </div>
+
+                        <div class="shield-type-card" data-type="extended">
+                            <div class="shield-icon">🛡️⏰</div>
+                            <h3>الدرع الممتد</h3>
+                            <div class="shield-cost">90,000 عملة</div>
+                            <div class="shield-duration">72 ساعة</div>
+                            <div class="shield-protection">
+                                <h4>الحماية:</h4>
+                                <ul>
+                                    <li>✅ يحمي من القنابل</li>
+                                    <li>✅ يحمي من الخفافيش</li>
+                                    <li>✅ يحمي من اللعنات</li>
+                                    <li>✅ حماية ممتدة لمدة 3 أيام</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary activate-shield-btn" data-type="extended">
+                                تفعيل الدرع الممتد
+                            </button>
+                        </div>
+
+                        <div class="shield-type-card" data-type="ultimate">
+                            <div class="shield-icon">🛡️🔥</div>
+                            <h3>الدرع الأقوى</h3>
+                            <div class="shield-cost">135,000 عملة</div>
+                            <div class="shield-duration">3 أيام</div>
+                            <div class="shield-protection">
+                                <h4>الحماية:</h4>
+                                <ul>
+                                    <li>✅ يحمي من جميع الهدايا السلبية</li>
+                                    <li>✅ حماية كاملة لمدة 3 أيام</li>
+                                    <li>✅ يحمي من القنابل والخفافيش واللعنات</li>
+                                    <li>✅ حماية شاملة</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary activate-shield-btn" data-type="ultimate">
+                                تفعيل الدرع الأقوى
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="user-coins">
+                        <h3>رصيدك الحالي</h3>
+                        <div class="coins-display" id="user-coins">
+                            <!-- سيتم ملؤها بواسطة JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تبويب السجل -->
+            <div class="tab-content" id="history-tab">
+                <div class="shield-history-container">
+                    <h2>سجل استخدام الدرع</h2>
+                    
+                    <div class="history-filters">
+                        <button class="filter-btn active" data-filter="all">الكل</button>
+                        <button class="filter-btn" data-filter="active">نشط</button>
+                        <button class="filter-btn" data-filter="expired">منتهي</button>
+                        <button class="filter-btn" data-filter="cancelled">ملغي</button>
+                    </div>
+
+                    <div class="history-list" id="shield-history-list">
+                        <!-- سيتم ملؤها بواسطة JavaScript -->
+                    </div>
+
+                    <div class="pagination" id="history-pagination">
+                        <!-- سيتم ملؤها بواسطة JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- تبويب الإعدادات -->
+            <div class="tab-content" id="settings-tab">
+                <div class="shield-settings-container">
+                    <h2>إعدادات الدرع</h2>
+                    
+                    <div class="settings-group">
+                        <h3>التجديد التلقائي</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="auto-renew">
+                                تفعيل التجديد التلقائي للدرع
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label for="auto-renew-type">نوع الدرع للتجديد التلقائي:</label>
+                            <select id="auto-renew-type">
+                                <option value="basic">الدرع الأساسي</option>
+                                <option value="premium">الدرع المميز</option>
+                                <option value="extended">الدرع الممتد</option>
+                                <option value="ultimate">الدرع الأقوى</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>الإشعارات</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="shield-notifications" checked>
+                                إشعارات الدرع
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>الحماية</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="block-all-negative" checked>
+                                حظر جميع الهدايا السلبية
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="saveShieldSettings()">حفظ الإعدادات</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- إشعارات -->
+        <div id="notifications" class="notifications"></div>
+    </div>
+
+    <!-- Modal تأكيد التفعيل -->
+    <div id="activation-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h3>تأكيد تفعيل الدرع</h3>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من تفعيل الدرع <span id="modal-shield-type"></span>؟</p>
+                <p>التكلفة: <span id="modal-shield-cost"></span> عملة</p>
+                <p>المدة: <span id="modal-shield-duration"></span></p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeActivationModal()">إلغاء</button>
+                <button class="btn btn-primary" onclick="confirmShieldActivation()">تأكيد التفعيل</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تسجيل Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('❌ فشل في تسجيل Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+    <script src="config.js"></script>
+    <script src="shield.js"></script>
+</body>
+</html> 

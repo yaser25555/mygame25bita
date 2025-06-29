@@ -1,0 +1,290 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://mygame25bita-7eqw.onrender.com wss: ws:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    <title>نظام التداول - لعبة الصندوق السحري</title>
+    <link rel="stylesheet" href="trading-styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="trading-container">
+        <!-- Header -->
+        <header class="trading-header">
+            <div class="header-content">
+                <h1>نظام التداول</h1>
+                <div class="user-info">
+                    <span id="userDisplayName">جاري التحميل...</span>
+                    <button id="backToGame" class="btn-secondary">العودة للعبة</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="trading-main">
+            <!-- Navigation Tabs -->
+            <nav class="trading-nav">
+                <button class="nav-tab active" data-tab="create">إنشاء تداول</button>
+                <button class="nav-tab" data-tab="received">الطلبات المستلمة</button>
+                <button class="nav-tab" data-tab="sent">الطلبات المرسلة</button>
+                <button class="nav-tab" data-tab="history">سجل التداول</button>
+                <button class="nav-tab" data-tab="settings">الإعدادات</button>
+            </nav>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Create Trade Tab -->
+                <div id="create" class="tab-panel active">
+                    <div class="trade-form">
+                        <h2>إنشاء طلب تداول جديد</h2>
+                        
+                        <div class="form-group">
+                            <label for="targetUsername">اسم المستخدم المستهدف:</label>
+                            <input type="text" id="targetUsername" placeholder="أدخل اسم المستخدم">
+                        </div>
+
+                        <div class="trade-items">
+                            <div class="trade-section">
+                                <h3>العناصر التي تقدمها:</h3>
+                                <div class="items-grid">
+                                    <div class="item-input">
+                                        <label>النقاط:</label>
+                                        <input type="number" id="offeredScore" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>اللآلئ:</label>
+                                        <input type="number" id="offeredPearls" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>الجواهر:</label>
+                                        <input type="number" id="offeredGems" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>المفاتيح:</label>
+                                        <input type="number" id="offeredKeys" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>العملات:</label>
+                                        <input type="number" id="offeredCoins" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>القنابل:</label>
+                                        <input type="number" id="offeredBombs" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>النجوم:</label>
+                                        <input type="number" id="offeredStars" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>الخفافيش:</label>
+                                        <input type="number" id="offeredBats" min="0" value="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="trade-section">
+                                <h3>العناصر التي تطلبها:</h3>
+                                <div class="items-grid">
+                                    <div class="item-input">
+                                        <label>النقاط:</label>
+                                        <input type="number" id="requestedScore" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>اللآلئ:</label>
+                                        <input type="number" id="requestedPearls" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>الجواهر:</label>
+                                        <input type="number" id="requestedGems" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>المفاتيح:</label>
+                                        <input type="number" id="requestedKeys" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>العملات:</label>
+                                        <input type="number" id="requestedCoins" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>القنابل:</label>
+                                        <input type="number" id="requestedBombs" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>النجوم:</label>
+                                        <input type="number" id="requestedStars" min="0" value="0">
+                                    </div>
+                                    <div class="item-input">
+                                        <label>الخفافيش:</label>
+                                        <input type="number" id="requestedBats" min="0" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tradeMessage">رسالة (اختياري):</label>
+                            <textarea id="tradeMessage" placeholder="أضف رسالة للطرف الآخر..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button id="createTrade" class="btn-primary">إرسال طلب التداول</button>
+                            <button id="clearForm" class="btn-secondary">مسح النموذج</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Received Trades Tab -->
+                <div id="received" class="tab-panel">
+                    <div class="trades-list">
+                        <h2>طلبات التداول المستلمة</h2>
+                        <div id="receivedTradesList" class="trades-container">
+                            <div class="loading">جاري تحميل الطلبات...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sent Trades Tab -->
+                <div id="sent" class="tab-panel">
+                    <div class="trades-list">
+                        <h2>طلبات التداول المرسلة</h2>
+                        <div id="sentTradesList" class="trades-container">
+                            <div class="loading">جاري تحميل الطلبات...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trade History Tab -->
+                <div id="history" class="tab-panel">
+                    <div class="trade-history">
+                        <h2>سجل التداول</h2>
+                        <div class="history-stats">
+                            <div class="stat-card">
+                                <h3>إجمالي التداولات</h3>
+                                <span id="totalTrades">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <h3>التداولات الناجحة</h3>
+                                <span id="successfulTrades">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <h3>التداولات الملغاة</h3>
+                                <span id="cancelledTrades">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <h3>السمعة</h3>
+                                <span id="reputation">100</span>
+                            </div>
+                        </div>
+                        <div id="tradeHistoryList" class="history-container">
+                            <div class="loading">جاري تحميل السجل...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings" class="tab-panel">
+                    <div class="trading-settings">
+                        <h2>إعدادات التداول</h2>
+                        
+                        <div class="settings-group">
+                            <h3>إعدادات عامة</h3>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="allowTrades" checked>
+                                    السماح باستقبال طلبات التداول
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="allowScoreTrading" checked>
+                                    السماح بتداول النقاط
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="allowPearlTrading" checked>
+                                    السماح بتداول اللآلئ
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="allowItemTrading" checked>
+                                    السماح بتداول العناصر
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>حدود التداول</h3>
+                            <div class="setting-item">
+                                <label for="minTradeAmount">الحد الأدنى للتداول:</label>
+                                <input type="number" id="minTradeAmount" min="1" value="10">
+                            </div>
+                            <div class="setting-item">
+                                <label for="maxTradeAmount">الحد الأقصى للتداول:</label>
+                                <input type="number" id="maxTradeAmount" min="1" value="10000">
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>إعدادات متقدمة</h3>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="autoRejectTrades">
+                                    رفض طلبات التداول تلقائياً
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button id="saveSettings" class="btn-primary">حفظ الإعدادات</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Trade Details Modal -->
+    <div id="tradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">تفاصيل التداول</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modalAccept" class="btn-primary" style="display: none;">قبول</button>
+                <button id="modalReject" class="btn-danger" style="display: none;">رفض</button>
+                <button id="modalCancel" class="btn-secondary" style="display: none;">إلغاء</button>
+                <button id="modalClose" class="btn-secondary">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <script>
+        // تسجيل Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('❌ فشل في تسجيل Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+    <script src="config.js"></script>
+    <script src="trading.js"></script>
+</body>
+</html> 

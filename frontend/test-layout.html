@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>اختبار توزيع الأعمدة</title>
+  <style>
+    body {
+      background: #f3f4f6;
+      font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+      margin: 0;
+      padding: 0;
+    }
+    .main-content {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 32px;
+      width: 100vw;
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding: 32px 0;
+    }
+    .messages-column {
+      flex: 0 0 350px;
+      max-width: 400px;
+      min-width: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      height: 80vh;
+      box-sizing: border-box;
+    }
+    .message-area {
+      width: 100%;
+      max-width: 370px;
+      min-height: 300px;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ef 100%);
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      margin-bottom: 24px;
+      padding: 28px 28px;
+      font-size: 1.25em;
+      color: #222;
+      direction: rtl;
+      text-align: right;
+      overflow-y: auto;
+      font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+    }
+    .game-center-column {
+      flex: 2;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 18px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 24px 0;
+    }
+    .small-logo {
+      width: 70px;
+      height: 70px;
+      margin: 10px auto 0 auto;
+      display: block;
+    }
+    .circular-controls {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      margin: 18px 0 10px 0;
+    }
+    .circular-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e0e7ef 0%, #7fbcff 100%);
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      color: #333;
+      transition: background 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+    .large-items {
+      transform: scale(1.18);
+      margin-top: 0 !important;
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .prominent-boxes {
+      margin-top: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      border-radius: 18px;
+      background: #fff;
+      padding: 18px 0 18px 0;
+      min-height: 200px;
+      width: 90%;
+      margin-bottom: 24px;
+    }
+    .left-panel {
+      flex: 0 0 340px;
+      max-width: 400px;
+      min-width: 250px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-sizing: border-box;
+      align-items: flex-start;
+      padding-top: 32px;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 370px;
+      min-width: 0;
+      box-sizing: border-box;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #e0e7ef 0%, #f3f4f6 100%);
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 18px;
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content">
+    <!-- عمود الرسائل (يمين) -->
+    <div class="messages-column">
+      <div class="message-area">
+        <b>منطقة الرسائل</b><br>
+        هنا تظهر رسائل النظام أو التنبيهات بشكل واضح وكبير.
+      </div>
+    </div>
+    <!-- عمود اللعبة (وسط) -->
+    <div class="game-center-column">
+      <img src="logo.png" alt="شعار اللعبة" class="small-logo">
+      <div class="circular-controls">
+        <button class="circular-btn" title="ضربة فردية">🎯</button>
+        <button class="circular-btn" title="ضربة ثلاثية">💥</button>
+        <button class="circular-btn" title="ضربة المطرقة">🔨</button>
+      </div>
+      <div class="large-items">
+        <b>العناصر المجمعة</b>
+      </div>
+      <div class="prominent-boxes">
+        <b>منطقة الصناديق</b>
+      </div>
+    </div>
+    <!-- عمود معلومات المستخدم والمحادثة (يسار) -->
+    <div class="left-panel">
+      <div style="background:#e0e7ef;border-radius:12px;padding:12px;width:100%;margin-bottom:12px;">
+        <b>معلومات المستخدم</b>
+      </div>
+      <div class="chat-container">
+        <b>المحادثة</b><br>
+        هنا تظهر رسائل الشات بين اللاعبين.
+      </div>
+    </div>
+  </div>
+</body>
+</html> 

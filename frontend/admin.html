@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://mygame25bita-7eqw.onrender.com wss: ws:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <meta name="theme-color" content="#00FF00">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Voice Boom Admin">
+  <title>لوحة تحكم المسؤول - Voice Boom</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin-styles.css?v=1">
+</head>
+<body>
+  <div class="game-logo">
+    <span class="logo-infinity">infinity</span>
+    <span class="logo-kingdom">Kingdom of Luck</span>
+  </div>
+  <div class="container">
+    <h2>👑 لوحة تحكم المسؤول</h2>
+
+    <!-- Admin Login Form -->
+    <form id="adminLoginForm" class="login-form">
+      <h3>🔐 تسجيل دخول المسؤول</h3>
+      <div class="field">
+        <label for="adminUsername">اسم المستخدم:</label>
+        <input type="text" id="adminUsername" placeholder="اسم المستخدم" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="adminPassword">كلمة المرور:</label>
+        <input type="password" id="adminPassword" placeholder="كلمة المرور" required autocomplete="current-password">
+      </div>
+      <button type="submit" id="adminLoginBtn">🚀 تسجيل الدخول</button>
+      <p id="loginMessage" style="color: red;"></p>
+    </form>
+
+    <!-- Admin Panel Content (initially hidden) -->
+    <div id="adminPanel" class="hidden">
+      <div class="admin-panel-sections">
+        <button id="showGameManagement">🎮 إدارة اللعبة</button>
+        <button id="showUserManagement">👥 إدارة المستخدمين</button>
+        <button id="showSuspiciousActivity">🔍 مراقبة النشاطات المشبوهة</button>
+        <button id="showUserImagesManagement">🖼️ إدارة صور المستخدمين</button>
+      </div>
+
+      <!-- Game Management Section -->
+      <div id="gameManagementSection" class="section-content hidden">
+        <h3>🎮 إعدادات اللعبة</h3>
+        <div class="field">
+            <label for="numBoxesInput">عدد الصناديق في الجولة:</label>
+            <input type="number" id="numBoxesInput" min="5" max="100">
+        </div>
+        <div class="field">
+            <label for="winRatioInput">نسبة الفوز (من 0.1 إلى 0.9):</label>
+            <input type="number" id="winRatioInput" step="0.1" min="0.1" max="0.9">
+        </div>
+        <button id="saveGameSettingsBtn">💾 حفظ إعدادات اللعبة</button>
+      </div>
+
+      <!-- User Management Section -->
+      <div id="userManagementSection" class="section-content hidden">
+        <h3>👥 إدارة المستخدمين</h3>
+        
+        <!-- حاوية البحث والعمليات -->
+        <div class="user-management-container">
+          <!-- البحث عن المستخدم -->
+          <div class="search-section">
+            <h4>🔍 البحث عن المستخدم</h4>
+            <div class="search-options">
+              <div class="search-option">
+                <label for="searchByUsername">البحث بالاسم:</label>
+                <input type="text" id="searchByUsername" placeholder="أدخل اسم المستخدم">
+                <button id="searchByUsernameBtn" class="search-btn">🔍 بحث</button>
+              </div>
+              <div class="search-option">
+                <label for="searchByUserId">البحث بالمعرف:</label>
+                <input type="number" id="searchByUserId" placeholder="أدخل معرف المستخدم">
+                <button id="searchByUserIdBtn" class="search-btn">🔍 بحث</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- عرض بيانات المستخدم -->
+          <div id="userDataDisplay" class="user-data-display hidden">
+            <h4>📋 بيانات المستخدم</h4>
+            <div class="user-info-grid">
+              <div class="user-info-item">
+                <label>اسم المستخدم:</label>
+                <span id="displayUsername"></span>
+              </div>
+              <div class="user-info-item">
+                <label>معرف المستخدم:</label>
+                <span id="displayCurrentUserId"></span>
+              </div>
+              <div class="user-info-item">
+                <label>البريد الإلكتروني:</label>
+                <span id="displayEmail"></span>
+              </div>
+              <div class="user-info-item">
+                <label>الرصيد الحالي:</label>
+                <span id="displayCoins"></span>
+              </div>
+              <div class="user-info-item">
+                <label>عدد اللآلئ:</label>
+                <span id="displayPearls"></span>
+              </div>
+              <div class="user-info-item">
+                <label>دور المستخدم:</label>
+                <span id="displayRole"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- حاوية العمليات -->
+          <div id="userOperationsContainer" class="user-operations hidden">
+            <h4>⚙️ عمليات المستخدم</h4>
+            
+            <!-- تغيير المعرف -->
+            <div class="operation-section">
+              <h5>🆔 تغيير معرف المستخدم</h5>
+              <div class="operation-inputs">
+                <input type="number" id="newUserId" placeholder="المعرف الجديد" min="1">
+                <button id="updateUserIdBtn" class="operation-btn update-btn">🔄 تحديث المعرف</button>
+              </div>
+              <p id="updateUserIdMessage" class="message"></p>
+            </div>
+
+            <!-- إدارة الرصيد واللآلئ -->
+            <div class="operation-section">
+              <h5>💰 إدارة الرصيد واللآلئ</h5>
+              <div class="operation-inputs">
+                <input type="number" id="manageCoins" placeholder="الرصيد الجديد" min="0">
+                <input type="number" id="managePearls" placeholder="عدد اللآلئ الجديد" min="0">
+                <button id="updateUserBtn" class="operation-btn update-btn">💾 حفظ التغييرات</button>
+              </div>
+            </div>
+
+            <!-- تعيين كمسؤول -->
+            <div class="operation-section">
+              <h5>👑 تعيين كمسؤول</h5>
+              <div class="operation-inputs">
+                <input type="text" id="adminRoleUsername" readonly>
+                <button id="assignAdminRoleBtn" class="operation-btn admin-btn">👑 تعيين مشرف</button>
+              </div>
+            </div>
+
+            <!-- تغيير كلمة المرور -->
+            <div class="operation-section">
+              <h5>🔐 تغيير كلمة المرور</h5>
+              <div class="operation-inputs">
+                <input type="password" id="editPassword" placeholder="كلمة المرور الجديدة">
+                <button id="updatePasswordBtn" class="operation-btn password-btn">🔐 تحديث كلمة المرور</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- قائمة المستخدمين -->
+          <div class="users-list-section">
+            <h4>📋 قائمة المستخدمين</h4>
+            <button id="loadAllUsersBtn" class="load-btn">📋 تحميل جميع المستخدمين</button>
+            <div id="usersList" class="users-list">
+              <!-- سيتم ملؤها بالجافاسكريبت -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suspicious Activity Monitoring Section -->
+      <div id="suspiciousActivitySection" class="section-content hidden">
+        <h3>🔍 مراقبة النشاطات المشبوهة</h3>
+        <div class="stats-summary">
+          <div class="stat-card">
+            <span class="stat-number" id="totalSuspiciousUsers">0</span>
+            <span class="stat-label">مستخدمين مشبوهين</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="highRiskUsers">0</span>
+            <span class="stat-label">مخاطر عالية</span>
+          </div>
+        </div>
+        
+        <button id="refreshSuspiciousActivityBtn" style="background: #10b981; margin: 10px 0;">🔄 تحديث البيانات</button>
+        
+        <div id="suspiciousUsersList" style="margin-top: 20px;">
+          <!-- سيتم ملؤها بالجافاسكريبت -->
+        </div>
+      </div>
+    </div>
+
+    <!-- مثال: قائمة المستخدمين المتصلين بالصوت -->
+    <ul id="voiceUsersList"></ul>
+
+  </div>
+
+  <script>
+    // تسجيل Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then((registration) => {
+                    console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+                })
+                .catch((error) => {
+                    console.log('❌ فشل في تسجيل Service Worker:', error);
+                });
+        });
+    }
+  </script>
+  <script src="config.js"></script>
+  <script src="admin.js?v=1"></script>
+</body>
+</html>
