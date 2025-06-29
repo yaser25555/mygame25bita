@@ -621,3 +621,26 @@ body.dark-mode .item-collection-display {
         height: 60px;
     }
 }
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: 100vw;
+    height: 100vh;
+    gap: 0;
+}
+.grid-cell {
+    border: 1px solid var(--border-color, #004D33);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--secondary-color, #003D25) 0%, #002A1B 100%);
+    color: var(--text-color-dark, #fff);
+}
+.icons-cell {
+    flex-direction: row;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--secondary-color, #003D25) 0%, #002A1B 100%);
+}
