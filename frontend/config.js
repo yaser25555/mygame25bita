@@ -17,7 +17,7 @@ const CONFIG = {
     CSP_CONNECT_SRC: 'https://mygame25bita-7eqw.onrender.com',
     
     // إعدادات التطبيق
-    APP_NAME: 'INFINITY BOX VOICEBOOM',
+    APP_NAME: 'INFINITY Kingdom of luck',
     APP_VERSION: '2.0.0'
 };
 

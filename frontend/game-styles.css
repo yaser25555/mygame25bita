@@ -5,367 +5,218 @@
     box-sizing: border-box;
 }
 
+/* سيتم نقل الأنماط من قسم <style> إلى هنا */
+/* تنسيقات أساسية */
 body {
-    font-family: 'Noto Naskh Arabic', sans-serif;
-    color: #E0E0E0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-    padding: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    overflow-x: hidden;
-    position: relative;
-    z-index: 0;
-    background-image: url('background_image.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
-
-body::before {
-    content: none;
-}
-
-/* زر الوضع الليلي */
-#darkModeToggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 1.5em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#darkModeToggle:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-}
-
-/* زر غرفة المحادثة الصوتية */
-.voice-chat-btn {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    z-index: 9999;
-    background: linear-gradient(135deg, #7fbcff 0%, #4f46e5 100%);
-    color: #fff;
-    border: none;
-    border-radius: 50px;
-    box-shadow: 0 4px 16px rgba(79,70,229,0.18);
-    font-size: 1.2em;
-    font-family: 'Cairo', 'Noto Naskh Arabic', sans-serif;
-    padding: 18px 32px;
-    cursor: pointer;
-    font-weight: bold;
-    letter-spacing: 1px;
-    transition: background 0.2s, transform 0.2s;
-}
-
-.voice-chat-btn:hover {
-    background: linear-gradient(135deg, #f43f5e 0%, #facc15 100%);
-    transform: translateY(-2px);
-}
-
-.voice-chat-btn:active {
-    transform: translateY(0);
-}
-
-/* توزيع الأعمدة الرئيسية */
-.main-content {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 32px;
-    width: 100%;
-    max-width: 1400px;
-    min-height: 100vh;
-    box-sizing: border-box;
-    padding: 32px 0;
-    margin: 0 auto;
-}
-
-/* عمود الرسائل */
-.messages-column {
-    flex: 0 0 350px;
-    max-width: 400px;
-    min-width: 250px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    height: 80vh;
-    box-sizing: border-box;
-}
-
-.message-area {
-    background: #232946;
-    color: #fff;
-    border-radius: 18px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-    margin-bottom: 24px;
-    padding: 28px 28px;
-    font-size: 1.25em;
-    direction: rtl;
-    text-align: right;
-    overflow-y: auto;
-    font-family: 'Noto Naskh Arabic', 'Amiri', serif;
-    width: 100%;
-    height: 100%;
-}
-
-.message-area h3 {
-    margin-bottom: 20px;
-    color: #7fbcff;
-    text-align: center;
-}
-
-/* عمود اللعبة */
-.game-center-column {
-    flex: 2;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 18px;
-    max-width: 600px;
-}
-
-/* العنوان */
-.header-container {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.centered-header-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-.logo.small-logo {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.game-title {
-    font-size: 2em;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(127, 188, 255, 0.8);
     margin: 0;
+    padding: 0;
+    background: #fff;
+    font-family: 'Cairo', 'Noto Naskh Arabic', sans-serif;
 }
-
-/* أزرار التحكم */
-.controls {
-    display: flex;
-    gap: 15px;
-    margin: 20px 0;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.bet-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 15px;
-    padding: 15px 20px;
-    color: white;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    min-width: 120px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.bet-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}
-
-.bet-button i {
-    font-size: 1.5em;
-}
-
-.bet-button span {
-    font-size: 0.9em;
-    font-weight: bold;
-}
-
-/* عرض العناصر المجمعة */
-.item-collection-display {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 20px;
-    margin: 20px 0;
-    width: 100%;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.item-collection-title {
+.top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #7fbcff;
-}
-
-.item-info-btn {
-    background: none;
-    border: none;
-    color: #7fbcff;
-    font-size: 1.2em;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-
-.item-info-btn:hover {
-    background: rgba(127, 188, 255, 0.2);
-    transform: scale(1.1);
-}
-
-.items-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 15px;
-}
-
-.item-display {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.item-display:hover {
-    transform: translateY(-2px);
-    border-color: #7fbcff;
-}
-
-.item-emoji {
-    font-size: 2em;
-    margin-bottom: 5px;
-}
-
-.item-count {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #fff;
-}
-
-.item-name {
-    font-size: 0.8em;
-    color: #ccc;
-    margin-top: 5px;
-}
-
-/* شبكة الصناديق */
-.container-grid.nine-boxes {
     width: 100vw;
-    height: calc(100vh - 130px); /* 130px تقريباً = شريط علوي + عنوان */
-    max-width: 100vw;
-    max-height: calc(100vh - 130px);
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 2vw;
-    padding: 0 2vw 2vw 2vw;
-    margin: 0 auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2001;
+    background: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 8px 16px 0 16px;
     box-sizing: border-box;
-    align-items: stretch;
-    justify-items: stretch;
 }
-
-.container-grid.nine-boxes .box {
-    font-size: 1.15em;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+.top-bar-left { display: flex; gap: 10px; align-items: center; }
+.top-bar-right { display: flex; align-items: center; }
+.player-info-bar { font-size: 1em; background: none; box-shadow: none; border-radius: 0; padding: 0; }
+.voice-chat-btn, .start-btn {
+    width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 1.6em; padding: 0; background: #fff; color: #222; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.game-main-area {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-top: 80px;
+}
+.game-center {
+    width: 100vw;
+    max-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.page-bg-frame {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: box-shadow 0.2s, transform 0.2s;
+    margin: 40px auto 0 auto;
+    max-width: 95vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    width: 100vw;
+}
+.page-bg-img {
+    border: 6px solid #e0e0e0;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    max-width: 420px;
+    width: 90vw;
+    height: auto;
+    display: block;
+}
+.game-title-under-bg {
+    margin-top: 18px;
+    font-size: 1.7em;
+    font-weight: bold;
+    color: #222;
+    text-align: center;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px #fff;
+}
+@media (max-width: 700px) {
+    .top-bar { flex-direction: column; align-items: stretch; gap: 8px; padding: 6px 2vw 0 2vw; }
+    .game-main-area { padding-top: 60px; min-height: 100vh; height: 100vh; }
+    .game-center { width: 100vw; max-width: 100vw; height: calc(100vh - 60px); min-height: calc(100vh - 60px); }
+    .game-center canvas { width: 100vw !important; height: 60vw !important; max-width: 100vw !important; max-height: 70vw !important; display: block; margin: 0 auto; }
+    #mobile-controls { display: flex !important; }
+    .player-info-bar { font-size: 0.95em; }
+}
+.top-bar, .game-main-area, .game-center, .game-overlay, #loading-indicator, .item-info-modal, .voice-modal, #win-gif-container, #sadcat-gif-container, #mobile-controls {
+    position: relative;
+    z-index: 10;
+}
+.container-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 400px;
+    height: 60vw;
+    min-height: 240px;
+    margin: 0 auto;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.box {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #333;
     min-height: 0;
     min-width: 0;
+    position: relative;
+    resize: both;
+    overflow: auto;
+    cursor: grab;
+    transition: box-shadow 0.2s;
+    z-index: 1;
+}
+.box:active {
+    cursor: grabbing;
+    z-index: 10;
+}
+.draggable-icon {
+    width: 60px;
+    height: 60px;
+    cursor: grab;
+    user-select: none;
+}
+.draggable-icon:active {
+    cursor: grabbing;
+}
+@media (max-width: 500px) {
+    .container-grid {
+        max-width: 100vw;
+        height: 60vw;
+        gap: 5px;
+        padding: 5px;
+    }
+    .box {
+        font-size: 1rem;
+    }
+}
+
+/* أنماط الأزرار المحددة التي كانت مضمنة */
+#voiceChatRoomBtn {
+    background: linear-gradient(135deg, #00c853 0%, #ffd600 100%);
+    color: #222;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+#profileBtn {
+    background: linear-gradient(135deg, #ffd600 0%, #00c853 100%);
+    color: #222;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7em;
+    margin-right: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border: none;
     cursor: pointer;
-    padding: 10px 0 2px 0;
 }
 
-.box-icon {
-    display: block;
-    margin: 0 auto 6px auto;
-    box-shadow: 0 2px 8px #7fbcff33;
-    transition: transform 0.18s;
+#voiceRoomPageBtn {
+    background: linear-gradient(135deg, #00bcd4 0%, #00c853 100%);
+    color: #fff;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7em;
+    margin-left: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border: none;
+    cursor: pointer;
 }
-
-#profileBox .profile-avatar {
-    border: 3px solid #7fbcff;
-    box-shadow: 0 2px 12px #7fbcff22;
-    background: #fff;
-}
-
-.box-label {
-    font-size: 1.08em;
-    font-weight: bold;
-    color: #1e3a8a;
-    letter-spacing: 1px;
+.box {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    border-radius: 15px;
+    padding: 20px;
     text-align: center;
-    margin-top: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+    font-size: 2em;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#profileBox:hover .profile-avatar,
-#voiceChatBox:hover .box-icon,
-#startGameBox:hover .box-icon {
-    transform: scale(1.13) rotate(-4deg);
-    box-shadow: 0 6px 24px #facc1533;
+.box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
-#voiceChatBox .box-label {
-    color: #facc15;
-}
-#startGameBox .box-label {
-    color: #0077cc;
-}
-
-@media (max-width: 700px) {
-    .container-grid.nine-boxes .box {
-        font-size: 0.92em;
-        padding: 6px 0 0 0;
-    }
-    .box-label {
-        font-size: 0.98em;
-    }
-    .box-icon {
-        width: 34px !important;
-        height: 34px !important;
-    }
-    #profileBox .profile-avatar {
-        width: 38px !important;
-        height: 38px !important;
-    }
+.box.opened {
+    background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+    border-color: #00b894;
 }
 
 /* عمود معلومات المستخدم والمحادثة */
@@ -769,4 +620,4 @@ body.dark-mode .item-collection-display {
         width: 60px;
         height: 60px;
     }
-} 
+}

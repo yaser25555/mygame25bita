@@ -1,7 +1,7 @@
 ﻿{
-  "name": "INFINITY BOX VOICEBOOM",
-  "short_name": "VoiceBoom",
-  "description": "لعبة VoiceBoom - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#002A1B",
@@ -45,3 +45,1699 @@
     }
   ]
 }
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدقاء",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002A1B",
+  "theme_color": "#00FF00",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "تسجيل الدخول",
+      "short_name": "دخول",
+      "description": "تسجيل الدخول للعبة",
+      "url": "/"
+    },
+    {
+      "name": "الدخول للعبة",
+      "short_name": "لعبة",
+      "description": "الدخول للعبة الرئيسية",
+      "url": "/game.html"
+    }
+  ]
+}
+{
+  "name": "INFINITY Kingdom of luck",
+  "short_name": "Kingdom of luck",
+  "description": "لعبة Kingdom of luck - استمتع بتجربة ألعاب ممتعة مع الأصدق

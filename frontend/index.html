@@ -13,7 +13,6 @@
     <meta name="msapplication-navbutton-color" content="#002A1B">
     <title>INFINITY - KIGDOM of LUCK</title>
     <link rel="stylesheet" href="login-styles.css">
-    <link rel="stylesheet" href="login-game-title.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="logo.png">
 </head>
@@ -32,24 +31,19 @@
             </div>
         </div>
 
-        <div class="tabs" style="display: flex; flex-direction: column; align-items: stretch;">
-            <div class="login-game-title" style="margin-bottom: 8px; margin-top: 0; align-self: center; width: 100%;">
-                <div class="login-game-main">INFINITY</div>
-                <div class="login-game-subtitle">kingdom of luck</div>
-            </div>
-            <div class="tab-buttons-group" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
-                <button class="tab-button active" id="login-tab">تسجيل الدخول</button>
-                <button class="tab-button" id="register-tab">تسجيل</button>
-                <button class="tab-button" id="admin-login-tab">🔐 تسجيل دخول المشرف</button>
-                <button class="tab-button" id="contact-tab">للاستفسار وشحن العملات</button>
-                <button class="tab-button admin-only" id="admin-tab" style="display: none;">لوحة التحكم</button>
-                <button class="tab-button game-btn" id="game-tab" style="display: none;">🎮 الدخول للعبة</button>
-                <button class="tab-button logout-btn" id="logout-tab" style="display: none;">تسجيل الخروج</button>
-            </div>
+        <div class="tabs">
+            <button class="tab-button active" id="login-tab">تسجيل الدخول</button>
+            <button class="tab-button" id="register-tab">تسجيل</button>
+            <button class="tab-button" id="admin-login-tab">🔐 تسجيل دخول المشرف</button>
+            <button class="tab-button" id="contact-tab">للاستفسار وشحن العملات</button>
+            <button class="tab-button admin-only" id="admin-tab" style="display: none;">لوحة التحكم</button>
+            <button class="tab-button game-btn" id="game-tab" style="display: none;">🎮 الدخول للعبة</button>
+            <button class="tab-button logout-btn" id="logout-tab" style="display: none;">تسجيل الخروج</button>
         </div>
 
         <div id="message-box" class="message-box"></div>
 
+        <!-- قسم تسجيل الدخول -->
         <div id="login-section" class="content-section active">
             <form id="login-form" method="POST" action="javascript:void(0)" autocomplete="on">
                 <div class="form-group">
