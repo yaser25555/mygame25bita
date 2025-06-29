@@ -389,15 +389,13 @@ function initCrop() {
     const cropFrame = document.getElementById('cropFrame');
     const cropOverlay = document.getElementById('cropOverlay');
     
-    // إضافة مستمعي الأحداث للسحب
-    cropFrame.addEventListener('mousedown', startDrag);
-    cropOverlay.addEventListener('mousemove', drag);
-    cropOverlay.addEventListener('mouseup', stopDrag);
-    
-    // إضافة مستمعي الأحداث للمس (للأجهزة المحمولة)
-    cropFrame.addEventListener('touchstart', startDrag);
-    cropOverlay.addEventListener('touchmove', drag);
-    cropOverlay.addEventListener('touchend', stopDrag);
+    // تم تعطيل مستمعات السحب بناءً على طلب المستخدم
+    // cropFrame.addEventListener('mousedown', startDrag);
+    // cropOverlay.addEventListener('mousemove', drag);
+    // cropOverlay.addEventListener('mouseup', stopDrag);
+    // cropFrame.addEventListener('touchstart', startDrag);
+    // cropOverlay.addEventListener('touchmove', drag);
+    // cropOverlay.addEventListener('touchend', stopDrag);
 }
 
 // بدء السحب
