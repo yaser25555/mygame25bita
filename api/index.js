@@ -38,10 +38,11 @@ app.use(cors({
       'http://localhost:5000',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:5000',
-      'https://infinity-box25.netlify.app' // السماح لدومين Netlify
+      'https://infinity-box25.netlify.app'
     ];
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // السماح بأي دومين فرعي من Netlify
+    if (origin.endsWith('.netlify.app') || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.log('❌ CORS blocked origin:', origin);
