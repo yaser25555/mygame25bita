@@ -2101,4 +2101,28 @@ router.post('/friends/add', verifyToken, async (req, res) => {
   }
 });
 
+// حفظ نتائج اللعبة (game1)
+router.post('/save-game-score', verifyToken, async (req, res) => {
+  try {
+    const { personalScore, highScore, roundNumber, singleShotsUsed, tripleShotsUsed, hammerShotsUsed } = req.body;
+    const userId = req.user.userId;
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+    // تحديث القيم فقط إذا كانت أكبر من القيم السابقة (للـ highScore)
+    if (typeof personalScore === 'number') user.stats.personalScore = personalScore;
+    if (typeof highScore === 'number' && highScore > user.stats.highScore) user.stats.highScore = highScore;
+    if (typeof roundNumber === 'number') user.stats.roundNumber = roundNumber;
+    if (typeof singleShotsUsed === 'number') user.stats.singleShotsUsed = singleShotsUsed;
+    if (typeof tripleShotsUsed === 'number') user.stats.tripleShotsUsed = tripleShotsUsed;
+    if (typeof hammerShotsUsed === 'number') user.stats.hammerShotsUsed = hammerShotsUsed;
+    await user.save();
+    res.json({ success: true, message: 'تم حفظ النتائج بنجاح', stats: user.stats });
+  } catch (error) {
+    console.error('خطأ في حفظ نتائج اللعبة:', error);
+    res.status(500).json({ success: false, message: 'خطأ في الخادم أثناء حفظ النتائج' });
+  }
+});
+
 module.exports = router; 
