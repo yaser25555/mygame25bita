@@ -60,6 +60,9 @@ let player = {
 let backgroundImage, playerImage, enemyImage, bulletImage, powerUpImage;
 let sounds = {};
 
+// الاتصال بـ socket.io
+const socket = io();
+
 // عند تهيئة اللعبة، اضبط حجم الكانفس تلقائياً للجوال
 function resizeCanvasForMobile() {
     if (window.innerWidth <= 700) {
@@ -615,6 +618,65 @@ async function fetchAndDisplayUserInfo() {
         console.log('فشل في جلب بيانات المستخدم:', e);
     }
 }
+
+// عند تسجيل نقطة (مثال: استدعِ هذه الدالة عند جمع نقطة)
+function onPlayerScored() {
+  socket.emit('playerScored', { playerId: myId }); // myId يجب أن يكون معرف اللاعب الحالي
+}
+
+// استقبال تحديث النقاط من السيرفر
+socket.on('scoreUpdated', ({ playerId, newScore }) => {
+  // حدث واجهة المستخدم بالنقاط الجديدة لهذا اللاعب
+  if (playerId === myId) {
+    gameState.score = newScore;
+    // يمكنك تحديث أي عنصر في الصفحة هنا
+  }
+  // إذا كان هناك قائمة لاعبين، حدثها أيضاً
+});
+
+// عند الدخول أو إعادة التحميل
+socket.emit('requestSync');
+socket.on('syncAllScores', (users) => {
+  // users مصفوفة فيها userId وscore لكل لاعب
+  // يمكنك تحديث كل النقاط في الواجهة هنا
+});
+
+// استقبال تحديث الوقت
+socket.on('timerUpdated', ({ time }) => {
+  // حدث عداد الوقت في الواجهة
+  // مثال: document.getElementById('timer').textContent = time;
+});
+
+// استقبال تحديث حالة اللعبة
+socket.on('gameStateUpdated', ({ state }) => {
+  // حدث حالة اللعبة في الواجهة
+  // مثال: gameState.state = state;
+});
+
+// استقبال تحديث مواقع اللاعبين
+socket.on('playerPositionUpdated', ({ playerId, position }) => {
+  // حدث موقع اللاعب في الواجهة
+  // مثال: updatePlayerPositionOnScreen(playerId, position);
+});
+
+// استقبال تحديث بروفايل اللاعب
+socket.on('profileUpdated', ({ playerId, profile }) => {
+  // حدث بيانات البروفايل في الواجهة
+  // مثال: updateProfileUI(playerId, profile);
+});
+
+// استقبال تحديث ممتلكات اللاعب
+socket.on('inventoryUpdated', ({ playerId, inventory }) => {
+  // حدث بيانات الممتلكات في الواجهة
+  // مثال: updateInventoryUI(playerId, inventory);
+});
+
+// أمثلة لإرسال التحديثات:
+// socket.emit('updateTimer', { time: 120 });
+// socket.emit('updateGameState', { state: 'playing' });
+// socket.emit('updatePlayerPosition', { playerId: myId, position: { x: 100, y: 200 } });
+// socket.emit('updateProfile', { playerId: myId, profile: { username: 'Player1', avatar: 'avatar.png' } });
+// socket.emit('updateInventory', { playerId: myId, inventory: { coins: 100, items: [...] } });
 
 // الكود الحالي هو نموذج أولي للعبة البالونات فقط، وجاهز للرفع على GitHub.
 // لا يوجد أي منطق قديم أو تعارض مع منطق البالونات. 

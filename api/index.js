@@ -408,6 +408,56 @@ async function broadcastPlayerList() {
     }
 }
 
+// --- تزامن لحظي للنقاط وحالة اللعبة عبر socket.io ---
+io.on('connection', (socket) => {
+  // تزامن النقاط
+  socket.on('playerScored', async ({ playerId }) => {
+    try {
+      const user = await User.findByIdAndUpdate(playerId, { $inc: { 'stats.score': 1 } }, { new: true });
+      if (user) {
+        io.emit('scoreUpdated', { playerId, newScore: user.stats.score });
+      }
+    } catch (err) {
+      console.error('خطأ في تحديث النقاط:', err);
+    }
+  });
+
+  // تزامن الوقت
+  socket.on('updateTimer', ({ time }) => {
+    io.emit('timerUpdated', { time });
+  });
+
+  // تزامن حالة اللعبة
+  socket.on('updateGameState', ({ state }) => {
+    io.emit('gameStateUpdated', { state });
+  });
+
+  // تزامن مواقع اللاعبين
+  socket.on('updatePlayerPosition', ({ playerId, position }) => {
+    io.emit('playerPositionUpdated', { playerId, position });
+  });
+
+  // تزامن بروفايل اللاعب
+  socket.on('updateProfile', ({ playerId, profile }) => {
+    io.emit('profileUpdated', { playerId, profile });
+  });
+
+  // تزامن ممتلكات اللاعب
+  socket.on('updateInventory', ({ playerId, inventory }) => {
+    io.emit('inventoryUpdated', { playerId, inventory });
+  });
+
+  // عند دخول لاعب جديد أو طلب مزامنة
+  socket.on('requestSync', async () => {
+    try {
+      const users = await User.find({}, 'userId stats.score');
+      socket.emit('syncAllScores', users);
+    } catch (err) {
+      console.error('خطأ في مزامنة النقاط:', err);
+    }
+  });
+});
+
 // Export httpServer and PORT for use in external scripts (like server-listen.js)
 module.exports = { httpServer, PORT };
 
