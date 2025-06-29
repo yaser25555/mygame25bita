@@ -61,7 +61,7 @@ let backgroundImage, playerImage, enemyImage, bulletImage, powerUpImage;
 let sounds = {};
 
 // الاتصال بـ socket.io
-const socket = io();
+const socket = io('https://mygame25bita-7eqw.onrender.com');
 
 // عند تهيئة اللعبة، اضبط حجم الكانفس تلقائياً للجوال
 function resizeCanvasForMobile() {

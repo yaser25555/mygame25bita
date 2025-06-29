@@ -786,7 +786,7 @@ function initSocketChat() {
     const token = localStorage.getItem('token');
     if (!token || !currentUser) return;
     // الاتصال بالسيرفر
-    socket = io(BACKEND_URL, {
+    socket = io('https://mygame25bita-7eqw.onrender.com', {
         transports: ['websocket'],
         withCredentials: true
     });
