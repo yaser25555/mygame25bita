@@ -557,21 +557,40 @@ function setupMobileControls() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🎮 تحميل صفحة اللعبة...');
     initGame();
-    
-    // Setup button event listeners
-    document.getElementById('startButton').addEventListener('click', startGame);
-    document.getElementById('restartButton').addEventListener('click', restartGame);
-    document.getElementById('menuButton').addEventListener('click', backToMenu);
-    
-    // ربط زر الغرفة الصوتية
+
+    // ربط زر الملف الشخصي
+    const profileBtn = document.getElementById('profileBtn');
+    if (profileBtn) {
+        profileBtn.addEventListener('click', function() {
+            window.location.href = 'profile.html';
+        });
+    }
+
+    // ربط زر غرفة المحادثة الصوتية
     const voiceBtn = document.getElementById('voiceChatRoomBtn');
     if (voiceBtn) {
         voiceBtn.addEventListener('click', function() {
-            // إظهار مودال المحادثة الصوتية
-            const modal = document.getElementById('voiceModal');
-            if (modal) modal.style.display = 'block';
+            window.location.href = 'voice-chat-room.html';
         });
     }
+
+    // ربط زر ابدأ اللعبة
+    const startBtn = document.getElementById('startButton');
+    if (startBtn) {
+        startBtn.addEventListener('click', startGame);
+    }
+
+    // ربط زر الخروج (voiceRoomPageBtn)
+    const exitBtn = document.getElementById('voiceRoomPageBtn');
+    if (exitBtn) {
+        exitBtn.addEventListener('click', function() {
+            window.location.href = 'index.html';
+        });
+    }
+
+    // Setup button event listeners
+    document.getElementById('restartButton').addEventListener('click', restartGame);
+    document.getElementById('menuButton').addEventListener('click', backToMenu);
     
     console.log('✅ تم تحميل صفحة اللعبة بنجاح');
     setupMobileControls();
