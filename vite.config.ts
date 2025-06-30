@@ -11,7 +11,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     rollupOptions: {
-      output:
+      output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           ui: ['lucide-react']
