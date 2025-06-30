@@ -13,15 +13,11 @@ import {
   Infinity,
   Menu,
   X,
-  Shield,
-  Sparkles,
-  Box as BoxIcon
+  Shield
 } from 'lucide-react';
 import GameGrid from './GameGrid';
 import VoiceChatRoom from './VoiceChatRoom';
 import AdminDashboard from './AdminDashboard';
-import NewPage from './NewPage';
-import InfinityBoxGame from './InfinityBoxGame';
 
 interface MainDashboardProps {
   userData: any;
@@ -29,15 +25,13 @@ interface MainDashboardProps {
 }
 
 const MainDashboard: React.FC<MainDashboardProps> = ({ userData, onLogout }) => {
-  const [activeTab, setActiveTab] = useState<'games' | 'voice' | 'leaderboard' | 'profile' | 'admin' | 'infinity' | 'newpage'>('games');
+  const [activeTab, setActiveTab] = useState<'games' | 'voice' | 'leaderboard' | 'profile' | 'admin'>('games');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navigationItems = [
     { id: 'games', label: 'الألعاب', icon: Gamepad2, color: 'text-purple-400' },
-    { id: 'infinity', label: 'صندوق اللانهاية', icon: BoxIcon, color: 'text-pink-400' },
     { id: 'voice', label: 'المحادثة الصوتية', icon: MessageCircle, color: 'text-blue-400' },
     { id: 'leaderboard', label: 'لوحة المتصدرين', icon: Trophy, color: 'text-yellow-400' },
-    { id: 'newpage', label: 'صفحة جديدة', icon: Sparkles, color: 'text-pink-400' },
     { id: 'profile', label: 'الملف الشخصي', icon: Users, color: 'text-green-400' },
     ...(userData?.isAdmin ? [{ id: 'admin', label: 'لوحة المشرف', icon: Shield, color: 'text-red-400' }] : []),
   ];
@@ -46,14 +40,10 @@ const MainDashboard: React.FC<MainDashboardProps> = ({ userData, onLogout }) => 
     switch (activeTab) {
       case 'games':
         return <GameGrid />;
-      case 'infinity':
-        return <InfinityBoxGame />;
       case 'voice':
         return <VoiceChatRoom userData={userData} onLogout={onLogout} />;
       case 'leaderboard':
         return <LeaderboardContent />;
-      case 'newpage':
-        return <NewPage />;
       case 'profile':
         return <ProfileContent userData={userData} />;
       case 'admin':

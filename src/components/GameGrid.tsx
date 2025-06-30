@@ -1,8 +1,10 @@
 import React from 'react';
 import GameCard from './GameCard';
 import { Gamepad2, Zap, Target, Puzzle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const GameGrid: React.FC = () => {
+  const navigate = useNavigate();
   const games = [
     {
       id: 1,
@@ -48,7 +50,7 @@ const GameGrid: React.FC = () => {
       image: 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?auto=compress&cs=tinysrgb&w=800',
       players: 25600,
       rating: 5,
-      onPlay: () => console.log('بطولة النجوم')
+      onPlay: () => navigate('/game')
     },
     {
       id: 6,
@@ -58,6 +60,16 @@ const GameGrid: React.FC = () => {
       players: 18900,
       rating: 4,
       onPlay: () => console.log('عالم الخيال')
+    },
+    {
+      id: 7,
+      title: 'الصناديق التي لا تنتهي - لعبة جديدة',
+      description: 'جرب لعبة الصناديق التي لا تنتهي الجديدة والممتعة!',
+      image: 'https://images.pexels.com/photos/3258/boxes-wooden-crates-market.jpg?auto=compress&cs=tinysrgb&w=800',
+      players: 0,
+      rating: 5,
+      featured: false,
+      onPlay: () => window.open('/game8.html', '_blank')
     }
   ];
 
