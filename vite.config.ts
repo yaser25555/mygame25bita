@@ -11,6 +11,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     rollupOptions: {
+      external: ['react-router-dom'],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
